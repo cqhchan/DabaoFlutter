@@ -3,16 +3,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class ColorHelper {
+  static int _dabaoOrangeHexCode = 0xFFF5A510;
 
+  static Color dabaoOrange = rgba(0xF5, 0xA5, 0x10);
 
-static int _dabaoOrangeHexCode = 0xFFF5A510;
-
-static Color dabaoOrange = rgba(0xF5, 0xA5, 0x10);
-
-static MaterialColor dabaoOrangeMaterial = MaterialColor(
+  static MaterialColor dabaoOrangeMaterial = MaterialColor(
     _dabaoOrangeHexCode,
     <int, Color>{
-       50: dabaoOrange,
+      50: dabaoOrange,
       100: dabaoOrange,
       200: dabaoOrange,
       300: dabaoOrange,
@@ -25,11 +23,8 @@ static MaterialColor dabaoOrangeMaterial = MaterialColor(
     },
   );
 
-
   // a is alpha from 0-100 %
-static Color rgba(int r, int b, int g, [int a = 100]){
-  return Color.fromARGB((a*255/100).round(), r, b, g);
-}
-
-
+  static Color rgba(int r, int b, int g, [int a = 100]) {
+    return Color.fromARGB((a * 255 / 100).round(), r, b, g);
+  }
 }
