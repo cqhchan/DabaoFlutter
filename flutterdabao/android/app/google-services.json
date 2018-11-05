@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "862771197348",
+    "firebase_url": "https://dabao-test-60434.firebaseio.com",
+    "project_id": "dabao-test-60434",
+    "storage_bucket": "dabao-test-60434.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:862771197348:android:cb138448f5304835",
+        "android_client_info": {
+          "package_name": "com.dabaoapp.dabao.dabaov20"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "862771197348-frsqr396pnmuitg9a789od268b3mc7bv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHPSELCnztmCUR-KTlMshk_l69R5kWojM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
