@@ -9,15 +9,25 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
   String _email;
   String _password;
 
+  void _showSnackBar(message) {
+    final snackBar = new SnackBar(
+      content: new Text(message),
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -41,7 +51,6 @@ class _LoginPageState extends State<LoginPage> {
               },
               controller: _usernameController,
               decoration: InputDecoration(
-                filled: true,
                 labelText: 'E-mail',
               ),
             ),
@@ -54,7 +63,6 @@ class _LoginPageState extends State<LoginPage> {
               },
               controller: _passwordController,
               decoration: InputDecoration(
-                filled: true,
                 labelText: 'Password',
               ),
               obscureText: true,
@@ -87,6 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                       Navigator.of(context)
                           .pushReplacementNamed('/defaultpage');
                     }).catchError((e) {
+                      _showSnackBar('Wrong username and password!');
                       print(e);
                     });
                   },

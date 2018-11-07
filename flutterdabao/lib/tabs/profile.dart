@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/screens/faq.dart';
 import 'package:flutterdabao/screens/support.dart';
 import 'package:flutterdabao/screens/transaction.dart';
+import 'package:flutterdabao/screens/about.dart';
 
 class Profile extends StatelessWidget {
   @override
@@ -49,6 +50,17 @@ class Profile extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (BuildContext context) => Support()),
+              );
+            },
+          ),
+          //Testing
+          new ListTile(
+            leading: new Icon(Icons.thumb_up),
+            title: new Text('Testing'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (BuildContext context) => About()),
               );
             },
           ),
