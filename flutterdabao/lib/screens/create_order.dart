@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../containers/date_time_section.dart';
-import '../containers/food_type_card.dart';
+import 'package:flutterdabao/containers/date_time_section.dart';
+import 'package:flutterdabao/containers/food_type_card.dart';
 
 class Order extends StatelessWidget {
   @override

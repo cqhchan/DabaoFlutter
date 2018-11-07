@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/create_order.dart';
+import 'package:flutterdabao/screens/create_order.dart';
 
 class Dabaoee extends StatelessWidget {
   final List<Tab> myTabs = <Tab>[

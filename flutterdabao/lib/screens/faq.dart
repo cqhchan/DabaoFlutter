@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
-import '../style/home_style.dart';
+import 'package:flutterdabao/style/home_style.dart';
 
-import 'dart:async';
 
 class FAQ extends StatelessWidget {
   @override

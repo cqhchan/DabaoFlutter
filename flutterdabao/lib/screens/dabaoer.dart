@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/create_delivery.dart';
+import 'package:flutterdabao/screens/create_delivery.dart';
 
 class Dabaoer extends StatelessWidget {
   final List<Tab> myTabs = <Tab>[

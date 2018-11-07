@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../style/home_style.dart';
-
-import '../screens/dabaoer.dart';
-import '../screens/dabaoee.dart';
+import 'package:flutterdabao/style/home_style.dart';
+import 'package:flutterdabao/screens/dabaoer.dart';
+import 'package:flutterdabao/screens/dabaoee.dart';
 
 class Home extends StatefulWidget {
   @override

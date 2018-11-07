@@ -1,76 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-import './tabs/home.dart' as _firstTab;
-import './tabs/chat.dart' as _secondTab;
-import './tabs/profile.dart' as _thirdTab;
+import 'package:flutterdabao/tabs/home.dart' as _firstTab;
+import 'package:flutterdabao/tabs/chat.dart' as _secondTab;
+import 'package:flutterdabao/tabs/profile.dart' as _thirdTab;
+import 'package:flutterdabao/style/home_style.dart';
+import 'package:flutterdabao/initial/login.dart';
 
-// import './screens/account.dart' as _accountPage;
-// import './screens/about.dart' as _aboutPage;
-// import './screens/support.dart' as _supportPage;
-
-import './style/home_style.dart';
-
-class HomePage extends StatelessWidget {
+class Default extends StatelessWidget {
   @override
   Widget build(BuildContext context) => new MaterialApp(
-        title: 'Dabao',
+        title: 'DABAO',
         theme: dabaoColourScheme,
         home: new Tabs(),
-        // onGenerateRoute: (RouteSettings settings) {
-        //   switch (settings.name) {
-        //     case '/account':
-        //       return new FromRightToLeft(
-        //         builder: (_) => new _accountPage.Account(),
-        //         settings: settings,
-        //       );
-        //     case '/about':
-        //       return new FromRightToLeft(
-        //         builder: (_) => new _aboutPage.About(),
-        //         settings: settings,
-        //       );
-        //     case '/support':
-        //       return new FromRightToLeft(
-        //         builder: (_) => new _supportPage.Support(),
-        //         settings: settings,
-        //       );
-        //   }
-        // },
+        routes: <String, WidgetBuilder>{
+          '/loginpage': (BuildContext context) => LoginPage(),
+          '/defaultpage': (BuildContext context) => Default(),
+        },
       );
 }
-
-// class FromRightToLeft<T> extends MaterialPageRoute<T> {
-//   FromRightToLeft({WidgetBuilder builder, RouteSettings settings})
-//       : super(builder: builder, settings: settings);
-
-//   @override
-//   Widget buildTransitions(BuildContext context, Animation<double> animation,
-//       Animation<double> secondaryAnimation, Widget child) {
-//     if (settings.isInitialRoute) return child;
-
-//     return new SlideTransition(
-//       child: new Container(
-//         decoration: new BoxDecoration(boxShadow: [
-//           new BoxShadow(
-//             color: Colors.black26,
-//             blurRadius: 25.0,
-//           )
-//         ]),
-//         child: child,
-//       ),
-//       position: new Tween<Offset>(
-//         begin: const Offset(1.0, 0.0),
-//         end: Offset.zero,
-//       ).animate(new CurvedAnimation(
-//         parent: animation,
-//         curve: Curves.fastOutSlowIn,
-//       )),
-//     );
-//   }
-
-//   @override
-//   Duration get transitionDuration => const Duration(milliseconds: 200);
-// }
 
 class Tabs extends StatefulWidget {
   @override
@@ -146,53 +94,6 @@ class TabsState extends State<Tabs> {
                   );
                 }).toList(),
               ),
-
-        //Drawer
-        // drawer: new Drawer(
-        //   child: new ListView(
-        //     children: <Widget>[
-        //       new Container(
-        //         height: 120.0,
-        //         child: new DrawerHeader(
-        //           padding: new EdgeInsets.all(0.0),
-        //           decoration: new BoxDecoration(
-        //             color: new Color(0xFFECEFF1),
-        //           ),
-        //           child: new Center(
-        //               child: new Image.asset('assets/CandyMonsterEdited.png')),
-        //         ),
-        //       ),
-        //       new ListTile(
-        //           leading: new Icon(Icons.person),
-        //           title: new Text('Account'),
-        //           onTap: () {
-        //             Navigator.pop(context);
-        //             Navigator.of(context).pushNamed('/account');
-        //           }),
-        //       new ListTile(
-        //           leading: new Icon(Icons.chat),
-        //           title: new Text('Support'),
-        //           onTap: () {
-        //             Navigator.pop(context);
-        //             Navigator.of(context).pushNamed('/support');
-        //           }),
-        //       new ListTile(
-        //           leading: new Icon(Icons.info),
-        //           title: new Text('About'),
-        //           onTap: () {
-        //             Navigator.pop(context);
-        //             Navigator.of(context).pushNamed('/about');
-        //           }),
-        //       new Divider(),
-        //       new ListTile(
-        //           leading: new Icon(Icons.exit_to_app),
-        //           title: new Text('Sign Out'),
-        //           onTap: () {
-        //             Navigator.pop(context);
-        //           }),
-        //     ],
-        //   ),
-        // ),
       );
 
   void onTap(int tab) {

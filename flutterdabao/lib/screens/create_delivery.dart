@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../containers/date_time_section.dart';
+import 'package:flutterdabao/containers/date_time_section.dart';
 
 class Delivery extends StatelessWidget {
   @override

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-import '../initial/login.dart';
-
-import '../screens/faq.dart';
-import '../screens/support.dart';
-import '../screens/transaction.dart';
+import 'package:flutterdabao/screens/faq.dart';
+import 'package:flutterdabao/screens/support.dart';
+import 'package:flutterdabao/screens/transaction.dart';
 
 class Profile extends StatelessWidget {
   @override
@@ -39,8 +38,7 @@ class Profile extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => FAQ()),
+                MaterialPageRoute(builder: (BuildContext context) => FAQ()),
               );
             },
           ),
@@ -50,8 +48,7 @@ class Profile extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => Support()),
+                MaterialPageRoute(builder: (BuildContext context) => Support()),
               );
             },
           ),
@@ -60,11 +57,11 @@ class Profile extends StatelessWidget {
             leading: new Icon(Icons.exit_to_app),
             title: new Text('Sign Out'),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => LoginPage()),
-              );
+              FirebaseAuth.instance.signOut().then((value) {
+                Navigator.of(context).pushReplacementNamed('/loginpage');
+              }).catchError((e) {
+                print(e);
+              });
             },
           ),
         ],
