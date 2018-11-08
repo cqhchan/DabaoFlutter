@@ -11,7 +11,6 @@ class ConfigHelper with HavingSubscriptionMixin{
   MutableProperty<User> currentUserProperty = MutableProperty<User>(null); 
   MutableProperty<List<Location>> allLocationsProperty = MutableProperty<List<Location>>(List<Location>()); 
 
-
   static ConfigHelper get instance => _internal != null ? _internal: ConfigHelper._create() ;
   static ConfigHelper _internal;
   
@@ -36,4 +35,6 @@ class ConfigHelper with HavingSubscriptionMixin{
   return currentUserProperty.producer.switchMap((user) => user == null? Observable.just(List<Location>()):FirebaseCollectionReactive<Location>(Firestore.instance.collection("locations")).observable);
 
   }
+
+
 }

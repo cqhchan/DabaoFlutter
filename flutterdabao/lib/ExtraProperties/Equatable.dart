@@ -2,8 +2,6 @@
 // Force subclasses to implement custom equal functions
 abstract class Equatable {
 
-  
-  
   @override
   bool operator ==(o) => isEqual(o);
   
