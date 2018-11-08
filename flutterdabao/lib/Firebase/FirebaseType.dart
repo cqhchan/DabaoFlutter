@@ -11,8 +11,6 @@ abstract class FirebaseType extends Mappable with Equatable {
 
   FirebaseType.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   
-  
-
   FirebaseType.fromUID(String uid) : super.fromUID(uid);
 
 
@@ -35,11 +33,4 @@ abstract class FirebaseType extends Mappable with Equatable {
   }
 
   
-}
-
-class FirebaseKeyHelper {
-
-  static const  String userKey = "users"; 
-
-
 }

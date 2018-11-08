@@ -21,7 +21,7 @@ class ConfigHelper with HavingSubscriptionMixin{
 
 
 
-
+  // Called once when app loads.
   appDidLoad(){
     disposeAndReset();
 

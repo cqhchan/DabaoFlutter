@@ -21,6 +21,8 @@ import 'package:flutterdabao/Model/User.dart';
     Firestore.instance.document("${className}/${uid}").snapshots().listen((doc) => this.mapFrom(doc.data));
   }
 
+
+  // All classes which intends to use MAPPING must implement their Mappable functions here.
   static T mapping<T extends Mappable>(DocumentSnapshot doc){
 
     if (T == User){
@@ -44,11 +46,11 @@ import 'package:flutterdabao/Model/User.dart';
     map(data);
   }
   
-  
-  String get className;
+  //standardization className.
+  String get className => this.runtimeType.toString().toLowerCase() + "s";
 
   
-
+  //To be implemented by Sub-class to take data from Map
   void map(Map<String, dynamic> data);
 }
 

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Model/User.dart';
 
@@ -9,12 +10,20 @@ import 'package:flutterdabao/initial/loading.dart';
 import 'package:flutterdabao/default.dart';
 
 class DabaoApp extends StatelessWidget {
+
+  // Add in all set up etc needed 
+  DabaoApp(){
+
+    debugPaintSizeEnabled=true;
+    ConfigHelper.instance.appDidLoad();
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    ConfigHelper config = ConfigHelper.instance;
     
-    config.appDidLoad();
 
     return MaterialApp(
       title: 'DABAO',
@@ -38,6 +47,8 @@ class DabaoApp extends StatelessWidget {
           } else {
             if (snapshot.hasData) {
             
+              // If Logged in, load user from FirebaseAuth
+              //TODO add in check if user has completed profile creation else bring to profile creation;
               User.fromAuth(snapshot.data);
               return Default();
             }

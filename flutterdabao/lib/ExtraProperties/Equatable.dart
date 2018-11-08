@@ -1,3 +1,5 @@
+
+// Force subclasses to implement custom equal functions
 abstract class Equatable {
 
   

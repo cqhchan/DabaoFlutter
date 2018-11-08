@@ -10,9 +10,7 @@ class Location extends FirebaseType {
 
   Location.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
-  // TODO: implement className
-  @override
-  String get className => this.runtimeType.toString().toLowerCase() + "s";
+  
 
   @override
   void map(Map<String,dynamic> data) {

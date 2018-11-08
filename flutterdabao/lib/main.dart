@@ -4,6 +4,5 @@ import 'package:flutterdabao/app.dart';
 
 
 void main() {
-  debugPaintSizeEnabled=true;
   runApp(DabaoApp());
 }

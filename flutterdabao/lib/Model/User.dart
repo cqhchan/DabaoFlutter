@@ -19,9 +19,7 @@ class User extends FirebaseType {
     ConfigHelper.instance.currentUserProperty.value = this;
   }
 
-  // TODO: implement className
-  @override
-  String get className => this.runtimeType.toString().toLowerCase() + "s";
+
 
   @override
   void map(Map<String, dynamic> data) {

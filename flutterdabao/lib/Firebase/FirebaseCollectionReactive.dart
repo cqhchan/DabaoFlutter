@@ -36,7 +36,6 @@ class FirebaseCollectionReactive<T extends FirebaseType>{
 
     });
 
-    print(list.length.toString());
     return list;
 
   } , List<T>());
