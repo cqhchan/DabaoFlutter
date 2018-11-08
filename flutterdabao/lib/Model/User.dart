@@ -17,6 +17,14 @@ class User extends FirebaseType {
 
   User.fromAuth(FirebaseUser user):super.fromUID(user.uid){
     ConfigHelper.instance.currentUserProperty.value = this;
+    
+    Map<String, String> data = Map<String, String>();
+    
+    data["email"] = user.email;
+
+    Firestore.instance
+        .collection(this.className).document(uid).setData(data);
+      
   }
 
 
@@ -29,10 +37,6 @@ class User extends FirebaseType {
 
 
   }
-
-
-  
-
 
 
 }

@@ -10,8 +10,6 @@ class UserManagement {
           'uid': user.uid
           })
         .then((value) {
-      Navigator.of(context).pop();
-      Navigator.of(context).pushReplacementNamed('/defaultpage');
     }).catchError((e) {
       print(e);
     });
