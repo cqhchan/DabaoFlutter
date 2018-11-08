@@ -2,9 +2,12 @@ class FatalError extends Error {
 
     String error = "";
 
-    FatalError(this.error);
+    FatalError(this.error){
+      print(toString());
 
-    String toString() => "Fatal Error" + error;
+    }
+
+    String toString() => "Fatal Error: " + error;
 
 
 }

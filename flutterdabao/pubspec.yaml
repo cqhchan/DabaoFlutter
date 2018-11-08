@@ -27,8 +27,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
-  rxdart: ^0.18.0
-  observable: ^0.22.1+4
+  rxdart:
+    git:  git://github.com/ReactiveX/rxdart.git
   firebase_auth: ^0.6.2+1
   google_sign_in: ^3.2.2
   firebase: ^5.0.0

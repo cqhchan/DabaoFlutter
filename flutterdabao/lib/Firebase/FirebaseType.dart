@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/ExtraProperties/Equatable.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/ExtraProperties/Mappable.dart';
@@ -5,20 +6,22 @@ import 'package:quiver/core.dart';
 
 
 
-class FirebaseType extends Identifiable with Equatable, Mappable {
+abstract class FirebaseType extends Mappable with Equatable {
   
 
-  FirebaseType(String uid) : super(uid);
+  FirebaseType.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   
   
+
+  FirebaseType.fromUID(String uid) : super.fromUID(uid);
+
+
   @override
   int generateHashCode() => hash2(this.runtimeType.toString().hashCode,uid.hashCode);
   
 
   @override
   bool isEqual(Object o) {
-       print("RunTime Name" +  this.runtimeType.toString());
-       print("Object Name" +  o.runtimeType.toString());
 
     if ( o.runtimeType ==  this.runtimeType) {
 
@@ -26,12 +29,12 @@ class FirebaseType extends Identifiable with Equatable, Mappable {
 
     } else {
       return false;
+
     }
 
-     
   }
 
-
+  
 }
 
 class FirebaseKeyHelper {
