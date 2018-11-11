@@ -3,13 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutterdabao/services/usermanagement.dart';
 
-class SignUpPage extends StatefulWidget {
-  SignUpPage({Key key}) : super(key: key);
+class SignupPage extends StatefulWidget {
+  SignupPage({Key key}) : super(key: key);
   @override
-  _SignUpPageState createState() => _SignUpPageState();
+  _SignupPageState createState() => _SignupPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignupPageState extends State<SignupPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 

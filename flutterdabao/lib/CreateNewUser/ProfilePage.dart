@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:flutterdabao/screens/faq.dart';
-import 'package:flutterdabao/screens/support.dart';
-import 'package:flutterdabao/screens/transaction.dart';
-import 'package:flutterdabao/screens/about.dart';
+import 'package:flutterdabao/FAQ/FAQPage.dart';
+import 'package:flutterdabao/Support/SupportPage.dart';
+import 'package:flutterdabao/PastTransaction/PastTransactionPage.dart';
+import 'package:flutterdabao/About/AboutPage.dart';
 
 class Profile extends StatelessWidget {
   @override

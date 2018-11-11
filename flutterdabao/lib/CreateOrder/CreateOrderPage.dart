@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutterdabao/containers/date_time_section.dart';
+import 'package:flutterdabao/CreateOrder/DatetimeWidget.dart';
+import 'package:flutterdabao/CreateOrder/FoodTypeWidget.dart';
 
-class Delivery extends StatelessWidget {
+class Order extends StatelessWidget {
   @override
   Widget build(BuildContext context) => new Scaffold(
         //App Bar
         appBar: new AppBar(
           title: new Text(
-            'Create Delivery',
+            'Create Orders',
             style: new TextStyle(
               fontSize: Theme.of(context).platform == TargetPlatform.iOS
                   ? 17.0
@@ -23,8 +24,11 @@ class Delivery extends StatelessWidget {
         body: new PageView(
           children: <Widget>[
             new Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[new Text('Create Delivery')],
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                DateTimePicker(),
+                FoodType(),
+              ],
             ),
           ],
         ),
