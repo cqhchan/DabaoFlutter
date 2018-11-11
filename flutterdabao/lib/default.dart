@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'package:flutterdabao/tabs/home.dart' as _firstTab;
-import 'package:flutterdabao/tabs/chat.dart' as _secondTab;
-import 'package:flutterdabao/tabs/profile.dart' as _thirdTab;
-import 'package:flutterdabao/style/home_style.dart';
-import 'package:flutterdabao/initial/login.dart';
+import 'package:flutterdabao/Home/HomePage.dart' as _firstTab;
+import 'package:flutterdabao/Chat/ChatPage.dart' as _secondTab;
+import 'package:flutterdabao/UserProfile/ProfilePage.dart' as _thirdTab;
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/LoginSignup/LoginPage.dart';
 
 class Default extends StatelessWidget {
   @override

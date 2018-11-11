@@ -4,9 +4,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Model/User.dart';
 
-import 'package:flutterdabao/style/home_style.dart';
-import 'package:flutterdabao/initial/login.dart';
-import 'package:flutterdabao/initial/loading.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/LoginSignup/LoginPage.dart';
+import 'package:flutterdabao/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/default.dart';
 
 class DabaoApp extends StatelessWidget {
@@ -14,7 +14,7 @@ class DabaoApp extends StatelessWidget {
   // Add in all set up etc needed 
   DabaoApp(){
 
-    debugPaintSizeEnabled=true;
+    //debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
 
 
