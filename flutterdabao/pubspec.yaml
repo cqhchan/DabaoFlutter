@@ -21,6 +21,11 @@ dependencies:
   card_settings: ^1.2.2
   progress_hud: ^1.1.0
   flutter_spinkit: "^3.0.0"
+  flutter_map: ^0.1.4
+  map_view: ^0.0.12
+  google_maps_webservice: ^0.0.9
+  latlong: ^0.6.1
+  time_slot_picker: ^0.0.1
   flutter:
     sdk: flutter
 

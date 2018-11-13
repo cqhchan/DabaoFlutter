@@ -31,7 +31,9 @@ class Dabaoer extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Delivery()),
+                    MaterialPageRoute(
+                      builder: (context) => Delivery(),
+                    ),
                   );
                 },
                 child: new Icon(Icons.add),
