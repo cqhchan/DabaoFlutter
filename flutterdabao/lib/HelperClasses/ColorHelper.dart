@@ -30,16 +30,24 @@ class ColorHelper {
 }
 
 Color kBackground = Colors.white;
-Color kBottomNavigator = Colors.yellow;
-Color kDeliverButton = Colors.grey;
-Color kOrderButton = Colors.yellow;
+Color kBottomNavigator = Colors.amber;
+Color kDeliverButton = Colors.grey[300];
+Color kOrderButton = Colors.amber;
+
+Color kDateTimeContainer = Colors.white;
+Color kDateTimePicked = Colors.amber[200];
+Color kDateTimeUnpicked = Colors.white;
+Color kDateTimeUnavailable = Colors.grey[400];
+
 Color kText = Colors.black;
+Color kTab = Colors.amber;
+Color kMarker = Colors.amber;
 
 
-final dabaoColourScheme = new ThemeData(
-            primarySwatch: Colors.yellow,
+final dabaoColourScheme = ThemeData(
+            primarySwatch: Colors.amber,
             scaffoldBackgroundColor: Colors.white,
-            primaryColor: Colors.yellow,
+            primaryColor: Colors.amber[600],
             backgroundColor: Colors.white
             );
 

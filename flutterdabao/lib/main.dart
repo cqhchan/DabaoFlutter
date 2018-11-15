@@ -10,11 +10,13 @@ import 'package:flutterdabao/app.dart';
 // import 'package:flutterdabao/CreateDelivery/FavoritesManager.dart';
 import 'package:map_view/map_view.dart';
 // import 'package:google_maps_webservice/places.dart' as places;
+// import 'package:flutter/rendering.dart';
 
 var apiKey =
     "AIzaSyA1VBJqZV92zUzMmNUrrq2oZpDKo_ckk2o"; //iOS Google Map API KEY only
 
 void main() {
+  // debugPaintSizeEnabled = true;
   MapView.setApiKey(apiKey);
   runApp(DabaoApp());
 }

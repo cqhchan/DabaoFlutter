@@ -1,26 +1,38 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutterdabao/CreateOrder/DatetimeWidget.dart';
-import 'package:flutterdabao/CreateOrder/FoodTypeWidget.dart';
+import 'package:flutterdabao/CreateOrder/TimeWidget.dart';
+import 'package:flutterdabao/CreateOrder/DateWidget.dart';
+import 'package:flutterdabao/CreateOrder/BackDrop.dart';
+// import 'package:flutterdabao/CreateOrder/FoodTypeWidget.dart';
 import 'package:flutterdabao/CreateOrder/LeafletMap.dart';
 
+
+//Not in use
 class Order extends StatelessWidget {
   @override
   Widget build(BuildContext context) => new Scaffold(
-        //Content of tabs
+        //AppBar
+        appBar: AppBar(
+          title: new Text('CREATE ORDER'),
+        ),
         body: Stack(
           children: <Widget>[
+            //Map Widget
             LeafletMap(),
+            //TimeSlot Widget
             SafeArea(
+              // left: true,
+              // right: true,
+              top: true,
+              bottom: true,
               child: Column(
                 children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.all(20.0),
-                    child: DateTimePicker(),
-                  ),
+                  DatePicker(),
+                  TimePicker(),
                 ],
               ),
             ),
+            BackDrop(),
           ],
         ),
       );

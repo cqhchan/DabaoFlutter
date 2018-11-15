@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
 // import 'package:flutterdabao/CreateDelivery/StaticLocation.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class LeafletMap extends StatefulWidget {
   _LeafletMapState createState() => _LeafletMapState();
@@ -33,7 +34,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -48,7 +49,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -63,7 +64,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -79,7 +80,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -94,7 +95,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -109,7 +110,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -124,7 +125,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -139,7 +140,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -154,7 +155,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');
@@ -169,7 +170,7 @@ class _LeafletMapState extends State<LeafletMap> {
               builder: (context) => new Container(
                     child: IconButton(
                       icon: Icon(Icons.location_on),
-                      color: Colors.yellow,
+                      color: kMarker,
                       iconSize: 30.0,
                       onPressed: () {
                         print('Marker tapped');

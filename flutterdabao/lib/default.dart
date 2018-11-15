@@ -74,7 +74,7 @@ class TabsState extends State<Tabs> {
         //Tabs
         bottomNavigationBar: Theme.of(context).platform == TargetPlatform.iOS
             ? new CupertinoTabBar(
-                activeColor: Colors.yellow,
+                activeColor: kTab,
                 currentIndex: _tab,
                 onTap: onTap,
                 items: TabItems.map((TabItem) {
@@ -85,6 +85,7 @@ class TabsState extends State<Tabs> {
                 }).toList(),
               )
             : new BottomNavigationBar(
+              fixedColor: kTab,
                 currentIndex: _tab,
                 onTap: onTap,
                 items: TabItems.map((TabItem) {
