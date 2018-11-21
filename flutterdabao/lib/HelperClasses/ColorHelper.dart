@@ -7,6 +7,9 @@ class ColorHelper {
 
   static Color dabaoOrange = rgba(0xF5, 0xA5, 0x10);
 
+  static Color dabaoOffWhiteF5 = rgba(0xF5, 0xF5, 0xF5);
+
+
   static MaterialColor dabaoOrangeMaterial = MaterialColor(
     _dabaoOrangeHexCode,
     <int, Color>{
@@ -27,6 +30,7 @@ class ColorHelper {
   static Color rgba(int r, int b, int g, [int a = 100]) {
     return Color.fromARGB((a * 255 / 100).round(), r, b, g);
   }
+  
 }
 
 Color kBackground = Colors.white;
