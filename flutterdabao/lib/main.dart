@@ -8,7 +8,7 @@ import 'package:flutterdabao/app.dart';
 // import 'package:flutterdabao/CreateDelivery/CompositeSubcription.dart';
 // import 'package:flutterdabao/CreateDelivery/FavoriteListWidget.dart';
 // import 'package:flutterdabao/CreateDelivery/FavoritesManager.dart';
-import 'package:map_view/map_view.dart';
+// import 'package:map_view/map_view.dart';
 // import 'package:google_maps_webservice/places.dart' as places;
 // import 'package:flutter/rendering.dart';
 
@@ -17,7 +17,7 @@ var apiKey =
 
 void main() {
   // debugPaintSizeEnabled = true;
-  MapView.setApiKey(apiKey);
+  // MapView.setApiKey(apiKey);
   runApp(DabaoApp());
 }
 
