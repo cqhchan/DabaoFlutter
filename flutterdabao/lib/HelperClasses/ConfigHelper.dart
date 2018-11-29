@@ -4,7 +4,7 @@ import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Model/Location.dart';
 import 'package:flutterdabao/Model/User.dart';
-import 'package:flutterdabao/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:rxdart/rxdart.dart';
 class ConfigHelper with HavingSubscriptionMixin{
 

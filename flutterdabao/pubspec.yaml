@@ -75,25 +75,26 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: SF-UI-Display
+    - family: SF_UI_Display
       fonts:
-        - asset: fonts/SF-UI-Display-Thin.otf
+        - asset: assets/fonts/SF-UI-Display-Regular.otf
+        - asset: assets/fonts/SF-UI-Display-Thin.otf
           weight: 100
-        - asset: fonts/SF-UI-Display-Ultralight.otf
+        - asset: assets/fonts/SF-UI-Display-Ultralight.otf
           weight: 200
-        - asset: fonts/SF-UI-Display-Light.otf
+        - asset: assets/fonts/SF-UI-Display-Light.otf
           weight: 300
-        - asset: fonts/SF-UI-Display-Regular.otf
+        - asset: assets/fonts/SF-UI-Display-Regular.otf
           weight: 400
-        - asset: fonts/SF-UI-Display-Medium.otf
+        - asset: assets/fonts/SF-UI-Display-Medium.otf
           weight: 500
-        - asset: fonts/SF-UI-Display-Semibold.otf
+        - asset: assets/fonts/SF-UI-Display-Semibold.otf
           weight: 600
-        - asset: fonts/SF-UI-Display-Bold.otf
+        - asset: assets/fonts/SF-UI-Display-Bold.otf
           weight: 700
-        - asset: fonts/SF-UI-Display-Heavy.otf
+        - asset: assets/fonts/SF-UI-Display-Heavy.otf
           weight: 800
-        - asset: fonts/SF-UI-Display-Black.otf
+        - asset: assets/fonts/SF-UI-Display-Black.otf
           weight: 900
 
   #

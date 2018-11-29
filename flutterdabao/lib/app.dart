@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:flutterdabao/Model/User.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -14,7 +15,7 @@ class DabaoApp extends StatelessWidget {
   // Add in all set up etc needed 
   DabaoApp(){
 
-    //debugPaintSizeEnabled=true;
+    // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
 
 
@@ -27,11 +28,11 @@ class DabaoApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'DABAO',
-      theme: dabaoColourScheme,
+      theme: ThemeData(fontFamily: "SF_UI_Display"),
       home: _handleCurrentScreen(),
       // initialRoute: '/loginpage',
       routes: <String, WidgetBuilder>{
-        '/defaultpage': (BuildContext context) => Default(),
+        '/defaultpage': (BuildContext context) => Home(),
         '/loginpage': (BuildContext context) => LoginPage(),
       },
     );
@@ -49,7 +50,7 @@ class DabaoApp extends StatelessWidget {
               // If Logged in, load user from FirebaseAuth
               //TODO add in check if user has completed profile creation else bring to profile creation;
               User.fromAuth(snapshot.data);
-              return Default();
+              return Home();
             }
             
             return LoginPage();
