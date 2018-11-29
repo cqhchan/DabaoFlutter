@@ -17,6 +17,11 @@ class Location extends FirebaseType {
     point = data["coordinates"];
   }
 
+  @override
+  void setUpVariables() {
+    // TODO: implement setUpVariables
+  }
+
 
 
 }
