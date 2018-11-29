@@ -62,7 +62,25 @@ class _Home extends State<Home> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(18.0))),
                         ),
-                      )
+                      ),
+                      Container(width: 30,),
+                      ScaleGestureDetector(
+                        child: Container(
+                          height: 95,
+                          width: 95,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    offset: Offset(0, 1),
+                                    color: Colors.black.withOpacity(0.5),
+                                    spreadRadius: 0.1,
+                                    blurRadius: 2.0)
+                              ],
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(18.0))),
+                        ),
+                      ),
                     ],
                   ),
                 ),
