@@ -2,6 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 
+
+
+
+// Scaled the Widget on tap Default to 0.95 scale in 0 milliseconds scaled back on release
 class ScaleGestureDetector extends StatefulWidget {
 
   ScaleGestureDetector(
@@ -235,9 +239,6 @@ Future<Null> _reverseAnimation() async {
 
       onTapDown: (tapDownDetails) {
         _playAnimation();
-        print("testing on tap down");
-
-
         if (widget.onDoubleTap != null)
         widget.onTapDown(tapDownDetails);
 
