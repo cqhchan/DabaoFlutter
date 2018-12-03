@@ -9,6 +9,7 @@ import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/LoginSignup/LoginPage.dart';
 import 'package:flutterdabao/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/default.dart';
+import 'package:flutterdabao/Map.dart';
 
 class DabaoApp extends StatelessWidget {
 
@@ -50,7 +51,8 @@ class DabaoApp extends StatelessWidget {
               // If Logged in, load user from FirebaseAuth
               //TODO add in check if user has completed profile creation else bring to profile creation;
               User.fromAuth(snapshot.data);
-              return Home();
+              // return Home(); //Here!
+              return MapsDemo();
             }
             
             return LoginPage();
