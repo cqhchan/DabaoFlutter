@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
@@ -48,6 +49,9 @@ class _Home extends State<Home> {
                   child: Row(
                     children: <Widget>[
                       ScaleGestureDetector(
+                        onTap: () async {
+                          FirebaseAuth.instance.signOut();
+                        },
                         child: Container(
                           height: 95,
                           width: 95,
