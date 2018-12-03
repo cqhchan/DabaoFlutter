@@ -35,6 +35,7 @@ class _Home extends State<Home> {
               children: <Widget>[
                 //First Widget consisting of Bg, and balance
                 balanceStack(context),
+
                 Container(
                   child: Text(
                     "How can we help you today?",

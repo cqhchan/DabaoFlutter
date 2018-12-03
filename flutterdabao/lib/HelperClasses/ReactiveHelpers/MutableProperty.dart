@@ -18,7 +18,7 @@ class MutableProperty<T> {
 
   onAdd(){
 
-    _producer.onAdd(value);
+    _producer.add(value);
 
   }
 
