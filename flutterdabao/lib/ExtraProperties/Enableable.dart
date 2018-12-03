@@ -1,4 +1,4 @@
-import 'package:flutterdabao/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 
 abstract class Enableable {
 

@@ -3,7 +3,7 @@ import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class Line extends StatelessWidget {
 
-  EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry margin;
 
   Line({
     Key key,
