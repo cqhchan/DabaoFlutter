@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 class ColorHelper {
   static int dabaoOrangeHexCode = 0xFFF5A510;
 
-  static const Color dabaoOrange = Color.fromRGBO(0xF5, 0xA5, 0x10, 1);
+  static const Color dabaoOrange = Color.fromRGBO(0xF5, 0xA5, 0x10, 1.0);
 
   static Color dabaoOffWhiteF5 = rgba(0xF5, 0xF5, 0xF5);
   static Color dabaoOffBlack4A = rgba(0x4A, 0x4A, 0x4A);
 
-  static Color dabaoGreyE0 = Color.fromRGBO(0xE0, 0xE0, 0xE0, 1);
+  static Color dabaoGreyE0 = Color.fromRGBO(0xE0, 0xE0, 0xE0, 1.0);
 
 
   static MaterialColor dabaoOrangeMaterial = MaterialColor(

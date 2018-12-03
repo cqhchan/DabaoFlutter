@@ -21,7 +21,7 @@ class _Home extends State<Home> {
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
   _Home() {
     _controller.addListener(() {
-      _opacityProperty.value = max(min((_controller.offset / 150), 1.0), 0.0);
+      _opacityProperty.value = max(min((_controller.offset / 150.0), 1.0), 0.0);
     });
   }
 
@@ -49,13 +49,13 @@ class _Home extends State<Home> {
                     children: <Widget>[
                       ScaleGestureDetector(
                         child: Container(
-                          height: 95,
-                          width: 95,
+                          height: 95.0,
+                          width: 95.0,
                           decoration: BoxDecoration(
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                    offset: Offset(0, 1),
+                                    offset: Offset(0.0, 1.0),
                                     color: Colors.black.withOpacity(0.5),
                                     spreadRadius: 0.1,
                                     blurRadius: 2.0)
@@ -64,16 +64,16 @@ class _Home extends State<Home> {
                                   BorderRadius.all(Radius.circular(18.0))),
                         ),
                       ),
-                      Container(width: 30,),
+                      Container(width: 30.0,),
                       ScaleGestureDetector(
                         child: Container(
-                          height: 95,
-                          width: 95,
+                          height: 95.0,
+                          width: 95.0,
                           decoration: BoxDecoration(
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                    offset: Offset(0, 1),
+                                    offset: Offset(0.0, 1.0),
                                     color: Colors.black.withOpacity(0.5),
                                     spreadRadius: 0.1,
                                     blurRadius: 2.0)

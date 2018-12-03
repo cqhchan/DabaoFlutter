@@ -16,7 +16,7 @@ class Line extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Container(
-      height: 1,
+      height: 1.0,
       color: ColorHelper.dabaoGreyE0,
       margin: margin,
     );
