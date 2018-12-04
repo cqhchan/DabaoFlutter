@@ -8,11 +8,11 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 // import 'package:intl/intl.dart';
 // import 'dart:async';
 
-class Tracker extends StatefulWidget {
-  _TrackerState createState() => _TrackerState();
+class OrderNow extends StatefulWidget {
+  _OrderNowState createState() => _OrderNowState();
 }
 
-class _TrackerState extends State<Tracker> {
+class _OrderNowState extends State<OrderNow> {
   String _address = '20 Heng Mui Keng Terrace';
   // bool _foodtagpress = false;
   // final dateformat = TimeOfDay('hh:mm:ss');
@@ -161,42 +161,43 @@ class _TrackerState extends State<Tracker> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     OutlineButton(
-                      highlightedBorderColor: ColorHelper.dabaoOrange,
-                      highlightColor: ColorHelper.dabaoOrange,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
-                      color: ColorHelper.dabaoOffWhiteF5,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          Image.asset('assets/icons/stand.png'),
-                          SizedBox(
-                            width: 5.0,
-                          ),
-                          Column(
-                            children: <Widget>[
-                              Text('Scheduled'),
-                              Text('Order'),
-                            ],
-                          ),
-                        ],
+                        highlightedBorderColor: ColorHelper.dabaoOrange,
+                        highlightColor: ColorHelper.dabaoOrange,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 5.0),
+                        color: ColorHelper.dabaoOffWhiteF5,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Image.asset('assets/icons/stand.png'),
+                            SizedBox(
+                              width: 5.0,
+                            ),
+                            Column(
+                              children: <Widget>[
+                                Text('Scheduled'),
+                                Text('Order'),
+                              ],
+                            ),
+                          ],
+                        ),
+                        onPressed: () {
+                          // showTimePicker(
+                          //   initialTime: TimeOfDay.now(),
+                          //   context: context,
+                          // );
+                          // showTimePicker(
+                          //   initialTime: TimeOfDay.now(),
+                          //   context: context,
+                          // );
+                          _selectStartTime();
+                          _selectEndTime();
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
                       ),
-                      onPressed: () {
-                        // showTimePicker(
-                        //   initialTime: TimeOfDay.now(),
-                        //   context: context,
-                        // );
-                        // showTimePicker(
-                        //   initialTime: TimeOfDay.now(),
-                        //   context: context,
-                        // );
-                        _selectStartTime();
-                        _selectEndTime();
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
+
                     RaisedButton(
                       padding:
                           EdgeInsets.symmetric(horizontal: 22.0, vertical: 9.0),

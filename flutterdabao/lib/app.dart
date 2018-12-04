@@ -29,7 +29,7 @@ class DabaoApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'DABAO',
-      theme: ThemeData(fontFamily: "SF_UI_Display"),
+      theme: ThemeData(fontFamily: "SF_UI_Display",primarySwatch: Colors.orange),
       home: _handleCurrentScreen(),
       // initialRoute: '/loginpage',
       routes: <String, WidgetBuilder>{

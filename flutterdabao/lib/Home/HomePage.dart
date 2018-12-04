@@ -63,11 +63,11 @@ class _Home extends State<Home> {
                         },
                         child: Container(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Image.asset('assets/icons/person.png'),
-                              SizedBox(height: 5),
+                              SizedBox(height: 2),
                               Text(
                                 'Dabaoee',
                                 style: FontHelper.normalTextStyle,
@@ -82,8 +82,8 @@ class _Home extends State<Home> {
                               ),
                             ],
                           ),
-                          height: 95.0,
-                          width: 95.0,
+                          height: 85.0,
+                          width: 85.0,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             boxShadow: [
@@ -103,11 +103,11 @@ class _Home extends State<Home> {
                       ScaleGestureDetector(
                         child: Container(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Image.asset('assets/icons/bike.png'),
-                              SizedBox(height: 10),
+                              SizedBox(height: 6),
                               Text(
                                 'Dabaoer',
                                 style: FontHelper.normalTextStyle,
@@ -122,8 +122,8 @@ class _Home extends State<Home> {
                               ),
                             ],
                           ),
-                          height: 95.0,
-                          width: 95.0,
+                          height: 85.0,
+                          width: 85.0,
                           decoration: BoxDecoration(
                               color: Colors.white,
                               boxShadow: [
@@ -145,7 +145,7 @@ class _Home extends State<Home> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Image.asset('assets/icons/chat.png'),
-                              SizedBox(height: 5),
+                              SizedBox(height: 1),
                               Text(
                                 'I want to',
                                 style: FontHelper.normalTextStyle,
@@ -156,8 +156,8 @@ class _Home extends State<Home> {
                               ),
                             ],
                           ),
-                          height: 95.0,
-                          width: 95.0,
+                          height: 85.0,
+                          width: 85.0,
                           decoration: BoxDecoration(
                               color: Colors.white,
                               boxShadow: [
