@@ -16,7 +16,7 @@ class DabaoApp extends StatelessWidget {
   // Add in all set up etc needed 
   DabaoApp(){
 
-    debugPaintSizeEnabled=true;
+    // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
 
 

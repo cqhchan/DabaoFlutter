@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutterdabao/CustomWidget/Tracker.dart';
 import 'package:flutterdabao/CustomWidget/BackButton.dart';
 import 'package:flutterdabao/CustomWidget/Map.dart';
@@ -9,6 +10,7 @@ class CreateOrder extends StatefulWidget {
 }
 
 class CreateOrderState extends State<CreateOrder> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +18,10 @@ class CreateOrderState extends State<CreateOrder> {
         children: <Widget>[
           Column(
             children: <Widget>[
-              CustomizedMap(),
+              Hero(
+                tag: 'GoogleMap',
+                child: CustomizedMap(),
+              ),
             ],
           ),
           CustomizedBackButton(),

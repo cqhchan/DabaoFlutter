@@ -13,6 +13,7 @@ environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
+  flushbar: ^1.1.2
   intl: ^0.15.7
   datetime_picker_formfield: ^0.1.4
   flutter_colorpicker: any

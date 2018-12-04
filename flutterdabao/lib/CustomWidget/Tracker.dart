@@ -1,8 +1,11 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/Searchable.dart';
+import 'package:flutterdabao/CreateOrder/FoodTag.dart';
+
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 // import 'dart:async';
 
 class Tracker extends StatefulWidget {
@@ -11,6 +14,7 @@ class Tracker extends StatefulWidget {
 
 class _TrackerState extends State<Tracker> {
   String _address = '20 Heng Mui Keng Terrace';
+  // bool _foodtagpress = false;
   // final dateformat = TimeOfDay('hh:mm:ss');
 
   // DateTime _startTime = new DateTime.now();
@@ -38,6 +42,30 @@ class _TrackerState extends State<Tracker> {
     });
   }
 
+  void _showModalSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+            color: ColorHelper.dabaoOffWhiteF5,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(width: 10.0, color: ColorHelper.dabaoOrange),
+                ),
+              ),
+              child: FoodTag(),
+            ),
+          );
+        });
+  }
+
+  // _handleFoodTag(value) {
+  //   setState(() {
+
+  //       });
+  // }
+
   // Future<Null> _selectEndTime(BuildContext context) async {
   //   final TimeOfDay pickedEnd = await showTimePicker(
   //     context: null,
@@ -59,11 +87,11 @@ class _TrackerState extends State<Tracker> {
   //       });
   // }
 
-  _handleAddress(value) {
-    setState(() {
-      _address = value;
-    });
-  }
+  // _handleAddress(value) {
+  //   setState(() {
+  //     _address = value;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -163,9 +191,7 @@ class _TrackerState extends State<Tracker> {
                         //   context: context,
                         // );
                         _selectStartTime();
-                        if (_selectStartTime()) {
-                          _selectEndTime();
-                        }
+                        _selectEndTime();
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
@@ -190,7 +216,17 @@ class _TrackerState extends State<Tracker> {
                         ],
                       ),
                       onPressed: () {
-                        print('hi');
+                        // widget.frontPanelOpen.value = true;
+                        // FoodTag.generateBlured();
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => FoodTag()),
+                        // );
+                        // generateBlured();
+                        // _foodtagpress = !_foodtagpress;
+                        // _handleFoodTag(_foodtagpress);
+                        // print(_foodtagpress);
+                        _showModalSheet();
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
@@ -205,6 +241,18 @@ class _TrackerState extends State<Tracker> {
       ),
     );
   }
+
+  // generateBlured() {
+  //   @override
+  //   Widget build(BuildContext context) {
+  //     return BackdropFilter(
+  //       filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+  //       child: Container(
+  //         decoration: BoxDecoration(color: Colors.black.withOpacity(0.2)),
+  //       ),
+  //     );
+  //   }
+  // }
 }
 
 // Wrap(
