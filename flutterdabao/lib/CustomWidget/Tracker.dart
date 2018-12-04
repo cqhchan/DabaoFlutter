@@ -5,11 +5,11 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:intl/intl.dart';
 // import 'dart:async';
 
-class LocateWidget extends StatefulWidget {
-  _LocateWidgetState createState() => _LocateWidgetState();
+class Tracker extends StatefulWidget {
+  _TrackerState createState() => _TrackerState();
 }
 
-class _LocateWidgetState extends State<LocateWidget> {
+class _TrackerState extends State<Tracker> {
   String _address = '20 Heng Mui Keng Terrace';
   // final dateformat = TimeOfDay('hh:mm:ss');
 
