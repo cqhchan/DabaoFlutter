@@ -1,38 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/Searchable.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
-import 'dart:async';
+import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:intl/intl.dart';
+// import 'dart:async';
 
 class LocateWidget extends StatefulWidget {
   _LocateWidgetState createState() => _LocateWidgetState();
 }
 
 class _LocateWidgetState extends State<LocateWidget> {
-  // final _addressController = TextEditingController();
+  String _address = '20 Heng Mui Keng Terrace';
+  // final dateformat = TimeOfDay('hh:mm:ss');
 
-  // String _address;
-  DateTime _startTime = new DateTime.now();
-  DateTime _endTime = new DateTime.now().add(Duration(hours: 1));
+  // DateTime _startTime = new DateTime.now();
+  // DateTime pickedStart = new DateTime.now();
+  // DateTime _endTime = new DateTime.now().add(Duration(hours: 1));
 
-  Future<Null> _selectStartTime(BuildContext context) async {
-    final TimeOfDay pickedStart = await showTimePicker(
-      context: null,
+  _selectStartTime() {
+    final Future<TimeOfDay> pickedStart = showTimePicker(
+      context: context,
       initialTime: TimeOfDay.now(),
     );
+    pickedStart.then((value) {
+      print(value.hour);
+      // print(timeformat.format(value));
+    });
   }
 
-  Future<Null> _selectEndTime(BuildContext context) async {
-    final TimeOfDay pickedEnd = await showTimePicker(
-      context: null,
+  _selectEndTime() {
+    final Future<TimeOfDay> pickedEnd = showTimePicker(
+      context: context,
       initialTime: TimeOfDay.now(),
     );
+    pickedEnd.then((value) {
+      print(value.hour);
+    });
   }
 
-  // if(pickedStart != null && pickedStart != _startTime) {
-  //   print('Start Time Selected: ${_startTime.toString()}');
-  //   setState(() {
-  //         _startTime = pickedStart;
-  //       });
+  // Future<Null> _selectEndTime(BuildContext context) async {
+  //   final TimeOfDay pickedEnd = await showTimePicker(
+  //     context: null,
+  //     initialTime: TimeOfDay.now(),
+  //   );
+  // }
+
+  // if (pickedStart != _startTime) {
+  // print('Start Time Selected: ${_startTime.toString()}');
+  // setState(() {
+  //       _startTime = pickedStart;
+  //     });
   // }
 
   // if(pickedEnd != null && pickedEnd != _endTime) {
@@ -41,6 +58,12 @@ class _LocateWidgetState extends State<LocateWidget> {
   //         _startTime = pickedEnd;
   //       });
   // }
+
+  _handleAddress(value) {
+    setState(() {
+      _address = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +76,7 @@ class _LocateWidgetState extends State<LocateWidget> {
             margin: EdgeInsets.fromLTRB(14.0, 0.0, 14.0, 30.0),
             height: 130.0,
             decoration: BoxDecoration(
-                color: Colors.white,
+                color: ColorHelper.dabaoOffWhiteF5,
                 borderRadius: BorderRadius.circular(9.0),
                 boxShadow: [
                   BoxShadow(
@@ -66,9 +89,10 @@ class _LocateWidgetState extends State<LocateWidget> {
               children: <Widget>[
                 Text(
                   'Deliver to...',
+                  style: FontHelper.normalTextStyle,
                 ),
                 SizedBox(
-                  height: 5.0,
+                  height: 8.0,
                 ),
                 Row(
                   children: <Widget>[
@@ -80,7 +104,10 @@ class _LocateWidgetState extends State<LocateWidget> {
                     ),
                     GestureDetector(
                       child: Container(
-                        child: Text('20 Heng Mui Keng Terrace'),
+                        child: Text(
+                          _address,
+                          style: FontHelper.placeholderTextStyle,
+                        ),
                       ),
                       // child: TextField(
                       //   controller: _addressController,
@@ -92,6 +119,7 @@ class _LocateWidgetState extends State<LocateWidget> {
                       // ),
                       onTap: () {
                         // FocusScope.of(context).requestFocus FocusNode());
+                        // _handleAddress(context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => Searchable()),
@@ -105,6 +133,8 @@ class _LocateWidgetState extends State<LocateWidget> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     OutlineButton(
+                      highlightedBorderColor: ColorHelper.dabaoOrange,
+                      highlightColor: ColorHelper.dabaoOrange,
                       padding:
                           EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
                       color: ColorHelper.dabaoOffWhiteF5,
@@ -124,8 +154,18 @@ class _LocateWidgetState extends State<LocateWidget> {
                         ],
                       ),
                       onPressed: () {
-                        _selectStartTime(context);
-                        _selectEndTime(context);
+                        // showTimePicker(
+                        //   initialTime: TimeOfDay.now(),
+                        //   context: context,
+                        // );
+                        // showTimePicker(
+                        //   initialTime: TimeOfDay.now(),
+                        //   context: context,
+                        // );
+                        _selectStartTime();
+                        if (_selectStartTime()) {
+                          _selectEndTime();
+                        }
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),

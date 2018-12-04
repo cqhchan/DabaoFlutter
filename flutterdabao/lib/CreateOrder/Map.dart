@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutterdabao/CreateOrder/LocateWidget.dart';
 
-class MapsDemo extends StatefulWidget {
+class Map extends StatefulWidget {
   @override
-  State createState() => MapsDemoState();
+  State createState() => MapState();
 }
 
-class MapsDemoState extends State<MapsDemo> {
+class MapState extends State<Map> {
   GoogleMapController mapController;
 
   @override
@@ -37,6 +37,19 @@ class MapsDemoState extends State<MapsDemo> {
                 ),
               ),
             ],
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: FlatButton(
+                padding: EdgeInsets.only(top: 20.0),
+                // padding: EdgeInsets.only(top: 60.0),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Image.asset('assets/icons/arrow-down-black.png'),
+              ),
+            ),
           ),
           LocateWidget(),
         ],
