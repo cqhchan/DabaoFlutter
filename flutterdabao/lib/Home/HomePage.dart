@@ -51,6 +51,9 @@ class _Home extends State<Home> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
+
+ 
+
                       //Dabaoee
                       ScaleGestureDetector(
                         onTap: () {

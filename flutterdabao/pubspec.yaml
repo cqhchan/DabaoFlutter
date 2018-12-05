@@ -13,7 +13,6 @@ environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
-  flushbar: ^1.1.2
   intl: ^0.15.7
   datetime_picker_formfield: ^0.1.4
   flutter_colorpicker: any
@@ -24,7 +23,13 @@ dependencies:
   flutter_spinkit: "^3.0.0"
   google_maps_webservice: ^0.0.9
   latlong: ^0.6.1
+  cloud_functions: ^0.0.5
   # time_slot_picker: ^0.0.1
+  # geolocation:
+  #   git:
+  #     url: 'https://github.com/driveddy/geolocation'
+  # geolocator: '^2.1.1'
+  location: ^1.4.1
   flutter:
     sdk: flutter
 
@@ -38,6 +43,8 @@ dependencies:
   firebase: ^5.0.0
   cloud_firestore: ^0.8.2
   google_maps_flutter: ^0.0.3+3
+
+
 
 
 dev_dependencies:

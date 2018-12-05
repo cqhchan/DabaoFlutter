@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/CustomError/FatalError.dart';
+import 'package:flutterdabao/CustomWidget/Headers/Category.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/Model/Location.dart';
@@ -14,12 +15,14 @@ import 'package:flutterdabao/Model/User.dart';
   Map<String, dynamic> data;
   
   Mappable.fromDocument(DocumentSnapshot doc) : super(doc.documentID){
+    setUpVariables();
     mapFrom(doc.data);
   }
 
   Mappable.fromUID(uid) : super(uid){
     Firestore.instance.document("${className}/${uid}").snapshots().listen((doc) => this.mapFrom(doc.data));
   }
+  void setUpVariables();
 
 
   // All classes which intends to use MAPPING must implement their Mappable functions here.
@@ -34,6 +37,13 @@ import 'package:flutterdabao/Model/User.dart';
       
 
       return new Location.fromDocument(doc) as T;
+    }
+
+
+    if (T == Category){
+      
+
+      return new Category.fromDocument(doc) as T;
     }
 
 

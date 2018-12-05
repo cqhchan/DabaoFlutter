@@ -57,7 +57,7 @@ class CreateOrderState extends State<CreateOrder> {
             ],
           ),
           CustomizedBackButton(),
-          OrderNow(),
+          // OrderNow(),
         ],
       ),
     );

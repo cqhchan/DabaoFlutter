@@ -1,10 +1,11 @@
-import 'package:flutterdabao/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 
 
 // adds a selectable property to classes
 // for use in lists etc to determine which was selected.
 abstract class Selectable {
 
+  
   MutableProperty<bool> isSelected = new MutableProperty(false);
 
 
