@@ -211,71 +211,66 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   //Not written in build so that it can be wrapped with modal_progress_HUD
   Widget buildWidget(BuildContext context) {
     return Scaffold(
-        /*
-              floatingActionButton: FloatingActionButton(
-                onPressed: getImage,
-                tooltip: 'Add image',
-                child: Icon(Icons.add_a_photo),
-              ),*/
         body: SafeArea(
       child: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 24.0),
         children: [
           GestureDetector(
             //onTap: getImage,
             onTap: _showModalSheet,
+
             child: _image == null
-                ? Image.asset(
-                    'assets/icons/3.0x/profile_icon.png',
-                    width: 300.0,
+                ? Container(
                     height: 300.0,
-                    fit: BoxFit.contain,
+                    child: Center(
+                      child: Icon(Icons.add_a_photo, size: 100.0),
+                    ),
+                    color: ColorHelper.dabaoGreyE0,
                   )
                 : Image.file(_image, height: 300.0, width: 300.0),
           ),
           SizedBox(height: 50.0),
-          TextField(
-            onChanged: (value) {
-              setState(() {
-                _name = value;
-              });
-            },
-            controller: _nameController,
-            decoration: InputDecoration(
-              labelText: 'Name',
-            ),
-          ),
-          SizedBox(height: 12.0),
-          TextField(
-            onChanged: (value) {
-              setState(() {
-                _phoneNumber = value;
-              });
-            },
-            controller: _phoneNumberController,
-            decoration: InputDecoration(
-              labelText: 'Phone Number',
-            ),
-          ),
-          SizedBox(height: 50.0),
-          RaisedButton(
-            child: Text('Logout'),
-            elevation: 5.0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            ),
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-          ),
-          RaisedButton(
-              child: Text('Create Profile'),
-              color: ColorHelper.dabaoOrange,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(5.0)),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(children: <Widget>[
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _name = value;
+                  });
+                },
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                ),
               ),
-              onPressed: createProfile),
+              SizedBox(height: 12.0),
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _phoneNumber = value;
+                  });
+                },
+                controller: _phoneNumberController,
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                ),
+              ),
+              SizedBox(height: 50.0),
+              RaisedButton(
+                  child: Container(
+                    height: 40,
+                    child: Center(
+                      child: Text('Create Profile'),
+                    ),
+                  ),
+                  color: ColorHelper.dabaoOrange,
+                  elevation: 5.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                  onPressed: createProfile),
+            ]),
+          ),
         ],
       ),
     ));
