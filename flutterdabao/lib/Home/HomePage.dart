@@ -49,7 +49,8 @@ class _Home extends State<Home> {
                   child: Row(
                     children: <Widget>[
                       ScaleGestureDetector(
-                        onTap: () async {
+                        onTap: ()  {
+                          print("testing");
                           FirebaseAuth.instance.signOut();
                         },
                         child: Container(

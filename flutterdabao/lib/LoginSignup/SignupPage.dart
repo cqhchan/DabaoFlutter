@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:flutterdabao/services/usermanagement.dart';
+import 'package:flutterdabao/LoginSignup/LoginPage.dart';
 
 class SignupPage extends StatefulWidget {
   SignupPage({Key key}) : super(key: key);
@@ -17,6 +16,13 @@ class _SignupPageState extends State<SignupPage> {
   String password;
 
   bool _autoValidate = false;
+
+  void _showSnackBar(message) {
+    final snackBar = new SnackBar(
+      content: new Text(message),
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
 
   String _validateEmail(String value) {
     if (value.isEmpty) {
@@ -58,10 +64,10 @@ class _SignupPageState extends State<SignupPage> {
       FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((signedInUser) {
-        UserManagement().storeNewUser(signedInUser, context);
-      }).catchError((e) {
-        print(e);
-      });
+        }).catchError((e) {
+          _showSnackBar('The email address is already in used!');
+          print(e);
+        });
     } else {
       setState(() => _autoValidate = true);
     }
@@ -114,7 +120,7 @@ class _SignupPageState extends State<SignupPage> {
                 children: <Widget>[
                   FlatButton(
                     child: Text('CANCEL'),
-                    shape: BeveledRectangleBorder(
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
                     onPressed: () {
@@ -124,7 +130,7 @@ class _SignupPageState extends State<SignupPage> {
                   RaisedButton(
                     child: Text('SIGN UP'),
                     elevation: 8.0,
-                    shape: BeveledRectangleBorder(
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
                     onPressed: _validateInputs,

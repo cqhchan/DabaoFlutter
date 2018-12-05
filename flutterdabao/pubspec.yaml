@@ -26,6 +26,7 @@ dependencies:
   # time_slot_picker: ^0.0.1
   flutter:
     sdk: flutter
+  image: ^2.0.5
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -36,7 +37,14 @@ dependencies:
   google_sign_in: ^3.2.2
   firebase: ^5.0.0
   cloud_firestore: ^0.8.2
-
+  image_picker: 
+  firebase_storage:
+  random_string:
+  path_provider: ^0.4.1
+  date_format: ^1.0.5
+  modal_progress_hud: ^0.1.2
+  image_cropper: ^0.0.9
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -45,7 +53,7 @@ dev_dependencies:
 
 
 # For information on the generic Dart part of this file, see the
-# following page: https://www.dartlang.org/tools/pub/pubspec
+# following page: https://www.dartlang.org/tools/pub/c
 
 # The following section is specific to Flutter.
 flutter:

@@ -109,7 +109,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               children: <Widget>[
                 FlatButton(
                   child: Text('SIGN UP'),
-                  shape: BeveledRectangleBorder(
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(7.0)),
                   ),
                   onPressed: () {
@@ -122,20 +122,24 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                 RaisedButton(
                   child: Text('LOG IN'),
                   elevation: 8.0,
-                  shape: BeveledRectangleBorder(
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(7.0)),
                   ),
                   onPressed: () {
                     FirebaseAuth.instance
                         .signInWithEmailAndPassword(
                             email: _email, password: _password)
-                        .then((FirebaseUser user) {
+                        .catchError((e) {
+                          _showSnackBar('Wrong username and password!');
+                          print(e);
+                        });
+                          /*
                       Navigator.of(context)
                           .pushReplacementNamed('/defaultpage');
                     }).catchError((e) {
                       _showSnackBar('Wrong username and password!');
                       print(e);
-                    });
+                    });*/
                   },
                 ),
               ],
