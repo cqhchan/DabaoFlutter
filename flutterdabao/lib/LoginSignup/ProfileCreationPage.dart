@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutterdabao/services/usermanagement.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:image/image.dart' as Resize;
 import 'package:path_provider/path_provider.dart';
@@ -105,11 +104,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         creatingThumbnail();
       }
     });
-
-    Navigator.of(context).pop();
   }
-
-  UserManagement userManagement = new UserManagement();
 
   void createProfile() {
     String uid;
@@ -186,12 +181,19 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
               ListTile(
                 leading: Icon(Icons.camera),
                 title: Text('Camera'),
-                onTap: getImageFromCamera,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  getImageFromCamera();
+                },
               ),
               ListTile(
                 leading: Icon(Icons.photo_album),
                 title: Text('Photos'),
-                onTap: getImageFromGallery,
+                onTap: () {
+                  Navigator.of(context).pop();
+
+                  getImageFromGallery();
+                },
               ),
               ListTile(
                   leading: Icon(Icons.cancel),
@@ -220,13 +222,14 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
 
             child: _image == null
                 ? Container(
-                    height: 300.0,
+                    height: MediaQuery.of(context).size.width,
+                    width: MediaQuery.of(context).size.width,
                     child: Center(
                       child: Icon(Icons.add_a_photo, size: 100.0),
                     ),
                     color: ColorHelper.dabaoGreyE0,
                   )
-                : Image.file(_image, height: 300.0, width: 300.0),
+                : Image.file(_image, height: MediaQuery.of(context).size.width, width: MediaQuery.of(context).size.width, fit: BoxFit.fill,),
           ),
           SizedBox(height: 50.0),
           Container(
