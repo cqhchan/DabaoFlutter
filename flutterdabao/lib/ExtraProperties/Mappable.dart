@@ -14,6 +14,7 @@ import 'package:flutterdabao/Model/User.dart';
   Map<String, dynamic> data;
   
   Mappable.fromDocument(DocumentSnapshot doc) : super(doc.documentID){
+    setUpVariables();
     mapFrom(doc.data);
   }
 
@@ -21,6 +22,7 @@ import 'package:flutterdabao/Model/User.dart';
     Firestore.instance.document("${className}/${uid}").snapshots().listen((doc) => this.mapFrom(doc.data));
   }
 
+  void setUpVariables();
 
   // All classes which intends to use MAPPING must implement their Mappable functions here.
   static T mapping<T extends Mappable>(DocumentSnapshot doc){

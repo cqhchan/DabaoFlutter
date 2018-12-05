@@ -9,12 +9,11 @@ import 'package:quiver/core.dart';
 abstract class FirebaseType extends Mappable with Equatable {
   
 
-  FirebaseType.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc) {setUpVariables();}
+  FirebaseType.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   
-  FirebaseType.fromUID(String uid) : super.fromUID(uid) {setUpVariables();}
+  FirebaseType.fromUID(String uid) : super.fromUID(uid);
 
 
-  void setUpVariables();
 
   @override
   int generateHashCode() => hash2(this.runtimeType.toString().hashCode,uid.hashCode);
