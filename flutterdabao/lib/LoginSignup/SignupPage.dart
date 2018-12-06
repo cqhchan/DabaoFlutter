@@ -1,3 +1,5 @@
+//This is the old sign up page
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/LoginSignup/LoginPage.dart';

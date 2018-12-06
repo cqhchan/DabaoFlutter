@@ -263,6 +263,21 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                   child: Container(
                     height: 40,
                     child: Center(
+                      child: Text('Logout'),
+                    ),
+                  ),
+                  color: ColorHelper.dabaoGreyE0,
+                  elevation: 5.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();}
+                  ),
+              RaisedButton(
+                  child: Container(
+                    height: 40,
+                    child: Center(
                       child: Text('Create Profile'),
                     ),
                   ),

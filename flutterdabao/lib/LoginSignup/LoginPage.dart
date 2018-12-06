@@ -38,6 +38,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutterdabao/LoginSignup/PhoneSignupPage.dart';
 
 import 'package:flutterdabao/LoginSignup/SignupPage.dart';
 
@@ -115,7 +116,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SignupPage()),
+                      MaterialPageRoute(builder: (context) => PhoneSignupPage()),
+                      //MaterialPageRoute(builder: (context) => SignupPage()),
                     );
                   },
                 ),
