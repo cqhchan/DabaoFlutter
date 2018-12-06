@@ -12,14 +12,10 @@ import 'package:flutterdabao/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/default.dart';
 
 class DabaoApp extends StatelessWidget {
-
-  // Add in all set up etc needed 
-  DabaoApp(){
-
+  // Add in all set up etc needed
+  DabaoApp() {
     // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
-
-
   }
 
   @override
@@ -28,7 +24,6 @@ class DabaoApp extends StatelessWidget {
       title: 'DABAO',
       theme: ThemeData(fontFamily: "SF_UI_Display"),
       home: _handleCurrentScreen(),
-
     );
   }
 
@@ -43,17 +38,70 @@ class DabaoApp extends StatelessWidget {
             if (snapshot.hasData) {
               // If Logged in, load user from FirebaseAuth
               //TODO add in check if user has completed profile creation else bring to profile creation;
-              
+
+              User user = User.fromAuth(snapshot.data);
+              return StreamBuilder<String>(
+                  stream: user.profileImage,
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return LoadingPage();
+                    } else if (snapshot.hasData) {
+                      //snapshot.data != null
+                      return new Navigator(
+                          onGenerateRoute: (RouteSettings settings) {
+                        return new MaterialPageRoute(builder: (context) {
+                          return Home();
+                        });
+                      });
+                    } else {
+                      return new Navigator(
+                          onGenerateRoute: (RouteSettings settings) {
+                        return new MaterialPageRoute(builder: (context) {
+                          return ProfileCreationPage();
+                        });
+                      });
+                    }
+                  });
+
+              //return Home();
+            } else {
+              return new Navigator(onGenerateRoute: (RouteSettings settings) {
+                return new MaterialPageRoute(builder: (context) {
+                  return LoginPage();
+                });
+              });
+            }
+          }
+        });
+  }
+  /*
+  // Handles Authentication State
+  Widget _handleCurrentScreen() {
+    return StreamBuilder<FirebaseUser>(
+        stream: FirebaseAuth.instance.onAuthStateChanged,
+        builder: (BuildContext context, snapshot) {
+
+          print("TestingHello");
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return LoadingPage();
+          } else {
+            if (snapshot.hasData) {
+              // If Logged in, load user from FirebaseAuth
+              //TODO add in check if user has completed profile creation else bring to profile creation;
+              print("TestingHello22222");
               User user = User.fromAuth(snapshot.data);
               return StreamBuilder<String>(
                 stream: user.profileImage,
                 builder: (BuildContext context, snapshot) {
-
+                  print(snapshot);
                   if (snapshot.connectionState == ConnectionState.waiting){
+                    print("TestingHello333");
                     return LoadingPage();
                   } else if (snapshot.hasData) { //snapshot.data != null
+                  print("TestingHello4444");
                     return Home();
                   } else {
+                    print("TestingHello555");
                     return ProfileCreationPage();
                   }        
                 }
@@ -66,4 +114,5 @@ class DabaoApp extends StatelessWidget {
           }
         });
   }
+  */
 }

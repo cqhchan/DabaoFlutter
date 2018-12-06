@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutterdabao/LoginSignup/LoginPage.dart';
+//import 'package:flutterdabao/LoginSignup/LoginPage.dart';
+import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
 
 class PhoneSignupPage extends StatefulWidget {
   PhoneSignupPage({Key key}) : super(key: key);
@@ -19,7 +20,6 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
   bool _autoValidate = false;
 
   Future<void> verifyPhone() async {
-    print(phoneNo);
     final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
       print("Test1");
       verificationId = verId;
@@ -33,11 +33,12 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     };
     final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
       print('verified');
+      print(user.uid);
     };   
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
       print('${exception.message}');
     };
-    //THIS IS THE CAUSE OF ERROR
+    
     await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNo,
         codeAutoRetrievalTimeout: autoRetrieve,
@@ -67,8 +68,16 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                   FirebaseAuth.instance.currentUser().then((user) {
                     //only need to signIn if verification is not done automatically
                     if (user == null) {
+                      //Navigator.of(context).pop();
                       Navigator.of(context).pop(); //To get rid of smsCodeDialog before moving on.
                       signIn();
+                      //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
+                      /*
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfileCreationPage())
+                      );
+                      */
                     }
                   });
                 },

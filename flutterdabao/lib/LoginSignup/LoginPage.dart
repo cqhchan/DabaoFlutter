@@ -135,13 +135,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                           _showSnackBar('Wrong username and password!');
                           print(e);
                         });
-                          /*
-                      Navigator.of(context)
-                          .pushReplacementNamed('/defaultpage');
-                    }).catchError((e) {
-                      _showSnackBar('Wrong username and password!');
-                      print(e);
-                    });*/
                   },
                 ),
               ],
