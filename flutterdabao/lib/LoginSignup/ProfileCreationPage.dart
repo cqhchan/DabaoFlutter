@@ -71,7 +71,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       });
     });
   }
-
+  
   //Providing the UI for user to crop profile image chosen from camera/gallery
   Future<File> _cropImage(File imageFile) async {
     File croppedFile = await ImageCropper.cropImage(
