@@ -187,7 +187,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     };
     
     await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: "+6596556320",
+        phoneNumber: phoneNumber,
         codeAutoRetrievalTimeout: autoRetrieve,
         codeSent: smsCodeSent,
         timeout: Duration(seconds: 5),
