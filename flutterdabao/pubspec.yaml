@@ -18,17 +18,11 @@ dependencies:
   flutter_colorpicker: any
   flutter_masked_text: ^0.6.0
   meta: ^1.1.6
-  card_settings: ^1.2.2
   progress_hud: ^1.1.0
   flutter_spinkit: "^3.0.0"
   google_maps_webservice: ^0.0.9
   latlong: ^0.6.1
   cloud_functions: ^0.0.5
-  # time_slot_picker: ^0.0.1
-  # geolocation:
-  #   git:
-  #     url: 'https://github.com/driveddy/geolocation'
-  # geolocator: '^2.1.1'
   location: ^1.4.1
   flutter:
     sdk: flutter

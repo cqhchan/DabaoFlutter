@@ -12,24 +12,18 @@ import 'package:flutterdabao/default.dart';
 import 'package:flutterdabao/CreateOrder/CreateOrder.dart';
 
 class DabaoApp extends StatelessWidget {
-
-  // Add in all set up etc needed 
-  DabaoApp(){
-
+  // Add in all set up etc needed
+  DabaoApp() {
     // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
-
-
   }
 
   @override
   Widget build(BuildContext context) {
-
-    
-
     return MaterialApp(
       title: 'DABAO',
-      theme: ThemeData(fontFamily: "SF_UI_Display",primarySwatch: Colors.orange),
+      theme:
+          ThemeData(fontFamily: "SF_UI_Display", primarySwatch: Colors.orange),
       home: _handleCurrentScreen(),
       // initialRoute: '/loginpage',
       routes: <String, WidgetBuilder>{
@@ -54,7 +48,7 @@ class DabaoApp extends StatelessWidget {
               return Home(); //Here!
               // return Map();
             }
-            
+
             return LoginPage();
           }
         });

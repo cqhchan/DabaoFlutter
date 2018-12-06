@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
+import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
@@ -13,6 +14,7 @@ import 'package:flutterdabao/Model/User.dart';
 
 import 'package:flutterdabao/CreateOrder/CreateOrder.dart';
 import 'package:flutterdabao/CreateOrder/FoodTag.dart';
+
 
 class Home extends StatefulWidget {
   @override
@@ -59,7 +61,7 @@ class _Home extends State<Home> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => CreateOrder()),
+                            FadeRoute(widget: CreateOrder()),
                             // MaterialPageRoute(builder: (context) => FoodTag()),
 
                           );
