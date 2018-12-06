@@ -33,7 +33,15 @@ dependencies:
   cupertino_icons: ^0.1.2
   rxdart:
     git:  git://github.com/ReactiveX/rxdart.git
-  firebase_auth: ^0.6.2+1
+  firebase_auth:
+    git:
+      url: git://github.com/cqhchan/plugins.git
+      path: packages/firebase_auth
+
+
+  # firebase_auth:
+  #   path: ../../plugins/packages/firebase_auth
+
   google_sign_in: ^3.2.2
   firebase: ^5.0.0
   cloud_firestore: ^0.8.2

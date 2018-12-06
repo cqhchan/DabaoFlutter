@@ -122,7 +122,9 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   //only works if you are creating a new account
   void createHavoc() {
     //FirebaseAuth.instance.crea
-    FirebaseAuth.instance.linkWithEmailAndPassword(email: 'hg4@hg.com', password: '1234567')
+
+    
+    FirebaseAuth.instance.linkWithCredential(EmailAuthProvider.getCredential(email: 'hg4@hg.com', password: '1234567'))
     .catchError((e) {
       //if it fails, means that the email already existed
       print(e);
@@ -146,13 +148,10 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                 child: Text('Verify'),
                 onPressed: () {
                   FirebaseAuth.instance.currentUser().then((user) {
-                    //only need to signIn if verification is not done automatically
-                    if (user == null) {
-                      //Navigator.of(context).pop();
+
                       Navigator.of(context).pop(); //To get rid of smsCodeDialog before moving on.
-                      FirebaseAuth.instance.verifyPhoneNumber()
-                      
-                    }
+                      signIn();                      
+                  
                   });
                 },
               )
@@ -161,8 +160,9 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         });
   }
   signIn() {
-    
-    createHavocTwo();
+
+    FirebaseAuth.instance.linkWithCredential(PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: smsCode));    
+
   }
 
   Future<void> createHavocTwo() async{
@@ -187,12 +187,13 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     };
     
     await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
+        phoneNumber: "+6596556320",
         codeAutoRetrievalTimeout: autoRetrieve,
         codeSent: smsCodeSent,
         timeout: Duration(seconds: 5),
         verificationCompleted: verifiedSuccess,
-        verificationFailed: veriFailed);
+        verificationFailed: veriFailed,
+        linkCredentials: true);
   }
   void createProfile() {
     String uid;

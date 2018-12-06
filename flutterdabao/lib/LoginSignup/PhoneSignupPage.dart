@@ -89,7 +89,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
 
   signIn() {
     FirebaseAuth.instance
-        .signInWithPhoneNumber(verificationId: verificationId, smsCode: smsCode)
+        .signInWithCredential(PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: smsCode))
         .catchError((e) {
       print(e);
     });
