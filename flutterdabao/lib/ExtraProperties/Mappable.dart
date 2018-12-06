@@ -19,6 +19,7 @@ import 'package:flutterdabao/Model/User.dart';
   }
 
   Mappable.fromUID(uid) : super(uid){
+    setUpVariables();
     Firestore.instance.document("${className}/${uid}").snapshots().listen((doc) => this.mapFrom(doc.data));
   }
 
