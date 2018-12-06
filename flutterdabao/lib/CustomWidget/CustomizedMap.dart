@@ -17,16 +17,16 @@ class _CustomizedMapState extends State<CustomizedMap>
   GoogleMapController mapController;
 
   Map<String, double> _startLocation = new Map();
-  Map<String, double> currentLocation = new Map();
+  Map<String, double> _currentLocation = new Map();
   StreamSubscription<Map<String, double>> locationSubscription;
 
   Location location = new Location();
   String error;
   bool _permission = false;
 
+  // Default Location to NUS if permission is not granted
   static LatLng locationProp = new LatLng(1.2923956, 103.77572039999995);
-  MutableProperty<LatLng> locationProperty = MutableProperty(locationProp);
-
+  MutableProperty<LatLng> currentLocation = MutableProperty(locationProp);
   MutableProperty<List<LatLng>> markerLocations = MutableProperty(List());
 
   Future<void> fetchJSON(LatLng thislocation) async {
@@ -50,9 +50,11 @@ class _CustomizedMapState extends State<CustomizedMap>
       result['locations'].forEach((latlng) {
         double latitude = latlng[0];
         double longitude = latlng[1];
+
         temp.add(LatLng(latitude, longitude));
       });
 
+      // Add location of markers to stream
       markerLocations.producer.add(temp);
     } on CloudFunctionsException catch (e) {
       print(e);
@@ -65,27 +67,21 @@ class _CustomizedMapState extends State<CustomizedMap>
   void initState() {
     super.initState();
 
-    subscription.add(locationProperty.producer.map((thisLocation) {
-      if (thisLocation != null) {
-        fetchJSON(thisLocation);
-      }
-    }).listen((_) {
-      print('Running...');
-    }));
+    // Request permission
+    initPlatformState();
 
     subscription.add(markerLocations.producer.listen((_) {
-      print('Running...');
+      print('Listening...');
     }));
 
-    // Ping location every 10mins when app is in background.
-    // Background mode
-
-    initPlatformState();
+    subscription.add(currentLocation.producer.listen((_) {
+      print('Listening');
+    }));
 
     locationSubscription =
         location.onLocationChanged().listen((Map<String, double> result) {
       setState(() {
-        currentLocation = result;
+        _currentLocation = result;
       });
     });
   }
@@ -110,16 +106,34 @@ class _CustomizedMapState extends State<CustomizedMap>
     });
   }
 
+  void _createCurrentLocationMarker() {
+    currentLocation.producer.listen((value) {
+      mapController.addMarker(MarkerOptions(
+        position: LatLng(value.latitude, value.longitude),
+      ));
+    });
+  }
+
   void _createMarkers() {
     markerLocations.producer.value.forEach((location) {
       mapController.addMarker(MarkerOptions(
-          icon: BitmapDescriptor.fromAsset('assets/icons/map_bike.png'),
+          icon: BitmapDescriptor.fromAsset('assets/icons/bike.png'),
           draggable: false,
           position: location));
     });
   }
 
   void _onMapCreated(GoogleMapController controller) {
+    // Add current location of user to stream
+    LatLng defaultTest = locationProp;
+    LatLng temp =
+        new LatLng(_currentLocation['latitude'], _currentLocation['longitude']);
+    currentLocation.producer.add(temp);
+    currentLocation.producer.listen((thisLocation) {
+      if (thisLocation != null) {
+        fetchJSON(thisLocation);
+      }
+    });
     setState(() {
       mapController = controller;
     });
@@ -127,6 +141,7 @@ class _CustomizedMapState extends State<CustomizedMap>
 
   @override
   void dispose() {
+    locationSubscription.cancel();
     subscription.dispose();
     mapController.dispose();
     super.dispose();
@@ -148,6 +163,8 @@ class _CustomizedMapState extends State<CustomizedMap>
                   case ConnectionState.active:
                     // Create Deliveries or Requests Markers
                     _createMarkers();
+                    // Create Current Location Marker
+                    _createCurrentLocationMarker();
                     // Update Google Map
                     return updatedMap;
                   case ConnectionState.done:
@@ -167,8 +184,8 @@ class _CustomizedMapState extends State<CustomizedMap>
             onMapCreated: _onMapCreated,
             options: GoogleMapOptions(
               cameraPosition: CameraPosition(
-                  target: LatLng(currentLocation['latitude'],
-                      currentLocation['longitude']),
+                  target: LatLng(_currentLocation['latitude'],
+                      _currentLocation['longitude']),
                   zoom: 15.0),
             ),
           ),
@@ -184,8 +201,8 @@ class _CustomizedMapState extends State<CustomizedMap>
                         mapController.animateCamera(
                             CameraUpdate.newCameraPosition(CameraPosition(
                                 zoom: 15,
-                                target: LatLng(currentLocation['latitude'],
-                                    currentLocation['longitude']))));
+                                target: LatLng(_currentLocation['latitude'],
+                                    _currentLocation['longitude']))));
                       },
               ),
             ),

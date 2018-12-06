@@ -25,10 +25,9 @@ class _OrderNowState extends State<OrderNow> {
     final Future<TimeOfDay> pickedStart = showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
-    );
-    pickedStart.then((value) {
+    ).then((value) {
       print(value.hour);
-      // print(timeformat.format(value));
+      _selectEndTime();
     });
   }
 
@@ -36,8 +35,7 @@ class _OrderNowState extends State<OrderNow> {
     final Future<TimeOfDay> pickedEnd = showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
-    );
-    pickedEnd.then((value) {
+    ).then((value) {
       print(value.hour);
     });
   }
@@ -59,39 +57,6 @@ class _OrderNowState extends State<OrderNow> {
           );
         });
   }
-
-  // _handleFoodTag(value) {
-  //   setState(() {
-
-  //       });
-  // }
-
-  // Future<Null> _selectEndTime(BuildContext context) async {
-  //   final TimeOfDay pickedEnd = await showTimePicker(
-  //     context: null,
-  //     initialTime: TimeOfDay.now(),
-  //   );
-  // }
-
-  // if (pickedStart != _startTime) {
-  // print('Start Time Selected: ${_startTime.toString()}');
-  // setState(() {
-  //       _startTime = pickedStart;
-  //     });
-  // }
-
-  // if(pickedEnd != null && pickedEnd != _endTime) {
-  //   print('End Time Selected: ${_endTime.toString()}');
-  //   setState(() {
-  //         _startTime = pickedEnd;
-  //       });
-  // }
-
-  // _handleAddress(value) {
-  //   setState(() {
-  //     _address = value;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -161,43 +126,33 @@ class _OrderNowState extends State<OrderNow> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     OutlineButton(
-                        highlightedBorderColor: ColorHelper.dabaoOrange,
-                        highlightColor: ColorHelper.dabaoOrange,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5.0),
-                        color: ColorHelper.dabaoOffWhiteF5,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Image.asset('assets/icons/stand.png'),
-                            SizedBox(
-                              width: 5.0,
-                            ),
-                            Column(
-                              children: <Widget>[
-                                Text('Scheduled'),
-                                Text('Order'),
-                              ],
-                            ),
-                          ],
-                        ),
-                        onPressed: () {
-                          // showTimePicker(
-                          //   initialTime: TimeOfDay.now(),
-                          //   context: context,
-                          // );
-                          // showTimePicker(
-                          //   initialTime: TimeOfDay.now(),
-                          //   context: context,
-                          // );
-                          _selectStartTime();
-                          _selectEndTime();
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
+                      highlightedBorderColor: ColorHelper.dabaoOrange,
+                      highlightColor: ColorHelper.dabaoOrange,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+                      color: ColorHelper.dabaoOffWhiteF5,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Image.asset('assets/icons/stand.png'),
+                          SizedBox(
+                            width: 5.0,
+                          ),
+                          Column(
+                            children: <Widget>[
+                              Text('Scheduled'),
+                              Text('Order'),
+                            ],
+                          ),
+                        ],
                       ),
-
+                      onPressed: () {
+                        _selectStartTime();
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
                     RaisedButton(
                       padding:
                           EdgeInsets.symmetric(horizontal: 22.0, vertical: 9.0),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class LoadingPage extends StatefulWidget {
   @override
@@ -14,18 +15,17 @@ class _LoadingPageState extends State<LoadingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Stack(
-      children: <Widget>[
-        SpinKitFadingCircle(
-          itemBuilder: (_, int index) {
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                color: index.isEven ? Colors.red : Colors.green,
-              ),
-            );
-          },
-        ),
-      ],
+    return Scaffold(
+            backgroundColor: ColorHelper.dabaoOffWhiteF5,
+          body: Center(
+        child: CircularProgressIndicator(
+                      value: null,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(ColorHelper.dabaoOrange),
+                      strokeWidth: 7.0,
+                    ),
+      ),
     );
+    
   }
 }

@@ -8,8 +8,6 @@ import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/LoginSignup/LoginPage.dart';
 import 'package:flutterdabao/LoaderAnimator/LoadingWidget.dart';
-import 'package:flutterdabao/default.dart';
-import 'package:flutterdabao/CreateOrder/CreateOrder.dart';
 
 class DabaoApp extends StatelessWidget {
   // Add in all set up etc needed
@@ -25,11 +23,6 @@ class DabaoApp extends StatelessWidget {
       theme:
           ThemeData(fontFamily: "SF_UI_Display", primarySwatch: Colors.orange),
       home: _handleCurrentScreen(),
-      // initialRoute: '/loginpage',
-      routes: <String, WidgetBuilder>{
-        '/defaultpage': (BuildContext context) => Home(),
-        '/loginpage': (BuildContext context) => LoginPage(),
-      },
     );
   }
 
@@ -45,8 +38,7 @@ class DabaoApp extends StatelessWidget {
               // If Logged in, load user from FirebaseAuth
               //TODO add in check if user has completed profile creation else bring to profile creation;
               User.fromAuth(snapshot.data);
-              return Home(); //Here!
-              // return Map();
+              return Home();
             }
 
             return LoginPage();
