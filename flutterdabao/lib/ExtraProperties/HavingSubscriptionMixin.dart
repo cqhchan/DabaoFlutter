@@ -1,3 +1,4 @@
+import 'package:flutterdabao/HelperClasses/compisite_subscription.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract class HavingSubscriptionMixin {
