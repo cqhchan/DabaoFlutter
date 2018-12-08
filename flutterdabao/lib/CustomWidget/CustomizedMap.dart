@@ -1,5 +1,11 @@
+// TODO: 
+// https://stackoverflow.com/questions/24302112/how-to-get-the-latitude-and-longitude-of-location-where-user-taps-on-the-map-in
+// https://stackoverflow.com/questions/53397826/flutter-get-coordinates-from-google-maps
+
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter/services.dart';
@@ -13,20 +19,23 @@ class CustomizedMap extends StatefulWidget {
 }
 
 class _CustomizedMapState extends State<CustomizedMap>
-    with HavingSubscriptionMixin {
+    with HavingSubscriptionMixin, SingleTickerProviderStateMixin {
   GoogleMapController mapController;
+  Marker _selectedMarker;
 
-  Map<String, double> _startLocation = new Map();
+  // Map<String, double> _startLocation = new Map();
   Map<String, double> _currentLocation = new Map();
   StreamSubscription<Map<String, double>> locationSubscription;
 
   Location location = new Location();
   String error;
-  bool _permission = false;
 
-  // Default Location to NUS if permission is not granted
-  static LatLng locationProp = new LatLng(1.2923956, 103.77572039999995);
-  MutableProperty<LatLng> currentLocation = MutableProperty(locationProp);
+  // static LatLng locationProp = new LatLng(1.2923956, 103.77572039999995);
+  // MutableProperty<LatLng> currentLocation = MutableProperty(locationProp);
+  // MutableProperty<LatLng> currentLocation = ConfigHelper.instance.currentLocationProperty;
+  MutableProperty<LatLng> oneTimeLocation = MutableProperty(null);
+  MutableProperty<LatLng> currentLocation = MutableProperty(null);
+  MutableProperty<LatLng> tapLocation = MutableProperty(null);
   MutableProperty<List<LatLng>> markerLocations = MutableProperty(List());
 
   Future<void> fetchJSON(LatLng thislocation) async {
@@ -66,31 +75,45 @@ class _CustomizedMapState extends State<CustomizedMap>
   @override
   void initState() {
     super.initState();
+    initGoogleMap();
 
-    // Request permission
-    initPlatformState();
-
-    subscription.add(markerLocations.producer.listen((_) {
-      print('Listening...');
-    }));
-
-    subscription.add(currentLocation.producer.listen((_) {
-      print('Listening');
-    }));
+    subscription.add(markerLocations.producer.listen((_) {}));
+    subscription.add(currentLocation.producer.listen((_) {}));
+    subscription.add(tapLocation.producer.listen((_){}));
 
     locationSubscription =
         location.onLocationChanged().listen((Map<String, double> result) {
+      oneTimeLocation.producer.add(
+        LatLng(1.2923956, 103.7757203999999),
+      );
+      currentLocation.producer.add(
+        // Default location to NUS for Testing Purposes
+        LatLng(1.2923956, 103.7757203999999),
+        // LatLng(
+        //   result["latitude"],
+        //   result["longitude"],
+        // ),
+      );
+      print("Current User's Location ------ Lat: ${result["latitude"]} Lng: ${result["longitude"]}");
       setState(() {
         _currentLocation = result;
       });
     });
   }
 
+  void initGoogleMap() async {
+    currentLocation.producer.listen((value) {
+      _currentLocation['latitude'] = value.latitude;
+      _currentLocation['longitude'] = value.longitude;
+    });
+
+    // Request permission
+    initPlatformState();
+  }
+
   void initPlatformState() async {
-    Map<String, double> my_location;
     try {
-      _permission = await location.hasPermission();
-      my_location = await location.getLocation();
+      await location.hasPermission();
       error = null;
     } on PlatformException catch (e) {
       if (e.code == "PERMISSION_DENIED") {
@@ -99,17 +122,39 @@ class _CustomizedMapState extends State<CustomizedMap>
         error =
             'Permission denied - please ask the user to enable it from the app setting';
       }
-      my_location = null;
+      print(error);
     }
+  }
+
+  void _onMarkerTapped(Marker marker) {
     setState(() {
-      _startLocation = my_location;
+      _selectedMarker = marker;
+    });
+    print('Selected Location: ${_selectedMarker.options.position}');
+  }
+
+  void _panToCurrentLocation(GoogleMapController controller) {
+    currentLocation.producer.listen((result) {
+      controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            zoom: 16,
+            target: LatLng(
+              result.latitude,
+              result.longitude,
+            ),
+          ),
+        ),
+      );
     });
   }
 
-  void _createCurrentLocationMarker() {
-    currentLocation.producer.listen((value) {
-      mapController.addMarker(MarkerOptions(
-        position: LatLng(value.latitude, value.longitude),
+  void _createDraggableMarker(GoogleMapController controller) {
+    oneTimeLocation.producer.take(1).listen((result) {
+      controller.addMarker(MarkerOptions(
+        infoWindowText: InfoWindowText('To Dabaoer:', 'Let Meet Here!'),
+        draggable: true,
+        position: result,
       ));
     });
   }
@@ -119,21 +164,29 @@ class _CustomizedMapState extends State<CustomizedMap>
       mapController.addMarker(MarkerOptions(
           icon: BitmapDescriptor.fromAsset('assets/icons/bike.png'),
           draggable: false,
+          infoWindowText: InfoWindowText('From Dabaoer:', "Good Food!"),
           position: location));
     });
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    // Add current location of user to stream
-    LatLng defaultTest = locationProp;
-    LatLng temp =
-        new LatLng(_currentLocation['latitude'], _currentLocation['longitude']);
+    LatLng temp = new LatLng(
+      _currentLocation['latitude'],
+      _currentLocation['longitude'],
+    );
     currentLocation.producer.add(temp);
     currentLocation.producer.listen((thisLocation) {
       if (thisLocation != null) {
         fetchJSON(thisLocation);
       }
     });
+
+    _panToCurrentLocation(controller);
+
+    _createDraggableMarker(controller);
+
+    controller.onMarkerTapped.add(_onMarkerTapped);
+
     setState(() {
       mapController = controller;
     });
@@ -141,7 +194,8 @@ class _CustomizedMapState extends State<CustomizedMap>
 
   @override
   void dispose() {
-    locationSubscription.cancel();
+    mapController?.onMarkerTapped?.remove(_onMarkerTapped);
+    locationSubscription.pause();
     subscription.dispose();
     mapController.dispose();
     super.dispose();
@@ -151,22 +205,19 @@ class _CustomizedMapState extends State<CustomizedMap>
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Center(
-        child: Scaffold(
-          body: StreamBuilder(
+        child: SafeArea(
+          child: StreamBuilder(
               stream: markerLocations.producer,
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
                     return CircularProgressIndicator();
                   case ConnectionState.none:
-                    return LinearProgressIndicator();
                   case ConnectionState.active:
                     // Create Deliveries or Requests Markers
                     _createMarkers();
-                    // Create Current Location Marker
-                    _createCurrentLocationMarker();
                     // Update Google Map
-                    return updatedMap;
+                    return updateMap;
                   case ConnectionState.done:
                 }
               }),
@@ -176,37 +227,43 @@ class _CustomizedMapState extends State<CustomizedMap>
   }
 
   // Google Map Widget
-  Widget get updatedMap {
+  Widget get updateMap {
     return Container(
       child: Stack(
         children: <Widget>[
           GoogleMap(
             onMapCreated: _onMapCreated,
             options: GoogleMapOptions(
+              rotateGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+              compassEnabled: false,
+              trackCameraPosition: true,
+              myLocationEnabled: true,
               cameraPosition: CameraPosition(
-                  target: LatLng(_currentLocation['latitude'],
-                      _currentLocation['longitude']),
-                  zoom: 15.0),
+                  target: LatLng(
+                    _currentLocation['latitude'],
+                    _currentLocation['longitude'],
+                  ),
+                  zoom: 15),
             ),
           ),
-          Align(
-            alignment: Alignment.topRight,
-            child: Container(
-              padding: EdgeInsets.only(top: 30.0),
-              child: IconButton(
-                icon: Icon(Icons.my_location),
-                onPressed: mapController == null
-                    ? null
-                    : () {
-                        mapController.animateCamera(
-                            CameraUpdate.newCameraPosition(CameraPosition(
-                                zoom: 15,
-                                target: LatLng(_currentLocation['latitude'],
-                                    _currentLocation['longitude']))));
-                      },
-              ),
-            ),
-          ),
+          // Align(
+          //   alignment: Alignment.topRight,
+          //   child: Container(
+          //     padding: EdgeInsets.only(top: 10.0),
+          //     child: IconButton(
+          //       icon: Icon(
+          //         Icons.my_location,
+          //         color: ColorHelper.dabaoOffBlack4A,
+          //       ),
+          //       onPressed: mapController == null
+          //           ? null
+          //           : () {
+          //               _panCameraPostitionToCurrentLocation(mapController);
+          //             },
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

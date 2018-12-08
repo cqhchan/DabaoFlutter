@@ -66,7 +66,7 @@ class _OrderNowState extends State<OrderNow> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.all(14.0),
-            margin: EdgeInsets.fromLTRB(14.0, 0.0, 14.0, 30.0),
+            margin: EdgeInsets.fromLTRB(6.0, 0.0, 6.0, 6.0),
             height: 130.0,
             decoration: BoxDecoration(
                 color: ColorHelper.dabaoOffWhiteF5,
