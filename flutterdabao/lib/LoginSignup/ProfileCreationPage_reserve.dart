@@ -18,19 +18,21 @@ class ProfileCreationPage extends StatefulWidget {
 
 class _ProfileCreationPageState extends State<ProfileCreationPage> {
   String _name;
-  String _phoneNumber;
-  String _email;
+  String phoneNumber;
+  String email;
   String _password;
   bool passwordVisibility = true;
   String verificationId;
   String smsCode;
+
+  
 
   @override
   void initState() {
     super.initState();
     FirebaseAuth.instance.currentUser().then((user) {
       setState(() {
-        _phoneNumber = user.phoneNumber;
+        phoneNumber = user.phoneNumber;
       });
     });
   }
@@ -117,26 +119,91 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       }
     });
   }
-
   //only works if you are creating a new account
-  void addEmailCredentials() {
+  void createHavoc() {
     //FirebaseAuth.instance.crea
 
-    FirebaseAuth.instance
-        .linkWithCredential(
-            EmailAuthProvider.getCredential(email: 'hg4@hg.com', password: '1234567'))
-            //EmailAuthProvider.getCredential(email: _email, password: _password))
-        .catchError((e) {
+    
+    FirebaseAuth.instance.linkWithCredential(EmailAuthProvider.getCredential(email: 'hg4@hg.com', password: '1234567'))
+    .catchError((e) {
       //if it fails, means that the email already existed
       print(e);
     });
   }
+  Future<bool> smsCodeDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Enter sms Code'),
+            content: TextField(
+              onChanged: (value) {
+                this.smsCode = value;
+              },
+            ),
+            contentPadding: EdgeInsets.all(10.0),
+            actions: <Widget>[
+              new FlatButton(
+                child: Text('Verify'),
+                onPressed: () {
+                  FirebaseAuth.instance.currentUser().then((user) {
 
+                      Navigator.of(context).pop(); //To get rid of smsCodeDialog before moving on.
+                      signIn();                      
+                  
+                  });
+                },
+              )
+            ],
+          );
+        });
+  }
+  signIn() { 
+    FirebaseAuth.instance.linkWithCredential(PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: smsCode));    
 
-  //Pre-condition: Called only when _image has been sethg
-  //uploading profileImage and thumbnailImage to firebase
-  void uploadImages() {
+  }
+
+  Future<void> createHavocTwo() async{
+    final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
+      print("Test1");
+      verificationId = verId;
+    };
+    final PhoneCodeSent smsCodeSent = (String verId, [int forceCodeResend]) {
+      print("Test2");
+      verificationId = verId;
+      smsCodeDialog(context).then((value) {
+        print('Signed in');
+      });
+    };
+    final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
+      print('verified');
+      print(user.uid);
+
+    };   
+    final PhoneVerificationFailed veriFailed = (AuthException exception) {
+      print('${exception.message}');
+    };
+    
+    await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        codeAutoRetrievalTimeout: autoRetrieve,
+        codeSent: smsCodeSent,
+        timeout: Duration(seconds: 5),
+        verificationCompleted: verifiedSuccess,
+        verificationFailed: veriFailed,
+        linkCredentials: true);
+  }
+  void createProfile() {
     String uid;
+
+    //To activate for loading spinner
+    setState(() {
+      _inProgress = true;
+    });
+    
+    
+    //upload the original image
     FirebaseAuth.instance.currentUser().then((user) {
       uid = user.uid;
       final StorageReference profileRef =
@@ -161,11 +228,10 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                     user.metadata.creationTimestamp,
                     user.metadata.lastSignInTimestamp,
                     thumbnailLink);
-                /*
                 //deactivate loading spinner
                 setState(() {
                   _inProgress = false;
-                });*/
+                });
               }).catchError((e) {
                 print(e);
               });
@@ -183,21 +249,6 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       });
     }).catchError((e) {
       print(e);
-    });
-  }
-
-  void createProfile() {
-    //To activate for loading spinner
-    setState(() {
-      _inProgress = true;
-    });
-
-    //upload the original image
-    uploadImages();
-    addEmailCredentials();
-    //Deactivating loading spinner
-    setState(() {
-      _inProgress = false;
     });
   }
 
@@ -253,6 +304,8 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         body: SafeArea(
       child: ListView(
         children: [
+          
+          
           GestureDetector(
             //onTap: getImage,
             onTap: _showModalSheet,
@@ -280,7 +333,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
               TextField(
                 enabled: false,
                 decoration: InputDecoration(
-                  labelText: _phoneNumber,
+                  labelText: phoneNumber,
                 ),
               ),
               TextField(
@@ -306,13 +359,24 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
               TextField(
                 onChanged: (value) {
                   setState(() {
-                    _password = value;
+                    _name = value;
                   });
                 },
                 decoration: InputDecoration(
                   labelText: 'Password',
                 ),
                 obscureText: passwordVisibility,
+              ),
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    phoneNumber = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                ),
+                
               ),
               GestureDetector(
                   onTap: () {
@@ -358,13 +422,11 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   ),
                   onPressed: createProfile),
-
-                  /* For testing purposes
-                  RaisedButton(
+              RaisedButton(
                   child: Container(
                     height: 40,
                     child: Center(
-                      child: Text('Test printing out phone number'),
+                      child: Text('Create Havoc'),
                     ),
                   ),
                   color: ColorHelper.dabaoGreyE0,
@@ -372,14 +434,23 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   ),
-                  onPressed: () {
-                    FirebaseAuth.instance.currentUser().then((user) {
-                      print(user.email);
-                      print(user.phoneNumber);
-                    });
-                  }),*/
+                  onPressed: createHavoc),
+                  RaisedButton(
+                  child: Container(
+                    height: 40,
+                    child: Center(
+                      child: Text('Create HavocTwo'),
+                    ),
+                  ),
+                  color: ColorHelper.dabaoGreyE0,
+                  elevation: 5.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                  onPressed: createHavocTwo),
             ]),
           ),
+          
         ],
       ),
     ));

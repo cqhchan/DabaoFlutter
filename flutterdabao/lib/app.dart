@@ -1,15 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
+import 'package:flutterdabao/LoginSignup/ProcessingPage.dart';
 import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
-import 'package:flutterdabao/Model/User.dart';
-
-import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/LoginSignup/LoginPage.dart';
 import 'package:flutterdabao/LoaderAnimator/LoadingWidget.dart';
-import 'package:flutterdabao/default.dart';
+import 'package:flutterdabao/LoginSignup/VerifyPhoneNumberPage.dart';
+import 'package:flutterdabao/Model/User.dart';
 
 class DabaoApp extends StatelessWidget {
   // Add in all set up etc needed
@@ -28,6 +26,7 @@ class DabaoApp extends StatelessWidget {
   }
 
   // Handles Authentication State
+  // Navigation logic
   Widget _handleCurrentScreen() {
     return StreamBuilder<FirebaseUser>(
         stream: FirebaseAuth.instance.onAuthStateChanged,
@@ -36,9 +35,29 @@ class DabaoApp extends StatelessWidget {
             return LoadingPage();
           } else {
             if (snapshot.hasData) {
-              // If Logged in, load user from FirebaseAuth
-              //TODO add in check if user has completed profile creation else bring to profile creation;
+              return ProcessingPage();
+            } else {
+              return new Navigator(onGenerateRoute: (RouteSettings settings) {
+                return new MaterialPageRoute(builder: (context) {
+                  return LoginPage();
+                });
+              });
+            }
+          }
+        });
+  }
 
+  /*
+  // Handles Authentication State
+  // Navigation logic
+  Widget _handleCurrentScreen() {
+    return StreamBuilder<FirebaseUser>(
+        stream: FirebaseAuth.instance.onAuthStateChanged,
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return LoadingPage();
+          } else {
+            if (snapshot.hasData) {
               User user = User.fromAuth(snapshot.data);
               return StreamBuilder<String>(
                   stream: user.profileImage,
@@ -46,8 +65,8 @@ class DabaoApp extends StatelessWidget {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return LoadingPage();
                     } else if (snapshot.hasData) {
-                      //snapshot.data != null
                       return new Navigator(
+                        //popping all previous context and goes to the returned page
                           onGenerateRoute: (RouteSettings settings) {
                         return new MaterialPageRoute(builder: (context) {
                           return Home();
@@ -62,8 +81,6 @@ class DabaoApp extends StatelessWidget {
                       });
                     }
                   });
-
-              //return Home();
             } else {
               return new Navigator(onGenerateRoute: (RouteSettings settings) {
                 return new MaterialPageRoute(builder: (context) {
@@ -73,7 +90,8 @@ class DabaoApp extends StatelessWidget {
             }
           }
         });
-  }
+  }*/
+
   /*
   // Handles Authentication State
   Widget _handleCurrentScreen() {

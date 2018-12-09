@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
-//import 'package:flutterdabao/LoginSignup/LoginPage.dart';
-import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
 
-class PhoneSignupPage extends StatefulWidget {
-  PhoneSignupPage({Key key}) : super(key: key);
+class VerifyPhoneNumberPage extends StatefulWidget {
+  VerifyPhoneNumberPage({Key key}) : super(key: key);
   @override
-  _PhoneSignupPageState createState() => _PhoneSignupPageState();
+  _VerifyPhoneNumberPageState createState() => _VerifyPhoneNumberPageState();
 }
 
-class _PhoneSignupPageState extends State<PhoneSignupPage> {
-  //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
   String phoneNo;
   String smsCode;
   String verificationId;
 
   bool _autoValidate = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   Future<void> verifyPhone() async {
     final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
@@ -32,6 +32,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     };
     final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
       print('verified');
+      print(user.uid);
     };
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
       print('${exception.message}');
@@ -64,20 +65,10 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                 child: Text('Verify'),
                 onPressed: () {
                   FirebaseAuth.instance.currentUser().then((user) {
-                    //only need to signIn if verification is not done automatically
-                    if (user == null) {
-                      //Navigator.of(context).pop();
-                      Navigator.of(context)
-                          .pop(); //To get rid of smsCodeDialog before moving on.
-                      signIn();
-                      //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
-                      /*
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProfileCreationPage())
-                      );
-                      */
-                    }
+                    Navigator.of(context)
+                        .pop(); //To get rid of smsCodeDialog before moving on.
+                    signIn();
+                    //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
                   });
                 },
               )
@@ -87,17 +78,8 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
   }
 
   signIn() {
-    FirebaseAuth.instance
-        .signInWithCredential(PhoneAuthProvider.getCredential(
-            verificationId: verificationId, smsCode: smsCode))
-        .then((user) {
-      ConfigHelper.instance.currentUserProperty.value
-          .setPhoneNumber(user.phoneNumber);
-    }).catchError((e) {
-      print(e);
-    }).catchError((e) {
-      print(e);
-    });
+    FirebaseAuth.instance.linkWithCredential(PhoneAuthProvider.getCredential(
+        verificationId: verificationId, smsCode: smsCode));
   }
   /*
   void _showSnackBar(message) {
@@ -147,7 +129,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                 children: <Widget>[
                   SizedBox(height: 16.0),
                   Text(
-                    'SIGNUP',
+                    'VERIFYING YOUR PHONE NUMBER',
                     style: Theme.of(context).textTheme.headline,
                   ),
                 ],
@@ -162,22 +144,23 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
               SizedBox(height: 12.0),
               ButtonBar(
                 children: <Widget>[
-                  FlatButton(
-                    child: Text('CANCEL'),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
                   RaisedButton(
-                    child: Text('SIGN UP'),
+                    child: Text('CONFIRM'),
                     elevation: 8.0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
                     onPressed: verifyPhone,
+                  ),
+                  RaisedButton(
+                    child: Text('LOGOUT'),
+                    elevation: 8.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    ),
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                    },
                   ),
                 ],
               ),

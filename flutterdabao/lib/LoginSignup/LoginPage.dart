@@ -1,53 +1,16 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutterdabao/ExtraProperties/Mappable.dart';
-// import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
-// import 'package:flutterdabao/Firebase/FirebaseType.dart';
-
-// class LoginPage extends StatefulWidget {
-
-//   @override
-//   _LoginState createState() => _LoginState();
-// }
-
-// class _LoginState extends State<LoginPage>
-//     with SingleTickerProviderStateMixin {
-
-
-//   @override
-//   Widget build(BuildContext context) {
-
-
-//     return Scaffold(
-//       body: Container(
-//         alignment: FractionalOffset(0.5, 0.5),
-//         child: Text("LOGIN BABY",
-//         style: TextStyle(color: Colors.black, fontSize: 30.0),),
-//       ),
-//       backgroundColor: ColorHelper.dabaoOrange,
-//     );
-
-//   }
-
-//   @override
-//   void didUpdateWidget(Widget oldWidget){
-
-//     super.didUpdateWidget(oldWidget);
-
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/LoginSignup/PhoneSignupPage.dart';
-
-import 'package:flutterdabao/LoginSignup/SignupPage.dart';
+import 'package:flutterdabao/LoginSignup/PhoneLoginPage.dart';
 
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final _usernameController = TextEditingController();
@@ -106,6 +69,34 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               ),
               obscureText: true,
             ),
+            Container(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(children: <Widget>[
+                  RaisedButton(
+                      child: Text('Create account'),
+                      elevation: 8.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                      ),
+                      onPressed: () {
+                        FirebaseAuth.instance.createUserWithEmailAndPassword(
+                            email: 'hg2@hg.com', password: '1234567');
+                        FirebaseAuth.instance.currentUser().then(
+                          (user) {
+                            ConfigHelper.instance.currentUserProperty.value
+                                .setUser(
+                                    user.email,
+                                    0,
+                                    0,
+                                    "blal",
+                                    "badd",
+                                    user.metadata.creationTimestamp,
+                                    user.metadata.lastSignInTimestamp,
+                                    "test");
+                          },
+                        );
+                      }),
+                ])),
             ButtonBar(
               children: <Widget>[
                 FlatButton(
@@ -116,27 +107,38 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => PhoneSignupPage()),
-                      //MaterialPageRoute(builder: (context) => SignupPage()),
+                      MaterialPageRoute(
+                          builder: (context) => PhoneSignupPage()),
                     );
                   },
                 ),
-                RaisedButton(
-                  child: Text('LOG IN'),
-                  elevation: 8.0,
+                FlatButton(
+                  child: Text('MOBILE LOGIN'),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(7.0)),
                   ),
                   onPressed: () {
-                    FirebaseAuth.instance
-                        .signInWithEmailAndPassword(
-                            email: _email, password: _password)
-                        .catchError((e) {
-                          _showSnackBar('Wrong username and password!');
-                          print(e);
-                        });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PhoneLoginPage()),
+                    );
                   },
                 ),
+                RaisedButton(
+                    child: Text('LOG IN'),
+                    elevation: 8.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    ),
+                    onPressed: () {
+                      FirebaseAuth.instance
+                          .signInWithEmailAndPassword(
+                              email: _email, password: _password)
+                          .catchError((e) {
+                        _showSnackBar('Wrong username and password!');
+                        print(e);
+                      });
+                    }),
               ],
             ),
           ],

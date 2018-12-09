@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
-//import 'package:flutterdabao/LoginSignup/LoginPage.dart';
-import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
+import 'package:flutterdabao/LoginSignup/PhoneSignupPage.dart';
 
-class PhoneSignupPage extends StatefulWidget {
-  PhoneSignupPage({Key key}) : super(key: key);
+class PhoneLoginPage extends StatefulWidget {
+  PhoneLoginPage({Key key}) : super(key: key);
   @override
-  _PhoneSignupPageState createState() => _PhoneSignupPageState();
+  _PhoneLoginPageState createState() => _PhoneLoginPageState();
 }
 
-class _PhoneSignupPageState extends State<PhoneSignupPage> {
-  //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+class _PhoneLoginPageState extends State<PhoneLoginPage> {
   String phoneNo;
   String smsCode;
   String verificationId;
@@ -32,11 +27,12 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     };
     final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
       print('verified');
-    };
+      print(user.uid);
+    };   
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
       print('${exception.message}');
     };
-
+    
     await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNo,
         codeAutoRetrievalTimeout: autoRetrieve,
@@ -66,17 +62,8 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                   FirebaseAuth.instance.currentUser().then((user) {
                     //only need to signIn if verification is not done automatically
                     if (user == null) {
-                      //Navigator.of(context).pop();
-                      Navigator.of(context)
-                          .pop(); //To get rid of smsCodeDialog before moving on.
+                      Navigator.of(context).pop(); //To get rid of smsCodeDialog before moving on.
                       signIn();
-                      //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
-                      /*
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProfileCreationPage())
-                      );
-                      */
                     }
                   });
                 },
@@ -88,47 +75,10 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
 
   signIn() {
     FirebaseAuth.instance
-        .signInWithCredential(PhoneAuthProvider.getCredential(
-            verificationId: verificationId, smsCode: smsCode))
-        .then((user) {
-      ConfigHelper.instance.currentUserProperty.value
-          .setPhoneNumber(user.phoneNumber);
-    }).catchError((e) {
-      print(e);
-    }).catchError((e) {
+        .signInWithCredential(PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: smsCode))
+        .catchError((e) {
       print(e);
     });
-  }
-  /*
-  void _showSnackBar(message) {
-    final snackBar = new SnackBar(
-      content: new Text(message),
-    );
-    _scaffoldKey.currentState.showSnackBar(snackBar);
-  }*/
-
-  String _validateEmail(String value) {
-    if (value.isEmpty) {
-      // The form is empty
-      return "Enter email address";
-    }
-    // This is just a regular expression for email addresses
-    String p = "[a-zA-Z0-9\+\.\_\%\-\+]{1,256}" +
-        "\\@" +
-        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-        "(" +
-        "\\." +
-        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-        ")+";
-    RegExp regExp = new RegExp(p);
-
-    if (regExp.hasMatch(value)) {
-      // So, the email is valid
-      return null;
-    }
-
-    // The pattern of the email didn't match the regex above.
-    return 'Email is not valid';
   }
 
   @override
@@ -147,7 +97,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                 children: <Widget>[
                   SizedBox(height: 16.0),
                   Text(
-                    'SIGNUP',
+                    'PHONE LOGIN',
                     style: Theme.of(context).textTheme.headline,
                   ),
                 ],
@@ -163,21 +113,33 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
               ButtonBar(
                 children: <Widget>[
                   FlatButton(
-                    child: Text('CANCEL'),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                  child: Text('SIGN UP'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
                   ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PhoneSignupPage()),
+                    );
+                  },
+                ),
                   RaisedButton(
-                    child: Text('SIGN UP'),
+                    child: Text('LOG IN'),
                     elevation: 8.0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
                     onPressed: verifyPhone,
+                  ),
+                  FlatButton(
+                    child: Text('EMAIL LOGIN'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    }
                   ),
                 ],
               ),

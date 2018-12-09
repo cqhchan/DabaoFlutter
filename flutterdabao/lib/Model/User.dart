@@ -16,7 +16,7 @@ class User extends FirebaseType {
   BehaviorSubject<double> amountEarned; 
   BehaviorSubject<String> profileImage;
   BehaviorSubject<String> name;
-  BehaviorSubject<String> phoneNumber;
+  BehaviorSubject<String> handPhone;
   BehaviorSubject<String> thumbnailImage;
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
@@ -42,8 +42,8 @@ class User extends FirebaseType {
     amountSaved = BehaviorSubject();
     profileImage = BehaviorSubject();
     name = BehaviorSubject();
-    phoneNumber = BehaviorSubject();
     thumbnailImage = BehaviorSubject();
+    handPhone = BehaviorSubject();
 
   }
 
@@ -52,57 +52,81 @@ class User extends FirebaseType {
 
     if (data.containsKey("email")){
       email.add(data["email"]);
+    } else {
+      email.add(null);
     }
 
     if (data.containsKey("save")){
       amountSaved.add(data["save"].toDouble());
+    } else {
+      amountSaved.add(null);
     }
 
     if (data.containsKey("earn")){
       amountEarned.add(data["earn"].toDouble());
+    } else {
+      amountEarned.add(null);
     }
 
     if (data.containsKey("PI")) {
       profileImage.add(data["PI"]);
+    } else {
+      profileImage.add(null);
     }
 
     if (data.containsKey("tn")) {
       thumbnailImage.add(data["tn"]);
+    } else {
+      thumbnailImage.add(null);
     }
 
     if (data.containsKey("name")) {
-      profileImage.add(data["name"]);
+      name.add(data["name"]);
     } else {
-
-      profileImage.add(null);
+      name.add(null);
     }
+
     if (data.containsKey("hp")) {
-      profileImage.add(data["hp"]);
+      handPhone.add(data["hp"]);
+    } else {
+      handPhone.add(null);
     }
-
   }
+
+  void setPhoneNumber(String phoneNumber) {
+    Firestore.instance
+    .collection('/users').document(uid)
+    .setData({
+      'hp': phoneNumber
+    });
+  }
+
   //last login date
   //creation date
-  void setUser(String email, double save, double earn, String pi, String name, String hp, 
+  void setUser(String email, double save, double earn, String pi, String name,
     int creationTime, int lastLoginTime, String tn) {
     Firestore.instance
         .collection('/users').document(uid)
-        .setData({ 
+        .updateData({ 
           'email': email, 
           'save': save,
           'earn': earn,
           'pi': pi,
           'tn': tn,
           'name': name,
-          'hp': hp,
           'ct': DateTimeHelper.convertTimeToString(creationTime),
-          'llt': DateTimeHelper.convertTimeToString(lastLoginTime)
+          'llt': DateTimeHelper.convertTimeToString(lastLoginTime),
           });
   }
   /*
-  String convertTimeToString(int time) {
-    return formatDate(DateTime.fromMillisecondsSinceEpoch(time * 1000), 
-      [dd, '-', mm, '-', yyyy, ' ', HH, ':', nn, ':', ss, ' ', z]);
+  void havePhoneNumber() {
+    FirebaseAuth.instance.currentUser().then((user) {
+      print(user.phoneNumber);
+      Firestore.instance.collection('/users').document(uid).updateData({'hp': user.phoneNumber});
+    }).catchError((e) { //reach here because don't have phone number
+      print(e);
+    });
+    
   }*/
 
   /*
