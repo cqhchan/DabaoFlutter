@@ -23,6 +23,10 @@ class _ProcessingPageState extends State<ProcessingPage> {
 
   @override
   Widget build(BuildContext context) {
+
+
+    // There are 3 things that you check to see of it should go to ProfileCreation/Verification or Home
+    // return true to go to home/ false to go to ProfileCreation
     return StreamBuilder<bool>(
         stream: Observable.combineLatest3(
             widget.user.email, widget.user.handPhone, widget.user.profileImage,

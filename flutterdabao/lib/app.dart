@@ -47,10 +47,11 @@ class DabaoApp extends StatelessWidget {
             return LoadingPage();
           } else {
             if (snapshot.hasData) {
+
+              //This Line of code is nesscery as it sets the current user in ConfigHelper
               User user = User.fromAuth(snapshot.data);
 
-              // There are 3 things that you check to see of it should go to ProfileCreation/Verification or Home
-              // return true to go to home/ false to go to ProfileCreation
+              //Check if its logged in
               return ProcessingPage(user);
             } else {
               return loginNavigator;
