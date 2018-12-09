@@ -106,8 +106,6 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin,Single
       children: <Widget>[
         CustomizedMap(
           mode: 0,
-          newLatitude: newLatitude,
-          newLongitude: newLongitude, 
           selectedlocation: selectedLocation,
         ),
         CustomizedBackButton(),
@@ -232,15 +230,17 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin,Single
       final lat = detail.result.geometry.location.lat;
       final lng = detail.result.geometry.location.lng;
 
-      // final result = new LatLng(lat, lng);
+      final result = new LatLng(lat, lng);
 
-      // selectedLocation.producer.add(result);
-      // selectedLocation.producer.listen((result){
-        setState(() {
-                  newLatitude = lat;
-                  newLongitude = lng;
-                });
-      // });
+      selectedLocation.producer.add(result);
+      selectedLocation.producer.listen((result){
+
+        print('Selected Location at OrderNow.dart: ${result}');
+        // setState(() {
+        //           newLatitude = lat;
+        //           newLongitude = lng;
+        //         });
+      });
 
       selectedLocationDescription.producer.add(p.description);
       selectedLocationDescription.producer.listen((desc) {

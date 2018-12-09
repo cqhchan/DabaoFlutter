@@ -15,38 +15,30 @@ import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 
 class CustomizedMap extends StatefulWidget {
-  
   CustomizedMap({
     Key key,
     @required this.mode,
-    @required this.newLatitude,
-    @required this.newLongitude,
     @required this.selectedlocation,
     this.zoom = 16,
-    this.radius = 3000, 
+    this.radius = 3000,
   }) : assert(mode != null);
   // Set mode to 1 to query order requests.
   // Set mode to 0 to query deliveries.
   final int mode;
-  final double newLatitude;
-  final double newLongitude;
   final double zoom;
   final double radius;
   final MutableProperty<LatLng> selectedlocation;
 
   @override
   _CustomizedMapState createState() =>
-      _CustomizedMapState(mode, radius, zoom, newLatitude, newLongitude);
+      _CustomizedMapState(mode, radius, zoom, selectedlocation);
 }
 
 class _CustomizedMapState extends State<CustomizedMap>
     with HavingSubscriptionMixin, SingleTickerProviderStateMixin {
-  _CustomizedMapState(
-      this.mode, this.radius, this.zoom, this.newLatitude, this.newLongitude);
+  _CustomizedMapState(this.mode, this.radius, this.zoom, this.selectedlocation);
 
   int mode;
-  double newLatitude;
-  double newLongitude;
   double zoom;
   double radius;
   String error;
@@ -55,9 +47,9 @@ class _CustomizedMapState extends State<CustomizedMap>
   Marker _selectedMarker;
   Map<String, double> _currentLocation = new Map();
   StreamSubscription<Map<String, double>> locationSubscription;
+  MutableProperty<LatLng> selectedlocation;
   MutableProperty<List<LatLng>> markerLocations = MutableProperty(List());
   MutableProperty<LatLng> updateMarkerLocation = MutableProperty(null);
-  MutableProperty<LatLng> oneTimeLocation = MutableProperty(null);
   MutableProperty<LatLng> currentLocation = MutableProperty(null);
   MutableProperty<LatLng> tapLocation = MutableProperty(null);
   // MutableProperty<LatLng> currentLocation = ConfigHelper.instance.currentLocationProperty;
@@ -99,36 +91,25 @@ class _CustomizedMapState extends State<CustomizedMap>
     subscription.add(currentLocation.producer.listen((_) {}));
     subscription.add(tapLocation.producer.listen((_) {}));
     subscription.add(updateMarkerLocation.producer.listen((_) {}));
+    subscription.add(selectedlocation.producer.listen((_) {}));
 
-    // newLatitude = 0.123; 
-    // newLongitude = 0.123;
-
-    // updateMarkerLocation.producer.add(LatLng(newLatitude, newLongitude));
-    // updateMarkerLocation.producer.listen((result){
-    //   print('Selected Location at CustomizedMap.dart: $result');
-    // });
+    selectedlocation.producer.take(1).listen((result) {
+      print('Selected Location at CustomizedMap.dart: $result');
+    });
 
     // User's Device Location
     locationSubscription =
         location.onLocationChanged().listen((Map<String, double> result) {
-      oneTimeLocation.producer.add(
-        // Default location to NUS for Testing Purposes
-        LatLng(1.2923956, 103.7757203999999),
-        // LatLng(
-        //   result["latitude"],
-        //   result["longitude"],
-        // ),
-      );
       currentLocation.producer.add(
         // Default location to NUS for Testing Purposes
-        LatLng(1.2923956, 103.7757203999999),
-        // LatLng(
-        //   result["latitude"],
-        //   result["longitude"],
-        // ),
+        // LatLng(1.2923956, 103.7757203999999),
+        LatLng(
+          result["latitude"],
+          result["longitude"],
+        ),
       );
       print(
-          "Current User's Location ------ Lat: ${result["latitude"]} Lng: ${result["longitude"]}");
+          "Current User's Location ------ Lat: ${result["latitude"]} ------ Lng: ${result["longitude"]}");
       setState(() {
         _currentLocation = result;
       });
@@ -167,8 +148,7 @@ class _CustomizedMapState extends State<CustomizedMap>
     print('Selected Location: ${_selectedMarker.options.position}');
   }
 
-  void _panToCurrentLocation(GoogleMapController controller) {
-    currentLocation.producer.listen((result) {
+  void _panToCurrentLocation(GoogleMapController controller, LatLng result) {
       controller.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -180,36 +160,32 @@ class _CustomizedMapState extends State<CustomizedMap>
           ),
         ),
       );
-    });
   }
 
   void _createDraggableMarker(GoogleMapController controller) {
-    oneTimeLocation.producer.take(1).listen((result) {
+    currentLocation.producer.take(1).listen((result) {
       controller.addMarker(MarkerOptions(
         infoWindowText: InfoWindowText('To Dabaoer:', 'Let Meet Here!'),
         draggable: true,
         position: result,
       ));
     });
+    setState(() {
+      mapController = controller;
+    });
   }
 
   void _updateDraggableMarker(GoogleMapController controller) {
-    // controller.clearMarkers();
-    // _initBeforeFetchJSON();
-
-    LatLng temp = new LatLng(
-      newLatitude,
-      newLongitude,
-    );
-    updateMarkerLocation.producer.add(temp);
-
-    updateMarkerLocation.producer.listen((result) {
+    selectedlocation.producer.listen((result) {
+      controller.clearMarkers();
       controller.addMarker(MarkerOptions(
         draggable: true,
         position: LatLng(result.latitude, result.longitude),
       ));
-    });
+      _panToCurrentLocation(controller,result);
+      fetchJSON(result);
 
+    });
     setState(() {
       mapController = controller;
     });
@@ -239,11 +215,9 @@ class _CustomizedMapState extends State<CustomizedMap>
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    print('Getting data from OrderNow.dart: LatLng($newLongitude,$newLatitude)');
-    // _initBeforeFetchJSON();
-    // _updateDraggableMarker(controller);
-    _panToCurrentLocation(controller);
+    _initBeforeFetchJSON();
     _createDraggableMarker(controller);
+    _updateDraggableMarker(controller);
     controller.onMarkerTapped.add(_onMarkerTapped);
     setState(() {
       mapController = controller;
