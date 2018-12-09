@@ -65,6 +65,8 @@ class _ProcessingPageState extends State<ProcessingPage> {
                 // TODO GO to Profile Creation Page
               }
 
+
+              // REMOVE when completed
               return ProfileCreationPage();
             }
           }
