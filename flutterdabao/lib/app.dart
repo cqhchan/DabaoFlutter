@@ -29,17 +29,6 @@ class DabaoApp extends StatelessWidget {
   // Handles Authentication State
   // Navigation logic
   Widget _handleCurrentScreen() {
-    MaterialPageRoute loginRoute = MaterialPageRoute(builder: (context) {
-      return LoginPage();
-    });
-
-    Navigator loginNavigator =
-        Navigator(onGenerateRoute: (RouteSettings settings) {
-      return loginRoute;
-    });
-
-
-
     return StreamBuilder<FirebaseUser>(
         stream: FirebaseAuth.instance.onAuthStateChanged,
         builder: (BuildContext context, snapshot) {
@@ -47,14 +36,17 @@ class DabaoApp extends StatelessWidget {
             return LoadingPage();
           } else {
             if (snapshot.hasData) {
-
               //This Line of code is nesscery as it sets the current user in ConfigHelper
               User user = User.fromAuth(snapshot.data);
 
               //Check if its logged in
               return ProcessingPage(user);
             } else {
-              return loginNavigator;
+              return Navigator(onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute(builder: (context) {
+                  return LoginPage();
+                });
+              });
             }
           }
         });
