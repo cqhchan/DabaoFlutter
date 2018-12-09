@@ -52,7 +52,6 @@ class _CustomizedMapState extends State<CustomizedMap>
   MutableProperty<LatLng> updateMarkerLocation = MutableProperty(null);
   MutableProperty<LatLng> currentLocation = MutableProperty(null);
   MutableProperty<LatLng> tapLocation = MutableProperty(null);
-  // MutableProperty<LatLng> currentLocation = ConfigHelper.instance.currentLocationProperty;
 
   Future<void> fetchJSON(LatLng thislocation) async {
     try {
@@ -179,6 +178,7 @@ class _CustomizedMapState extends State<CustomizedMap>
     selectedlocation.producer.listen((result) {
       controller.clearMarkers();
       controller.addMarker(MarkerOptions(
+        infoWindowText: InfoWindowText('To Dabaoer:', 'Let Meet Here!'),
         draggable: true,
         position: LatLng(result.latitude, result.longitude),
       ));
@@ -276,23 +276,6 @@ class _CustomizedMapState extends State<CustomizedMap>
               ),
             ),
           ),
-          // Align(
-          //   alignment: Alignment.topRight,
-          //   child: Container(
-          //     padding: EdgeInsets.only(top: 10.0),
-          //     child: IconButton(
-          //       icon: Icon(
-          //         Icons.my_location,
-          //         color: ColorHelper.dabaoOffBlack4A,
-          //       ),
-          //       onPressed: mapController == null
-          //           ? null
-          //           : () {
-          //               _panCameraPostitionToCurrentLocation(mapController);
-          //             },
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
