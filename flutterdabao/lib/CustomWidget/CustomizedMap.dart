@@ -1,4 +1,4 @@
-// TODO: 
+// TODO:
 // https://stackoverflow.com/questions/24302112/how-to-get-the-latitude-and-longitude-of-location-where-user-taps-on-the-map-in
 // https://stackoverflow.com/questions/53397826/flutter-get-coordinates-from-google-maps
 
@@ -15,55 +15,64 @@ import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 
 class CustomizedMap extends StatefulWidget {
-  _CustomizedMapState createState() => _CustomizedMapState();
+  const CustomizedMap({
+    Key key,
+    @required this.mode,
+    @required this.newLatitude,
+    @required this.newLongitude,
+    this.zoom = 16,
+    this.radius = 3000,
+  }) : assert(mode != null);
+  // Set mode to 1 to query order requests.
+  // Set mode to 0 to query deliveries.
+  final int mode;
+  final double newLatitude;
+  final double newLongitude;
+  final double zoom;
+  final double radius;
+  @override
+  _CustomizedMapState createState() =>
+      _CustomizedMapState(mode, radius, zoom, newLatitude, newLongitude);
 }
 
 class _CustomizedMapState extends State<CustomizedMap>
     with HavingSubscriptionMixin, SingleTickerProviderStateMixin {
+  _CustomizedMapState(
+      this.mode, this.radius, this.zoom, this.newLatitude, this.newLongitude);
+
+  int mode;
+  double newLatitude;
+  double newLongitude;
+  double zoom;
+  double radius;
+  String error;
+  Location location = new Location();
   GoogleMapController mapController;
   Marker _selectedMarker;
-
-  // Map<String, double> _startLocation = new Map();
   Map<String, double> _currentLocation = new Map();
   StreamSubscription<Map<String, double>> locationSubscription;
-
-  Location location = new Location();
-  String error;
-
-  // static LatLng locationProp = new LatLng(1.2923956, 103.77572039999995);
-  // MutableProperty<LatLng> currentLocation = MutableProperty(locationProp);
-  // MutableProperty<LatLng> currentLocation = ConfigHelper.instance.currentLocationProperty;
+  MutableProperty<List<LatLng>> markerLocations = MutableProperty(List());
+  MutableProperty<LatLng> updateMarkerLocation = MutableProperty(null);
   MutableProperty<LatLng> oneTimeLocation = MutableProperty(null);
   MutableProperty<LatLng> currentLocation = MutableProperty(null);
   MutableProperty<LatLng> tapLocation = MutableProperty(null);
-  MutableProperty<List<LatLng>> markerLocations = MutableProperty(List());
+  // MutableProperty<LatLng> currentLocation = ConfigHelper.instance.currentLocationProperty;
 
   Future<void> fetchJSON(LatLng thislocation) async {
     try {
       Map<String, dynamic> attributeMap = new Map<String, dynamic>();
-
       attributeMap["lat"] = thislocation.latitude;
       attributeMap["long"] = thislocation.longitude;
-
-      // the radius is 3km
-      attributeMap["radius"] = 3000;
-
-      // 0 = deliveries
-      // 1 = requests
-      attributeMap["mode"] = 0;
-
+      attributeMap["radius"] = radius;
+      attributeMap["mode"] = mode;
       final result = await CloudFunctions.instance
           .call(functionName: 'locationRequest', parameters: attributeMap);
-
       List<LatLng> temp = List();
       result['locations'].forEach((latlng) {
         double latitude = latlng[0];
         double longitude = latlng[1];
-
         temp.add(LatLng(latitude, longitude));
       });
-
-      // Add location of markers to stream
       markerLocations.producer.add(temp);
     } on CloudFunctionsException catch (e) {
       print(e);
@@ -75,16 +84,36 @@ class _CustomizedMapState extends State<CustomizedMap>
   @override
   void initState() {
     super.initState();
+
+    // Initialize for iOS only
+    _currentLocation['latitude'] = 1.2923956;
+    _currentLocation['longitude'] = 103.7757203999999;
+
     initGoogleMap();
 
     subscription.add(markerLocations.producer.listen((_) {}));
     subscription.add(currentLocation.producer.listen((_) {}));
-    subscription.add(tapLocation.producer.listen((_){}));
+    subscription.add(tapLocation.producer.listen((_) {}));
+    subscription.add(updateMarkerLocation.producer.listen((_) {}));
 
+    // newLatitude = 0.123; 
+    // newLongitude = 0.123;
+
+    // updateMarkerLocation.producer.add(LatLng(newLatitude, newLongitude));
+    // updateMarkerLocation.producer.listen((result){
+    //   print('Selected Location at CustomizedMap.dart: $result');
+    // });
+
+    // User's Device Location
     locationSubscription =
         location.onLocationChanged().listen((Map<String, double> result) {
       oneTimeLocation.producer.add(
+        // Default location to NUS for Testing Purposes
         LatLng(1.2923956, 103.7757203999999),
+        // LatLng(
+        //   result["latitude"],
+        //   result["longitude"],
+        // ),
       );
       currentLocation.producer.add(
         // Default location to NUS for Testing Purposes
@@ -94,7 +123,8 @@ class _CustomizedMapState extends State<CustomizedMap>
         //   result["longitude"],
         // ),
       );
-      print("Current User's Location ------ Lat: ${result["latitude"]} Lng: ${result["longitude"]}");
+      print(
+          "Current User's Location ------ Lat: ${result["latitude"]} Lng: ${result["longitude"]}");
       setState(() {
         _currentLocation = result;
       });
@@ -138,7 +168,7 @@ class _CustomizedMapState extends State<CustomizedMap>
       controller.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
-            zoom: 16,
+            zoom: zoom,
             target: LatLng(
               result.latitude,
               result.longitude,
@@ -159,6 +189,28 @@ class _CustomizedMapState extends State<CustomizedMap>
     });
   }
 
+  void _updateDraggableMarker(GoogleMapController controller) {
+    // controller.clearMarkers();
+    // _initBeforeFetchJSON();
+
+    LatLng temp = new LatLng(
+      newLatitude,
+      newLongitude,
+    );
+    updateMarkerLocation.producer.add(temp);
+
+    updateMarkerLocation.producer.listen((result) {
+      controller.addMarker(MarkerOptions(
+        draggable: true,
+        position: LatLng(result.latitude, result.longitude),
+      ));
+    });
+
+    setState(() {
+      mapController = controller;
+    });
+  }
+
   void _createMarkers() {
     markerLocations.producer.value.forEach((location) {
       mapController.addMarker(MarkerOptions(
@@ -169,7 +221,7 @@ class _CustomizedMapState extends State<CustomizedMap>
     });
   }
 
-  void _onMapCreated(GoogleMapController controller) {
+  void _initBeforeFetchJSON() {
     LatLng temp = new LatLng(
       _currentLocation['latitude'],
       _currentLocation['longitude'],
@@ -180,13 +232,15 @@ class _CustomizedMapState extends State<CustomizedMap>
         fetchJSON(thisLocation);
       }
     });
+  }
 
+  void _onMapCreated(GoogleMapController controller) {
+    print('Getting data from OrderNow.dart: LatLng($newLongitude,$newLatitude)');
+    // _initBeforeFetchJSON();
+    // _updateDraggableMarker(controller);
     _panToCurrentLocation(controller);
-
     _createDraggableMarker(controller);
-
     controller.onMarkerTapped.add(_onMarkerTapped);
-
     setState(() {
       mapController = controller;
     });
@@ -214,9 +268,7 @@ class _CustomizedMapState extends State<CustomizedMap>
                     return CircularProgressIndicator();
                   case ConnectionState.none:
                   case ConnectionState.active:
-                    // Create Deliveries or Requests Markers
                     _createMarkers();
-                    // Update Google Map
                     return updateMap;
                   case ConnectionState.done:
                 }
@@ -226,7 +278,6 @@ class _CustomizedMapState extends State<CustomizedMap>
     );
   }
 
-  // Google Map Widget
   Widget get updateMap {
     return Container(
       child: Stack(
@@ -240,11 +291,12 @@ class _CustomizedMapState extends State<CustomizedMap>
               trackCameraPosition: true,
               myLocationEnabled: true,
               cameraPosition: CameraPosition(
-                  target: LatLng(
-                    _currentLocation['latitude'],
-                    _currentLocation['longitude'],
-                  ),
-                  zoom: 15),
+                target: LatLng(
+                  _currentLocation['latitude'],
+                  _currentLocation['longitude'],
+                ),
+                zoom: zoom,
+              ),
             ),
           ),
           // Align(
