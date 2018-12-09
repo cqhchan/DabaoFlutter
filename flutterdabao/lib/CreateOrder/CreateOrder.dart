@@ -11,8 +11,8 @@ class CreateOrder extends StatelessWidget {
       body: Stack(
         children: <Widget>[
           CustomizedMap(),
-          CustomizedBackButton(),
           OrderNow(),
+          CustomizedBackButton(),
         ],
       ),
     );

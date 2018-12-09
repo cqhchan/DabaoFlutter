@@ -65,14 +65,15 @@ class _OrderNowState extends State<OrderNow> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(14.0),
-            margin: EdgeInsets.fromLTRB(6.0, 0.0, 6.0, 6.0),
-            height: 130.0,
+            padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 15.0),
+            margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 35.0),
+            height: 160.0,
             decoration: BoxDecoration(
                 color: ColorHelper.dabaoOffWhiteF5,
                 borderRadius: BorderRadius.circular(9.0),
                 boxShadow: [
                   BoxShadow(
+                    offset: Offset(0.0,1.0),
                     color: Colors.grey,
                     blurRadius: 5.0,
                   )
@@ -82,7 +83,7 @@ class _OrderNowState extends State<OrderNow> {
               children: <Widget>[
                 Text(
                   'Deliver to...',
-                  style: FontHelper.normalTextStyle,
+                  style: FontHelper.semiBold16(ColorHelper.dabaoOffBlack4A),
                 ),
                 SizedBox(
                   height: 8.0,
@@ -91,6 +92,9 @@ class _OrderNowState extends State<OrderNow> {
                   children: <Widget>[
                     Image.asset(
                       'assets/icons/pin.png',
+                      fit: BoxFit.fill,
+                      width: 18.0,
+                      height: 18.0,
                     ),
                     SizedBox(
                       width: 10.0,
@@ -99,7 +103,7 @@ class _OrderNowState extends State<OrderNow> {
                       child: Container(
                         child: Text(
                           _address,
-                          style: FontHelper.placeholderTextStyle,
+                          style: FontHelper.regular(Colors.black, 14.0),
                         ),
                       ),
                       // child: TextField(

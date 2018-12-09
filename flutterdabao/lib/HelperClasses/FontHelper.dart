@@ -15,5 +15,15 @@ class FontHelper {
   static const TextStyle semiBold18Black = TextStyle(color: Colors.black, fontSize: 18.0, fontStyle: FontStyle.normal,fontWeight: FontWeight.w600, fontFamily: "SF_UI_Display") ;
   static const TextStyle semiBold20Orange = TextStyle(color: ColorHelper.dabaoOrange, fontSize: 20.0, fontStyle: FontStyle.normal,fontWeight: FontWeight.w600, fontFamily: "SF_UI_Display") ;
 
+  static const TextStyle regular14Black = TextStyle(color: Colors.black, fontSize: 12.0, fontStyle: FontStyle.normal,fontWeight: FontWeight.w400, fontFamily: "SF_UI_Display") ;
+  static const TextStyle bold14Black = TextStyle(color: Colors.black, fontSize: 14.0, fontStyle: FontStyle.normal,fontWeight: FontWeight.w700, fontFamily: "SF_UI_Display") ;
+
+  static TextStyle semiBold16(Color color) {
+  return TextStyle(color: color, fontSize: 16.0, fontStyle: FontStyle.normal,fontWeight: FontWeight.w600, fontFamily: "SF_UI_Display") ;
+  }
+
+  static TextStyle regular(Color color, double size) {
+  return TextStyle(color: color, fontSize: size, fontStyle: FontStyle.normal,fontWeight: FontWeight.w400, fontFamily: "SF_UI_Display") ;
+  }
 
 }
