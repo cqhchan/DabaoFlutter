@@ -60,10 +60,10 @@ class User extends FirebaseType {
 
     if (data.containsKey("PI")) {
       profileImage.add(data["PI"]);
-      print("PI added");
+      //print("PI added");
     } else {
       profileImage.add(null);
-      print("PI null");
+      //print("PI null");
     }
 
     if (data.containsKey("tn")) {
@@ -74,19 +74,19 @@ class User extends FirebaseType {
 
     if (data.containsKey("name")) {
       name.add(data["name"]);
-      print("name added");
+      //print("name added");
     } else {
       name.add(null);
-      print("name null");
+      //print("name null");
     }
 
     if (data.containsKey("hp")) {
       handPhone.add(data["hp"]);
-            print("hp added");
+      //print("hp added");
 
     } else {
       handPhone.add(null);
-                  print("hp null");
+      //print("hp null");
 
     }
   }
@@ -95,7 +95,7 @@ class User extends FirebaseType {
     Firestore.instance
         .collection('/users')
         .document(uid)
-        .setData({'hp': phoneNumber});
+        .setData({'hp': phoneNumber}, merge: true);
   }
 
   //last login date

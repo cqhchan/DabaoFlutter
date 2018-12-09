@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
@@ -16,10 +17,6 @@ class ProcessingPage extends StatefulWidget {
 }
 
 class _ProcessingPageState extends State<ProcessingPage> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +44,16 @@ class _ProcessingPageState extends State<ProcessingPage> {
                 });
               });
             } else {
-              if (widget.user.handPhone.value == null) {
+              if (widget.user.email.value != null) {
+                //if this is old user
                 // TODO GO to Verify Phone Page
                 return Navigator(onGenerateRoute: (RouteSettings settings) {
                   return MaterialPageRoute(builder: (context) {
                     return VerifyPhoneNumberPage();
                   });
                 });
-              } else if (widget.user.profileImage.value == null) {
+              } else {
+                // if this is a new user
                 // TODO GO to Profile Creation Page
                 return Navigator(onGenerateRoute: (RouteSettings settings) {
                   return MaterialPageRoute(builder: (context) {

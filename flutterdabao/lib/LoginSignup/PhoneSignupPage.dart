@@ -86,13 +86,11 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
         });
   }
 
-  signIn() {
+  signIn() async{
     FirebaseAuth.instance
         .signInWithCredential(PhoneAuthProvider.getCredential(
             verificationId: verificationId, smsCode: smsCode))
         .then((user) {
-      ConfigHelper.instance.currentUserProperty.value
-          .setPhoneNumber(user.phoneNumber);
     }).catchError((e) {
       print(e);
     }).catchError((e) {

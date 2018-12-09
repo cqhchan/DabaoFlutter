@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/Home/HomePage.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
   VerifyPhoneNumberPage({Key key}) : super(key: key);
@@ -9,6 +10,9 @@ class VerifyPhoneNumberPage extends StatefulWidget {
 }
 
 class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   String phoneNo;
   String smsCode;
   String verificationId;
@@ -61,7 +65,7 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
             ),
             contentPadding: EdgeInsets.all(10.0),
             actions: <Widget>[
-              new FlatButton(
+              FlatButton(
                 child: Text('Verify'),
                 onPressed: () {
                   FirebaseAuth.instance.currentUser().then((user) {
@@ -70,6 +74,12 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
                     signIn();
                     //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
                   });
+                },
+              ),
+              FlatButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.pop(context);
                 },
               )
             ],
@@ -80,14 +90,24 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
   signIn() {
     FirebaseAuth.instance.linkWithCredential(PhoneAuthProvider.getCredential(
         verificationId: verificationId, smsCode: smsCode));
+    FirebaseAuth.instance.currentUser().then((user) {
+      ConfigHelper.instance.currentUserProperty.value.setPhoneNumber(phoneNo);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    }).catchError((e) {
+      print(e);
+      _showSnackBar("This mobile number is already in use");
+    });
   }
-  /*
+
   void _showSnackBar(message) {
     final snackBar = new SnackBar(
       content: new Text(message),
     );
     _scaffoldKey.currentState.showSnackBar(snackBar);
-  }*/
+  }
 
   String _validateEmail(String value) {
     if (value.isEmpty) {
@@ -116,7 +136,7 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //key: _scaffoldKey,
+      key: _scaffoldKey,
       body: SafeArea(
         child: Form(
           //key: _formKey,

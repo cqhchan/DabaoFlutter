@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage>
               children: <Widget>[
                 SizedBox(height: 16.0),
                 Text(
-                  'LOG IN',
+                  'EMAIL LOGIN',
                   style: Theme.of(context).textTheme.headline,
                 ),
               ],
@@ -69,34 +69,7 @@ class _LoginPageState extends State<LoginPage>
               ),
               obscureText: true,
             ),
-            Container(
-                padding: EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(children: <Widget>[
-                  RaisedButton(
-                      child: Text('Create account'),
-                      elevation: 8.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                      ),
-                      onPressed: () {
-                        FirebaseAuth.instance.createUserWithEmailAndPassword(
-                            email: 'hg2@hg.com', password: '1234567');
-                        FirebaseAuth.instance.currentUser().then(
-                          (user) {
-                            ConfigHelper.instance.currentUserProperty.value
-                                .setUser(
-                                    user.email,
-                                    0,
-                                    0,
-                                    "blal",
-                                    "badd",
-                                    user.metadata.creationTimestamp,
-                                    user.metadata.lastSignInTimestamp,
-                                    "test");
-                          },
-                        );
-                      }),
-                ])),
+            
             ButtonBar(
               children: <Widget>[
                 FlatButton(
@@ -125,7 +98,7 @@ class _LoginPageState extends State<LoginPage>
                   },
                 ),
                 RaisedButton(
-                    child: Text('LOG IN'),
+                    child: Text('LOGIN'),
                     elevation: 8.0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
