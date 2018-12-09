@@ -8,6 +8,7 @@ import 'package:flutterdabao/LoginSignup/LoginPage.dart';
 import 'package:flutterdabao/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/LoginSignup/VerifyPhoneNumberPage.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DabaoApp extends StatelessWidget {
   // Add in all set up etc needed
@@ -28,6 +29,17 @@ class DabaoApp extends StatelessWidget {
   // Handles Authentication State
   // Navigation logic
   Widget _handleCurrentScreen() {
+    MaterialPageRoute loginRoute = MaterialPageRoute(builder: (context) {
+      return LoginPage();
+    });
+
+    Navigator loginNavigator =
+        Navigator(onGenerateRoute: (RouteSettings settings) {
+      return loginRoute;
+    });
+
+
+
     return StreamBuilder<FirebaseUser>(
         stream: FirebaseAuth.instance.onAuthStateChanged,
         builder: (BuildContext context, snapshot) {
@@ -35,13 +47,13 @@ class DabaoApp extends StatelessWidget {
             return LoadingPage();
           } else {
             if (snapshot.hasData) {
-              return ProcessingPage();
+              User user = User.fromAuth(snapshot.data);
+
+              // There are 3 things that you check to see of it should go to ProfileCreation/Verification or Home
+              // return true to go to home/ false to go to ProfileCreation
+              return ProcessingPage(user);
             } else {
-              return new Navigator(onGenerateRoute: (RouteSettings settings) {
-                return new MaterialPageRoute(builder: (context) {
-                  return LoginPage();
-                });
-              });
+              return loginNavigator;
             }
           }
         });
