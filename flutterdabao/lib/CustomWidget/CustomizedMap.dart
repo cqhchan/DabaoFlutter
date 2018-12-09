@@ -149,17 +149,17 @@ class _CustomizedMapState extends State<CustomizedMap>
   }
 
   void _panToCurrentLocation(GoogleMapController controller, LatLng result) {
-      controller.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            zoom: zoom,
-            target: LatLng(
-              result.latitude,
-              result.longitude,
-            ),
+    controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          zoom: zoom,
+          target: LatLng(
+            result.latitude,
+            result.longitude,
           ),
         ),
-      );
+      ),
+    );
   }
 
   void _createDraggableMarker(GoogleMapController controller) {
@@ -182,9 +182,8 @@ class _CustomizedMapState extends State<CustomizedMap>
         draggable: true,
         position: LatLng(result.latitude, result.longitude),
       ));
-      _panToCurrentLocation(controller,result);
-      fetchJSON(result);
-
+      _panToCurrentLocation(controller, result);
+      // fetchJSON(result);
     });
     setState(() {
       mapController = controller;
@@ -209,7 +208,7 @@ class _CustomizedMapState extends State<CustomizedMap>
     currentLocation.producer.add(temp);
     currentLocation.producer.listen((thisLocation) {
       if (thisLocation != null) {
-        fetchJSON(thisLocation);
+        // fetchJSON(thisLocation);
       }
     });
   }

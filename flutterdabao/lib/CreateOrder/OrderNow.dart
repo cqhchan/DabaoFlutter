@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-import 'package:flutterdabao/CreateOrder/FoodTag.dart';
+import 'package:flutterdabao/CustomWidget/CreateOrangeButton.dart';
 import 'package:flutterdabao/CustomWidget/CustomizedBackButton.dart';
 import 'package:flutterdabao/CustomWidget/CustomizedMap.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -23,7 +23,8 @@ class OrderNow extends StatefulWidget {
   _OrderNowState createState() => _OrderNowState();
 }
 
-class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin,SingleTickerProviderStateMixin {
+class _OrderNowState extends State<OrderNow>
+    with HavingSubscriptionMixin, SingleTickerProviderStateMixin {
   String _address = '20 Heng Mui Keng Terrace';
 
   MutableProperty<LatLng> selectedLocation = MutableProperty(null);
@@ -63,162 +64,103 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin,Single
     });
   }
 
-  void _showModalSheet() {
-    showModalBottomSheet(
-        context: context,
-        builder: (builder) {
-          return Container(
-            color: ColorHelper.dabaoOffWhiteF5,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(width: 10.0, color: ColorHelper.dabaoOrange),
-                ),
-              ),
-              child: FoodTag(),
-            ),
-          );
-        });
-  }
-
-  // _getLatitude() {
-  //   selectedLocation.producer.take(1).listen((result) {
-  //     // setState(() {
-  //       newLatitude = result.latitude;
-  //     // });
-  //     print('Selected Location at OrderNow.dart: Lat = $newLatitude');
-  //     return newLatitude;
-  //   });
-  // }
-  // _getLongitude() {
-  //   selectedLocation.producer.take(1).listen((result) {
-  //     // setState(() {
-  //       newLongitude = result.longitude;
-  //     // });
-  //     print('Selected Location at OrderNow.dart: Lng = $newLongitude');
-  //     return newLongitude;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        CustomizedMap(
-          mode: 0,
-          selectedlocation: selectedLocation,
-        ),
-        CustomizedBackButton(),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(14.0),
-              margin: EdgeInsets.fromLTRB(6.0, 0.0, 6.0, 6.0),
-              height: 130.0,
-              decoration: BoxDecoration(
-                  color: ColorHelper.dabaoOffWhiteF5,
-                  borderRadius: BorderRadius.circular(9.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 5.0,
-                    )
-                  ]),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Deliver to...',
-                    style: FontHelper.normalTextStyle,
-                  ),
-                  SizedBox(
-                    height: 8.0,
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/icons/pin.png',
-                      ),
-                      SizedBox(
-                        width: 10.0,
-                      ),
-                      GestureDetector(
-                        child: Container(
-                          child: Text(
-                            _address,
-                            style: FontHelper.placeholderTextStyle,
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          CustomizedMap(
+            mode: 0,
+            selectedlocation: selectedLocation,
+          ),
+          CustomizedBackButton(),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(12.0),
+                margin: EdgeInsets.fromLTRB(6.0, 0.0, 6.0, 6.0),
+                decoration: BoxDecoration(
+                    color: ColorHelper.dabaoOffWhiteF5,
+                    borderRadius: BorderRadius.circular(9.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey,
+                        blurRadius: 5.0,
+                      )
+                    ]),
+                child: Wrap(
+                  runSpacing: 4.0,
+                  verticalDirection: VerticalDirection.up,
+                  direction: Axis.horizontal,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        OutlineButton(
+                          highlightedBorderColor: ColorHelper.dabaoOrange,
+                          highlightColor: ColorHelper.dabaoOrange,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 5.0),
+                          color: ColorHelper.dabaoOffWhiteF5,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              Image.asset('assets/icons/stand.png'),
+                              SizedBox(
+                                width: 5.0,
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Text('Scheduled'),
+                                  Text('Order'),
+                                ],
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            _selectStartTime();
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
-                        onTap: _handlePressButton,
-                      ),
-                    ],
-                  ),
-                  Divider(height: 15.0, indent: 20.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      OutlineButton(
-                        highlightedBorderColor: ColorHelper.dabaoOrange,
-                        highlightColor: ColorHelper.dabaoOrange,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5.0),
-                        color: ColorHelper.dabaoOffWhiteF5,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Image.asset('assets/icons/stand.png'),
-                            SizedBox(
-                              width: 5.0,
-                            ),
-                            Column(
-                              children: <Widget>[
-                                Text('Scheduled'),
-                                Text('Order'),
-                              ],
-                            ),
-                          ],
+                        CreateOrangeButton(
+                            imageAsset: 'assets/icons/run.png',
+                            text: 'Order Now'),
+                      ],
+                    ),
+                    Divider(height: 15.0, indent: 20.0),
+                    Row(
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/icons/pin.png',
                         ),
-                        onPressed: () {
-                          _selectStartTime();
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                        SizedBox(
+                          width: 10.0,
                         ),
-                      ),
-                      RaisedButton(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 22.0, vertical: 9.0),
-                        color: ColorHelper.dabaoOrange,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Image.asset('assets/icons/run.png'),
-                            SizedBox(
-                              width: 5.0,
+                        Expanded(
+                          child: GestureDetector(
+                            child: Text(
+                              _address,
+                              style: FontHelper.placeholderTextStyle,
                             ),
-                            Column(
-                              children: <Widget>[
-                                Text('Order Now'),
-                              ],
-                            ),
-                          ],
+                            onTap: _handlePressButton,
+                          ),
                         ),
-                        onPressed: () {
-                          _showModalSheet();
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
+                      ],
+                    ),
+                    Text(
+                      'Deliver to...',
+                      style: FontHelper.normalTextStyle,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -233,13 +175,8 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin,Single
       final result = new LatLng(lat, lng);
 
       selectedLocation.producer.add(result);
-      selectedLocation.producer.listen((result){
-
-        print('Selected Location at OrderNow.dart: ${result}');
-        // setState(() {
-        //           newLatitude = lat;
-        //           newLongitude = lng;
-        //         });
+      selectedLocation.producer.listen((result) {
+        print('Selected Location at OrderNow.dart: $result');
       });
 
       selectedLocationDescription.producer.add(p.description);
