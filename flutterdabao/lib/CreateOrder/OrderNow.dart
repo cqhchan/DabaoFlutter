@@ -107,7 +107,8 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin,Single
         CustomizedMap(
           mode: 0,
           newLatitude: newLatitude,
-          newLongitude: newLongitude,
+          newLongitude: newLongitude, 
+          selectedlocation: selectedLocation,
         ),
         CustomizedBackButton(),
         Column(

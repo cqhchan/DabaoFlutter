@@ -15,13 +15,15 @@ import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 
 class CustomizedMap extends StatefulWidget {
-  const CustomizedMap({
+  
+  CustomizedMap({
     Key key,
     @required this.mode,
     @required this.newLatitude,
     @required this.newLongitude,
+    @required this.selectedlocation,
     this.zoom = 16,
-    this.radius = 3000,
+    this.radius = 3000, 
   }) : assert(mode != null);
   // Set mode to 1 to query order requests.
   // Set mode to 0 to query deliveries.
@@ -30,6 +32,8 @@ class CustomizedMap extends StatefulWidget {
   final double newLongitude;
   final double zoom;
   final double radius;
+  final MutableProperty<LatLng> selectedlocation;
+
   @override
   _CustomizedMapState createState() =>
       _CustomizedMapState(mode, radius, zoom, newLatitude, newLongitude);
