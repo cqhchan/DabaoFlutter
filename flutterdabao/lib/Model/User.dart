@@ -26,7 +26,7 @@ class User extends FirebaseType {
     data["email"] = user.email;
 
     Firestore.instance
-        .collection(this.className).document(uid).updateData(data);
+        .collection(this.className).document(uid).setData(data, merge: true);
     
 
   }
@@ -45,17 +45,17 @@ class User extends FirebaseType {
   @override
   void map(Map<String, dynamic> data) {
 
-    if (data.containsKey("email")){
-      email.add(data["email"]);
-    }
+    // if (data.containsKey("email")){
+    //   email.add(data["email"]);
+    // }
 
-    if (data.containsKey("save")){
-      amountSaved.add(data["save"].toDouble());
-    }
+    // if (data.containsKey("save")){
+    //   amountSaved.add(data["save"].toDouble());
+    // }
 
-    if (data.containsKey("earn")){
-      amountEarned.add(data["earn"].toDouble());
-    }
+    // if (data.containsKey("earn")){
+    //   amountEarned.add(data["earn"].toDouble());
+    // }
 
   }
 
