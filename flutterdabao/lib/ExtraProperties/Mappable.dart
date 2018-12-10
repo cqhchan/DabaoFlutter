@@ -3,7 +3,6 @@ import 'package:flutterdabao/CustomError/FatalError.dart';
 import 'package:flutterdabao/CustomWidget/Headers/Category.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
-import 'package:flutterdabao/Model/Location.dart';
 import 'package:flutterdabao/Model/User.dart';
 
 
@@ -32,13 +31,6 @@ import 'package:flutterdabao/Model/User.dart';
 
       return new User.fromDocument(doc) as T;
     }
-
-    if (T == Location){
-      
-
-      return new Location.fromDocument(doc) as T;
-    }
-
 
     if (T == Category){
       

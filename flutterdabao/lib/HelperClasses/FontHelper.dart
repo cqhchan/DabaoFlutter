@@ -96,4 +96,13 @@ class FontHelper {
         fontWeight: FontWeight.w400,
         fontFamily: "SF_UI_Display");
   }
+
+    static TextStyle bold(Color color, double size) {
+    return TextStyle(
+        color: color,
+        fontSize: size,
+        fontStyle: FontStyle.normal,
+        fontWeight: FontWeight.w700,
+        fontFamily: "SF_UI_Display");
+  }
 }

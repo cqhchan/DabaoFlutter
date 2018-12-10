@@ -15,7 +15,6 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart'
 import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/User.dart';
 
-
 class Home extends StatefulWidget {
   @override
   _Home createState() => new _Home();
@@ -54,21 +53,18 @@ class _Home extends State<Home> {
                     spacing: 25.0,
                     children: <Widget>[
                       //Dabaoee
-                      ScaleGestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            FadeRoute(widget: OrderNow()),
-                          );
-                        },
-                        child: squardCard('assets/icons/person.png', 'Dabaoee',
-                            'I want to Order'),
-                      ),
+                      squardCard('assets/icons/person.png', 'Dabaoee',
+                          'I want to Order', () {
+                        Navigator.push(
+                          context,
+                          FadeRoute(widget: OrderNow()),
+                        );
+                      }),
+
                       //Dabaoer
-                      ScaleGestureDetector(
-                        child:  squardCard('assets/icons/bike.png', 'Dabaoer',
-                            'I want to Deliver'),
-                      ),
+                      squardCard('assets/icons/bike.png', 'Dabaoer',
+                          'I want to Deliver', () {}),
+
                       //ChatBox
                     ],
                   ),
@@ -102,43 +98,41 @@ class _Home extends State<Home> {
         ],
       );
 
-  Container squardCard(String imagePath, String title, String body) {
+  Container squardCard(
+    String imagePath,
+    String title,
+    String body,
+    VoidCallback onPressed,
+  ) {
     return Container(
-      padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            height: 40,
-            width: 40,
-            child: Image.asset(imagePath)),
-          SizedBox(height: 2),
-          Text(
-            title,
-            style: FontHelper.bold14Black,
-          ),
-          Text(
-            body,
-            style: FontHelper.regular14Black,
-          ),
-        ],
+      child: RaisedButton(
+        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+        color: Colors.white,
+        elevation: 4.0,
+        disabledElevation: 4.0,
+        highlightElevation: 4.0,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(18.0))),
+        onPressed: onPressed,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(height: 40, width: 40, child: Image.asset(imagePath)),
+            SizedBox(height: 2),
+            Text(
+              title,
+              style: FontHelper.bold14Black,
+            ),
+            Text(
+              body,
+              style: FontHelper.regular14Black,
+            ),
+          ],
+        ),
       ),
       height: 95.0,
       width: 95.0,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-              offset: Offset(0.0, 1.0),
-              color: Colors.black.withOpacity(0.5),
-              spreadRadius: 0.1,
-              blurRadius: 2.0)
-        ],
-        borderRadius: BorderRadius.all(
-          Radius.circular(18.0),
-        ),
-      ),
     );
   }
 

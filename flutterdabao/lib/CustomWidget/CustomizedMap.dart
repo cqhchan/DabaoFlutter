@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter/services.dart';
@@ -126,18 +127,7 @@ class _CustomizedMapState extends State<CustomizedMap>
   }
 
   void initPlatformState() async {
-    try {
-      await location.hasPermission();
-      error = null;
-    } on PlatformException catch (e) {
-      if (e.code == "PERMISSION_DENIED") {
-        error = 'Permission denied';
-      } else if (e.code == "PERMISSION_DENIED_NEVER_ASK") {
-        error =
-            'Permission denied - please ask the user to enable it from the app setting';
-      }
-      print(error);
-    }
+    await LocationHelper.instance.hardAskForPermission(context, new Text("Location permission"), new Text("Dabao need your location to function properly, Please enable it under settings"));
   }
 
   void _onMarkerTapped(Marker marker) {

@@ -1,7 +1,11 @@
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
+import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:flutter/services.dart';
+
 // import 'package:location/location.dart';
 // import 'package:flutter/services.dart';
 // import 'package:rxdart/rxdart.dart';
@@ -18,16 +22,31 @@ class ConfigHelper with HavingSubscriptionMixin {
       _internal != null ? _internal : ConfigHelper._create();
   static ConfigHelper _internal;
 
-  // Location location = new Location();
 
   ConfigHelper._create() {
     _internal = this;
   }
 
   // Called once when app loads.
-  appDidLoad() {
+  appDidLoad() async{
     disposeAndReset();
 
+print(await LocationHelper.instance.softAskForPermission());    
+  
+  print("test");
+  //       location.onLocationChanged().listen((Map<String, double> result) {
+  //     currentLocationProperty.producer.add(
+  //       // Default location to NUS for Testing Purposes
+  //       // LatLng(1.2923956, 103.7757203999999),
+  //       LatLng(
+  //         result["latitude"],
+  //         result["longitude"],
+  //       ),
+  //     );
+  //     print(
+  //         "Current test User's Location ------ Lat: ${result["latitude"]} ------ Lng: ${result["longitude"]}");
+
+  //   });
     // askForPermission();
 
     // location.onLocationChanged().listen((Map<String, double> result) {
@@ -51,6 +70,9 @@ class ConfigHelper with HavingSubscriptionMixin {
 
     // subscription.add(allLocationsProperty.bindTo(allLocationProducer()));
   }
+
+
+
 
   // askForPermission() async {
   //   try {

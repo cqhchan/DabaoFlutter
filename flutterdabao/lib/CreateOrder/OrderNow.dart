@@ -1,21 +1,15 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/LocationCard.dart';
 
-import 'package:flutterdabao/CustomWidget/CreateOrangeButton.dart';
 import 'package:flutterdabao/CustomWidget/CustomizedBackButton.dart';
 import 'package:flutterdabao/CustomWidget/CustomizedMap.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 
-import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
-import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_webservice/places.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
-import 'dart:async';
+
 
 
 class OrderNow extends StatefulWidget {

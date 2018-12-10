@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:flutterdabao/CustomWidget/CreateOrangeButton.dart';
+import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -35,12 +35,12 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
       children: <Widget>[
         Container(
           alignment: Alignment(0.0, -1.0),
-          padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 15.0),
+          padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 0.0),
           margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 35.0),
-          height: 160.0,
+          height:160.0,
           decoration: BoxDecoration(
-              color: ColorHelper.dabaoOffWhiteF5,
-              borderRadius: BorderRadius.circular(9.0),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8.0),
               boxShadow: [
                 BoxShadow(
                   offset: Offset(0.0, 1.0),
@@ -49,86 +49,145 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
                 )
               ]),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                'Deliver to...',
-                style: FontHelper.normalTextStyle,
-                textAlign: TextAlign.start,
+              buildHeader(),
+              SizedBox(
+                height: 10.0,
+              ),
+              buildSelectedlocationWidget(),
+              Line(
+                margin: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 10.0),
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  Image.asset(
-                    'assets/icons/pin.png',
-                  ),
+                  // Expanded(child: Container(color: Colors.black,child: Text("t"),),),
+                  _scheduleOrder(),
                   SizedBox(
-                    width: 10.0,
+                    width: 20.0,
                   ),
-                  Expanded(
-                    child: GestureDetector(
-                      child: StreamBuilder<String>(
-                        stream: widget.selectedLocationDescription.producer,
-                        builder: (context, addressSnap) {
-                          if (addressSnap.connectionState ==
-                                  ConnectionState.waiting ||
-                              !addressSnap.hasData) {
-                            return Text(
-                              "Select Location",
-                              style: FontHelper.semiBold(
-                                  ColorHelper.dabaoOffBlack9B, 14.0),
-                            );
-                          } else {
-                            return Text(
-                              addressSnap.data,
-                              style: FontHelper.semiBold(Colors.black, 14.0),
-                            );
-                          }
-                        },
-                      ),
-                      onTap: _handlePressButton,
-                    ),
-                  ),
+                  _orderNow(),
                 ],
-              ),
-              Divider(height: 15.0, indent: 20.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  OutlineButton(
-                    highlightedBorderColor: ColorHelper.dabaoOrange,
-                    highlightColor: ColorHelper.dabaoOrange,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
-                    color: ColorHelper.dabaoOffWhiteF5,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Image.asset('assets/icons/stand.png'),
-                        SizedBox(
-                          width: 5.0,
-                        ),
-                        Column(
-                          children: <Widget>[
-                            Text('Scheduled'),
-                            Text('Order'),
-                          ],
-                        ),
-                      ],
-                    ),
-                    onPressed: () {
-                      _selectStartTime();
-                    },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  CreateOrangeButton(
-                      imageAsset: 'assets/icons/run.png', text: 'Order Now'),
-                ],
-              ),
+              )
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Expanded _orderNow() {
+    return Expanded(
+      child: Container(
+        child: RaisedButton(
+          elevation: 0.0,
+          highlightElevation: 0.0,
+          padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 9.0),
+          color: ColorHelper.dabaoOrange,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Image.asset('assets/icons/run.png'),
+              SizedBox(
+                width: 5.0,
+              ),
+              Expanded(
+                child: Center(
+                  child: Text('Order Now', style: FontHelper.bold(Colors.black, 16.0),textAlign: TextAlign.start,),
+                ),
+              ),
+            ],
+          ),
+          onPressed: () {},
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        height: 55.0,
+      ),
+    );
+  }
+
+  Container _scheduleOrder() {
+    return Container(
+      height: 55.0,
+      width: 105.0,
+      child: RaisedButton(
+        elevation: 0.0,
+        highlightElevation: 0.0,
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Image.asset('assets/icons/stand.png'),
+            SizedBox(
+              width: 5.0,
+            ),
+            Text(
+              'Scheduled\nOrder',
+              textAlign: TextAlign.center,
+              style: FontHelper.bold(Colors.black, 12.0),
+            ),
+          ],
+        ),
+        onPressed: () {
+          _selectStartTime();
+        },
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            side: BorderSide(color: ColorHelper.dabaoOrange)),
+      ),
+    );
+  }
+
+  Row buildSelectedlocationWidget() {
+    return Row(
+      children: <Widget>[
+        Image.asset(
+          'assets/icons/pin.png',
+          fit: BoxFit.fill,
+          width: 18.0,
+          height: 18.0,
+        ),
+        SizedBox(
+          width: 10.0,
+        ),
+        buildSelectedLocationTextWidget(),
+      ],
+    );
+  }
+
+  GestureDetector buildSelectedLocationTextWidget() {
+    return GestureDetector(
+      child: Container(
+        child: StreamBuilder<String>(
+          stream: widget.selectedLocationDescription.producer,
+          builder: (context, addressSnap) {
+            if (addressSnap.connectionState == ConnectionState.waiting ||
+                !addressSnap.hasData) {
+              return Text(
+                "Select Location",
+                style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 14.0),
+              );
+            } else {
+              return Text(
+                addressSnap.data,
+                style: FontHelper.semiBold(Colors.black, 14.0),
+              );
+            }
+          },
+        ),
+      ),
+      onTap: _handlePressButton,
+    );
+  }
+
+  Text buildHeader() {
+    return Text(
+      'Deliver to...',
+      style: FontHelper.semiBold16(ColorHelper.dabaoOffBlack4A),
     );
   }
 
