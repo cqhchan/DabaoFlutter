@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CreateOrder/CreateOrder.dart';
 import 'package:flutterdabao/CreateOrder/FoodTag.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
@@ -13,7 +14,6 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/User.dart';
-
 
 
 class Home extends StatefulWidget {
@@ -50,132 +50,26 @@ class _Home extends State<Home> {
                 ),
                 Container(
                   padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  child: Wrap(
+                    spacing: 25.0,
                     children: <Widget>[
-
- 
-
                       //Dabaoee
                       ScaleGestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
                             FadeRoute(widget: OrderNow()),
-                            // MaterialPageRoute(builder: (context) => FoodTag()),
-
                           );
                         },
-                        child: Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Image.asset('assets/icons/person.png'),
-                              SizedBox(height: 2),
-                              Text(
-                                'Dabaoee',
-                                style: FontHelper.normalTextStyle,
-                              ),
-                              Text(
-                                'I want to',
-                                style: FontHelper.normalTextStyle,
-                              ),
-                              Text(
-                                'Order',
-                                style: FontHelper.normalTextStyle,
-                              ),
-                            ],
-                          ),
-                          height: 85.0,
-                          width: 85.0,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                  offset: Offset(0.0, 1.0),
-                                  color: Colors.black.withOpacity(0.5),
-                                  spreadRadius: 0.1,
-                                  blurRadius: 2.0)
-                            ],
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(18.0),
-                            ),
-                          ),
-                        ),
+                        child: squardCard('assets/icons/person.png', 'Dabaoee',
+                            'I want to Order'),
                       ),
                       //Dabaoer
                       ScaleGestureDetector(
-                        child: Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Image.asset('assets/icons/bike.png'),
-                              SizedBox(height: 6),
-                              Text(
-                                'Dabaoer',
-                                style: FontHelper.normalTextStyle,
-                              ),
-                              Text(
-                                'I want to',
-                                style: FontHelper.normalTextStyle,
-                              ),
-                              Text(
-                                'Deliver',
-                                style: FontHelper.normalTextStyle,
-                              ),
-                            ],
-                          ),
-                          height: 85.0,
-                          width: 85.0,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    offset: Offset(0.0, 1.0),
-                                    color: Colors.black.withOpacity(0.5),
-                                    spreadRadius: 0.1,
-                                    blurRadius: 2.0)
-                              ],
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(18.0))),
-                        ),
+                        child:  squardCard('assets/icons/bike.png', 'Dabaoer',
+                            'I want to Deliver'),
                       ),
                       //ChatBox
-                      ScaleGestureDetector(
-                        child: Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Image.asset('assets/icons/chat.png'),
-                              SizedBox(height: 1),
-                              Text(
-                                'I want to',
-                                style: FontHelper.normalTextStyle,
-                              ),
-                              Text(
-                                'Chat',
-                                style: FontHelper.normalTextStyle,
-                              ),
-                            ],
-                          ),
-                          height: 85.0,
-                          width: 85.0,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    offset: Offset(0.0, 1.0),
-                                    color: Colors.black.withOpacity(0.5),
-                                    spreadRadius: 0.1,
-                                    blurRadius: 2.0)
-                              ],
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(18.0))),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -202,6 +96,46 @@ class _Home extends State<Home> {
                   )))
         ],
       );
+
+  Container squardCard(String imagePath, String title, String body) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            height: 40,
+            width: 40,
+            child: Image.asset(imagePath)),
+          SizedBox(height: 2),
+          Text(
+            title,
+            style: FontHelper.bold14Black,
+          ),
+          Text(
+            body,
+            style: FontHelper.regular14Black,
+          ),
+        ],
+      ),
+      height: 95.0,
+      width: 95.0,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+              offset: Offset(0.0, 1.0),
+              color: Colors.black.withOpacity(0.5),
+              spreadRadius: 0.1,
+              blurRadius: 2.0)
+        ],
+        borderRadius: BorderRadius.all(
+          Radius.circular(18.0),
+        ),
+      ),
+    );
+  }
 
   Stack balanceStack(BuildContext context) {
     return Stack(

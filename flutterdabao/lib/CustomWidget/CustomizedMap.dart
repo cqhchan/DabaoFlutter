@@ -236,7 +236,6 @@ class _CustomizedMapState extends State<CustomizedMap>
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Center(
-        child: SafeArea(
           child: StreamBuilder(
               stream: markerLocations.producer,
               builder: (context, snapshot) {
@@ -251,7 +250,6 @@ class _CustomizedMapState extends State<CustomizedMap>
                 }
               }),
         ),
-      ),
     );
   }
 
