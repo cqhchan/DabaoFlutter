@@ -9,6 +9,7 @@ class ColorHelper {
 
   static Color dabaoOffWhiteF5 = rgba(0xF5, 0xF5, 0xF5);
   static Color dabaoOffBlack4A = rgba(0x4A, 0x4A, 0x4A);
+  static Color dabaoOffBlack9B = rgba(0x9B, 0x9B, 0x9B);
 
   static Color dabaoGreyE0 = Color.fromRGBO(0xE0, 0xE0, 0xE0, 1.0);
 

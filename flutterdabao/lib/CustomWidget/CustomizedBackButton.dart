@@ -10,9 +10,13 @@ class CustomizedBackButton extends StatelessWidget {
     return FloatingHeader(
       opacityProperty: MutableProperty<double>(0.0),
       leftButton: GestureDetector(
-        child: Image.asset(
-          "assets/icons/arrow-left-round.png",
-        ),
+        child: Container(
+          child: Image.asset(
+            "assets/icons/arrow-left-round.png",
+            fit: BoxFit.fill,
+          ),
+        height: 40.0,
+        width: 40.0,),
         onTap: (){
           Navigator.of(context).pop();
         },

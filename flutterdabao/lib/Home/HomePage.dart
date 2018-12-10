@@ -90,8 +90,13 @@ class _Home extends State<Home> {
                   backgroundColor: Colors.white,
                   opacityProperty: _opacityProperty,
                   leftButton: GestureDetector(
-                    child: Image.asset(
-                      "assets/icons/profile_icon.png",
+                    child: Container(
+                      height: 40.0,
+                      width: 40.0,
+                      child: Image.asset(
+                        "assets/icons/profile_icon.png",
+                        fit: BoxFit.fill,
+                      ),
                     ),
                   )))
         ],

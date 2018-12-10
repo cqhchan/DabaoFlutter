@@ -8,9 +8,13 @@ class OrderHolder {
   //Complusory
   MutableProperty<OrderMode> mode = MutableProperty(null);
   MutableProperty<LatLng> deliveryLocation = MutableProperty(null);
+  MutableProperty<String> deliveryLocationDescription = MutableProperty(null);
   MutableProperty<String> foodTag = MutableProperty(null);
   MutableProperty<List<OrderItem>> orderItems = MutableProperty(null);
   MutableProperty<DateTime> startDeliveryTime = MutableProperty(null);
+
+
+  
   //Optional
   MutableProperty<DateTime> endDeliveryTime = MutableProperty(null);
   MutableProperty<String> message = MutableProperty(null);
