@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -25,18 +27,22 @@ class LocationHelper {
 
   String addressFromPlacemarker(Placemark place) {
     if (place.name.isNotEmpty) {
+      var name = place.name == null ? '' : place.name;
+      var thoroughfare = place.thoroughfare == null ? '' : place.thoroughfare;
+      var subThoroughfare =
+          place.subThoroughfare == null ? '' : place.subThoroughfare;
 
-      var name = place.name == null? '' : place.name;
-      var thoroughfare = place.thoroughfare == null? '' : place.thoroughfare;
-      var subThoroughfare = place.subThoroughfare == null? '' : place.subThoroughfare;
+      if (Platform.isAndroid) {
 
-      if (StringHelper.isNumeric(name)) {
+        if (StringHelper.isNumeric(name)) {
+    
 
-        return name + " " + thoroughfare;
-
+          return name + " " + thoroughfare;
+        } else {
+          return name + ", " + subThoroughfare + " " + thoroughfare;
+        }
       } else {
-
-        return name + ", " + subThoroughfare + " " + thoroughfare;
+          return subThoroughfare + " " + thoroughfare + ", " + name;
 
       }
     } else if (place.postalCode.isNotEmpty) {

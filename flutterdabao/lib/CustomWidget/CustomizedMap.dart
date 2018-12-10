@@ -149,6 +149,12 @@ class _CustomizedMapState extends State<CustomizedMap>
     }));
   }
 
+  bool get isInDebugMode {
+    bool inDebugMode = false;
+    assert(inDebugMode = true);
+    return inDebugMode;
+  }
+
   void _createNearbyMarkers(GoogleMapController controller) {
     LatLng previousLatLng;
 
@@ -163,6 +169,9 @@ class _CustomizedMapState extends State<CustomizedMap>
         }
       }
       previousLatLng = location;
+
+      //If Debug Mode, dont query
+      if (!isInDebugMode)
       FirebaseCloudFunctions()
           .fetchNearbyOrderOrDeliveries(location: location, mode: 0)
           .then((list) {
@@ -189,10 +198,12 @@ class _CustomizedMapState extends State<CustomizedMap>
     _createNearbyMarkers(mapController);
 
     controller.addListener(mapCallBack);
+    print("testing location" + currentLocation.value.toString());
 
     subscription.add(currentLocation.producer
         .where((latlng) => latlng != null)
         .listen((location) {
+      print("testing location" + location.toString());
       if (selectedlocation.value == null ||
           selectedlocationDescription.value == null) {
         updateSelectedLocationFromLatLng(location);
