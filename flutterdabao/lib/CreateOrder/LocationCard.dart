@@ -37,7 +37,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
           alignment: Alignment(0.0, -1.0),
           padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 0.0),
           margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 35.0),
-          height:160.0,
+          height: 160.0,
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8.0),
@@ -94,7 +94,11 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
               ),
               Expanded(
                 child: Center(
-                  child: Text('Order Now', style: FontHelper.bold(Colors.black, 16.0),textAlign: TextAlign.start,),
+                  child: Text(
+                    'Order Now',
+                    style: FontHelper.bold(Colors.black, 16.0),
+                    textAlign: TextAlign.start,
+                  ),
                 ),
               ),
             ],
@@ -154,14 +158,14 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
         SizedBox(
           width: 10.0,
         ),
-        buildSelectedLocationTextWidget(),
+        Expanded(child: buildSelectedLocationTextWidget()),
       ],
     );
   }
 
-  GestureDetector buildSelectedLocationTextWidget() {
-    return GestureDetector(
-      child: Container(
+  Widget buildSelectedLocationTextWidget() {
+    return Container(
+      child: GestureDetector(
         child: StreamBuilder<String>(
           stream: widget.selectedLocationDescription.producer,
           builder: (context, addressSnap) {
@@ -175,12 +179,13 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
               return Text(
                 addressSnap.data,
                 style: FontHelper.semiBold(Colors.black, 14.0),
+                overflow: TextOverflow.ellipsis,
               );
             }
           },
         ),
+        onTap: _handlePressButton,
       ),
-      onTap: _handlePressButton,
     );
   }
 
@@ -198,7 +203,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
       context: context,
       apiKey: kGoogleApiKey,
       onError: onError,
-      mode: Mode.fullscreen,
+      mode: Mode.overlay,
       language: "en",
       components: [Component(Component.country, "sg")],
     );

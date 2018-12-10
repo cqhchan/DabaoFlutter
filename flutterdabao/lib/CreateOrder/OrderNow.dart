@@ -52,7 +52,7 @@ class _OrderNowState extends State<OrderNow>
         children: <Widget>[
           CustomizedMap(
             mode: 0,
-            selectedlocation: deliveryLocation,
+            selectedlocation: deliveryLocation, selectedlocationDescription: deliveryLocationDescription,
           ),
           CustomizedBackButton(),
           LocationCard(selectedLocationDescription: deliveryLocationDescription, selectedLocation: deliveryLocation,),

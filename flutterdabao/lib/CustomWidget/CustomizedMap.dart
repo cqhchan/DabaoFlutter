@@ -3,15 +3,12 @@
 // https://stackoverflow.com/questions/53397826/flutter-get-coordinates-from-google-maps
 
 import 'package:flutter/material.dart';
-import 'package:cloud_functions/cloud_functions.dart';
-import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
-import 'package:flutter/services.dart';
-import 'dart:async';
-
+import 'package:geolocator/geolocator.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 
@@ -20,6 +17,7 @@ class CustomizedMap extends StatefulWidget {
     Key key,
     @required this.mode,
     @required this.selectedlocation,
+    @required this.selectedlocationDescription,
     this.zoom = 16,
     this.radius = 3000,
   }) : assert(mode != null);
@@ -29,221 +27,197 @@ class CustomizedMap extends StatefulWidget {
   final double zoom;
   final double radius;
   final MutableProperty<LatLng> selectedlocation;
+  final MutableProperty<String> selectedlocationDescription;
 
   @override
-  _CustomizedMapState createState() =>
-      _CustomizedMapState(mode, radius, zoom, selectedlocation);
+  _CustomizedMapState createState() => _CustomizedMapState(
+      mode, radius, zoom, selectedlocation, selectedlocationDescription);
 }
 
 class _CustomizedMapState extends State<CustomizedMap>
-    with HavingSubscriptionMixin, SingleTickerProviderStateMixin {
-  _CustomizedMapState(this.mode, this.radius, this.zoom, this.selectedlocation);
+    with
+        HavingSubscriptionMixin,
+        SingleTickerProviderStateMixin,
+        HavingGoogleMaps {
+  _CustomizedMapState(this.mode, this.radius, this.zoom, this.selectedlocation,
+      this.selectedlocationDescription);
 
   int mode;
   double zoom;
   double radius;
-  String error;
-  Location location = new Location();
-  GoogleMapController mapController;
-  Marker _selectedMarker;
-  Map<String, double> _currentLocation = new Map();
-  StreamSubscription<Map<String, double>> locationSubscription;
-  MutableProperty<LatLng> selectedlocation;
-  MutableProperty<List<LatLng>> markerLocations = MutableProperty(List());
-  MutableProperty<LatLng> updateMarkerLocation = MutableProperty(null);
-  MutableProperty<LatLng> currentLocation = MutableProperty(null);
-  MutableProperty<LatLng> tapLocation = MutableProperty(null);
 
-  Future<void> fetchJSON(LatLng thislocation) async {
-    try {
-      Map<String, dynamic> attributeMap = new Map<String, dynamic>();
-      attributeMap["lat"] = thislocation.latitude;
-      attributeMap["long"] = thislocation.longitude;
-      attributeMap["radius"] = radius;
-      attributeMap["mode"] = mode;
-      final result = await CloudFunctions.instance
-          .call(functionName: 'locationRequest', parameters: attributeMap);
-      List<LatLng> temp = List();
-      result['locations'].forEach((latlng) {
-        double latitude = latlng[0];
-        double longitude = latlng[1];
-        temp.add(LatLng(latitude, longitude));
-      });
-      markerLocations.producer.add(temp);
-    } on CloudFunctionsException catch (e) {
-      print(e);
-    } catch (e) {
-      print('Error: $e');
-    }
+  // Order delivery location
+  MutableProperty<LatLng> selectedlocation;
+
+  // Order delivery location
+  MutableProperty<String> selectedlocationDescription;
+
+  // Locations of people who are delivering nearby
+  MutableProperty<List<LatLng>> markerLocations = MutableProperty(List());
+
+  // Current User Location
+  MutableProperty<LatLng> currentLocation =
+      ConfigHelper.instance.currentLocationProperty;
+
+  Marker _deliveryMarker;
+
+  BitmapDescriptor get deliveryIcon {
+    bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+    if (isIOS)
+      return BitmapDescriptor.fromAsset('assets/icons/red_marker_icon.png');
+    else
+      return BitmapDescriptor.fromAsset(
+          'assets/icons/3.0x/red_marker_icon.png');
+  }
+
+  BitmapDescriptor get bikeIcon {
+    bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+    if (isIOS)
+      return BitmapDescriptor.fromAsset('assets/icons/bike.png');
+    else
+      return BitmapDescriptor.fromAsset('assets/icons/3.0x/bike.png');
   }
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize for iOS only
-    _currentLocation['latitude'] = 1.2923956;
-    _currentLocation['longitude'] = 103.7757203999999;
+    // Request permission and start listening to current location
+    startListeningToCurrentLocation();
 
-    initGoogleMap();
+    // When it first loads, if selected location/ selected location desription is null, it will set them to current location
 
-    subscription.add(markerLocations.producer.listen((_) {}));
-    subscription.add(currentLocation.producer.listen((_) {}));
-    subscription.add(tapLocation.producer.listen((_) {}));
-    subscription.add(updateMarkerLocation.producer.listen((_) {}));
-    subscription.add(selectedlocation.producer.listen((_) {}));
+    mapCallBack = () {
+      if (mapController.isCameraMoving) {
+        {
+          if (_deliveryMarker != null)
+            mapController.updateMarker(
+                _deliveryMarker,
+                MarkerOptions(
+                  position: mapController.cameraPosition.target,
+                ));
+        }
 
-    selectedlocation.producer.take(1).listen((result) {
-      print('Selected Location at CustomizedMap.dart: $result');
-    });
-
-    // User's Device Location
-    locationSubscription =
-        location.onLocationChanged().listen((Map<String, double> result) {
-      currentLocation.producer.add(
-        // Default location to NUS for Testing Purposes
-        // LatLng(1.2923956, 103.7757203999999),
-        LatLng(
-          result["latitude"],
-          result["longitude"],
-        ),
-      );
-      print(
-          "Current User's Location ------ Lat: ${result["latitude"]} ------ Lng: ${result["longitude"]}");
-      setState(() {
-        _currentLocation = result;
-      });
-    });
-  }
-
-  void initGoogleMap() async {
-    currentLocation.producer.listen((value) {
-      _currentLocation['latitude'] = value.latitude;
-      _currentLocation['longitude'] = value.longitude;
-    });
-
-    // Request permission
-    initPlatformState();
-  }
-
-  void initPlatformState() async {
-    await LocationHelper.instance.hardAskForPermission(context, new Text("Location permission"), new Text("Dabao need your location to function properly, Please enable it under settings"));
-  }
-
-  void _onMarkerTapped(Marker marker) {
-    setState(() {
-      _selectedMarker = marker;
-    });
-    print('Selected Location: ${_selectedMarker.options.position}');
-  }
-
-  void _panToCurrentLocation(GoogleMapController controller, LatLng result) {
-    controller.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          zoom: zoom,
-          target: LatLng(
-            result.latitude,
-            result.longitude,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _createDraggableMarker(GoogleMapController controller) {
-    currentLocation.producer.take(1).listen((result) {
-      controller.addMarker(MarkerOptions(
-        infoWindowText: InfoWindowText('To Dabaoer:', 'Let Meet Here!'),
-        draggable: true,
-        position: result,
-      ));
-    });
-    setState(() {
-      mapController = controller;
-    });
-  }
-
-  void _updateDraggableMarker(GoogleMapController controller) {
-    selectedlocation.producer.listen((result) {
-      controller.clearMarkers();
-      controller.addMarker(MarkerOptions(
-        infoWindowText: InfoWindowText('To Dabaoer:', 'Let Meet Here!'),
-        draggable: true,
-        position: LatLng(result.latitude, result.longitude),
-      ));
-      _panToCurrentLocation(controller, result);
-      // fetchJSON(result);
-    });
-    setState(() {
-      mapController = controller;
-    });
-  }
-
-  void _createMarkers() {
-    markerLocations.producer.value.forEach((location) {
-      mapController.addMarker(MarkerOptions(
-          icon: BitmapDescriptor.fromAsset('assets/icons/bike.png'),
-          draggable: false,
-          infoWindowText: InfoWindowText('From Dabaoer:', "Good Food!"),
-          position: location));
-    });
-  }
-
-  void _initBeforeFetchJSON() {
-    LatLng temp = new LatLng(
-      _currentLocation['latitude'],
-      _currentLocation['longitude'],
-    );
-    currentLocation.producer.add(temp);
-    currentLocation.producer.listen((thisLocation) {
-      if (thisLocation != null) {
-        // fetchJSON(thisLocation);
+        lastCameraIsMoving = true;
+      } else {
+        if (lastCameraIsMoving) {
+          updateSelectedLocationFromLatLng(mapController.cameraPosition.target);
+        }
+        lastCameraIsMoving = false;
       }
-    });
+    };
   }
+
+  void updateSelectedLocationFromLatLng(LatLng location) async {
+    List<Placemark> addresses = await LocationHelper.instance.location
+        .placemarkFromCoordinates(location.latitude, location.longitude);
+    Placemark first = addresses.first;
+
+    selectedlocationDescription.value =
+        LocationHelper.instance.addressFromPlacemarker(first);
+    selectedlocation.value = location;
+  }
+
+  void startListeningToCurrentLocation() async {
+    ConfigHelper.instance.startListeningToCurrentLocation(
+        LocationHelper.instance.hardAskForPermission(
+            context,
+            Text("Please Enable Location"),
+            Text(
+                "Dabao needs your location to verify your Orders/Deliveries")));
+  }
+
+// Create marker, updates if nesscery when selectedLocation is updated
+  void _createDeliveryMarker(GoogleMapController controller) {
+    subscription.add(selectedlocation.producer.listen((result) async {
+      if (_deliveryMarker == null) {
+        _deliveryMarker = await controller.addMarker(MarkerOptions(
+          icon: deliveryIcon,
+          infoWindowText: InfoWindowText('Delivery Location', 'Hold to Drag'),
+          draggable: true,
+          consumeTapEvents: false,
+          position: result,
+        ));
+      } else {
+        await controller.updateMarker(
+            _deliveryMarker,
+            MarkerOptions(
+              position: result,
+            ));
+      }
+      panToLocation(controller, result, zoom);
+    }));
+  }
+
+  void _createNearbyMarkers(GoogleMapController controller) {
+    LatLng previousLatLng;
+
+    // if previous locatiion to current location is > 2000, search again
+    subscription.add(selectedlocation.producer.listen((location) async {
+      if (previousLatLng != null) {
+        double distance = await LocationHelper.instance.location
+            .distanceBetween(location.latitude, location.longitude,
+                previousLatLng.latitude, previousLatLng.longitude);
+        if (distance < 2000) {
+          return;
+        }
+      }
+      previousLatLng = location;
+      FirebaseCloudFunctions()
+          .fetchNearbyOrderOrDeliveries(location: location, mode: 0)
+          .then((list) {
+        markerLocations.value = list;
+      });
+    }));
+
+    subscription.add(markerLocations.producer.listen((markerLocations) {
+      markerLocations.forEach((location) {
+        mapController.addMarker(MarkerOptions(
+            icon: bikeIcon,
+            draggable: false,
+            infoWindowText: InfoWindowText('Dabaoer', "Good Food!"),
+            position: location));
+      });
+    }));
+  }
+
+  bool lastCameraIsMoving = false;
 
   void _onMapCreated(GoogleMapController controller) {
-    _initBeforeFetchJSON();
-    _createDraggableMarker(controller);
-    _updateDraggableMarker(controller);
-    controller.onMarkerTapped.add(_onMarkerTapped);
-    setState(() {
-      mapController = controller;
-    });
+    mapController = controller;
+    _createDeliveryMarker(mapController);
+    _createNearbyMarkers(mapController);
+
+    controller.addListener(mapCallBack);
+
+    subscription.add(currentLocation.producer
+        .where((latlng) => latlng != null)
+        .listen((location) {
+      if (selectedlocation.value == null ||
+          selectedlocationDescription.value == null) {
+        updateSelectedLocationFromLatLng(location);
+      }
+    }));
   }
 
   @override
   void dispose() {
-    mapController?.onMarkerTapped?.remove(_onMarkerTapped);
-    locationSubscription.pause();
     subscription.dispose();
     mapController.dispose();
     super.dispose();
   }
 
+// currentLocation
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Center(
-          child: StreamBuilder(
-              stream: markerLocations.producer,
-              builder: (context, snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.waiting:
-                    return CircularProgressIndicator();
-                  case ConnectionState.none:
-                  case ConnectionState.active:
-                    _createMarkers();
-                    return updateMap;
-                  case ConnectionState.done:
-                }
-              }),
-        ),
+        child: createMap,
+      ),
     );
   }
 
-  Widget get updateMap {
+  Widget get createMap {
     return Container(
       child: Stack(
         children: <Widget>[
@@ -256,10 +230,10 @@ class _CustomizedMapState extends State<CustomizedMap>
               trackCameraPosition: true,
               myLocationEnabled: true,
               cameraPosition: CameraPosition(
-                target: LatLng(
-                  _currentLocation['latitude'],
-                  _currentLocation['longitude'],
-                ),
+                // if there is no selectedLocation it will show NUS location
+                target: selectedlocation.value == null
+                    ? LatLng(1.2966, 103.7764)
+                    : selectedlocation.value,
                 zoom: zoom,
               ),
             ),

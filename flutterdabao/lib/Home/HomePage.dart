@@ -1,16 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutterdabao/CreateOrder/CreateOrder.dart';
-import 'package:flutterdabao/CreateOrder/FoodTag.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
-import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/User.dart';
@@ -27,6 +25,15 @@ class _Home extends State<Home> {
     _controller.addListener(() {
       _opacityProperty.value = max(min((_controller.offset / 150.0), 1.0), 0.0);
     });
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+
+
+    ConfigHelper.instance.startListeningToCurrentLocation(LocationHelper.instance.softAskForPermission());
   }
 
   @override
@@ -60,11 +67,9 @@ class _Home extends State<Home> {
                           FadeRoute(widget: OrderNow()),
                         );
                       }),
-
                       //Dabaoer
                       squardCard('assets/icons/bike.png', 'Dabaoer',
                           'I want to Deliver', () {}),
-
                       //ChatBox
                     ],
                   ),

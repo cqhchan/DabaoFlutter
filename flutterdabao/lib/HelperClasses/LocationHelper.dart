@@ -1,55 +1,112 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
-import 'package:location/location.dart';
-// import 'package:permission_handler/permission_handler.dart';
+import 'package:flutterdabao/HelperClasses/StringHelper.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:settings/settings.dart';
+import 'package:geolocator/geolocator.dart';
 
 class LocationHelper {
   static LocationHelper get instance =>
       _internal != null ? _internal : LocationHelper();
   static LocationHelper _internal;
 
-  Location location = new Location();
+  Geolocator location = new Geolocator();
+
+  Observable<LatLng> onLocationChange() {
+    return Observable(location.getPositionStream()).map((Position result) {
+      return LatLng(
+        result.latitude,
+        result.longitude,
+      );
+    });
+  }
+
+  String addressFromPlacemarker(Placemark place) {
+    if (place.name.isNotEmpty) {
+
+      var name = place.name == null? '' : place.name;
+      var thoroughfare = place.thoroughfare == null? '' : place.thoroughfare;
+      var subThoroughfare = place.subThoroughfare == null? '' : place.subThoroughfare;
+
+      if (StringHelper.isNumeric(name)) {
+
+        return name + " " + thoroughfare;
+
+      } else {
+
+        return name + ", " + subThoroughfare + " " + thoroughfare;
+
+      }
+    } else if (place.postalCode.isNotEmpty) {
+      print(place.postalCode);
+
+      return place.postalCode;
+    } else {
+      return place.country;
+    }
+  }
 
   //Ask for permission if user denied, do nothing
   Future<bool> softAskForPermission() {
-    return location.hasPermission();
+    return location
+        .checkGeolocationPermissionStatus()
+        .catchError((e) {})
+        .then((permissionStatus) async {
+      switch (permissionStatus) {
+        case GeolocationStatus.granted:
+          return true;
+
+        default:
+          return false;
+      }
+    });
   }
 
   //Hard ask for permission if user denied, open dialog to direct to settings
+  //TODO fix issue in android whereby askForPermission does not return a future.
   Future<bool> hardAskForPermission(
       BuildContext context, Text title, Text content) {
-    return location.hasPermission().then((hasPermission) async {
-      if (hasPermission)
-        return true;
-      else
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: title,
-                content: content,
-                actions: <Widget>[
-                  new FlatButton(
-                    child: new Text("DISMISS",style: FontHelper.regular(Colors.black, 14.0),),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  new FlatButton(
-                    child: new Text("SETTINGS",style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),),
-                    onPressed: () {
-                      
-                      // PermissionHandler().openAppSettings();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            });
+    return location
+        .checkGeolocationPermissionStatus()
+        .catchError((e) {})
+        .then((permissionStatus) async {
+      switch (permissionStatus) {
+        case GeolocationStatus.granted:
+          return true;
 
-            return false;
-
+        default:
+          return showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: title,
+                  content: content,
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "DISMISS",
+                        style: FontHelper.regular(Colors.black, 14.0),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    new FlatButton(
+                      child: new Text(
+                        "SETTINGS",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
+                        await Settings.openAppSettings();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              });
+      }
     });
   }
 }
