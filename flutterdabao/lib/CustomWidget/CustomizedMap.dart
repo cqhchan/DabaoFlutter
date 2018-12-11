@@ -198,12 +198,10 @@ class _CustomizedMapState extends State<CustomizedMap>
     _createNearbyMarkers(mapController);
 
     controller.addListener(mapCallBack);
-    print("testing location" + currentLocation.value.toString());
 
     subscription.add(currentLocation.producer
         .where((latlng) => latlng != null)
         .listen((location) {
-      print("testing location" + location.toString());
       if (selectedlocation.value == null ||
           selectedlocationDescription.value == null) {
         updateSelectedLocationFromLatLng(location);

@@ -12,11 +12,12 @@ import 'package:google_maps_webservice/places.dart';
 class LocationCard extends StatefulWidget {
   final MutableProperty<String> selectedLocationDescription;
   final MutableProperty<LatLng> selectedLocation;
-
+  final VoidCallback showOverlayCallback; 
   const LocationCard({
     Key key,
     @required this.selectedLocationDescription,
     @required this.selectedLocation,
+    @required this.showOverlayCallback
   }) : super(key: key);
 
   @override
@@ -29,51 +30,53 @@ class LocationCard extends StatefulWidget {
 class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        Container(
-          alignment: Alignment(0.0, -1.0),
-          padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 0.0),
-          margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 35.0),
-          height: 160.0,
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: [
-                BoxShadow(
-                  offset: Offset(0.0, 1.0),
-                  color: Colors.grey,
-                  blurRadius: 5.0,
-                )
-              ]),
+    return SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              buildHeader(),
-              SizedBox(
-                height: 10.0,
-              ),
-              buildSelectedlocationWidget(),
-              Line(
-                margin: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 10.0),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  // Expanded(child: Container(color: Colors.black,child: Text("t"),),),
-                  _scheduleOrder(),
-                  SizedBox(
-                    width: 20.0,
-                  ),
-                  _orderNow(),
-                ],
-              )
-            ],
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Container(
+            alignment: Alignment(0.0, -1.0),
+            padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 0.0),
+            margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 35.0),
+            height: 160.0,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: [
+                  BoxShadow(
+                    offset: Offset(0.0, 1.0),
+                    color: Colors.grey,
+                    blurRadius: 5.0,
+                  )
+                ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                buildHeader(),
+                SizedBox(
+                  height: 10.0,
+                ),
+                buildSelectedlocationWidget(),
+                Line(
+                  margin: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 10.0),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    // Expanded(child: Container(color: Colors.black,child: Text("t"),),),
+                    _scheduleOrder(),
+                    SizedBox(
+                      width: 20.0,
+                    ),
+                    _orderNow(),
+                  ],
+                )
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -103,7 +106,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
               ),
             ],
           ),
-          onPressed: () {},
+          onPressed: widget.showOverlayCallback,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
