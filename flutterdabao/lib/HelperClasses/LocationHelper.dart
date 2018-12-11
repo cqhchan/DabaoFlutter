@@ -17,7 +17,7 @@ class LocationHelper {
   Geolocator location = new Geolocator();
 
   Observable<LatLng> onLocationChange() {
-    return Observable(location.getPositionStream()).map((Position result) {
+    return Observable(location.getPositionStream()).where((position) => position!=null).map((Position result) {
       return LatLng(
         result.latitude,
         result.longitude,
