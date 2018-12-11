@@ -35,6 +35,12 @@ class ConfigHelper with HavingSubscriptionMixin {
   void startListeningToCurrentLocation(Future<bool> askForPermission) async {
     location?.cancel();
     await askForPermission;
+    var lastLocation = await LocationHelper.instance.location.getLastKnownPosition();
+
+    if (lastLocation != null)
+    currentLocationProperty.value = LatLng(lastLocation.latitude, lastLocation.longitude);
+
+    
     location = currentLocationProperty.bindTo(LocationHelper.instance.onLocationChange());
 
   }
