@@ -95,7 +95,7 @@ class User extends FirebaseType {
     if (data.containsKey("verified")) {
       verified.add(data["verified"]);
     } else {
-      verified.add(null);
+      verified.add(false);
     }
   }
 

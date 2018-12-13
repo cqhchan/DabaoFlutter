@@ -99,6 +99,7 @@ class _LoginPageState extends State<LoginPage>
                 ),
                 RaisedButton(
                     child: Text('LOGIN'),
+                    color: Colors.orange[300],
                     elevation: 8.0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
-//import 'package:flutterdabao/LoginSignup/LoginPage.dart';
-import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
+import 'package:flutter/services.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class PhoneSignupPage extends StatefulWidget {
   PhoneSignupPage({Key key}) : super(key: key);
@@ -11,14 +10,26 @@ class PhoneSignupPage extends StatefulWidget {
 }
 
 class _PhoneSignupPageState extends State<PhoneSignupPage> {
-  //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String phoneNo;
   String smsCode;
   String verificationId;
+  bool _inProgress = false;
 
   bool _autoValidate = false;
+
+  void _validate() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      // Text forms was validated.
+      form.save();
+      verifyPhone();
+    } else {
+      setState(() => _autoValidate = true);
+    }
+  }
 
   Future<void> verifyPhone() async {
     final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
@@ -36,6 +47,9 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
       print('${exception.message}');
     };
+    setState(() {
+      _inProgress = true;
+    });
 
     await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNo,
@@ -44,6 +58,10 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
         timeout: Duration(seconds: 5),
         verificationCompleted: verifiedSuccess,
         verificationFailed: veriFailed);
+
+    setState(() {
+      _inProgress = false;
+    });
   }
 
   Future<bool> smsCodeDialog(BuildContext context) {
@@ -70,13 +88,6 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                       Navigator.of(context)
                           .pop(); //To get rid of smsCodeDialog before moving on.
                       signIn();
-                      //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
-                      /*
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProfileCreationPage())
-                      );
-                      */
                     }
                   });
                 },
@@ -86,76 +97,77 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
         });
   }
 
-  signIn() async{
+  signIn() async {
     FirebaseAuth.instance
         .signInWithCredential(PhoneAuthProvider.getCredential(
             verificationId: verificationId, smsCode: smsCode))
-        .then((user) {
-    }).catchError((e) {
+        .catchError((e) {
+          _showSnackBar(e);
       print(e);
     }).catchError((e) {
       print(e);
     });
   }
-  /*
+  
   void _showSnackBar(message) {
     final snackBar = new SnackBar(
       content: new Text(message),
     );
     _scaffoldKey.currentState.showSnackBar(snackBar);
-  }*/
-
-  String _validateEmail(String value) {
-    if (value.isEmpty) {
-      // The form is empty
-      return "Enter email address";
-    }
-    // This is just a regular expression for email addresses
-    String p = "[a-zA-Z0-9\+\.\_\%\-\+]{1,256}" +
-        "\\@" +
-        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-        "(" +
-        "\\." +
-        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-        ")+";
-    RegExp regExp = new RegExp(p);
-
-    if (regExp.hasMatch(value)) {
-      // So, the email is valid
-      return null;
-    }
-
-    // The pattern of the email didn't match the regex above.
-    return 'Email is not valid';
   }
 
-  @override
-  Widget build(BuildContext context) {
+  String _validatePhoneNumber(String value) {
+    if (value.isEmpty) {
+      return "Enter Phone number";
+    } else if (value.length != 8){
+      return "Singapore's phone number should be eight digits long";
+    } else if (value[0] != '8' && value[0] != '9') {
+      return "Please enter a valid phone number";
+    }
+  }
+
+  Widget buildWidget() {
     return Scaffold(
-      //key: _scaffoldKey,
+      key: _scaffoldKey,
       body: SafeArea(
         child: Form(
-          //key: _formKey,
+          key: _formKey,
           autovalidate: _autoValidate,
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 24.0),
             children: <Widget>[
+              SizedBox(height: 96.0),
+              Text('SIGNUP',
+                  style: Theme.of(context).textTheme.headline,
+                  textAlign: TextAlign.center),
               SizedBox(height: 80.0),
-              Column(
+              Text(
+                'Please Enter A Singapore Mobile Number',
+                style: Theme.of(context).textTheme.title,
+              ),
+              SizedBox(height: 10.0),
+              Row(
                 children: <Widget>[
-                  SizedBox(height: 16.0),
                   Text(
-                    'SIGNUP',
-                    style: Theme.of(context).textTheme.headline,
+                    '+65',
+                    style: Theme.of(context).textTheme.subhead,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Enter Phone Number',
+                      ),
+                      onSaved: (value) {
+                        phoneNo = "+65" + value;
+                      },
+                      validator: _validatePhoneNumber,
+                      keyboardType: TextInputType.number,
+                    ),
                   ),
                 ],
-              ),
-              SizedBox(height: 100.0),
-              TextField(
-                decoration: InputDecoration(hintText: 'Enter Phone number'),
-                onChanged: (value) {
-                  phoneNo = value;
-                },
               ),
               SizedBox(height: 12.0),
               ButtonBar(
@@ -171,11 +183,12 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                   ),
                   RaisedButton(
                     child: Text('SIGN UP'),
+                    color: Colors.orange[300],
                     elevation: 8.0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
-                    onPressed: verifyPhone,
+                    onPressed: _validate,
                   ),
                 ],
               ),
@@ -184,5 +197,10 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ModalProgressHUD(child: buildWidget(), inAsyncCall: _inProgress);
   }
 }

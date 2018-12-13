@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/LoginSignup/PhoneSignupPage.dart';
 
 class PhoneLoginPage extends StatefulWidget {
@@ -12,8 +13,31 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
   String phoneNo;
   String smsCode;
   String verificationId;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _autoValidate = false;
+
+  void _validate() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      // Text forms was validated.
+      form.save();
+      verifyPhone();
+    } else {
+      setState(() => _autoValidate = true);
+    }
+  }
+
+  String _validatePhoneNumber(String value) {
+    if (value.isEmpty) {
+      return "Enter Phone number";
+    } else if (value.length != 8){
+      return "Singapore's phone number should be eight digits long";
+    } else if (value[0] != '8' && value[0] != '9') {
+      return "Please enter a valid phone number";
+    }
+  }
 
   Future<void> verifyPhone() async {
     final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
@@ -73,10 +97,18 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
         });
   }
 
+  void _showSnackBar(message) {
+    final snackBar = new SnackBar(
+      content: new Text(message),
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
+
   signIn() {
     FirebaseAuth.instance
         .signInWithCredential(PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: smsCode))
         .catchError((e) {
+          _showSnackBar(e);
       print(e);
     });
   }
@@ -84,31 +116,54 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //key: _scaffoldKey,
+      key: _scaffoldKey,
       body: SafeArea(
         child: Form(
-          //key: _formKey,
+          key: _formKey,
           autovalidate: _autoValidate,
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 24.0),
             children: <Widget>[
-              SizedBox(height: 80.0),
-              Column(
-                children: <Widget>[
+              SizedBox(height: 96.0),
+              
                   SizedBox(height: 16.0),
                   Text(
-                    'PHONE LOGIN',
+                    'MOBILE LOGIN',
                     style: Theme.of(context).textTheme.headline,
+                    textAlign: TextAlign.center,
+                  ),
+              
+              
+              SizedBox(height: 80.0),
+              Text(
+                'Please Enter A Singapore Mobile Number',
+                style: Theme.of(context).textTheme.title,
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                children: <Widget>[
+                  Text(
+                    '+65',
+                    style: Theme.of(context).textTheme.subhead,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Enter Phone Number',
+                      ),
+                      onSaved: (value) {
+                        phoneNo = "+65" + value;
+                      },
+                      validator: _validatePhoneNumber,
+                      keyboardType: TextInputType.number,
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: 100.0),
-              TextField(
-                decoration: InputDecoration(hintText: 'Enter Phone number'),
-                onChanged: (value) {
-                  phoneNo = value;
-                },
-              ),
+              SizedBox(height: 12.0),
               SizedBox(height: 12.0),
               ButtonBar(
                 children: <Widget>[
@@ -127,15 +182,17 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                   RaisedButton(
                     child: Text('LOG IN'),
                     elevation: 8.0,
+                    color: Colors.orange[300],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
-                    onPressed: verifyPhone,
+                    onPressed: _validate,
                   ),
                   FlatButton(
-                    child: Text('EMAIL LOGIN'),
+                    child: Text('EMAIL LOGIN'),                   
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                      
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
