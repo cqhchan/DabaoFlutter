@@ -36,7 +36,7 @@ class DabaoApp extends StatelessWidget {
             return LoadingPage();
           } else {
             if (snapshot.hasData) {
-              //This Line of code is nesscery as it sets the current user in ConfigHelper
+              //This line of code sets the current user in ConfigHelper
               User user = User.fromAuth(snapshot.data);
               //Check if its logged in
               return ProcessingPage(user);

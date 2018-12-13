@@ -1,6 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:flutterdabao/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
@@ -23,6 +21,7 @@ class _ProcessingPageState extends State<ProcessingPage> {
     // There are 3 things that you check to see of it should go to ProfileCreation/Verification or Home
     // return true to go to home/ false to go to ProfileCreation
     return StreamBuilder<bool>(
+      /*
         stream: Observable.combineLatest3(
             widget.user.email, widget.user.handPhone, widget.user.profileImage,
             (email, phoneNumber, profileImage) {
@@ -31,7 +30,8 @@ class _ProcessingPageState extends State<ProcessingPage> {
           } else {
             return false;
           }
-        }),
+        }),*/
+        stream: widget.user.verified,
         builder: (BuildContext context, userSnapshot) {
           if (userSnapshot.connectionState == ConnectionState.waiting ||
               !userSnapshot.hasData) {
@@ -44,9 +44,8 @@ class _ProcessingPageState extends State<ProcessingPage> {
                 });
               });
             } else {
-              if (widget.user.email.value != null) {
+              if (widget.user.email.value != null && widget.user.verified.value == false) {
                 //if this is old user
-                // TODO GO to Verify Phone Page
                 return Navigator(onGenerateRoute: (RouteSettings settings) {
                   return MaterialPageRoute(builder: (context) {
                     return VerifyPhoneNumberPage();
@@ -54,7 +53,6 @@ class _ProcessingPageState extends State<ProcessingPage> {
                 });
               } else {
                 // if this is a new user
-                // TODO GO to Profile Creation Page
                 return Navigator(onGenerateRoute: (RouteSettings settings) {
                   return MaterialPageRoute(builder: (context) {
                     return ProfileCreationPage();

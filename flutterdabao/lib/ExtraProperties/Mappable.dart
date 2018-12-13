@@ -47,7 +47,11 @@ import 'package:flutterdabao/Model/User.dart';
   void mapFrom(Map<String, dynamic> data){
     this.data = data;
     
-    data == null ? map(Map()):map(data);
+    if (data == null) {
+      map(Map());
+    } else {
+      map(data);
+    }
   }
   
   //standardization className.

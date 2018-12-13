@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,6 +27,11 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   String verificationId;
   String smsCode;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  File _image;
+  File _thumbnail;
+  //for loading spinner, appears if true, hidden if false
+  bool _inProgress = false;
+
 
   @override
   void initState() {
@@ -37,10 +43,10 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     });
   }
 
-  File _image;
-  File _thumbnail;
-  //for loading spinner, appears if true, hidden if false
-  bool _inProgress = false;
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  //IMAGE PROCESSING/////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
 
   //Pre-condition: Called only when _image has been set
   void creatingThumbnail() {
@@ -119,6 +125,128 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       }
     });
   }
+  ///////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+ 
+
+
+  ///////////////////////////////////////////////////////////////////////////////
+  //TO DEAL WITH "ERROR_REQUIRES_RECENT_LOGIN" EXCEPTION/////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+  Future<void> verifyPhone() async {
+    final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
+      verificationId = verId;
+    };
+    final PhoneCodeSent smsCodeSent = (String verId, [int forceCodeResend]) {
+      verificationId = verId;
+      smsCodeDialog(context).then((value) {
+        print('Signed in');
+      });
+    };
+    final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
+      print('verified');
+    };
+    final PhoneVerificationFailed veriFailed = (AuthException exception) {
+      print('${exception.message}');
+    };
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: _phoneNumber,
+        codeAutoRetrievalTimeout: autoRetrieve,
+        codeSent: smsCodeSent,
+        timeout: Duration(seconds: 5),
+        verificationCompleted: verifiedSuccess,
+        verificationFailed: veriFailed);
+  }
+
+  Future<bool> smsCodeDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Enter sms Code'),
+            content: TextField(
+              onChanged: (value) {
+                this.smsCode = value;
+              },
+            ),
+            contentPadding: EdgeInsets.all(10.0),
+            actions: <Widget>[
+              new FlatButton(
+                child: Text('Verify'),
+                onPressed: () {
+                  FirebaseAuth.instance.currentUser().then((user) {
+                    //only need to signIn if verification is not done automatically
+                    if (user == null) {
+                      //Navigator.of(context).pop();
+                      Navigator.of(context)
+                          .pop(); //To get rid of smsCodeDialog before moving on.
+                      signIn();
+                      //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
+                      /*
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfileCreationPage())
+                      );
+                      */
+                    }
+                  });
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  signIn() async{
+    FirebaseAuth.instance
+        .signInWithCredential(PhoneAuthProvider.getCredential(
+            verificationId: verificationId, smsCode: smsCode))
+        .then((user) {
+    }).catchError((e) {
+      print(e);
+    }).catchError((e) {
+      print(e);
+    });
+  }
+  ///////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+  
+
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  //PROFILE CREATION FUNCTIONS///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+  void createProfile() {
+    //if-else statements prevent user from proceeding further if they have not filled up credentials properly yet
+    if (_image == null) {
+      _showSnackBar("Please upload a profile image");
+      return;
+    } else if (_email == null) {
+      _showSnackBar("Please enter your email");
+      return;
+    } else if (_password == null) {
+      _showSnackBar("Please enter your password");
+      return;
+    } else if (_name == null) {
+      _showSnackBar("Please enter your name");
+      return;
+    }
+
+    //To activate for loading spinner
+    setState(() {
+      _inProgress = true;
+    });
+
+    //setting email first. In this function, it will call upload image
+    addEmailCredentials();
+
+    //Deactivating loading spinner
+    setState(() {
+      _inProgress = false;
+    });
+  }
 
   //only works if you are creating a new account
   void addEmailCredentials() {
@@ -127,16 +255,21 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         .linkWithCredential(
             EmailAuthProvider.getCredential(email: _email, password: _password))
         .then((user) {
+      uploadImages(); //only upload image and set information into firestore if email credentials are valid
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => Home()),
       );
-    })
-        //EmailAuthProvider.getCredential(email: _email, password: _password))
-        .catchError((e) {
-      //if it fails, means that the email already existed
-      _showSnackBar("Email is already in use!");
-      print(e);
+    }).catchError((PlatformException e) {
+      if (e.code == "ERROR_PROVIDER_ALREADY_LINKED" || e.code == "ERROR_CREDENTIAL_ALREADY_IN_USE") {
+        print(e);
+        _showSnackBar("Email is already in use!");
+      } else if (e.code == "ERROR_REQUIRES_RECENT_LOGIN") {
+        print(e);
+        verifyPhone();
+      } else {
+        print(e);
+      }
     });
   }
 
@@ -159,6 +292,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
           thumbnailTask.onComplete.then((thumbnailRef) {
             thumbnailRef.ref.getDownloadURL().then((thumbnailLink) {
               FirebaseAuth.instance.currentUser().then((user) {
+                print("Helpppppppppppppppppppppp");
                 ConfigHelper.instance.currentUserProperty.value.setUser(
                     _email,
                     0,
@@ -167,12 +301,8 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                     _name,
                     user.metadata.creationTimestamp,
                     user.metadata.lastSignInTimestamp,
-                    thumbnailLink);
-                /*
-                //deactivate loading spinner
-                setState(() {
-                  _inProgress = false;
-                });*/
+                    thumbnailLink,
+                    _phoneNumber);
               }).catchError((e) {
                 print(e);
               });
@@ -193,35 +323,8 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     });
   }
 
-  void createProfile() {
-    if (_image == null) { //this is to prevent users from creating profile without a profile image
-      _showSnackBar("Please upload a profile image");
-      return;
-    } else if (_email == null) {
-      _showSnackBar("Please enter your email");
-      return;
-    } else if (_password == null) {
-      _showSnackBar("Please enter your password");
-      return;
-    } else if (_name == null) {
-      _showSnackBar("Please enter your name");
-      return;
-    }
-    
-    //To activate for loading spinner
-    setState(() {
-      _inProgress = true;
-    });
-
-    //upload the original image
-    uploadImages();
-    addEmailCredentials();
-
-    //Deactivating loading spinner
-    setState(() {
-      _inProgress = false;
-    });
-  }
+  ///////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
 
   void _showSnackBar(message) {
     final snackBar = new SnackBar(
@@ -275,6 +378,9 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         });
   }
 
+  ///////////////////////////////////////////////////////////////////////////////
+  //TO BUILD THE SCREEN//////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   //This builds the user interface on the screen
   //Not written in build so that it can be wrapped with modal_progress_HUD
   Widget buildWidget(BuildContext context) {

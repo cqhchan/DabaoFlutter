@@ -13,6 +13,9 @@ class User extends FirebaseType {
   BehaviorSubject<String> name;
   BehaviorSubject<String> handPhone;
   BehaviorSubject<String> thumbnailImage;
+  //this verified boolean helps ensure old user's phone number is verified
+  //new users are set to verified = true by default
+  BehaviorSubject<bool> verified;
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   User.fromUID(String uid) : super.fromUID(uid);
@@ -36,6 +39,7 @@ class User extends FirebaseType {
     name = BehaviorSubject();
     thumbnailImage = BehaviorSubject();
     handPhone = BehaviorSubject();
+    verified = BehaviorSubject();
   }
 
   @override
@@ -83,11 +87,15 @@ class User extends FirebaseType {
     if (data.containsKey("hp")) {
       handPhone.add(data["hp"]);
       //print("hp added");
-
     } else {
       handPhone.add(null);
       //print("hp null");
+    }
 
+    if (data.containsKey("verified")) {
+      verified.add(data["verified"]);
+    } else {
+      verified.add(null);
     }
   }
 
@@ -95,42 +103,25 @@ class User extends FirebaseType {
     Firestore.instance
         .collection('/users')
         .document(uid)
-        .setData({'hp': phoneNumber}, merge: true);
+        .setData({'hp': phoneNumber, 'verified': true}, merge: true);
   }
 
   //last login date
   //creation date
   void setUser(String email, double save, double earn, String pi, String name,
-      int creationTime, int lastLoginTime, String tn) {
-    Firestore.instance.collection('/users').document(uid).updateData({
+      int creationTime, int lastLoginTime, String tn, String handPhone) {
+    Firestore.instance.collection('/users').document(uid).setData({
       'email': email,
       'save': save,
       'earn': earn,
       'pi': pi,
       'tn': tn,
       'name': name,
+      'hp': handPhone,
       'ct': DateTimeHelper.convertTimeToString(creationTime),
       'llt': DateTimeHelper.convertTimeToString(lastLoginTime),
-    });
+      'verified': true, 
+    },
+    merge: true);
   }
-  /*
-  void havePhoneNumber() {
-    FirebaseAuth.instance.currentUser().then((user) {
-      print(user.phoneNumber);
-      Firestore.instance.collection('/users').document(uid).updateData({'hp': user.phoneNumber});
-    }).catchError((e) { //reach here because don't have phone number
-      print(e);
-    });
-    
-  }*/
-
-  /*
-  void updateThumbnail(String tn) {
-    Firestore.instance
-      .collection('/users').document(uid)
-      .updateData({
-        'tn': tn
-      });
-  }
-  */
 }

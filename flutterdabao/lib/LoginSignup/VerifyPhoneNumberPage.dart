@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
 
@@ -91,7 +92,7 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
     FirebaseAuth.instance.linkWithCredential(PhoneAuthProvider.getCredential(
         verificationId: verificationId, smsCode: smsCode));
     FirebaseAuth.instance.currentUser().then((user) {
-      ConfigHelper.instance.currentUserProperty.value.setPhoneNumber(phoneNo);
+      ConfigHelper.instance.currentUserProperty.value.setPhoneNumber(phoneNo); // this will make the verify boolean turn true
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => Home()),
