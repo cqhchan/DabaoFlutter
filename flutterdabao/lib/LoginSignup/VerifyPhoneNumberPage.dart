@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
   VerifyPhoneNumberPage({Key key}) : super(key: key);
@@ -12,17 +14,42 @@ class VerifyPhoneNumberPage extends StatefulWidget {
 
 class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String phoneNo;
   String smsCode;
   String verificationId;
+  bool _inProgress = false;
 
   bool _autoValidate = false;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  void _validate() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      // Text forms was validated.
+      form.save();
+      setState(() {
+        _inProgress = true;
+      });
+      verifyPhone();
+    } else {
+      setState(() => _autoValidate = true);
+    }
+  }
+
+  String _validatePhoneNumber(String value) {
+    if (value.isEmpty) {
+      return "Enter Phone number";
+    } else if (value.length != 8){
+      return "Singapore's phone number should be eight digits long";
+    } else if (value[0] != '8' && value[0] != '9') {
+      return "Please enter a valid phone number";
+    }
   }
 
   Future<void> verifyPhone() async {
@@ -53,6 +80,9 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
   }
 
   Future<bool> smsCodeDialog(BuildContext context) {
+    setState(() {
+      _inProgress = false;
+    });
     return showDialog(
         context: context,
         barrierDismissible: false,
@@ -92,7 +122,8 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
     FirebaseAuth.instance.linkWithCredential(PhoneAuthProvider.getCredential(
         verificationId: verificationId, smsCode: smsCode));
     FirebaseAuth.instance.currentUser().then((user) {
-      ConfigHelper.instance.currentUserProperty.value.setPhoneNumber(phoneNo); // this will make the verify boolean turn true
+      ConfigHelper.instance.currentUserProperty.value.setPhoneNumber(
+          phoneNo); // this will make the verify boolean turn true
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => Home()),
@@ -110,68 +141,65 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
     _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 
-  String _validateEmail(String value) {
-    if (value.isEmpty) {
-      // The form is empty
-      return "Enter email address";
-    }
-    // This is just a regular expression for email addresses
-    String p = "[a-zA-Z0-9\+\.\_\%\-\+]{1,256}" +
-        "\\@" +
-        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-        "(" +
-        "\\." +
-        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-        ")+";
-    RegExp regExp = new RegExp(p);
 
-    if (regExp.hasMatch(value)) {
-      // So, the email is valid
-      return null;
-    }
-
-    // The pattern of the email didn't match the regex above.
-    return 'Email is not valid';
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget buildWidget() {
     return Scaffold(
       key: _scaffoldKey,
       body: SafeArea(
         child: Form(
-          //key: _formKey,
+          key: _formKey,
           autovalidate: _autoValidate,
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 24.0),
             children: <Widget>[
-              SizedBox(height: 80.0),
-              Column(
-                children: <Widget>[
-                  SizedBox(height: 16.0),
+              SizedBox(height: 96.0),
                   Text(
                     'VERIFYING YOUR PHONE NUMBER',
                     style: Theme.of(context).textTheme.headline,
+                    textAlign: TextAlign.center,
+                  ),
+                
+              SizedBox(height: 80.0),
+              Text(
+                'Please Enter A Singapore Mobile Number',
+                style: Theme.of(context).textTheme.title,
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                children: <Widget>[
+                  Text(
+                    '+65',
+                    style: Theme.of(context).textTheme.subhead,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Enter Phone Number',
+                      ),
+                      onSaved: (value) {
+                        phoneNo = "+65" + value;
+                      },
+                      validator: _validatePhoneNumber,
+                      keyboardType: TextInputType.number,
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: 100.0),
-              TextField(
-                decoration: InputDecoration(hintText: 'Enter Phone number'),
-                onChanged: (value) {
-                  phoneNo = value;
-                },
-              ),
+              
               SizedBox(height: 12.0),
               ButtonBar(
                 children: <Widget>[
                   RaisedButton(
+                    color: ColorHelper.dabaoOrange,
                     child: Text('CONFIRM'),
                     elevation: 8.0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
-                    onPressed: verifyPhone,
+                    onPressed: _validate,
                   ),
                   RaisedButton(
                     child: Text('LOGOUT'),
@@ -190,5 +218,10 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
         ),
       ),
     );
+  }
+
+   @override
+  Widget build(BuildContext context) {
+    return ModalProgressHUD(child: buildWidget(), inAsyncCall: _inProgress);
   }
 }

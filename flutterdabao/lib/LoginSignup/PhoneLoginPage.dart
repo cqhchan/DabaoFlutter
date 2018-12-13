@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/LoginSignup/PhoneSignupPage.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class PhoneLoginPage extends StatefulWidget {
   PhoneLoginPage({Key key}) : super(key: key);
@@ -15,7 +16,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
   String verificationId;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+  bool _inProgress = false;
   bool _autoValidate = false;
 
   void _validate() {
@@ -23,6 +24,9 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
     if (form.validate()) {
       // Text forms was validated.
       form.save();
+      setState(() {
+        _inProgress = true;
+      });
       verifyPhone();
     } else {
       setState(() => _autoValidate = true);
@@ -32,7 +36,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
   String _validatePhoneNumber(String value) {
     if (value.isEmpty) {
       return "Enter Phone number";
-    } else if (value.length != 8){
+    } else if (value.length != 8) {
       return "Singapore's phone number should be eight digits long";
     } else if (value[0] != '8' && value[0] != '9') {
       return "Please enter a valid phone number";
@@ -52,11 +56,11 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
     final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
       print('verified');
       print(user.uid);
-    };   
+    };
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
       print('${exception.message}');
     };
-    
+
     await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNo,
         codeAutoRetrievalTimeout: autoRetrieve,
@@ -67,6 +71,9 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
   }
 
   Future<bool> smsCodeDialog(BuildContext context) {
+    setState(() {
+      _inProgress = false;
+    });
     return showDialog(
         context: context,
         barrierDismissible: false,
@@ -86,7 +93,8 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                   FirebaseAuth.instance.currentUser().then((user) {
                     //only need to signIn if verification is not done automatically
                     if (user == null) {
-                      Navigator.of(context).pop(); //To get rid of smsCodeDialog before moving on.
+                      Navigator.of(context)
+                          .pop(); //To get rid of smsCodeDialog before moving on.
                       signIn();
                     }
                   });
@@ -106,15 +114,16 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
 
   signIn() {
     FirebaseAuth.instance
-        .signInWithCredential(PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: smsCode))
+        .signInWithCredential(PhoneAuthProvider.getCredential(
+            verificationId: verificationId, smsCode: smsCode))
         .catchError((e) {
-          _showSnackBar(e);
+      _showSnackBar(e);
       print(e);
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+
+  Widget buildWidget() {
     return Scaffold(
       key: _scaffoldKey,
       body: SafeArea(
@@ -126,14 +135,11 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
             children: <Widget>[
               SizedBox(height: 96.0),
               
-                  SizedBox(height: 16.0),
-                  Text(
-                    'MOBILE LOGIN',
-                    style: Theme.of(context).textTheme.headline,
-                    textAlign: TextAlign.center,
-                  ),
-              
-              
+              Text(
+                'MOBILE LOGIN',
+                style: Theme.of(context).textTheme.headline,
+                textAlign: TextAlign.center,
+              ),
               SizedBox(height: 80.0),
               Text(
                 'Please Enter A Singapore Mobile Number',
@@ -168,17 +174,18 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
               ButtonBar(
                 children: <Widget>[
                   FlatButton(
-                  child: Text('SIGN UP'),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    child: Text('SIGN UP'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PhoneSignupPage()),
+                      );
+                    },
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => PhoneSignupPage()),
-                    );
-                  },
-                ),
                   RaisedButton(
                     child: Text('LOG IN'),
                     elevation: 8.0,
@@ -189,15 +196,13 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                     onPressed: _validate,
                   ),
                   FlatButton(
-                    child: Text('EMAIL LOGIN'),                   
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                      
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    }
-                  ),
+                      child: Text('EMAIL LOGIN'),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      }),
                 ],
               ),
             ],
@@ -205,5 +210,10 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ModalProgressHUD(child: buildWidget(), inAsyncCall: _inProgress);
   }
 }

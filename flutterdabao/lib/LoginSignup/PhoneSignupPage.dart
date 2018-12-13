@@ -25,6 +25,9 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     if (form.validate()) {
       // Text forms was validated.
       form.save();
+      setState(() {
+        _inProgress = true;
+      });
       verifyPhone();
     } else {
       setState(() => _autoValidate = true);
@@ -47,9 +50,6 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
       print('${exception.message}');
     };
-    setState(() {
-      _inProgress = true;
-    });
 
     await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNo,
@@ -58,13 +58,12 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
         timeout: Duration(seconds: 5),
         verificationCompleted: verifiedSuccess,
         verificationFailed: veriFailed);
-
-    setState(() {
-      _inProgress = false;
-    });
   }
 
   Future<bool> smsCodeDialog(BuildContext context) {
+    setState(() {
+      _inProgress = false;
+    });
     return showDialog(
         context: context,
         barrierDismissible: false,

@@ -510,6 +510,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                       ],
                     )),
                     SizedBox(height: 50.0),
+                    /* FOR DEBUGGING PURPOSES
                     RaisedButton(
                         child: Container(
                           height: 40,
@@ -524,7 +525,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                         ),
                         onPressed: () {
                           FirebaseAuth.instance.signOut();
-                        }),
+                        }),*/
                     RaisedButton(
                         child: Container(
                           height: 40,
@@ -538,26 +539,6 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         onPressed: _validate),
-
-                    /* For testing purposes
-                  RaisedButton(
-                  child: Container(
-                    height: 40,
-                    child: Center(
-                      child: Text('Test printing out phone number'),
-                    ),
-                  ),
-                  color: ColorHelper.dabaoGreyE0,
-                  elevation: 5.0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  ),
-                  onPressed: () {
-                    FirebaseAuth.instance.currentUser().then((user) {
-                      print(user.email);
-                      print(user.phoneNumber);
-                    });
-                  }),*/
                   ]),
                 ),
               ],
