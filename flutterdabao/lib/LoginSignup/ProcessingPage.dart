@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
 import 'package:flutterdabao/LoginSignup/VerifyPhoneNumberPage.dart';
@@ -20,6 +21,8 @@ class _ProcessingPageState extends State<ProcessingPage> {
   Widget build(BuildContext context) {
     // There are 3 things that you check to see of it should go to ProfileCreation/Verification or Home
     // return true to go to home/ false to go to ProfileCreation
+
+    
     return StreamBuilder<bool>(
       /*
         stream: Observable.combineLatest3(
@@ -33,6 +36,12 @@ class _ProcessingPageState extends State<ProcessingPage> {
         }),*/
         stream: widget.user.verified,
         builder: (BuildContext context, userSnapshot) {
+
+          // GO STRAIGHT TO HOME IN DEBUG
+          if (ConfigHelper.instance.isInDebugMode)
+          return Home();
+
+
           if (userSnapshot.connectionState == ConnectionState.waiting ||
               !userSnapshot.hasData) {
             return LoadingPage();

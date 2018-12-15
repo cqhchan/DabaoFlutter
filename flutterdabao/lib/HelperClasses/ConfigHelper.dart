@@ -34,6 +34,12 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription.add(currentUserFoodTagsProperty.bindTo(currentUserFoodTagProducer()));
   }
 
+    bool get isInDebugMode {
+    bool inDebugMode = false;
+    assert(inDebugMode = true);
+    return inDebugMode;
+  }
+
   Observable<List<FoodTag>> currentUserFoodTagProducer() {
 
     return currentUserProperty.producer.switchMap(
