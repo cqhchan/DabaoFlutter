@@ -28,13 +28,14 @@ class ConfigHelper with HavingSubscriptionMixin {
   }
 
   // Called once when app loads.
-  appDidLoad() async {
+  appDidLoad() {
     disposeAndReset();
 
     subscription.add(currentUserFoodTagsProperty.bindTo(currentUserFoodTagProducer()));
   }
 
   Observable<List<FoodTag>> currentUserFoodTagProducer() {
+
     return currentUserProperty.producer.switchMap(
         (user) => user == null ? List<FoodTag>() : user.userFoodTags);
   }

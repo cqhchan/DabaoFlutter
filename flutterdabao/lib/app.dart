@@ -37,21 +37,22 @@ class DabaoApp extends StatelessWidget {
             if (snapshot.hasData) {
               // If Logged in, load user from FirebaseAuth
               //TODO add in check if user has completed profile creation else bring to profile creation;
-              
               User user = User.fromAuth(snapshot.data);
-              return StreamBuilder<String>(
-                stream: user.profileImage,
-                builder: (BuildContext context, snapshot) {
 
-                  if (snapshot.connectionState == ConnectionState.waiting){
-                    return LoadingPage();
-                  } else if (snapshot.hasData) { //snapshot.data != null
-                    return Home();
-                  } else {
-                    return ProfileCreationPage();
-                  }        
-                }
-                );
+              return Home();
+              // return StreamBuilder<String>(
+              //   stream: user.profileImage,
+              //   builder: (BuildContext context, snapshot) {
+
+              //     if (snapshot.connectionState == ConnectionState.waiting){
+              //       return LoadingPage();
+              //     } else if (snapshot.hasData) { //snapshot.data != null
+              //       return Home();
+              //     } else {
+              //       return Home();
+              //     }        
+              //   }
+              //   );
                 
                 //return Home();
             } else {

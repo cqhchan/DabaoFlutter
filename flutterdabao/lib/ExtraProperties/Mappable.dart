@@ -58,8 +58,9 @@ abstract class Mappable extends Identifiable {
     this.data = data;
     if (data!= null) {
     map(data);
-    } 
+    } else {
     map(Map());
+    }
   }
 
   //standardization className.
