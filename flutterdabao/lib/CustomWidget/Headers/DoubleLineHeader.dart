@@ -49,23 +49,39 @@ class _DoubleLineHeaderState extends State<DoubleLineHeader> {
 
     if (widget.leftButton != null) listOfWidget.add(widget.leftButton);
 
-    if (widget.title != null)
-      listOfWidget.add(Container(
-        padding: EdgeInsets.only(left: 10.0),
-        child: Text(
-          widget.title,
-          style: widget.headerTextStyle,
+    if (widget.title != null) {
+      List<Widget> columList = List();
+
+      if (widget.subtitle != null)
+        columList.add(Container(
+          child: Text(
+            widget.subtitle,
+            style: widget.subTitleTextStyle,
+          ),
+        ));
+
+      columList.add(Flexible(
+        child: Container(
+          width: 200,
+          child: Text(
+            widget.title,
+            overflow: TextOverflow.ellipsis,
+            style: widget.headerTextStyle,
+          ),
         ),
       ));
 
-    if (widget.subtitle != null)
-      listOfWidget.add(Container(
-        padding: EdgeInsets.only(left: 5.0,top: 2.0),
-        child: Text(
-          widget.subtitle,
-          style: widget.subTitleTextStyle,
+      listOfWidget.add(
+        Container(
+          padding: EdgeInsets.only(left: 18.0, right: 18.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: columList,
+          ),
         ),
-      ));
+      );
+    }
 
     if (widget.rightButton != null)
       listOfWidget.add(
@@ -104,8 +120,6 @@ class _DoubleLineHeaderState extends State<DoubleLineHeader> {
               ),
             ))
           ],
-        )
-      
-        );
+        ));
   }
 }

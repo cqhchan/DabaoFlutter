@@ -4,13 +4,14 @@ import 'package:flutterdabao/CreateOrder/LocationCard.dart';
 import 'package:flutterdabao/CreateOrder/OrderOverlay.dart';
 import 'package:flutterdabao/CustomWidget/Buttons/CustomizedBackButton.dart';
 import 'package:flutterdabao/CustomWidget/CustomizedMap.dart';
-import 'package:flutterdabao/CustomWidget/HalfHalfPopUpRoute.dart';
+import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/CustomWidget/Headers/DoubleLineHeader.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
+import 'package:flutterdabao/OrderItems/OrderItemEditor.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -44,17 +45,9 @@ class _OrderNowState extends State<OrderNow>
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
-    showOverlay = () {
-      showHalfBottomSheet(
-          context: context,
-          builder: (builder) {
-            return OrderOverlay(holder: widget.holder, page: progress,);
-          
-          });
-    };
-
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -74,5 +67,16 @@ class _OrderNowState extends State<OrderNow>
     );
   }
 
-  VoidCallback showOverlay;
+  showOverlay() {
+    
+
+    showHalfBottomSheet(
+        context: context,
+        builder: (builder) {
+          return OrderOverlay(
+            holder: widget.holder,
+            page: progress,
+          );
+        });
+  }
 }

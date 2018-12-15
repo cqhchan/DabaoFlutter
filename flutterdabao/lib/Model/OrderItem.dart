@@ -1,41 +1,54 @@
-import 'package:flutterdabao/HelperClasses/StringHelper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutterdabao/Firebase/FirebaseType.dart';
+import 'package:rxdart/subjects.dart';
 
-class OrderItem {
-  final String titleKey = "T";
-  final String qtyKey = "QTY";
-  final String priceKey = "P";
-  final String descriptionKey = "D";
+class OrderItem extends FirebaseType {
+  static final String titleKey = "T";
+  static final String qtyKey = "QTY";
+  static final String priceKey = "P";
+  static final String descriptionKey = "D";
 
-  String name;
-  double price;
-  int quantity;
-  String description;
+  BehaviorSubject<String> name;
+  BehaviorSubject<double> price;
+  BehaviorSubject<int> quantity;
+  BehaviorSubject<String> description;
 
-  OrderItem(this.name, this.price, this.description, this.quantity);
+  OrderItem.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
-  OrderItem.fromMap(Map<String, dynamic> map) {
+  @override
+  void map(Map<String, dynamic> map) {
+    
+    print (map);
     if (map.containsKey(titleKey)) {
-      name = map[titleKey];
+      name.add(map[titleKey]);
     } else {
-      name = StringHelper.nullString;
+      name.add(null);
     }
 
     if (map.containsKey(descriptionKey)) {
-      description = map[descriptionKey];
+      description.add(map[descriptionKey]);
     } else {
-      description = StringHelper.nullString;
+      description.add(null);
     }
 
     if (map.containsKey(qtyKey)) {
-      quantity = map[qtyKey];
+      quantity.add(map[qtyKey]);
     } else {
-      quantity = -1;
+      quantity.add(0);
     }
 
     if (map.containsKey(priceKey)) {
-      price = map[priceKey];
+      price.add(map[priceKey] + .0);
     } else {
-      price = -1;
+      price.add(0.0);
     }
+  }
+
+  @override
+  void setUpVariables() {
+    name = BehaviorSubject();
+    quantity = BehaviorSubject();
+    price = BehaviorSubject();
+    description = BehaviorSubject();
   }
 }

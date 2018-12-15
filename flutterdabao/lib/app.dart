@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:flutterdabao/Model/User.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/LoginSignup/LoginPage.dart';
-import 'package:flutterdabao/LoaderAnimator/LoadingWidget.dart';
 
 class DabaoApp extends StatelessWidget {
   // Add in all set up etc needed

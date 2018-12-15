@@ -64,7 +64,6 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    // Expanded(child: Container(color: Colors.black,child: Text("t"),),),
                     _scheduleOrder(),
                     SizedBox(
                       width: 20.0,

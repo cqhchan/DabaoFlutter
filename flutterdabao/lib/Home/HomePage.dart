@@ -4,14 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/Holder/OrderItemHolder.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
+import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/OrderItems/OrderItemEditor.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -27,13 +32,12 @@ class _Home extends State<Home> {
     });
   }
 
-
   @override
   void initState() {
     super.initState();
 
-
-    ConfigHelper.instance.startListeningToCurrentLocation(LocationHelper.instance.softAskForPermission());
+    ConfigHelper.instance.startListeningToCurrentLocation(
+        LocationHelper.instance.softAskForPermission());
   }
 
   @override
@@ -68,8 +72,11 @@ class _Home extends State<Home> {
                         );
                       }),
                       //Dabaoer
+
                       squardCard('assets/icons/bike.png', 'Dabaoer',
-                          'I want to Deliver', () {}),
+                          'I want to Deliver', () {
+                        showOrderItemCreator(context: context, foodTagTitle: 'koi', onCompleteCallback: (OrderItemHolder r) {});
+                      }),
                       //ChatBox
                     ],
                   ),
@@ -149,7 +156,7 @@ class _Home extends State<Home> {
           decoration: new BoxDecoration(
               image: new DecorationImage(
                   colorFilter: ColorFilter.mode(
-                      ColorHelper.rgba(0xD8, 0xD8, 0xD8, 20), BlendMode.darken),
+                      ColorHelper.rgbo(0xD8, 0xD8, 0xD8, 20), BlendMode.darken),
                   image: new AssetImage("assets/images/splashbg.png"),
                   fit: BoxFit.fitWidth)),
         ),

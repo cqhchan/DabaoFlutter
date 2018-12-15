@@ -13,3 +13,26 @@ class FirebaseDocumentReactive<T extends Mappable>{
 
 }
 
+
+
+class FirebaseDocumentReactiveOnce<T extends Mappable>{
+
+  Future<T> future;
+  
+  FirebaseDocumentReactiveOnce(DocumentReference ref){
+
+
+      future = ref.get().then((snapshot) {
+
+        return Mappable.mapping<T>(snapshot);
+
+      });
+
+
+
+  }
+
+}
+
+
+

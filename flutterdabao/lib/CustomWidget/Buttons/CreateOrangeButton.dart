@@ -22,24 +22,6 @@ class CreateOrangeButtonState extends State<CreateOrangeButton> {
   String imageAsset;
   String text;
 
-  void _showModalSheet() {
-    showModalBottomSheet(
-        context: context,
-        builder: (builder) {
-          return Container(
-            color: ColorHelper.dabaoOffWhiteF5,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(width: 10.0, color: ColorHelper.dabaoOrange),
-                ),
-              ),
-              child: FoodTag(),
-            ),
-          );
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -61,7 +43,6 @@ class CreateOrangeButtonState extends State<CreateOrangeButton> {
           ],
         ),
         onPressed: () {
-          _showModalSheet();
         },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),

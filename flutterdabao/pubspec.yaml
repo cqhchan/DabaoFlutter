@@ -25,7 +25,6 @@ dependencies:
   cloud_functions: ^0.0.5
   geolocator: '^2.1.1'
   google_maps_flutter: ^0.0.3+3 
-  latlong: ^0.6.1
   flutter_google_places: any
   shared_preferences: ^0.4.3
   material_search: ^0.2.8
@@ -36,7 +35,9 @@ dependencies:
   firebase_auth: ^0.6.2+1
   google_sign_in: ^3.2.2
   firebase: ^5.0.0
+  flutter_typeahead: ^0.4.1
   cloud_firestore: ^0.8.2
+  geohash: ^0.2.1
   settings:
     git:
       url: https://github.com/cqhchan/settings

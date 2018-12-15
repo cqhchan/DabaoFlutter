@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutterdabao/CreateOrder/FoodTag.dart';
+import 'package:flutterdabao/CreateOrder/OverlayPages/SelectFoodTagPage.dart';
+import 'package:flutterdabao/CreateOrder/OverlayPages/SelectOrderItem.dart';
 import 'package:flutterdabao/CustomWidget/Headers/DoubleLineHeader.dart';
 import 'package:flutterdabao/CustomWidget/page_turner_widget.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:rxdart/src/subjects/behavior_subject.dart';
 
@@ -26,18 +28,57 @@ class _OrderOverlayState extends State<OrderOverlay> with PageHandler {
 
   @override
   Widget pageForNumber(int pageNumber) {
+    if (pageNumber == null) {
+      return CircularProgressIndicator();
+    }
+
     switch (pageNumber) {
       case 0:
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             DoubleLineHeader(
-              title: "Food Tag",
-              subtitle: "Select one",
+              title: widget.holder.deliveryLocationDescription.value,
+              subtitle: "Today,",
             ),
-            FoodTag()
+            Flexible(
+              child: SingleChildScrollView(
+                child: SelectFoodTagPage(
+                  holder: widget.holder,
+                  nextPage: nextPage,
+                ),
+              ),
+            )
           ],
         );
+        break;
+
+      case 1:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            DoubleLineHeader(
+              leftButton: GestureDetector(
+                onTap: previousPage,
+                child: Container(
+                    margin: EdgeInsets.only(left: 16.0),
+                    height: 20,
+                    width: 15,
+                    child: Image.asset("assets/icons/arrow_left_icon.png")),
+              ),
+              title: StringHelper.upperCaseWords(widget.holder.foodTag.value),
+            ),
+            Flexible(
+              child: SingleChildScrollView(
+                child: SelectOrderItem(
+                  holder: widget.holder,
+                  nextPage: nextPage,
+                ),
+              ),
+            )
+          ],
+        );
+        break;
 
       default:
         return Column(
@@ -57,11 +98,6 @@ class _OrderOverlayState extends State<OrderOverlay> with PageHandler {
           ],
         );
     }
-
-    return Container(
-      height: 200,
-      width: MediaQuery.of(context).size.width,
-    );
   }
 
   @override

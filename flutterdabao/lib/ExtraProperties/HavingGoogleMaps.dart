@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 abstract class HavingGoogleMaps {
   GoogleMapController mapController;
 
-  Function mapCallBack;
+  mapCallBack();
 
   Future<void> panToLocation(
       GoogleMapController controller, LatLng location, double minZoom, [int delayInMilliSecs = 200]) {

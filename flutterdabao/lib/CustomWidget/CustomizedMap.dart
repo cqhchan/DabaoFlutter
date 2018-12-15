@@ -59,8 +59,10 @@ class _CustomizedMapState extends State<CustomizedMap>
   MutableProperty<LatLng> currentLocation =
       ConfigHelper.instance.currentLocationProperty;
 
+  // Delivery Marker
   Marker _deliveryMarker;
 
+  //Delivery Icon when stationary
   BitmapDescriptor get deliveryIcon {
     bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     if (isIOS)
@@ -70,6 +72,18 @@ class _CustomizedMapState extends State<CustomizedMap>
           'assets/icons/3.0x/red_marker_icon.png');
   }
 
+  //Delivery Icon when Moving
+  BitmapDescriptor get semiOpaqueDeliveryIcon {
+    bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+    if (isIOS)
+      return BitmapDescriptor.fromAsset(
+          'assets/icons/red_marker_semi_opaque.png');
+    else
+      return BitmapDescriptor.fromAsset(
+          'assets/icons/3.0x/red_marker_semi_opaque.png');
+  }
+
+  //bikeIcon of nearby Dabaoers
   BitmapDescriptor get bikeIcon {
     bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     if (isIOS)
@@ -78,145 +92,16 @@ class _CustomizedMapState extends State<CustomizedMap>
       return BitmapDescriptor.fromAsset('assets/icons/3.0x/bike.png');
   }
 
+  bool lastCameraIsMoving = false;
+
   @override
   void initState() {
     super.initState();
 
     // Request permission and start listening to current location
     startListeningToCurrentLocation();
-
-    // When it first loads, if selected location/ selected location desription is null, it will set them to current location
-
-    mapCallBack = () {
-      if (mapController.isCameraMoving) {
-        {
-          if (_deliveryMarker != null)
-            mapController.updateMarker(
-                _deliveryMarker,
-                MarkerOptions(
-                  position: mapController.cameraPosition.target,
-                ));
-        }
-
-        lastCameraIsMoving = true;
-      } else {
-        if (lastCameraIsMoving) {
-          updateSelectedLocationFromLatLng(mapController.cameraPosition.target);
-        }
-        lastCameraIsMoving = false;
-      }
-    };
   }
 
-  void updateSelectedLocationFromLatLng(LatLng location) async {
-    List<Placemark> addresses = await LocationHelper.instance.location
-        .placemarkFromCoordinates(location.latitude, location.longitude);
-    Placemark first = addresses.first;
-
-    selectedlocationDescription.value =
-        LocationHelper.instance.addressFromPlacemarker(first);
-    selectedlocation.value = location;
-  }
-
-  void startListeningToCurrentLocation() async {
-    ConfigHelper.instance.startListeningToCurrentLocation(
-        LocationHelper.instance.hardAskForPermission(
-            context,
-            Text("Please Enable Location"),
-            Text(
-                "Dabao needs your location to verify your Orders/Deliveries")));
-  }
-
-// Create marker, updates if nesscery when selectedLocation is updated
-  void _createDeliveryMarker(GoogleMapController controller) {
-    subscription.add(selectedlocation.producer.listen((result) async {
-      if (_deliveryMarker == null) {
-        _deliveryMarker = await controller.addMarker(MarkerOptions(
-          icon: deliveryIcon,
-          infoWindowText: InfoWindowText('Delivery Location', 'Hold to Drag'),
-          draggable: true,
-          consumeTapEvents: false,
-          position: result,
-        ));
-      } else {
-        await controller.updateMarker(
-            _deliveryMarker,
-            MarkerOptions(
-              position: result,
-            ));
-      }
-      panToLocation(controller, result, zoom);
-    }));
-  }
-
-  bool get isInDebugMode {
-    bool inDebugMode = false;
-    assert(inDebugMode = true);
-    return inDebugMode;
-  }
-
-  void _createNearbyMarkers(GoogleMapController controller) {
-    LatLng previousLatLng;
-
-    // if previous locatiion to current location is > 2000, search again
-    subscription.add(selectedlocation.producer.listen((location) async {
-      if (previousLatLng != null) {
-        double distance = await LocationHelper.instance.location
-            .distanceBetween(location.latitude, location.longitude,
-                previousLatLng.latitude, previousLatLng.longitude);
-        if (distance < 2000) {
-          return;
-        }
-      }
-      previousLatLng = location;
-
-      //If Debug Mode, dont query
-      if (!isInDebugMode)
-      FirebaseCloudFunctions()
-          .fetchNearbyOrderOrDeliveries(location: location, mode: 0)
-          .then((list) {
-        markerLocations.value = list;
-      });
-    }));
-
-    subscription.add(markerLocations.producer.listen((markerLocations) {
-      markerLocations.forEach((location) {
-        mapController.addMarker(MarkerOptions(
-            icon: bikeIcon,
-            draggable: false,
-            infoWindowText: InfoWindowText('Dabaoer', "Good Food!"),
-            position: location));
-      });
-    }));
-  }
-
-  bool lastCameraIsMoving = false;
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-    _createDeliveryMarker(mapController);
-    _createNearbyMarkers(mapController);
-
-    controller.addListener(mapCallBack);
-
-    subscription.add(currentLocation.producer
-        .where((latlng) => latlng != null)
-        .listen((location) {
-      if (selectedlocation.value == null ||
-          selectedlocationDescription.value == null) {
-        updateSelectedLocationFromLatLng(location);
-      }
-    }));
-  }
-
-  @override
-  void dispose() {
-    subscription.dispose();
-    mapController.dispose();
-    super.dispose();
-  }
-
-// currentLocation
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -251,4 +136,155 @@ class _CustomizedMapState extends State<CustomizedMap>
       ),
     );
   }
+
+  //let address from selected LatLng and update the selected Location and Selected Locaition Description
+  //Used when used moves the map
+  void updateSelectedLocationFromLatLng(LatLng location) async {
+    List<Placemark> addresses = await LocationHelper.instance.location
+        .placemarkFromCoordinates(location.latitude, location.longitude);
+    Placemark first = addresses.first;
+
+    selectedlocationDescription.value =
+        LocationHelper.instance.addressFromPlacemarker(first);
+    selectedlocation.value = location;
+  }
+
+  //Ask for permission and start listening to current location
+  void startListeningToCurrentLocation() async {
+    ConfigHelper.instance.startListeningToCurrentLocation(
+        LocationHelper.instance.hardAskForPermission(
+            context,
+            Text("Please Enable Location"),
+            Text(
+                "Dabao needs your location to verify your Orders/Deliveries")));
+  }
+
+// Create marker, updates if nesscery when selectedLocation is updated
+  void _createDeliveryMarker(GoogleMapController controller) {
+    subscription.add(selectedlocation.producer.listen((result) async {
+      if (_deliveryMarker == null) {
+        Marker tempMarker = await controller.addMarker(MarkerOptions(
+          icon: deliveryIcon,
+          infoWindowText: InfoWindowText('Delivery Location', 'Hold to Drag'),
+          draggable: true,
+          consumeTapEvents: false,
+          position: result,
+        ));
+
+        if (_deliveryMarker == null) {
+          _deliveryMarker = tempMarker;
+        } else {
+          controller.removeMarker(tempMarker);
+        }
+      } else {
+        await controller.updateMarker(
+            _deliveryMarker,
+            MarkerOptions(
+              icon: deliveryIcon,
+              position: result,
+            ));
+      }
+      panToLocation(controller, result, zoom);
+    }));
+  }
+
+  bool get isInDebugMode {
+    bool inDebugMode = false;
+    assert(inDebugMode = true);
+    return inDebugMode;
+  }
+
+//Create nearby Markers of Dabaoers
+  void _createNearbyMarkers(GoogleMapController controller) {
+    LatLng previousLatLng;
+
+    // if previous locatiion to current location is > 2000, search again
+    subscription.add(selectedlocation.producer.listen((location) async {
+      if (previousLatLng != null) {
+        double distance = await LocationHelper.instance.location
+            .distanceBetween(location.latitude, location.longitude,
+                previousLatLng.latitude, previousLatLng.longitude);
+        if (distance < 2000) {
+          return;
+        }
+      }
+      previousLatLng = location;
+
+      //If Debug Mode, dont query
+      if (!isInDebugMode)
+        FirebaseCloudFunctions
+            .fetchNearbyDeliveries(location: location)
+            .then((list) {
+          markerLocations.value = list;
+        });
+    }));
+
+    subscription.add(markerLocations.producer.listen((markerLocations) {
+      markerLocations.forEach((location) {
+        mapController.addMarker(MarkerOptions(
+            icon: bikeIcon,
+            draggable: false,
+            infoWindowText: InfoWindowText('Dabaoer', "Good Food!"),
+            position: location));
+      });
+    }));
+  }
+
+// Whtt do do when Map is created
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+    _createDeliveryMarker(mapController);
+    _createNearbyMarkers(mapController);
+
+    controller.addListener(mapCallBack);
+
+    subscription.add(currentLocation.producer
+        .where((latlng) => latlng != null)
+        .listen((location) {
+      if (selectedlocation.value == null ||
+          selectedlocationDescription.value == null) {
+        updateSelectedLocationFromLatLng(location);
+      }
+    }));
+  }
+
+  @override
+  void dispose() {
+    subscription.dispose();
+    mapController.dispose();
+    super.dispose();
+  }
+
+  //Set the Map Callback Function
+  // called when map is moving/ stopped moving
+  @override
+  mapCallBack() {
+    if (mapController.isCameraMoving) {
+      
+        if (_deliveryMarker != null) {
+        
+        if (lastCameraIsMoving) {
+          mapController.updateMarker(
+              _deliveryMarker,
+              MarkerOptions(
+                position: mapController.cameraPosition.target,
+              ));
+        } else {
+          mapController.updateMarker(
+              _deliveryMarker,
+              MarkerOptions(
+                icon: semiOpaqueDeliveryIcon,
+                position: mapController.cameraPosition.target,
+              ));
+      }
+        }
+      lastCameraIsMoving = true;
+    } else {
+      if (lastCameraIsMoving) {
+        updateSelectedLocationFromLatLng(mapController.cameraPosition.target);
+      }
+      lastCameraIsMoving = false;
+    }
+  }
+  
 }

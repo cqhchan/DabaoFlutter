@@ -18,7 +18,7 @@ class FontHelper {
       color: Colors.orange,
       fontSize: 12.0,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w300,
+      fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
   static const TextStyle headerTextStyle = TextStyle(
       color: Colors.black,
@@ -29,14 +29,14 @@ class FontHelper {
 
   static const TextStyle overlayHeader = TextStyle(
       color: Colors.black,
-      fontSize: 22.0,
+      fontSize: 16.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w500,
       fontFamily: "SF_UI_Display");
 
   static const TextStyle overlaySubtitleHeader = TextStyle(
-      color: ColorHelper.dabaoOffBlack4A,
-      fontSize: 12.0,
+      color: ColorHelper.dabaoOffBlack9B,
+      fontSize: 14.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w500,
       fontFamily: "SF_UI_Display");
@@ -118,6 +118,15 @@ class FontHelper {
         fontSize: size,
         fontStyle: FontStyle.normal,
         fontWeight: FontWeight.w700,
+        fontFamily: "SF_UI_Display");
+  }
+
+    static TextStyle medium(Color color, double size) {
+    return TextStyle(
+        color: color,
+        fontSize: size,
+        fontStyle: FontStyle.normal,
+        fontWeight: FontWeight.w500,
         fontFamily: "SF_UI_Display");
   }
 }

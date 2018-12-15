@@ -6,15 +6,20 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart'
 abstract class Selectable {
 
   
-  MutableProperty<bool> isSelected = new MutableProperty(false);
+  MutableProperty<bool> isSelectedProperty = new MutableProperty(false);
 
+  bool get isSelected =>  isSelectedProperty.value;
 
   select(){
-    isSelected.value = true;
+    isSelectedProperty.value = true;
   }
 
   deSelect(){
-    isSelected.value = false;
+    isSelectedProperty.value = false;
+  }
+
+  toggle(){
+    isSelectedProperty.value = !isSelectedProperty.value;
   }
 
 

@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -17,7 +17,9 @@ class LocationHelper {
   Geolocator location = new Geolocator();
 
   Observable<LatLng> onLocationChange() {
-    return Observable(location.getPositionStream()).where((position) => position!=null).map((Position result) {
+    return Observable(location.getPositionStream())
+        .where((position) => position != null)
+        .map((Position result) {
       return LatLng(
         result.latitude,
         result.longitude,
@@ -33,17 +35,13 @@ class LocationHelper {
           place.subThoroughfare == null ? '' : place.subThoroughfare;
 
       if (Platform.isAndroid) {
-
         if (StringHelper.isNumeric(name)) {
-    
-
           return name + " " + thoroughfare;
         } else {
           return name + ", " + subThoroughfare + " " + thoroughfare;
         }
       } else {
-          return subThoroughfare + " " + thoroughfare + ", " + name;
-
+        return subThoroughfare + " " + thoroughfare + ", " + name;
       }
     } else if (place.postalCode.isNotEmpty) {
       print(place.postalCode);
@@ -114,5 +112,23 @@ class LocationHelper {
               });
       }
     });
+  }
+
+  static double latitudeOffset(double latitude, double distanceInMeters) {
+    var earth = 6378.137; //radius of the earth in kilometer
+    var pi = math.pi;
+    var m = (1 / ((2 * pi / 360) * earth)) / 1000; //1 meter in degree
+
+    return latitude + (distanceInMeters * m);
+  }
+
+  static double longitudeOffset(
+      double latitude, double longitude, double distanceInMeters) {
+    var earth = 6378.137; //radius of the earth in kilometer
+    var pi = math.pi;
+    var cos = math.cos;
+    var m = (1 / ((2 * pi / 360) * earth)) / 1000; //1 meter in degree
+
+    return longitude + (distanceInMeters * m) / cos(latitude * (pi / 180));
   }
 }

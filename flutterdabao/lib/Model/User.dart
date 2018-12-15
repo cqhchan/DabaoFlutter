@@ -4,15 +4,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:rxdart/rxdart.dart';
 
 class User extends FirebaseType {
 
-
+  static String foodTagKey = 'FT';
 
   BehaviorSubject<String> email; 
   BehaviorSubject<double> amountSaved; 
   BehaviorSubject<double> amountEarned; 
+
+  BehaviorSubject<List<FoodTag>> userFoodTags; 
 
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
@@ -38,12 +41,26 @@ class User extends FirebaseType {
     email = BehaviorSubject();
     amountEarned = BehaviorSubject();
     amountSaved = BehaviorSubject();
-
+    userFoodTags = BehaviorSubject(seedValue: List());
 
   }
 
   @override
   void map(Map<String, dynamic> data) {
+
+    if (data.containsKey(foodTagKey)){
+      var mapOfFoodTag = data[foodTagKey] as Map;
+      List<FoodTag> fT = List();
+      
+      mapOfFoodTag.forEach((key,rawMap){
+        var map = rawMap.cast<String,dynamic>();
+        fT.add(FoodTag.fromMap(key, map));
+      });
+      userFoodTags.add(fT);
+    } else {
+      userFoodTags.add(List());
+    }
+
 
     // if (data.containsKey("email")){
     //   email.add(data["email"]);
