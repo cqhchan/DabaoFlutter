@@ -56,10 +56,11 @@ abstract class Mappable extends Identifiable {
 
   void mapFrom(Map<String, dynamic> data) {
     this.data = data;
-    if (data!= null) {
-    map(data);
+    
+    if (data == null) {
+      map(Map());
     } else {
-    map(Map());
+      map(data);
     }
   }
 

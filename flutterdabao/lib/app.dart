@@ -1,14 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
-import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
-import 'package:flutterdabao/Home/HomePage.dart';
-import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
-import 'package:flutterdabao/Model/User.dart';
-
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/LoginSignup/ProcessingPage.dart';
 import 'package:flutterdabao/LoginSignup/LoginPage.dart';
+
+import 'package:flutterdabao/Model/User.dart';
 
 class DabaoApp extends StatelessWidget {
   // Add in all set up etc needed
@@ -27,6 +26,7 @@ class DabaoApp extends StatelessWidget {
   }
 
   // Handles Authentication State
+  // Navigation logic
   Widget _handleCurrentScreen() {
     return StreamBuilder<FirebaseUser>(
         stream: FirebaseAuth.instance.onAuthStateChanged,
@@ -35,30 +35,20 @@ class DabaoApp extends StatelessWidget {
             return LoadingPage();
           } else {
             if (snapshot.hasData) {
-              // If Logged in, load user from FirebaseAuth
-              //TODO add in check if user has completed profile creation else bring to profile creation;
+              //This line of code sets the current user in ConfigHelper
               User user = User.fromAuth(snapshot.data);
-
-              return Home();
-              // return StreamBuilder<String>(
-              //   stream: user.profileImage,
-              //   builder: (BuildContext context, snapshot) {
-
-              //     if (snapshot.connectionState == ConnectionState.waiting){
-              //       return LoadingPage();
-              //     } else if (snapshot.hasData) { //snapshot.data != null
-              //       return Home();
-              //     } else {
-              //       return Home();
-              //     }        
-              //   }
-              //   );
-                
-                //return Home();
+              //Check if its logged in
+              return ProcessingPage(user);
             } else {
-              return LoginPage();
+              return Navigator(onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute(builder: (context) {
+                  return LoginPage();
+                });
+              });
             }
           }
         });
   }
+
+ 
 }

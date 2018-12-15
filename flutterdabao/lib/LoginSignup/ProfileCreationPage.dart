@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -17,16 +19,34 @@ class ProfileCreationPage extends StatefulWidget {
 }
 
 class _ProfileCreationPageState extends State<ProfileCreationPage> {
-  final _nameController = TextEditingController();
-  final _phoneNumberController = TextEditingController();
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _name;
   String _phoneNumber;
-
+  String _email;
+  String _password;
+  bool passwordVisibility = true;
+  String verificationId;
+  String smsCode;
   File _image;
   File _thumbnail;
   //for loading spinner, appears if true, hidden if false
   bool _inProgress = false;
+  bool _autoValidate = false;
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseAuth.instance.currentUser().then((user) {
+      setState(() {
+        _phoneNumber = user.phoneNumber;
+      });
+    });
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  //IMAGE PROCESSING/////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
 
   //Pre-condition: Called only when _image has been set
   void creatingThumbnail() {
@@ -105,16 +125,146 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       }
     });
   }
+  ///////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
 
+  ///////////////////////////////////////////////////////////////////////////////
+  //TO DEAL WITH "ERROR_REQUIRES_RECENT_LOGIN" EXCEPTION/////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+  Future<void> verifyPhone() async {
+    final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
+      verificationId = verId;
+    };
+    final PhoneCodeSent smsCodeSent = (String verId, [int forceCodeResend]) {
+      verificationId = verId;
+      smsCodeDialog(context).then((value) {
+        print('Signed in');
+      });
+    };
+    final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
+      print('verified');
+    };
+    final PhoneVerificationFailed veriFailed = (AuthException exception) {
+      print('${exception.message}');
+    };
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: _phoneNumber,
+        codeAutoRetrievalTimeout: autoRetrieve,
+        codeSent: smsCodeSent,
+        timeout: Duration(seconds: 5),
+        verificationCompleted: verifiedSuccess,
+        verificationFailed: veriFailed);
+  }
+
+  Future<bool> smsCodeDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Enter sms Code'),
+            content: TextField(
+              onChanged: (value) {
+                this.smsCode = value;
+              },
+            ),
+            contentPadding: EdgeInsets.all(10.0),
+            actions: <Widget>[
+              new FlatButton(
+                child: Text('Verify'),
+                onPressed: () {
+                  FirebaseAuth.instance.currentUser().then((user) {
+                    //only need to signIn if verification is not done automatically
+                    if (user == null) {
+                      //Navigator.of(context).pop();
+                      Navigator.of(context)
+                          .pop(); //To get rid of smsCodeDialog before moving on.
+                      signIn();
+                      //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
+                      /*
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfileCreationPage())
+                      );
+                      */
+                    }
+                  });
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  signIn() async {
+    FirebaseAuth.instance
+        .signInWithCredential(PhoneAuthProvider.getCredential(
+            verificationId: verificationId, smsCode: smsCode))
+        .then((user) {})
+        .catchError((e) {
+      print(e);
+    }).catchError((e) {
+      print(e);
+    });
+  }
+  ///////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////////////////////////////
+  //PROFILE CREATION FUNCTIONS///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   void createProfile() {
-    String uid;
+    //if-else statements prevent user from proceeding further if they have not filled up credentials properly yet
+    if (_image == null) {
+      _showSnackBar("Please upload a profile image");
+      return;
+    }
 
     //To activate for loading spinner
     setState(() {
       _inProgress = true;
     });
 
-    //upload the original image
+    //setting email first. In this function, it will call upload image
+    addEmailCredentials();
+
+    //Deactivating loading spinner
+    setState(() {
+      _inProgress = false;
+    });
+  }
+
+  //only works if you are creating a new account
+  void addEmailCredentials() {
+    //FirebaseAuth.instance.crea
+    FirebaseAuth.instance
+        .linkWithCredential(
+            EmailAuthProvider.getCredential(email: _email, password: _password))
+        .then((user) {
+      uploadImages(); //only upload image and set information into firestore if email credentials are valid
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    }).catchError((PlatformException e) {
+      if (e.code == "ERROR_PROVIDER_ALREADY_LINKED" ||
+          e.code == "ERROR_CREDENTIAL_ALREADY_IN_USE") {
+        print(e);
+        _showSnackBar("Email is already in use!");
+      } else if (e.code == "ERROR_REQUIRES_RECENT_LOGIN") {
+        print(e);
+        verifyPhone();
+      } else {
+        print(e);
+      }
+    });
+  }
+
+  //Pre-condition: Called only when _image has been sethg
+  //uploading profileImage and thumbnailImage to firebase
+  void uploadImages() {
+    String uid;
     FirebaseAuth.instance.currentUser().then((user) {
       uid = user.uid;
       final StorageReference profileRef =
@@ -131,19 +281,15 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
             thumbnailRef.ref.getDownloadURL().then((thumbnailLink) {
               FirebaseAuth.instance.currentUser().then((user) {
                 ConfigHelper.instance.currentUserProperty.value.setUser(
-                    user.email,
+                    _email,
                     0,
                     0,
                     profileLink,
                     _name,
-                    _phoneNumber,
                     user.metadata.creationTimestamp,
                     user.metadata.lastSignInTimestamp,
-                    thumbnailLink);
-                //deactivate loading spinner
-                setState(() {
-                  _inProgress = false;
-                });
+                    thumbnailLink,
+                    _phoneNumber);
               }).catchError((e) {
                 print(e);
               });
@@ -162,6 +308,16 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     }).catchError((e) {
       print(e);
     });
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+
+  void _showSnackBar(message) {
+    final snackBar = new SnackBar(
+      content: new Text(message),
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 
   //to raise the bottom sheet
@@ -209,74 +365,186 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         });
   }
 
+  void _validate() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      // Text forms was validated.
+      form.save();
+      createProfile();
+    } else {
+      setState(() => _autoValidate = true);
+    }
+  }
+
+  String _validateName(String value) {
+    if (value.isEmpty) {
+      return "Enter your name";
+    }
+  }
+
+  String _validatePassword(String value) {
+    if (value.isEmpty) {
+      return "Enter your password";
+    } else if (value.length < 7) {
+      return "Password must be at least 7 characters long";
+    }
+  }
+
+  String _validateEmail(String value) {
+    if (value.isEmpty) {
+      // The form is empty
+      return "Enter email address";
+    }
+    // This is just a regular expression for email addresses
+    String p = "[a-zA-Z0-9\+\.\_\%\-\+]{1,256}" +
+        "\\@" +
+        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+        "(" +
+        "\\." +
+        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+        ")+";
+    RegExp regExp = new RegExp(p);
+
+    if (regExp.hasMatch(value)) {
+      // So, the email is valid
+      return null;
+    }
+
+    // The pattern of the email didn't match the regex above.
+    return 'Pleas enter a valid email address';
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  //TO BUILD THE SCREEN//////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   //This builds the user interface on the screen
   //Not written in build so that it can be wrapped with modal_progress_HUD
   Widget buildWidget(BuildContext context) {
     return Scaffold(
+        key: _scaffoldKey,
         body: SafeArea(
-      child: ListView(
-        children: [
-          GestureDetector(
-            //onTap: getImage,
-            onTap: _showModalSheet,
+          child: Form(
+            key: _formKey,
+            autovalidate: _autoValidate,
+            child: ListView(
+              children: [
+                GestureDetector(
+                  //onTap: getImage,
+                  onTap: _showModalSheet,
 
-            child: _image == null
-                ? Container(
-                    height: MediaQuery.of(context).size.width,
-                    width: MediaQuery.of(context).size.width,
-                    child: Center(
-                      child: Icon(Icons.add_a_photo, size: 100.0),
-                    ),
-                    color: ColorHelper.dabaoGreyE0,
-                  )
-                : Image.file(_image, height: MediaQuery.of(context).size.width, width: MediaQuery.of(context).size.width, fit: BoxFit.fill,),
-          ),
-          SizedBox(height: 50.0),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(children: <Widget>[
-              TextField(
-                onChanged: (value) {
-                  setState(() {
-                    _name = value;
-                  });
-                },
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Name',
+                  child: _image == null
+                      ? Container(
+                          height: MediaQuery.of(context).size.width,
+                          width: MediaQuery.of(context).size.width,
+                          child: Center(
+                            child: Icon(Icons.add_a_photo, size: 100.0),
+                          ),
+                          color: ColorHelper.dabaoGreyE0,
+                        )
+                      : Image.file(
+                          _image,
+                          height: MediaQuery.of(context).size.width,
+                          width: MediaQuery.of(context).size.width,
+                          fit: BoxFit.fill,
+                        ),
                 ),
-              ),
-              SizedBox(height: 12.0),
-              TextField(
-                onChanged: (value) {
-                  setState(() {
-                    _phoneNumber = value;
-                  });
-                },
-                controller: _phoneNumberController,
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                ),
-              ),
-              SizedBox(height: 50.0),
-              RaisedButton(
-                  child: Container(
-                    height: 40,
-                    child: Center(
-                      child: Text('Create Profile'),
+                SizedBox(height: 50.0),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(children: <Widget>[
+                    TextField(
+                      enabled: false,
+                      decoration: InputDecoration(
+                        labelText: _phoneNumber,
+                      ),
                     ),
-                  ),
-                  color: ColorHelper.dabaoOrange,
-                  elevation: 5.0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  ),
-                  onPressed: createProfile),
-            ]),
+                    TextFormField(
+                      onSaved: (value) {
+                        _name = value;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Name',
+                      ),
+                      validator: _validateName,
+                    ),
+                    TextFormField(
+                      onSaved: (value) {
+                        _email = value;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Email Address',
+                      ),
+                      validator: _validateEmail,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    Container(
+                        child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: TextFormField(
+                            onSaved: (value) {
+                              _password = value;
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                            ),
+                            obscureText: passwordVisibility,
+                            validator: _validatePassword,
+                          ),
+                        ),
+                        GestureDetector(
+                            onTap: () {
+                              if (passwordVisibility == false) {
+                                setState(() {
+                                  passwordVisibility = true;
+                                });
+                              } else {
+                                setState(() {
+                                  passwordVisibility = false;
+                                });
+                              }
+                            },
+                            child: passwordVisibility == true
+                                ? Icon(Icons.visibility)
+                                : Icon(Icons.visibility_off)),
+                      ],
+                    )),
+                    SizedBox(height: 50.0),
+                    /* FOR DEBUGGING PURPOSES
+                    RaisedButton(
+                        child: Container(
+                          height: 40,
+                          child: Center(
+                            child: Text('Logout'),
+                          ),
+                        ),
+                        color: ColorHelper.dabaoGreyE0,
+                        elevation: 5.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        onPressed: () {
+                          FirebaseAuth.instance.signOut();
+                        }),*/
+                    RaisedButton(
+                        child: Container(
+                          height: 40,
+                          child: Center(
+                            child: Text('Create Profile'),
+                          ),
+                        ),
+                        color: ColorHelper.dabaoOrange,
+                        elevation: 5.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        onPressed: _validate),
+                  ]),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    ));
+        ));
   }
 
   @override

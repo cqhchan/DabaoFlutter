@@ -1,23 +1,16 @@
 import 'dart:math';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
-import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
-
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
-import 'package:flutterdabao/Holder/OrderItemHolder.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
-import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/User.dart';
-import 'package:flutterdabao/OrderItems/OrderItemEditor.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Home extends StatefulWidget {
   @override
