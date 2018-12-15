@@ -13,6 +13,8 @@ abstract class FirebaseType extends Mappable with Equatable {
   
   FirebaseType.fromUID(String uid) : super.fromUID(uid);
 
+  FirebaseType.fromMap(String uid, Map<String,dynamic> data) : super.fromMap(uid, data);
+
 
 
   @override

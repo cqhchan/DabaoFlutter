@@ -4,12 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 
 class User extends FirebaseType {
 
-
+  static String foodTagKey = 'FT';
 
   BehaviorSubject<String> email; 
   BehaviorSubject<double> amountSaved; 
@@ -18,6 +19,7 @@ class User extends FirebaseType {
   BehaviorSubject<String> name;
   BehaviorSubject<String> phoneNumber;
   BehaviorSubject<String> thumbnailImage;
+    BehaviorSubject<List<FoodTag>> userFoodTags; 
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   User.fromUID(String uid) : super.fromUID(uid);
@@ -44,23 +46,38 @@ class User extends FirebaseType {
     name = BehaviorSubject();
     phoneNumber = BehaviorSubject();
     thumbnailImage = BehaviorSubject();
+    userFoodTags = BehaviorSubject(seedValue: List());
 
   }
 
   @override
   void map(Map<String, dynamic> data) {
 
-    if (data.containsKey("email")){
-      email.add(data["email"]);
+    if (data.containsKey(foodTagKey)){
+      var mapOfFoodTag = data[foodTagKey] as Map;
+      List<FoodTag> fT = List();
+      
+      mapOfFoodTag.forEach((key,rawMap){
+        var map = rawMap.cast<String,dynamic>();
+        fT.add(FoodTag.fromMap(key, map));
+      });
+      userFoodTags.add(fT);
+    } else {
+      userFoodTags.add(List());
     }
 
-    if (data.containsKey("save")){
-      amountSaved.add(data["save"].toDouble());
-    }
 
-    if (data.containsKey("earn")){
-      amountEarned.add(data["earn"].toDouble());
-    }
+    // if (data.containsKey("email")){
+    //   email.add(data["email"]);
+    // }
+
+    // if (data.containsKey("save")){
+    //   amountSaved.add(data["save"].toDouble());
+    // }
+
+    // if (data.containsKey("earn")){
+    //   amountEarned.add(data["earn"].toDouble());
+    // }
 
     if (data.containsKey("PI")) {
       profileImage.add(data["PI"]);

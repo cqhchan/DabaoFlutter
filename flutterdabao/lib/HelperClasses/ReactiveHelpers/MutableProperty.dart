@@ -29,7 +29,6 @@ class MutableProperty<T> {
 
 StreamSubscription<T> bindTo(RxDart.Observable<T> o ){
     
-    print("New Test " +T.runtimeType.toString());
 
     return o.listen((t) => _producer.onAdd(t), onError: (e) => _producer.addError(e));
 

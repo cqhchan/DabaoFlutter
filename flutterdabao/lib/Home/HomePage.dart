@@ -2,15 +2,22 @@ import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
-import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
+import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/Holder/OrderItemHolder.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
+import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/OrderItems/OrderItemEditor.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -22,8 +29,16 @@ class _Home extends State<Home> {
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
   _Home() {
     _controller.addListener(() {
-      _opacityProperty.value = max(min((_controller.offset / 150), 1.0), 0.0);
+      _opacityProperty.value = max(min((_controller.offset / 150.0), 1.0), 0.0);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    ConfigHelper.instance.startListeningToCurrentLocation(
+        LocationHelper.instance.softAskForPermission());
   }
 
   @override
@@ -39,56 +54,39 @@ class _Home extends State<Home> {
 
                 Container(
                   child: Text(
-                    "How can we help you today?",
+                    "How can we serve you today?",
                     style: FontHelper.semiBold18Black,
                   ),
                   padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
                 ),
                 Container(
                   padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-                  child: Row(
+                  child: Wrap(
+                    spacing: 25.0,
                     children: <Widget>[
-                      ScaleGestureDetector(
-                        onTap: ()  {
-                          print("testing");
-                          FirebaseAuth.instance.signOut();
-                        },
-                        child: Container(
-                          height: 95,
-                          width: 95,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    offset: Offset(0, 1),
-                                    color: Colors.black.withOpacity(0.5),
-                                    spreadRadius: 0.1,
-                                    blurRadius: 2.0)
-                              ],
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(18.0))),
-                        ),
-                      ),
-                      Container(width: 30,),
-                      ScaleGestureDetector(
-                        child: Container(
-                          height: 95,
-                          width: 95,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    offset: Offset(0, 1),
-                                    color: Colors.black.withOpacity(0.5),
-                                    spreadRadius: 0.1,
-                                    blurRadius: 2.0)
-                              ],
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(18.0))),
-                        ),
-                      ),
+                      //Dabaoee
+                      squardCard('assets/icons/person.png', 'Dabaoee',
+                          'I want to Order', () {
+                        Navigator.push(
+                          context,
+                          FadeRoute(widget: OrderNow()),
+                        );
+                      }),
+                      //Dabaoer
+
+                      squardCard('assets/icons/bike.png', 'Dabaoer',
+                          'I want to Deliver', () {
+                      }),
+                      //ChatBox
                     ],
                   ),
+                ),
+                Container(
+                  child: Text(
+                    "Notifications",
+                    style: FontHelper.semiBold18Black,
+                  ),
+                  padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 0.0),
                 ),
               ],
             ),
@@ -100,13 +98,55 @@ class _Home extends State<Home> {
                   backgroundColor: Colors.white,
                   opacityProperty: _opacityProperty,
                   leftButton: GestureDetector(
-                    child: Image.asset(
-                      "assets/icons/profile_icon.png",
-                      scale: 0.8,
+                    child: Container(
+                      height: 40.0,
+                      width: 40.0,
+                      child: Image.asset(
+                        "assets/icons/profile_icon.png",
+                        fit: BoxFit.fill,
+                      ),
                     ),
                   )))
         ],
       );
+
+  Container squardCard(
+    String imagePath,
+    String title,
+    String body,
+    VoidCallback onPressed,
+  ) {
+    return Container(
+      child: RaisedButton(
+        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+        color: Colors.white,
+        elevation: 4.0,
+        disabledElevation: 4.0,
+        highlightElevation: 4.0,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(18.0))),
+        onPressed: onPressed,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(height: 40, width: 40, child: Image.asset(imagePath)),
+            SizedBox(height: 2),
+            Text(
+              title,
+              style: FontHelper.bold14Black,
+            ),
+            Text(
+              body,
+              style: FontHelper.regular14Black,
+            ),
+          ],
+        ),
+      ),
+      height: 95.0,
+      width: 95.0,
+    );
+  }
 
   Stack balanceStack(BuildContext context) {
     return Stack(
@@ -116,7 +156,7 @@ class _Home extends State<Home> {
           decoration: new BoxDecoration(
               image: new DecorationImage(
                   colorFilter: ColorFilter.mode(
-                      ColorHelper.rgba(0xD8, 0xD8, 0xD8, 20), BlendMode.darken),
+                      ColorHelper.rgbo(0xD8, 0xD8, 0xD8, 20), BlendMode.darken),
                   image: new AssetImage("assets/images/splashbg.png"),
                   fit: BoxFit.fitWidth)),
         ),

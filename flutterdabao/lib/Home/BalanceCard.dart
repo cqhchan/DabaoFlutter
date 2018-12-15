@@ -27,7 +27,7 @@ class BalanceCard extends StatelessWidget {
                   children: <Widget>[
                     topWidget(),
                     Line(
-                      margin: EdgeInsets.fromLTRB(25, 0, 35, 0),
+                      margin: EdgeInsets.fromLTRB(25.0, 0.0, 35.0, 0.0),
                     ),
                     bottomRow(),
                   ],
@@ -60,7 +60,7 @@ class BalanceCard extends StatelessWidget {
                   children: <Widget>[
                     Center(
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                        padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 0.0),
                         child: Text(
                           "I have Saved",
                           style: FontHelper.semiBold14Black,
@@ -70,7 +70,7 @@ class BalanceCard extends StatelessWidget {
                     Expanded(
                       child: Center(
                         child: Container(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
                           child: Text(
                             "\$" + snapshot.data.toString(),
                             style: FontHelper.semiBold20Orange,
@@ -89,13 +89,13 @@ class BalanceCard extends StatelessWidget {
                 strokeWidth: 3.0,
               )),
       ),
-      margin: EdgeInsets.fromLTRB(12, 12.5, 25, 12.5),
-      height: 85,
+      margin: EdgeInsets.fromLTRB(12.0, 12.5, 25.0, 12.5),
+      height: 85.0,
       decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-                offset: Offset(0, 1),
+                offset: Offset(0.0, 1.0),
                 color: Colors.black.withOpacity(0.5),
                 spreadRadius: 0.1,
                 blurRadius: 2.0)
@@ -116,7 +116,7 @@ class BalanceCard extends StatelessWidget {
                   children: <Widget>[
                     Center(
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                        padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 0.0),
                         child: Text(
                           "I have Earned",
                           style: FontHelper.semiBold14Black,
@@ -126,7 +126,7 @@ class BalanceCard extends StatelessWidget {
                     Expanded(
                       child: Center(
                         child: Container(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
                           child: Text(
                             "\$" + snapshot.data.toString(),
                             style: FontHelper.semiBold20Orange,
@@ -145,13 +145,13 @@ class BalanceCard extends StatelessWidget {
                 strokeWidth: 3.0,
               )),
       ),
-      height: 85,
-      margin: EdgeInsets.fromLTRB(25, 12.5, 12, 12.5),
+      height: 85.0,
+      margin: EdgeInsets.fromLTRB(25.0, 12.5, 12.0, 12.5),
       decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-                offset: Offset(0, 1),
+                offset: Offset(0.0, 1.0),
                 color: Colors.black.withOpacity(0.5),
                 spreadRadius: 0.1,
                 blurRadius: 2.0)
@@ -163,7 +163,7 @@ class BalanceCard extends StatelessWidget {
   Expanded topWidget() {
     return Expanded(
         child: Container(
-      margin: EdgeInsets.fromLTRB(25, 0, 35, 0),
+      margin: EdgeInsets.fromLTRB(25.0, 0.0, 35.0, 0.0),
       child: Center(
           child: Row(
         children: <Widget>[
