@@ -6,10 +6,12 @@ abstract class PageHandler {
 
   BehaviorSubject<int> get pageNumberSubject;
 
-  nextPage(){ 
-    pageNumberSubject.add(pageNumberSubject.value + 1 );}
+  int get maxPage;
 
-  previousPage(){ pageNumberSubject.add(pageNumberSubject.value - 1 );}
+
+  nextPage(){ pageNumberSubject.add( pageNumberSubject.value + 1 > maxPage ? maxPage : pageNumberSubject.value + 1 );}
+
+  previousPage(){ pageNumberSubject.add(pageNumberSubject.value - 1 < 0 ? 0: pageNumberSubject.value - 1 );}
 
   Widget pageForNumber(int pageNumber);
 }

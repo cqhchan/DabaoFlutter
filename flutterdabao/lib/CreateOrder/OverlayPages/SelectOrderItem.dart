@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CustomWidget/Buttons/ArrowButton.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -67,20 +68,42 @@ class _SelectOrderItemState extends State<SelectOrderItem>
   Widget build(BuildContext context) {
     return Container(
       color: ColorHelper.dabaoOffWhiteF5,
-      child: SafeArea(
-        child: Column(
-          children: <Widget>[
-            //Suggested orders
-            Container(
-                padding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 0.0),
-                child: suggestedOrders()),
+      child: SingleChildScrollView(
+        child: SafeArea(
+          child: Column(
+            children: <Widget>[
+              //Suggested orders
+              Container(
+                  padding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 0.0),
+                  child: suggestedOrders()),
 
-            Container(
-                padding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 30.0),
-                child: OrderItemSummary(
-                  holders: widget.holder,
-                )),
-          ],
+              Container(
+                  padding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 30.0),
+                  child: OrderItemSummary(
+                    holders: widget.holder,
+                  )),
+
+              StreamBuilder<List<OrderItemHolder>>(
+                stream: widget.holder.orderItems.producer,
+                builder: (context, snap) {
+                  if (snap.hasData && snap.data.length > 0) {
+                    return Container(
+                      padding: EdgeInsets.only(
+                          left: 30.0, right: 30.0, bottom: 20.0),
+                      child: ArrowButton(
+                        title: "Go to Checkout",
+                        onPressedCallback: () {
+                          widget.nextPage();
+                        },
+                      ),
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -102,7 +125,6 @@ class _SelectOrderItemState extends State<SelectOrderItem>
 
         snap.data
             .map((orderItem) => _OrderItemSuggestedCell(
-                  
                   onAddTapped: (OrderItem item) {
                     //Show Order Creator page
                     showOrderItemCreator(

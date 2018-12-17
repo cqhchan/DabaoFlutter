@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 class ColumnBuilder extends StatefulWidget {
   final IndexedWidgetBuilder itemBuilder;
   final WidgetBuilder placeHolderBuilder;
-
+  final WidgetBuilder persistantItemBuilder;
   final MainAxisAlignment mainAxisAlignment;
   final MainAxisSize mainAxisSize;
   final CrossAxisAlignment crossAxisAlignment;
@@ -21,10 +21,13 @@ class ColumnBuilder extends StatefulWidget {
     this.textDirection,
     this.verticalDirection: VerticalDirection.down,
     this.placeHolderBuilder,
+    this.persistantItemBuilder,
   }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
+        print("testing it Came here ");
+
     return _ColumnBuilderState();
   }
 }
@@ -32,11 +35,20 @@ class ColumnBuilder extends StatefulWidget {
 class _ColumnBuilderState extends State<ColumnBuilder> {
   @override
   Widget build(BuildContext context) {
-    return new Column(
-      children: widget.itemCount == 0 && widget.placeHolderBuilder != null
+
+    List<Widget> listOfWidget;
+
+    listOfWidget = widget.itemCount == 0 && widget.placeHolderBuilder != null
           ? [widget.placeHolderBuilder(context)]
           : new List.generate(widget.itemCount,
-              (index) => widget.itemBuilder(context, index)).toList(),
+              (index) => widget.itemBuilder(context, index)).toList();
+
+    if (widget.itemCount != 0 && widget.persistantItemBuilder != null){
+      listOfWidget.add(widget.persistantItemBuilder(context));
+    }
+
+    return new Column(
+      children: listOfWidget,
     );
   }
 }

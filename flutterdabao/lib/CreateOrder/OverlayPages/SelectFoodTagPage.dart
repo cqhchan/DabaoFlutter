@@ -67,25 +67,30 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 30.0, right: 30.0, bottom: 30.0),
-      color: ColorHelper.dabaoOffWhiteF5,
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Align(
-                alignment: Alignment.center,
-                child: Container(
-                    padding: EdgeInsets.only(top: 18.0, bottom: 18.0),
-                    child: Text(
-                      "What are you having today?",
-                      style: FontHelper.semiBold(
-                          ColorHelper.dabaoOffBlack4A, 15.0),
-                    ))),
-            buildBeingDelivered(),
-            buildReccomended(),
-            buildUser(),
-          ],
+                color: ColorHelper.dabaoOffWhiteF5,
+
+          child: SingleChildScrollView(
+            child: Container(
+          padding: EdgeInsets.only(left: 30.0, right: 30.0, bottom: 30.0),
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                        padding: EdgeInsets.only(top: 18.0, bottom: 18.0),
+                        child: Text(
+                          "What are you having today?",
+                          style: FontHelper.semiBold(
+                              ColorHelper.dabaoOffBlack4A, 15.0),
+                        ))),
+                buildBeingDelivered(),
+                buildReccomended(),
+                buildUser(),
+              ],
+            ),
+          ),
         ),
       ),
     );

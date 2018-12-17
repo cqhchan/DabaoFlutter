@@ -10,21 +10,25 @@ class DoubleLineHeader extends StatefulWidget {
   final GestureDetector rightButton;
   final TextStyle headerTextStyle;
   final TextStyle subTitleTextStyle;
+  final VoidCallback headerTapped;
+  final VoidCallback closeTapped;
 
   final Color backgroundColor;
   final Color topLineColor;
 
-  DoubleLineHeader(
-      {Key key,
-      this.backgroundColor = Colors.white,
-      this.title,
-      this.headerTextStyle = FontHelper.overlayHeader,
-      this.subTitleTextStyle = FontHelper.overlaySubtitleHeader,
-      this.leftButton,
-      this.rightButton,
-      this.subtitle,
-      this.topLineColor = ColorHelper.dabaoOrange})
-      : super(key: key);
+  DoubleLineHeader({
+    Key key,
+    this.backgroundColor = Colors.white,
+    this.title,
+    this.headerTextStyle = FontHelper.overlayHeader,
+    this.subTitleTextStyle = FontHelper.overlaySubtitleHeader,
+    this.leftButton,
+    this.rightButton,
+    this.subtitle,
+    this.topLineColor = ColorHelper.dabaoOrange,
+    this.headerTapped,
+    this.closeTapped,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -61,8 +65,8 @@ class _DoubleLineHeaderState extends State<DoubleLineHeader> {
         ));
 
       columList.add(Flexible(
-        child: Container(
-          width: 200,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 200.0),
           child: Text(
             widget.title,
             overflow: TextOverflow.ellipsis,
@@ -72,12 +76,16 @@ class _DoubleLineHeaderState extends State<DoubleLineHeader> {
       ));
 
       listOfWidget.add(
-        Container(
-          padding: EdgeInsets.only(left: 18.0, right: 18.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: columList,
+        GestureDetector(
+          onTap: widget.headerTapped,
+          child: Container(
+            color: Colors.transparent,
+            padding: EdgeInsets.only(left: 18.0, right: 18.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: columList,
+            ),
           ),
         ),
       );
@@ -102,7 +110,7 @@ class _DoubleLineHeaderState extends State<DoubleLineHeader> {
                   padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 18.0),
                   child: Image.asset('assets/icons/circle_close_icon.png'),
                 ),
-                onTap: () => Navigator.of(context).pop(),
+                onTap: widget.closeTapped,
               ),
             ),
             Container(

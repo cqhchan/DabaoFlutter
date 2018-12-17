@@ -1,14 +1,10 @@
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/OrderItemHolder.dart';
-import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-enum OrderMode { asap, scheduled }
+import 'package:rxdart/rxdart.dart';
 
 class OrderHolder {
-
-
   //Complusory
   MutableProperty<OrderMode> mode = MutableProperty(null);
   MutableProperty<LatLng> deliveryLocation = MutableProperty(null);
@@ -16,8 +12,18 @@ class OrderHolder {
   MutableProperty<String> foodTag = MutableProperty(null);
   MutableProperty<List<OrderItemHolder>> orderItems = MutableProperty(List());
   MutableProperty<DateTime> startDeliveryTime = MutableProperty(null);
+  MutableProperty<double> deliveryFee = MutableProperty(0.0);
 
   //Optional
   MutableProperty<DateTime> endDeliveryTime = MutableProperty(null);
   MutableProperty<String> message = MutableProperty(null);
+
+  Observable<double> maxPrice;
+
+  OrderHolder() {
+    maxPrice = orderItems.producer.map((items) => items
+        .map((order) => order.price.value * order.quantity.value)
+        .toList()
+        .reduce((price1, price2) => price1 + price2));
+  }
 }

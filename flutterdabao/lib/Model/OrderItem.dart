@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:rxdart/subjects.dart';
 
+enum OrderMode { asap, scheduled }
+
+
 class OrderItem extends FirebaseType {
   static final String titleKey = "T";
   static final String qtyKey = "QTY";

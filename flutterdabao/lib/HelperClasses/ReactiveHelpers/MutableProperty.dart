@@ -30,7 +30,7 @@ class MutableProperty<T> {
 StreamSubscription<T> bindTo(RxDart.Observable<T> o ){
     
 
-    return o.listen((t) => _producer.onAdd(t), onError: (e) => _producer.addError(e));
+    return o.listen((t) => _producer.add(t), onError: (e) => _producer.addError(e));
 
   }
 

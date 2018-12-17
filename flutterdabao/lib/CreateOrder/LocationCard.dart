@@ -6,18 +6,19 @@ import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/Holder/OrderHolder.dart';
+import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 
 class LocationCard extends StatefulWidget {
-  final MutableProperty<String> selectedLocationDescription;
-  final MutableProperty<LatLng> selectedLocation;
-  final VoidCallback showOverlayCallback; 
+  final OrderHolder holder;
+
+  final VoidCallback showOverlayCallback;
   const LocationCard({
     Key key,
-    @required this.selectedLocationDescription,
-    @required this.selectedLocation,
-    @required this.showOverlayCallback
+    @required this.holder,
+    @required this.showOverlayCallback,
   }) : super(key: key);
 
   @override
@@ -31,15 +32,15 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-          child: Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           Container(
             alignment: Alignment(0.0, -1.0),
-            padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 0.0),
+            padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 20.0),
             margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 35.0),
-            height: 160.0,
+            // height: 160.0,
             decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8.0),
@@ -65,8 +66,8 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     _scheduleOrder(),
-                    SizedBox(
-                      width: 20.0,
+                    ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: 10.0, maxWidth: 20.0),
                     ),
                     _orderNow(),
                   ],
@@ -85,16 +86,20 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
         child: RaisedButton(
           elevation: 0.0,
           highlightElevation: 0.0,
-          padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 9.0),
+          padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 9.0),
           color: ColorHelper.dabaoOrange,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+                   ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: 15.0, maxWidth: 22.0),
+                    ),
               Image.asset('assets/icons/run.png'),
+              
               SizedBox(
                 width: 5.0,
               ),
-              Expanded(
+              Flexible(
                 child: Center(
                   child: Text(
                     'Order Now',
@@ -103,9 +108,16 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
                   ),
                 ),
               ),
+                   ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: 15.0, maxWidth: 22.0),
+                    ),
             ],
           ),
-          onPressed: widget.showOverlayCallback,
+          onPressed: () {
+            widget.holder.startDeliveryTime.value = DateTime.now();
+            widget.holder.mode.value = OrderMode.asap;
+            widget.showOverlayCallback();
+          },
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
@@ -115,10 +127,11 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
     );
   }
 
-  Container _scheduleOrder() {
-    return Container(
-      height: 55.0,
-      width: 105.0,
+  Widget _scheduleOrder() {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: 55.0, minHeight: 55.0, minWidth: 90.0, maxWidth: 105.0),
+      // height: 55.0,
+      // width: 105.0,
       child: RaisedButton(
         elevation: 0.0,
         highlightElevation: 0.0,
@@ -131,10 +144,12 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
             SizedBox(
               width: 5.0,
             ),
-            Text(
-              'Scheduled\nOrder',
-              textAlign: TextAlign.center,
-              style: FontHelper.bold(Colors.black, 12.0),
+            FittedBox(
+                          child: Text(
+                'Scheduled\nOrder',
+                textAlign: TextAlign.center,
+                style: FontHelper.bold(Colors.black, 12.0),
+              ),
             ),
           ],
         ),
@@ -169,7 +184,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
     return Container(
       child: GestureDetector(
         child: StreamBuilder<String>(
-          stream: widget.selectedLocationDescription.producer,
+          stream: widget.holder.deliveryLocationDescription.producer,
           builder: (context, addressSnap) {
             if (addressSnap.connectionState == ConnectionState.waiting ||
                 !addressSnap.hasData) {
@@ -212,8 +227,8 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
 
     if (p != null) {
       LatLng newLocation = await getLatLng(p);
-      widget.selectedLocation.producer.add(newLocation);
-      widget.selectedLocationDescription.producer.add(p.description);
+      widget.holder.deliveryLocation.producer.add(newLocation);
+      widget.holder.deliveryLocationDescription.producer.add(p.description);
     }
   }
 

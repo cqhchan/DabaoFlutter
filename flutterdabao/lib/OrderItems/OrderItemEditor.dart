@@ -105,6 +105,12 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
         ? ""
         : StringHelper.upperCaseWords(widget.orderItemHolder.title.value);
 
+    _subTitleTextController.text = (widget.orderItemHolder.description.value ==
+                null ||
+            widget.orderItemHolder.description.value.isEmpty)
+        ? ""
+        : StringHelper.upperCaseWords(widget.orderItemHolder.description.value);
+
     _priceController.text = widget.orderItemHolder.price.value == null
         ? "\$0.00"
         : "\$" + widget.orderItemHolder.price.value.toStringAsFixed(2);
@@ -137,77 +143,84 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        alignment: Alignment(0, 0),
-        margin: EdgeInsets.all(45.0),
+    return GestureDetector(
+      onTap: (){FocusScope.of(context).requestFocus(new FocusNode());
+},
+          child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Container(
+            alignment: Alignment(0, 0),
+            margin: EdgeInsets.only(left: 45.0,right: 45.0),
 
-        //Card is required for Mateials Design
-        child: Card(
-          color: Colors.transparent,
-          // Set the height and width of the widget
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 300, maxHeight: 360),
+            //Card is required for Mateials Design
+            child: Card(
+              color: Colors.transparent,
+              // Set the height and width of the widget
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 300, maxHeight: 360),
 
-            // Set the container styling
-            child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  color: Colors.white),
+                // Set the container styling
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.white),
 
-              //Contents
-              child: Column(
-                children: <Widget>[
-                  // Close button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      color: Colors.black,
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                  //Rest of content
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.only(
-                          left: 18.0, right: 18.0, bottom: 18.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            padding: EdgeInsets.only(bottom: 10.0),
-                            child: Text(
-                              "CUSTOMISE YOUR ORDER",
-                              style: FontHelper.bold(
-                                  ColorHelper.dabaoOffBlack4A, 12.0),
-                            ),
-                          ),
-                          buildTitleTextField(),
-                          Container(
-                            padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
-                            child: Text(
-                              "Special Instructions",
-                              style: FontHelper.medium(
-                                  ColorHelper.dabaoOffBlack4A, 12.0),
-                            ),
-                          ),
-                          buildDescriptionTextField(),
-                          buildPrice(),
-                          buildQty(),
-                          buildErrorMessage(),
-                          buildBottomButton(context)
-                        ],
+                  //Contents
+                  child: Column(
+                    children: <Widget>[
+                      // Close button
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          color: Colors.black,
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
                       ),
-                    ),
+                      //Rest of content
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              left: 18.0, right: 18.0, bottom: 18.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.only(bottom: 10.0),
+                                child: Text(
+                                  "CUSTOMISE YOUR ORDER",
+                                  style: FontHelper.bold(
+                                      ColorHelper.dabaoOffBlack4A, 12.0),
+                                ),
+                              ),
+                              buildTitleTextField(),
+                              Container(
+                                padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
+                                child: Text(
+                                  "Special Instructions",
+                                  style: FontHelper.medium(
+                                      ColorHelper.dabaoOffBlack4A, 12.0),
+                                ),
+                              ),
+                              buildDescriptionTextField(),
+                              buildPrice(),
+                              buildQty(),
+                              buildErrorMessage(),
+                              buildBottomButton(context)
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ));
+            )),
+      ),
+    );
   }
 
   Align buildBottomButton(BuildContext context) {
@@ -319,7 +332,6 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
                   controller: _priceController,
                   textAlign: TextAlign.center,
                   style: FontHelper.medium(Colors.black, 14.0),
-                  
                   keyboardType: TextInputType.numberWithOptions(),
                   textInputAction: TextInputAction.done,
                   inputFormatters: [
@@ -344,6 +356,7 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
         new LengthLimitingTextInputFormatter(40),
       ],
       maxLines: 3,
+      autocorrect: false,
       textInputAction: TextInputAction.done,
       textCapitalization: TextCapitalization.sentences,
       style: FontHelper.medium(Colors.black, 12.0),
