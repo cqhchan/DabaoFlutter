@@ -319,7 +319,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
               selectedStartMinute != null &&
               selectedStartHour != selectedEndHour &&
               selectedStartHour < selectedEndHour &&
-              selectedStartHour > DateTime.now().hour) {
+              selectedStartHour > selectedDate.hour) {
             DateTime start = DateTime(
               selectedDate.year,
               selectedDate.month,
