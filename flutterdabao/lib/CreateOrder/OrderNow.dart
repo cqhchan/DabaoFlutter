@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutterdabao/CreateOrder/FoodTag.dart';
 import 'package:flutterdabao/CreateOrder/LocationCard.dart';
 import 'package:flutterdabao/CreateOrder/OrderOverlay.dart';
 import 'package:flutterdabao/CustomWidget/Buttons/CustomizedBackButton.dart';

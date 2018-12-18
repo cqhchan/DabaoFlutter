@@ -3,22 +3,27 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/Holder/OrderHolder.dart';
+import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 
 class LocationCard extends StatefulWidget {
   final MutableProperty<String> selectedLocationDescription;
   final MutableProperty<LatLng> selectedLocation;
-  final VoidCallback showOverlayCallback; 
-  const LocationCard({
-    Key key,
-    @required this.selectedLocationDescription,
-    @required this.selectedLocation,
-    @required this.showOverlayCallback
-  }) : super(key: key);
+  final VoidCallback showOverlayCallback;
+  final OrderHolder holder = OrderHolder();
+
+  LocationCard(
+      {Key key,
+      @required this.selectedLocationDescription,
+      @required this.selectedLocation,
+      @required this.showOverlayCallback})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -27,11 +32,16 @@ class LocationCard extends StatefulWidget {
   }
 }
 
-class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
+class LocationCardState extends State<LocationCard>
+    with HavingGoogleMapPlaces, HavingSubscriptionMixin {
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-          child: Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
@@ -62,11 +72,11 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
                   margin: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 10.0),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     _scheduleOrder(),
                     SizedBox(
-                      width: 20.0,
+                      width: 10.0,
                     ),
                     _orderNow(),
                   ],
@@ -79,51 +89,57 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
     );
   }
 
-  Expanded _orderNow() {
-    return Expanded(
-      child: Container(
-        child: RaisedButton(
-          elevation: 0.0,
-          highlightElevation: 0.0,
-          padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 9.0),
-          color: ColorHelper.dabaoOrange,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Image.asset('assets/icons/run.png'),
-              SizedBox(
-                width: 5.0,
-              ),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    'Order Now',
-                    style: FontHelper.bold(Colors.black, 16.0),
-                    textAlign: TextAlign.start,
-                  ),
+  Container _orderNow() {
+    return Container(
+      height: 45.0,
+      width: 105.0,
+      child: RaisedButton(
+        elevation: 0.0,
+        highlightElevation: 0.0,
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        color: ColorHelper.dabaoOrange,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Image.asset('assets/icons/run.png'),
+                SizedBox(
+                  width: 5.0,
                 ),
-              ),
-            ],
-          ),
-          onPressed: widget.showOverlayCallback,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
+                Wrap(
+                  direction: Axis.vertical,
+                  children: <Widget>[
+                    Text(
+                      'Order Now',
+                      style: FontHelper.bold(Colors.black, 12.0),
+                      textAlign: TextAlign.center,
+                    ),
+                    _handlePeriod(),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
-        height: 55.0,
+        onPressed: widget.showOverlayCallback,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
       ),
     );
   }
 
   Container _scheduleOrder() {
     return Container(
-      height: 55.0,
+      height: 45.0,
       width: 105.0,
       child: RaisedButton(
         elevation: 0.0,
         highlightElevation: 0.0,
         color: Colors.white,
-        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -139,7 +155,24 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
           ],
         ),
         onPressed: () {
-          _selectStartTime();
+          showtimeCreator(
+              context: context,
+              startDeliveryTimeCallback: (DateTime dateTime) {
+                setState(() {
+                  widget.holder.startDeliveryTime.value = dateTime;
+                });
+                widget.holder.startDeliveryTime.onAdd();
+                print(
+                    'Start Delivery Time: ${widget.holder.startDeliveryTime.value}');
+              },
+              endDeliveryTimeCallback: (DateTime dateTime) {
+                setState(() {
+                  widget.holder.endDeliveryTime.value = dateTime;
+                });
+                widget.holder.endDeliveryTime.onAdd();
+                print(
+                    'End Delivery Time: ${widget.holder.endDeliveryTime.value}');
+              });
         },
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -221,22 +254,34 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
     SnackBar(content: Text(response.errorMessage));
   }
 
-  _selectStartTime() {
-    final Future<TimeOfDay> pickedStart = showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    ).then((value) {
-      print(value.hour);
-      _selectEndTime();
-    });
+  _handlePeriod() {
+    if (widget.holder.startDeliveryTime.value != null) {
+      return Text(
+        '${widget.holder.startDeliveryTime.value.hour}:${_handleMinute(widget.holder.startDeliveryTime.value.minute)} ~ ${widget.holder.endDeliveryTime.value.hour}:${_handleMinute(widget.holder.endDeliveryTime.value.minute)}',
+        style: FontHelper.subtitleTextStyle,
+        textAlign: TextAlign.center,
+      );
+    }
+    return Offstage();
   }
 
-  _selectEndTime() {
-    final Future<TimeOfDay> pickedEnd = showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    ).then((value) {
-      print(value.hour);
-    });
+  ////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////
+  //1. Round up minute to the nearest ten
+  //2. Round up to the nearest hour when minute is between 51 and 60
+  _handleMinute(int value) {
+    if (value < 10 || value == null) {
+      return '00';
+    } else if (value < 20 && value > 11) {
+      return '10';
+    } else if (value < 30 && value > 21) {
+      return '20';
+    } else if (value < 40 && value > 31) {
+      return '30';
+    } else if (value < 50 && value > 41) {
+      return '40';
+    } else if (value < 60 && value > 51) {
+      return '50';
+    }
   }
 }
