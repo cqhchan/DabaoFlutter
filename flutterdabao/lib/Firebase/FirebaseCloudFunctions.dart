@@ -103,6 +103,40 @@ class FirebaseCloudFunctions {
     return list;
   }
 
+  ///[location] Location to search
+  ///[radius] radius in meters to search default 1000
+  static Future<List<FoodTag>> fetchNearbyDeliveryFoodTags({
+    @required LatLng location,
+    int radius = 1000,
+  }) async {
+    List<FoodTag> list = List();
+    try {
+      Map<String, dynamic> attributeMap = new Map<String, dynamic>();
+      attributeMap["lat"] = location.latitude;
+      attributeMap["long"] = location.longitude;
+      attributeMap["radius"] = radius;
+      attributeMap["mode"] = 3;
+      print('requesting foodTags from functions');
+      Map<dynamic, dynamic> results = await CloudFunctions.instance
+          .call(functionName: 'locationRequest', parameters: attributeMap);
+      print(results);
+
+      results.forEach((key, dataRaw) {
+        Map<String, dynamic> data = dataRaw.cast<String, dynamic>();
+        list.add(FoodTag.fromMap(key, data));
+      });
+
+      print(list.length);
+    } on CloudFunctionsException catch (e) {
+      print(e);
+    } catch (e) {
+      print('Error: $e');
+    }
+
+    return list;
+  }
+
+
   ///[foodTagTitle] foodTag To Search
   ///[limit] limit number of Suggested Food Type
   static Future<List<OrderItem>> fetchOrderItemForFoodTag({

@@ -31,12 +31,12 @@ class SelectFoodTagPage extends StatefulWidget {
 
 class _SelectFoodTagPageState extends State<SelectFoodTagPage>
     with HavingSubscriptionMixin {
-  static final MutableProperty<List<FoodTag>> reccomendedFoodTags =
+  final MutableProperty<List<FoodTag>> reccomendedFoodTags =
       MutableProperty(List());
-  static final MutableProperty<List<FoodTag>> deliveredNearbyFoodTags =
+  final MutableProperty<List<FoodTag>> deliveredNearbyFoodTags =
       MutableProperty(List());
 
-  static LatLng lastSearchLatLng;
+  LatLng lastSearchLatLng;
 
   final MutableProperty<List<FoodTag>> userFoodTags =
       ConfigHelper.instance.currentUserFoodTagsProperty;
@@ -48,12 +48,18 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
     subscription
         .add(widget.holder.deliveryLocation.producer.listen((location) async {
       if (lastSearchLatLng == null || lastSearchLatLng != location)
+                print("test 1");
+
         FirebaseCloudFunctions
             .fetchNearbyFoodTags(location: location)
             .then((list) {
           reccomendedFoodTags.value = list;
+        });
+        print("test");
+        FirebaseCloudFunctions
+            .fetchNearbyDeliveryFoodTags(location: location)
+            .then((list) {
           deliveredNearbyFoodTags.value = list;
-          lastSearchLatLng = location;
         });
     }));
   }
@@ -196,7 +202,7 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
             ),
             TagWrap(
               selectedCallBack: callback,
-              taggables: reccomendedFoodTags,
+              taggables: deliveredNearbyFoodTags,
             ),
             Line(
               margin: EdgeInsets.only(
