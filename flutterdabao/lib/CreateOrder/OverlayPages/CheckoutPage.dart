@@ -39,7 +39,9 @@ class _CheckoutPageState extends State<CheckoutPage>
 
     subscription.add(suggestedDeliveryFeeProperty.bindTo(
         widget.holder.orderItems.producer.map((items) => ConfigHelper.instance
-            .deliveryFeeCalculator(numberOfItems: items.length))));
+            .deliveryFeeCalculator(numberOfItems: items.map((item){
+              return item.quantity.value;
+            }).reduce((qty1,qty2)=> qty1 + qty2)))));
 
     subscription.add(actualDeliveryFeeProperty.bindTo(Observable.combineLatest2(
         suggestedDeliveryFeeProperty.producer,
