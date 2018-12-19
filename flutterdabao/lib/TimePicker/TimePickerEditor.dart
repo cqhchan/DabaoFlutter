@@ -3,6 +3,7 @@ import 'package:flutterdabao/CustomWidget/Route/OverlayRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
+import 'package:flutterdabao/TimePicker/ScrollableNumberPicker.dart';
 
 typedef DateSelectedCallback = Function(DateTime);
 
@@ -49,6 +50,10 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   int selectedStartMinute;
   int selectedEndHour;
   int selectedEndMinute;
+
+  NumberPicker integerNumberPicker;
+  int _currentIntValue = 10;
+
   String errorMessage = "";
 
   void reset() {
@@ -118,11 +123,13 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     return Container(
       alignment: Alignment.center,
       child: Card(
+        margin: EdgeInsets.symmetric(horizontal: 40, vertical: 90),
         color: Colors.white,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 220, maxHeight: 310),
+          constraints: BoxConstraints(
+              minWidth: double.infinity, minHeight: double.infinity),
           child: Column(
             children: <Widget>[
               Container(
@@ -230,36 +237,53 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     );
   }
 
-  Row buildStartDeliverSelector() {
-    return Row(
-      children: <Widget>[
-        Container(
-          constraints: BoxConstraints(minHeight: 20, minWidth: 40),
-          child: Text(
-            'Start: ',
-            style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
-          ),
-        ),
-        Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                onTap: _selectStartTime,
-                child: _buildClockSize(selectedStartHour, selectedStartMinute),
-              ),
-            ],
-          ),
-        ),
-      ],
+  _handleValueChanged(num value) {
+    if (value != null) {
+      setState(() => _currentIntValue = value);
+    }
+  }
+
+  Widget buildStartDeliverSelector() {
+
+    integerNumberPicker = new NumberPicker.integer(
+      itemExtent: 50,
+      listViewWidth: 50,
+      maxValue: 50,
+      minValue: 0,
+
+      //  EdgeInsets.all(0.0)
+      initialValue: _currentIntValue,
+      step: 10,
+      onChanged: (value) {
+        _handleValueChanged(value);
+      },
     );
+
+    return 
+    // Row(
+      // children: <Widget>[
+      //   Container(
+      //     constraints: BoxConstraints(minHeight: 20, minWidth: 40),
+      //     child: Text(
+      //       'Start: ',
+      //       style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
+      //     ),
+      //   ),
+        integerNumberPicker;
+        // integerNumberPicker
+        // GestureDetector(
+        //   onTap: _selectStartTime,
+        //   child: _buildClockSize(selectedStartHour, selectedStartMinute),
+        // ),
+      // ],
+    // );
   }
 
   Row buildEndDeliverSelector() {
     return Row(
       children: <Widget>[
         Container(
-          constraints: BoxConstraints(minHeight: 20, minWidth: 40),
+          // constraints: BoxConstraints(minHeight: 20, minWidth: 40),
           child: Text(
             'End: ',
             style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
@@ -267,12 +291,14 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
         ),
         Expanded(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              GestureDetector(
-                onTap: _selectEndTime,
-                child: _buildClockSize(selectedEndHour, selectedEndMinute),
-              ),
+              // integerNumberPicker ,
+              // integerNumberPicker
+              // GestureDetector(
+              //   onTap: _selectEndTime,
+              //   child: _buildClockSize(selectedEndHour, selectedEndMinute),
+              // ),
             ],
           ),
         ),

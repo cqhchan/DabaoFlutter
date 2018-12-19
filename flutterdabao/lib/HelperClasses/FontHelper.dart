@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class FontHelper {
+  static const TextStyle fadeTextStyle = TextStyle(
+      color: Colors.grey,
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
   static const TextStyle subtitleTextStyle = TextStyle(
       color: Colors.black,
       fontSize: 9.0,
