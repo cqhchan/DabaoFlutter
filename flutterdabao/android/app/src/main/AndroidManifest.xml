@@ -20,12 +20,8 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="flutterdabao"
         android:icon="@mipmap/ic_launcher">
-<<<<<<< HEAD
-
-=======
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAHPSELCnztmCUR-KTlMshk_l69R5kWojM"/>
->>>>>>> V2.0_orders
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -47,13 +43,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-<<<<<<< HEAD
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-=======
-        <activity android:name="com.apptreesoftware.mapview.MapActivity"/>
->>>>>>> V2.0_orders
     </application>
 </manifest>
