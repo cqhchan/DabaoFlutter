@@ -93,7 +93,7 @@ class _CustomizedMapState extends State<CustomizedMap>
   }
 
   bool lastCameraIsMoving = false;
-
+  LatLng lastLatLng;
   @override
   void initState() {
     super.initState();
@@ -258,30 +258,36 @@ class _CustomizedMapState extends State<CustomizedMap>
   //Set the Map Callback Function
   // called when map is moving/ stopped moving
   @override
-  mapCallBack() {
+  mapCallBack() async {
     if (mapController.isCameraMoving) {
       
-        if (_deliveryMarker != null) {
+        if (_deliveryMarker != null && mapController.cameraPosition.target != lastLatLng ) {
         
         if (lastCameraIsMoving) {
+          //Update Location
+          print("Update Location");
           mapController.updateMarker(
               _deliveryMarker,
               MarkerOptions(
                 position: mapController.cameraPosition.target,
               ));
         } else {
-          mapController.updateMarker(
+          //Update Image
+          print("Update Image");
+          await mapController.updateMarker(
               _deliveryMarker,
               MarkerOptions(
                 icon: semiOpaqueDeliveryIcon,
                 position: mapController.cameraPosition.target,
               ));
+          lastCameraIsMoving = true;
+
       }
         }
-      lastCameraIsMoving = true;
+      lastLatLng = mapController.cameraPosition.target;
     } else {
       if (lastCameraIsMoving) {
-        updateSelectedLocationFromLatLng(mapController.cameraPosition.target);
+      updateSelectedLocationFromLatLng(mapController.cameraPosition.target);
       }
       lastCameraIsMoving = false;
     }
