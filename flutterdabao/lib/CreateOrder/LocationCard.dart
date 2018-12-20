@@ -156,26 +156,38 @@ class LocationCardState extends State<LocationCard>
           ],
         ),
         onPressed: () {
-          showtimeCreator(
-              startTime: widget.holder.startDeliveryTime.value,
-              endTime: widget.holder.endDeliveryTime.value,
-              context: context,
-              startDeliveryTimeCallback: (DateTime dateTime) {
-                setState(() {
-                  widget.holder.startDeliveryTime.value = dateTime;
-                });
-                widget.holder.startDeliveryTime.onAdd();
-                print(
-                    'Start Delivery Time: ${widget.holder.startDeliveryTime.value}');
-              },
-              endDeliveryTimeCallback: (DateTime dateTime) {
-                setState(() {
-                  widget.holder.endDeliveryTime.value = dateTime;
-                });
-                widget.holder.endDeliveryTime.onAdd();
-                print(
-                    'End Delivery Time: ${widget.holder.endDeliveryTime.value}');
+          // showTimeCreator(
+          //     startTime: widget.holder.startDeliveryTime.value,
+          //     endTime: widget.holder.endDeliveryTime.value,
+          //     context: context,
+          //     startDeliveryTimeCallback: (DateTime dateTime) {
+          //       setState(() {
+          //         widget.holder.startDeliveryTime.value = dateTime;
+          //       });
+          //       widget.holder.startDeliveryTime.onAdd();
+          //       print(
+          //           'Start Delivery Time: ${widget.holder.startDeliveryTime.value}');
+          //     },
+          //     endDeliveryTimeCallback: (DateTime dateTime) {
+          //       setState(() {
+          //         widget.holder.endDeliveryTime.value = dateTime;
+          //       });
+          //       widget.holder.endDeliveryTime.onAdd();
+          //       print(
+          //           'End Delivery Time: ${widget.holder.endDeliveryTime.value}');
+          //     });
+          showOneTimeCreator(
+            startTime: widget.holder.startDeliveryTime.value,
+            context: context,
+            startDeliveryTimeCallback: (DateTime dateTime) {
+              setState(() {
+                widget.holder.startDeliveryTime.value = dateTime;
               });
+              widget.holder.startDeliveryTime.onAdd();
+              print(
+                  'Start Delivery Time: ${widget.holder.startDeliveryTime.value}');
+            },
+          );
         },
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -258,9 +270,16 @@ class LocationCardState extends State<LocationCard>
   }
 
   _handlePeriod() {
-    if (widget.holder.startDeliveryTime.value != null) {
+    if (widget.holder.startDeliveryTime.value != null &&
+        widget.holder.endDeliveryTime.value != null) {
       return Text(
         '${widget.holder.startDeliveryTime.value.hour}:${widget.holder.startDeliveryTime.value.minute} ~ ${widget.holder.endDeliveryTime.value.hour}:${widget.holder.endDeliveryTime.value.minute}',
+        style: FontHelper.subtitleTextStyle,
+        textAlign: TextAlign.center,
+      );
+    } else if (widget.holder.startDeliveryTime.value != null) {
+      return Text(
+        '${widget.holder.startDeliveryTime.value.hour}:${widget.holder.startDeliveryTime.value.minute}',
         style: FontHelper.subtitleTextStyle,
         textAlign: TextAlign.center,
       );
