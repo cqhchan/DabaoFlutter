@@ -6,13 +6,12 @@ import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
 import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 
-typedef DateSelectedCallback = Function(DateTime);
+typedef DoubleDateSelectedCallback = Function(DateTime, DateTime);
 
 Future<T> showtimeCreator<T>({
   @required BuildContext context,
   bool barrierDismissible = false,
-  @required DateSelectedCallback startDeliveryTimeCallback,
-  @required DateSelectedCallback endDeliveryTimeCallback,
+  @required DoubleDateSelectedCallback onCompleteCallBack,
   DateTime startTime,
   DateTime endTime,
 }) {
@@ -24,8 +23,7 @@ Future<T> showtimeCreator<T>({
       return _TimePickerEditor(
         startTime: startTime,
         endTime: endTime,
-        startDeliveryOnComplete: startDeliveryTimeCallback,
-        endDeliveryOnComplete: endDeliveryTimeCallback,
+        onCompleteCallBack: onCompleteCallBack,
       );
     },
     theme: Theme.of(context, shadowThemeOnly: true),
@@ -35,8 +33,7 @@ Future<T> showtimeCreator<T>({
 }
 
 class _TimePickerEditor extends StatefulWidget {
-  final DateSelectedCallback startDeliveryOnComplete;
-  final DateSelectedCallback endDeliveryOnComplete;
+  final DoubleDateSelectedCallback onCompleteCallBack;
   final startTime;
   final endTime;
 
@@ -44,9 +41,8 @@ class _TimePickerEditor extends StatefulWidget {
 
   const _TimePickerEditor({
     Key key,
-    @required this.startDeliveryOnComplete,
     this.orderHolder,
-    @required this.endDeliveryOnComplete,
+    @required this.onCompleteCallBack,
     this.startTime,
     this.endTime,
   }) : super(key: key);
@@ -434,9 +430,8 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
               _currentEndHour,
               _currentEndMinute,
             );
-            widget.startDeliveryOnComplete(start);
-            widget.endDeliveryOnComplete(end);
             Navigator.of(context).pop();
+            widget.onCompleteCallBack(start,end);
           } else {
             setState(() {
               errorMessage = "Please input the correct time period";
@@ -525,3 +520,4 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     }
   }
 }
+

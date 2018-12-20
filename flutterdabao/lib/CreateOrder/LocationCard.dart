@@ -8,6 +8,7 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 
@@ -114,9 +115,10 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
             ],
           ),
           onPressed: () {
-            widget.holder.startDeliveryTime.value = DateTime.now();
+
             widget.holder.mode.value = OrderMode.asap;
             widget.showOverlayCallback();
+            
           },
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -154,7 +156,19 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
           ],
         ),
         onPressed: () {
-          _selectStartTime();
+            showtimeCreator(
+              startTime: widget.holder.startDeliveryTime.value,
+              endTime: widget.holder.endDeliveryTime.value,
+              context: context,
+              onCompleteCallBack: (DateTime start,DateTime end) {
+                  widget.holder.startDeliveryTime.value = start;
+                  widget.holder.endDeliveryTime.value = end;
+                  widget.holder.mode.value = OrderMode.scheduled;
+                  widget.showOverlayCallback();
+
+              },
+             );
+
         },
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -236,22 +250,4 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
     SnackBar(content: Text(response.errorMessage));
   }
 
-  _selectStartTime() {
-    final Future<TimeOfDay> pickedStart = showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    ).then((value) {
-      print(value.hour);
-      _selectEndTime();
-    });
-  }
-
-  _selectEndTime() {
-    final Future<TimeOfDay> pickedEnd = showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    ).then((value) {
-      print(value.hour);
-    });
-  }
 }

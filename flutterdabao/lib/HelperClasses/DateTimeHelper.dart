@@ -18,6 +18,13 @@ class DateTimeHelper {
       return formatDate(date, [D, ', ', dd, '-', m, ' ', h, ':', nn, ' ', am]);
   }
 
+    static String convertDoubleTimeToDisplayString(DateTime start, DateTime end) {
+    if (isToday(start))
+      return formatDate(start, ['Today, ', h, ':', nn, ' ', am]) + " to " + formatDate(end, [ h, ':', nn, ' ', am]);
+    else
+      return formatDate(start, [D, ', ', dd, '-', m, ' ', h, ':', nn, ' ', am]) + " to " + formatDate(end, [ h, ':', nn, ' ', am]);
+  }
+
   static bool isToday(DateTime time) {
     DateTime today = DateTime.now();
     return (time.day == today.day &&

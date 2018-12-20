@@ -133,7 +133,6 @@ class Order extends FirebaseType with Selectable {
   }
 
   static bool isValid(OrderHolder holder) {
-    if (holder.startDeliveryTime.value == null) return false;
 
     if (holder.foodTag.value == null) return false;
 
@@ -158,7 +157,7 @@ class Order extends FirebaseType with Selectable {
         break;
 
       case OrderMode.scheduled:
-
+        if (holder.startDeliveryTime.value == null) return false;
         if (holder.endDeliveryTime.value == null) return false;
         break;
     }
@@ -171,9 +170,6 @@ class Order extends FirebaseType with Selectable {
 
     data[createdDeliveryTimeKey] =
         DateTimeHelper.convertDateTimeToString(DateTime.now());
-
-    data[startDeliveryTimeKey] =
-        DateTimeHelper.convertDateTimeToString(holder.startDeliveryTime.value);
 
     data[deliveryLocationKey] = GeoPoint(holder.deliveryLocation.value.latitude,
         holder.deliveryLocation.value.longitude);
@@ -196,11 +192,14 @@ class Order extends FirebaseType with Selectable {
     switch (holder.mode.value) {
       case OrderMode.asap:
         data[modeKey] = "ASAP";
-
+        data[startDeliveryTimeKey] =
+        DateTimeHelper.convertDateTimeToString(DateTime.now());
         break;
 
       case OrderMode.scheduled:
         data[modeKey] = "SCHEDULED";
+        data[startDeliveryTimeKey] =
+        DateTimeHelper.convertDateTimeToString(holder.startDeliveryTime.value);
         data[endDeliveryTimeKey] = DateTimeHelper.convertDateTimeToString(
             holder.endDeliveryTime.value);
 
