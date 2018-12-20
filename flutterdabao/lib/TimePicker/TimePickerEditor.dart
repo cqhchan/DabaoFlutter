@@ -3,7 +3,8 @@ import 'package:flutterdabao/CustomWidget/Route/OverlayRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
-import 'package:flutterdabao/TimePicker/ScrollableNumberPicker.dart';
+import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
+import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 
 typedef DateSelectedCallback = Function(DateTime);
 
@@ -12,6 +13,8 @@ Future<T> showtimeCreator<T>({
   bool barrierDismissible = false,
   @required DateSelectedCallback startDeliveryTimeCallback,
   @required DateSelectedCallback endDeliveryTimeCallback,
+  DateTime startTime,
+  DateTime endTime,
 }) {
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -19,6 +22,8 @@ Future<T> showtimeCreator<T>({
       .push<T>(CustomOverlayRoute<T>(
     builder: (context) {
       return _TimePickerEditor(
+        startTime: startTime,
+        endTime: endTime,
         startDeliveryOnComplete: startDeliveryTimeCallback,
         endDeliveryOnComplete: endDeliveryTimeCallback,
       );
@@ -32,14 +37,19 @@ Future<T> showtimeCreator<T>({
 class _TimePickerEditor extends StatefulWidget {
   final DateSelectedCallback startDeliveryOnComplete;
   final DateSelectedCallback endDeliveryOnComplete;
+  final startTime;
+  final endTime;
+
   final OrderHolder orderHolder;
 
-  const _TimePickerEditor(
-      {Key key,
-      @required this.startDeliveryOnComplete,
-      this.orderHolder,
-      @required this.endDeliveryOnComplete})
-      : super(key: key);
+  const _TimePickerEditor({
+    Key key,
+    @required this.startDeliveryOnComplete,
+    this.orderHolder,
+    @required this.endDeliveryOnComplete,
+    this.startTime,
+    this.endTime,
+  }) : super(key: key);
 
   __TimePickerEditorState createState() => __TimePickerEditorState();
 }
@@ -53,10 +63,10 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   int selectedEndHour;
   int selectedEndMinute;
 
-  NumberPicker integerStartHourPicker;
-  NumberPicker integerStartMinutePicker;
-  NumberPicker integerEndHourPicker;
-  NumberPicker integerEndMinutePicker;
+  HourPicker integerStartHourPicker;
+  MinutePicker integerStartMinutePicker;
+  HourPicker integerEndHourPicker;
+  MinutePicker integerEndMinutePicker;
 
   int _currentStartHour;
   int _currentStartMinute;
@@ -65,18 +75,21 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
 
   String errorMessage = "";
 
+  DateTime start;
+  DateTime end;
+
   void reset() {
     //Default selected hour to one hour from now
     _currentStartHour = _handleMoreThan24Hours(DateTime.now().hour + 1);
 
-    //Default selected minute to the nearest ten of the current minute
-    _currentStartMinute = DateTime.now().minute;
+    //Default selected minute round down to the nearest ten of the current minute
+    _currentStartMinute = _handleMinute(DateTime.now().minute);
 
     //Default selected hour to two hours from now
     _currentEndHour = _handleMoreThan24Hours(DateTime.now().hour + 2);
 
-    //Default selected minute to the nearest ten of the current minute
-    _currentEndMinute = DateTime.now().minute;
+    //Default selected minute round down to the nearest ten of the current minute
+    _currentEndMinute = _handleMinute(DateTime.now().minute);
   }
 
   void initState() {
@@ -86,6 +99,15 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     selectedEndDate = DateTime.now();
 
     reset();
+
+    if (widget.startTime != null && widget.endTime != null) {
+      _currentStartHour = widget.startTime.hour;
+      _currentEndHour = widget.endTime.hour;
+      _currentStartMinute = widget.startTime.minute;
+      _currentEndMinute = widget.endTime.minute;
+      selectedStartDate = widget.startTime;
+      selectedEndDate = widget.endTime;
+    }
   }
 
   @override
@@ -101,54 +123,38 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
       ),
-      body: Card(
-        margin: EdgeInsets.fromLTRB(50, 50, 50, 150),
-        color: Colors.white,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        child: Column(
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                  color: ColorHelper.dabaoOrange,
-                  borderRadius: BorderRadius.circular(10.0)),
-              child: Row(
-                children: <Widget>[
-                  buildClearButton(),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: buildHeader(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+      body: Align(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: 450, maxWidth: 240),
+          child: Column(
+            children: <Widget>[
+              buildHeader(),
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10)),
+                    color: Colors.white),
+                child: Column(
+                  children: <Widget>[
+                    buildSizedBox(),
+                    buildDateSelector(),
+                    buildSizedBox(),
+                    buildStartDeliverSelector(),
+                    buildSizedBox(),
+                    buildTomorrow(),
+                    buildSizedBox(),
+                    buildEndDeliverSelector(),
+                    buildSizedBox(),
+                    buildErrorMessage(),
+                    buildSizedBox(),
+                    buildBottomButton(context)
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Wrap(
-                children: <Widget>[
-                  buildSizedBox(),
-                  buildDateSelector(),
-                  buildSizedBox(),
-                  buildStartDeliverSelector(),
-                  buildSizedBox(),
-                  buildTomorrow(),
-                  buildSizedBox(),
-                  buildEndDeliverSelector(),
-                  buildSizedBox(),
-                  buildErrorMessage(),
-                  buildSizedBox(),
-                  buildBottomButton(context)
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -164,24 +170,38 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     );
   }
 
-  Column buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          'Schedule Your Order',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        SizedBox(
-          height: 4.0,
-        ),
-        Text(
-          'Deliver my food between...',
-          style: TextStyle(
-            fontSize: 10,
+  Container buildHeader() {
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorHelper.dabaoOrange,
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+      ),
+      child: Row(
+        children: <Widget>[
+          buildClearButton(),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Schedule Your Order',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: 4.0,
+                ),
+                Text(
+                  'Deliver my food between...',
+                  style: TextStyle(
+                    fontSize: 10,
+                  ),
+                )
+              ],
+            ),
           ),
-        )
-      ],
+        ],
+      ),
     );
   }
 
@@ -234,9 +254,9 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   }
 
   Widget buildStartDeliverSelector() {
-    integerStartHourPicker = new NumberPicker.integer(
+    integerStartHourPicker = new HourPicker.hour(
       maxValue: 23,
-      minValue: _handleMinValue(),
+      minValue: 0,
       initialValue: _currentStartHour,
       step: 1,
       onChanged: (value) {
@@ -244,13 +264,13 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
       },
     );
 
-    integerStartMinutePicker = new NumberPicker.integer(
-      maxValue: 59,
+    integerStartMinutePicker = new MinutePicker.minute(
+      maxValue: 5,
       minValue: 0,
-      initialValue: _currentStartMinute,
+      initialValue: _currentStartMinute ~/ 10,
       step: 1,
       onChanged: (value) {
-        _handleStartMinuteChanged(value);
+        _handleStartMinuteChanged(value * 10);
       },
     );
 
@@ -324,7 +344,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   }
 
   Row buildEndDeliverSelector() {
-    integerEndHourPicker = new NumberPicker.integer(
+    integerEndHourPicker = new HourPicker.hour(
       maxValue: 23,
       minValue: 0,
       initialValue: _currentEndHour,
@@ -334,13 +354,13 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
       },
     );
 
-    integerEndMinutePicker = new NumberPicker.integer(
-      maxValue: 59,
+    integerEndMinutePicker = new MinutePicker.minute(
+      maxValue: 5,
       minValue: 0,
-      initialValue: _currentEndMinute,
+      initialValue: _currentEndMinute ~/ 10,
       step: 1,
       onChanged: (value) {
-        _handleEndMinuteChanged(value);
+        _handleEndMinuteChanged(value * 10);
       },
     );
 
@@ -398,15 +418,16 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
               _currentStartMinute != null &&
               _currentEndHour != null &&
               _currentEndMinute != null &&
-              _currentStartHour != _currentEndHour) {
-            DateTime start = DateTime(
+              _currentStartHour != _currentEndHour &&
+              _currentStartHour > DateTime.now().hour) {
+            start = DateTime(
               selectedStartDate.year,
               selectedStartDate.month,
               selectedStartDate.day,
               _currentStartHour,
               _currentStartMinute,
             );
-            DateTime end = DateTime(
+            end = DateTime(
               selectedEndDate.year,
               selectedEndDate.month,
               selectedEndDate.day,
@@ -430,17 +451,23 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   Future _selectDate() async {
     await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedStartDate,
       firstDate: DateTime(
           DateTime.now().year, DateTime.now().month, DateTime.now().day),
-      lastDate: DateTime(
-          DateTime.now().year, DateTime.now().month, DateTime.now().day + 7),
+      lastDate: DateTime(2100),
     ).then((date) {
       if (date != null) {
-        reset();
         setState(() {
-          selectedStartDate = date;
-          selectedEndDate = date;
+          selectedStartDate = DateTime(
+            date.year,
+            date.month,
+            date.day,
+          );
+          selectedEndDate = DateTime(
+            date.year,
+            date.month,
+            date.day,
+          );
         });
       }
     });
@@ -466,6 +493,25 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     return value = value >= 24 ? value - 24 : value;
   }
 
+  ///Round down minute to the nearest ten
+  _handleMinute(int value) {
+    if (value < 10 || value == null) {
+      return 0;
+    } else if (value < 20 && value >= 10) {
+      return 10;
+    } else if (value < 30 && value >= 20) {
+      return 20;
+    } else if (value < 40 && value >= 30) {
+      return 30;
+    } else if (value < 50 && value >= 40) {
+      return 40;
+    } else if (value < 60 && value >= 50) {
+      return 50;
+    } else {
+      return value;
+    }
+  }
+
   ///This method returns integer for minimum value for time picker.
   ///If the [SelectedStartDate] is current date, it will returns a ((current hour) + 1).
   ///Else it will return an integer 0.
@@ -474,10 +520,6 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
         selectedStartDate.month == DateTime.now().month &&
         selectedStartDate.year == DateTime.now().year) {
       return _handleMoreThan24Hours(DateTime.now().hour + 1);
-    } else if (selectedStartDate.day >= DateTime.now().day &&
-        selectedStartDate.month >= DateTime.now().month &&
-        selectedStartDate.year >= DateTime.now().year) {
-      return DateTime.now().hour;
     } else {
       return 0;
     }

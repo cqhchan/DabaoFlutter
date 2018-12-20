@@ -8,7 +8,7 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 /// Created by Marcin Szałek
 
 ///NumberPicker is a widget designed to pick a number between #minValue and #maxValue
-class NumberPicker extends StatelessWidget {
+class HourPicker extends StatelessWidget {
   ///height of every list element
   static const double DEFAULT_ITEM_EXTENT = 50.0;
 
@@ -16,7 +16,7 @@ class NumberPicker extends StatelessWidget {
   static const double DEFAULT_LISTVIEW_WIDTH = 60.0;
 
   ///constructor for integer number picker
-  NumberPicker.integer({
+  HourPicker.hour({
     Key key,
     @required int initialValue,
     @required this.minValue,
@@ -42,38 +42,6 @@ class NumberPicker extends StatelessWidget {
         _listViewHeight = 3 * itemExtent,
         super(key: key);
 
-  ///constructor for decimal number picker
-  NumberPicker.decimal({
-    Key key,
-    @required double initialValue,
-    @required this.minValue,
-    @required this.maxValue,
-    @required this.onChanged,
-    this.decimalPlaces = 1,
-    this.itemExtent = DEFAULT_ITEM_EXTENT,
-    this.listViewWidth = DEFAULT_LISTVIEW_WIDTH,
-  })  : assert(initialValue != null),
-        assert(minValue != null),
-        assert(maxValue != null),
-        assert(decimalPlaces != null && decimalPlaces > 0),
-        assert(maxValue > minValue),
-        assert(initialValue >= minValue && initialValue <= maxValue),
-        selectedIntValue = initialValue.floor(),
-        selectedDecimalValue = ((initialValue - initialValue.floorToDouble()) *
-                math.pow(10, decimalPlaces))
-            .round(),
-        intScrollController = new ScrollController(
-          initialScrollOffset: (initialValue.floor() - minValue) * itemExtent,
-        ),
-        decimalScrollController = new ScrollController(
-          initialScrollOffset: ((initialValue - initialValue.floorToDouble()) *
-                      math.pow(10, decimalPlaces))
-                  .roundToDouble() *
-              itemExtent,
-        ),
-        _listViewHeight = 3 * itemExtent,
-        step = 1,
-        super(key: key);
 
   ///called when selected value changes
   final ValueChanged<num> onChanged;
@@ -137,25 +105,12 @@ class NumberPicker extends StatelessWidget {
   ///main widget
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-
-    if (decimalPlaces == 0) {
-      return _integerListView(themeData);
-    } else {
-      return new Row(
-        children: <Widget>[
-          _integerListView(themeData),
-        ],
-        mainAxisAlignment: MainAxisAlignment.center,
-      );
-    }
+    return _intListView();
   }
 
-  Widget _integerListView(ThemeData themeData) {
+  Widget _intListView() {
     TextStyle selectedStyle = FontHelper.semiBold(Colors.black, 45);
-
     int itemCount = (maxValue - minValue) ~/ step + 3;
-
     return new NotificationListener(
       child: new Container(
         height: itemExtent,
@@ -176,7 +131,8 @@ class NumberPicker extends StatelessWidget {
             return isExtra
                 ? new Container() //empty first and last element
                 : new Center(
-                    child: new Text(value.toString(), style: itemStyle),
+                    child: new Text(_handleZeroPadding(value),
+                        style: itemStyle),
                   );
           },
         ),
@@ -188,6 +144,14 @@ class NumberPicker extends StatelessWidget {
   //
   // ----------------------------- LOGIC -----------------------------
   //
+
+  _handleZeroPadding(value) {
+    if (value < 10) {
+      return (value.toString().padLeft(2, '0'));
+    } else {
+      return value.toString();
+    }
+  }
 
   int _intValueFromIndex(int index) => minValue + (index - 1) * step;
 
@@ -249,11 +213,6 @@ class NumberPicker extends StatelessWidget {
     //make sure that max is a multiple of step
     int max = (maxValue ~/ step) * step;
     return _normalizeMiddleValue(integerValueInTheMiddle, minValue, max);
-  }
-
-  int _normalizeDecimalMiddleValue(int decimalValueInTheMiddle) {
-    return _normalizeMiddleValue(
-        decimalValueInTheMiddle, 0, math.pow(10, decimalPlaces) - 1);
   }
 
   ///indicates if user has stopped scrolling so we can center value in the middle

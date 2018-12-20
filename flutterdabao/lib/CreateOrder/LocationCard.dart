@@ -11,6 +11,7 @@ import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'package:rxdart/rxdart.dart';
 
 class LocationCard extends StatefulWidget {
   final MutableProperty<String> selectedLocationDescription;
@@ -156,6 +157,8 @@ class LocationCardState extends State<LocationCard>
         ),
         onPressed: () {
           showtimeCreator(
+              startTime: widget.holder.startDeliveryTime.value,
+              endTime: widget.holder.endDeliveryTime.value,
               context: context,
               startDeliveryTimeCallback: (DateTime dateTime) {
                 setState(() {
@@ -257,31 +260,11 @@ class LocationCardState extends State<LocationCard>
   _handlePeriod() {
     if (widget.holder.startDeliveryTime.value != null) {
       return Text(
-        '${widget.holder.startDeliveryTime.value.hour}:${_handleMinute(widget.holder.startDeliveryTime.value.minute)} ~ ${widget.holder.endDeliveryTime.value.hour}:${_handleMinute(widget.holder.endDeliveryTime.value.minute)}',
+        '${widget.holder.startDeliveryTime.value.hour}:${widget.holder.startDeliveryTime.value.minute} ~ ${widget.holder.endDeliveryTime.value.hour}:${widget.holder.endDeliveryTime.value.minute}',
         style: FontHelper.subtitleTextStyle,
         textAlign: TextAlign.center,
       );
     }
     return Offstage();
-  }
-
-  ////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////
-  //1. Round up minute to the nearest ten
-  //2. Round up to the nearest hour when minute is between 51 and 60
-  _handleMinute(int value) {
-    if (value < 10 || value == null) {
-      return '00';
-    } else if (value < 20 && value > 11) {
-      return '10';
-    } else if (value < 30 && value > 21) {
-      return '20';
-    } else if (value < 40 && value > 31) {
-      return '30';
-    } else if (value < 50 && value > 41) {
-      return '40';
-    } else if (value < 60 && value > 51) {
-      return '50';
-    }
   }
 }
