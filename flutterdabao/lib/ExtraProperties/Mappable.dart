@@ -4,6 +4,7 @@ import 'package:flutterdabao/CustomWidget/Headers/Category.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
+import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 
@@ -49,6 +50,10 @@ abstract class Mappable extends Identifiable {
 
         if (T == OrderItem) {
       return new OrderItem.fromDocument(doc) as T;
+    }
+
+            if (T == Order) {
+      return new Order.fromDocument(doc) as T;
     }
 
     throw FatalError("Mappable Not Declared");

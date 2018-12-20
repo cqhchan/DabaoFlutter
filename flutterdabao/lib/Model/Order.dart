@@ -8,12 +8,16 @@ import 'package:flutterdabao/Holder/OrderItemHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:rxdart/rxdart.dart';
 
+final String orderStatus_Requested = "Requested";
+final String orderStatus_Accepted = "Accepted";
+
+
 class Order extends FirebaseType with Selectable {
+  
   static final String createdTimeKey = "CT";
   static final String startTimeKey = "ST";
   static final String endTimeKey = "ET";
   static final String deliveryTimeKey = "DT";
-
   static final String deliveryLocationKey = "L";
   static final String deliveryLocationDescriptionKey = "LD";
   static final String foodTagKey = "FT";
@@ -22,6 +26,8 @@ class Order extends FirebaseType with Selectable {
   static final String deliveryFeeKey = "DF";
   static final String modeKey = "MD";
   static final String messageKey = "ME";
+  static final String statusKey = "S";
+
 
   BehaviorSubject<DateTime> createdDeliveryTime;
   BehaviorSubject<DateTime> startDeliveryTime;
