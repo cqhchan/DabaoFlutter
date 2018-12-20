@@ -3,13 +3,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'package:rxdart/rxdart.dart';
 
 class LocationCard extends StatefulWidget {
   final OrderHolder holder;
@@ -28,7 +31,12 @@ class LocationCard extends StatefulWidget {
   }
 }
 
-class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
+class LocationCardState extends State<LocationCard>
+    with HavingGoogleMapPlaces, HavingSubscriptionMixin {
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -63,7 +71,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
                   margin: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 10.0),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     _scheduleOrder(),
                     ConstrainedBox(
@@ -122,7 +130,6 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
-        height: 55.0,
       ),
     );
   }
@@ -136,7 +143,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
         elevation: 0.0,
         highlightElevation: 0.0,
         color: Colors.white,
-        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -154,7 +161,26 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
           ],
         ),
         onPressed: () {
-          _selectStartTime();
+          showtimeCreator(
+              startTime: widget.holder.startDeliveryTime.value,
+              endTime: widget.holder.endDeliveryTime.value,
+              context: context,
+              startDeliveryTimeCallback: (DateTime dateTime) {
+                setState(() {
+                  widget.holder.startDeliveryTime.value = dateTime;
+                });
+                widget.holder.startDeliveryTime.onAdd();
+                print(
+                    'Start Delivery Time: ${widget.holder.startDeliveryTime.value}');
+              },
+              endDeliveryTimeCallback: (DateTime dateTime) {
+                setState(() {
+                  widget.holder.endDeliveryTime.value = dateTime;
+                });
+                widget.holder.endDeliveryTime.onAdd();
+                print(
+                    'End Delivery Time: ${widget.holder.endDeliveryTime.value}');
+              });
         },
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -236,22 +262,14 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
     SnackBar(content: Text(response.errorMessage));
   }
 
-  _selectStartTime() {
-    final Future<TimeOfDay> pickedStart = showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    ).then((value) {
-      print(value.hour);
-      _selectEndTime();
-    });
-  }
-
-  _selectEndTime() {
-    final Future<TimeOfDay> pickedEnd = showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    ).then((value) {
-      print(value.hour);
-    });
+  _handlePeriod() {
+    if (widget.holder.startDeliveryTime.value != null) {
+      return Text(
+        '${widget.holder.startDeliveryTime.value.hour}:${widget.holder.startDeliveryTime.value.minute} ~ ${widget.holder.endDeliveryTime.value.hour}:${widget.holder.endDeliveryTime.value.minute}',
+        style: FontHelper.subtitleTextStyle,
+        textAlign: TextAlign.center,
+      );
+    }
+    return Offstage();
   }
 }
