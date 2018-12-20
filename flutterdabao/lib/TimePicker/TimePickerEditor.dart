@@ -45,72 +45,47 @@ class _TimePickerEditor extends StatefulWidget {
 }
 
 class __TimePickerEditorState extends State<_TimePickerEditor> {
-  DateTime selectedDate;
+  DateTime selectedStartDate;
+  DateTime selectedEndDate;
+
   int selectedStartHour;
   int selectedStartMinute;
   int selectedEndHour;
   int selectedEndMinute;
 
-  NumberPicker integerNumberPicker;
-  int _currentIntValue = 10;
+  NumberPicker integerStartHourPicker;
+  NumberPicker integerStartMinutePicker;
+  NumberPicker integerEndHourPicker;
+  NumberPicker integerEndMinutePicker;
+
+  int _currentStartHour;
+  int _currentStartMinute;
+  int _currentEndHour;
+  int _currentEndMinute;
 
   String errorMessage = "";
 
   void reset() {
-    ////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
     //Default selected hour to one hour from now
-    selectedStartHour = DateTime.now().hour + 1;
+    _currentStartHour = _handleMoreThan24Hours(DateTime.now().hour + 1);
 
-    ////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
     //Default selected minute to the nearest ten of the current minute
-    // selectedStartMinute =
-    //     _handleMinuteToString(DateTime.now().minute).toString();
-    selectedStartMinute = DateTime.now().minute;
+    _currentStartMinute = DateTime.now().minute;
 
-    ////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
-    //Default selected hour to one hour from now
-    selectedEndHour = DateTime.now().hour + 3;
+    //Default selected hour to two hours from now
+    _currentEndHour = _handleMoreThan24Hours(DateTime.now().hour + 2);
 
-    ////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
     //Default selected minute to the nearest ten of the current minute
-    // selectedEndMinute = _handleMinuteToString(DateTime.now().minute).toString();
-    selectedEndMinute = DateTime.now().minute;
+    _currentEndMinute = DateTime.now().minute;
   }
 
   void initState() {
     super.initState();
 
-    selectedDate = DateTime.now();
+    selectedStartDate = DateTime.now();
+    selectedEndDate = DateTime.now();
 
-    // ////////////////////////////////////////////////////////////////////
-    // ////////////////////////////////////////////////////////////////////
-    // //Default selected hour to one hour from now
-    selectedStartHour = DateTime.now().hour + 1;
-
-    // ////////////////////////////////////////////////////////////////////
-    // ////////////////////////////////////////////////////////////////////
-    // //Default selected minute to the nearest ten of the current minute
-    // selectedStartMinute =
-    //     _handleMinuteToString(DateTime.now().minute).toString();
-    selectedStartMinute = DateTime.now().minute;
-
-    // ////////////////////////////////////////////////////////////////////
-    // ////////////////////////////////////////////////////////////////////
-    // //Default selected hour to one hour from now
-    selectedEndHour = DateTime.now().hour + 3;
-
-    // ////////////////////////////////////////////////////////////////////
-    // ////////////////////////////////////////////////////////////////////
-    // //Default selected minute to the nearest ten of the current minute
-    // selectedEndMinute = _handleMinuteToString(DateTime.now().minute).toString();
-    selectedEndMinute = DateTime.now().minute;
-
-    _buildClockSize(selectedStartHour, selectedStartMinute);
-    _buildClockSize(selectedEndHour, selectedEndMinute);
+    reset();
   }
 
   @override
@@ -120,94 +95,93 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 40, vertical: 90),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+      ),
+      body: Card(
+        margin: EdgeInsets.fromLTRB(50, 50, 50, 150),
         color: Colors.white,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-              minWidth: double.infinity, minHeight: double.infinity),
-          child: Column(
-            children: <Widget>[
-              Container(
-                decoration: BoxDecoration(
+        child: Column(
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
                   color: ColorHelper.dabaoOrange,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                padding: EdgeInsets.all(4.0),
-                child: Row(
-                  children: <Widget>[
-                    buildClearButton(),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          buildHeader(),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.all(10.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      buildSizedBox(),
-                      buildDateSelector(),
-                      buildSizedBox(),
-                      buildStartDeliverSelector(),
-                      buildEndDeliverSelector(),
-                      buildSizedBox(),
-                      buildErrorMessage(),
-                      buildSizedBox(),
-                      buildBottomButton(context)
-                    ],
+                  borderRadius: BorderRadius.circular(10.0)),
+              child: Row(
+                children: <Widget>[
+                  buildClearButton(),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: buildHeader(),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Wrap(
+                children: <Widget>[
+                  buildSizedBox(),
+                  buildDateSelector(),
+                  buildSizedBox(),
+                  buildStartDeliverSelector(),
+                  buildSizedBox(),
+                  buildTomorrow(),
+                  buildSizedBox(),
+                  buildEndDeliverSelector(),
+                  buildSizedBox(),
+                  buildErrorMessage(),
+                  buildSizedBox(),
+                  buildBottomButton(context)
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Align buildClearButton() {
-    return Align(
-      child: IconButton(
-        color: Colors.black,
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
+  IconButton buildClearButton() {
+    return IconButton(
+      color: Colors.black,
+      icon: Icon(Icons.clear),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
     );
   }
 
-  Container buildHeader() {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Text(
-            'Schedule Your Order',
-            style: TextStyle(fontWeight: FontWeight.bold),
+  Column buildHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'Schedule Your Order',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        SizedBox(
+          height: 4.0,
+        ),
+        Text(
+          'Deliver my food between...',
+          style: TextStyle(
+            fontSize: 10,
           ),
-          SizedBox(
-            height: 4.0,
-          ),
-          Text(
-            'Deliver my food between...',
-            style: TextStyle(
-              fontSize: 10,
-            ),
-          )
-        ],
-      ),
+        )
+      ],
     );
   }
 
@@ -227,94 +201,172 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
             style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
           ),
         ),
-        Expanded(
-          child: GestureDetector(
-            onTap: _selectDate,
-            child: _handleDateToString(),
-          ),
-        )
+        GestureDetector(
+          onTap: _selectDate,
+          child: _handleDateToString(),
+        ),
       ],
     );
   }
 
-  _handleValueChanged(num value) {
+  _handleStartHourChanged(num value) {
     if (value != null) {
-      setState(() => _currentIntValue = value);
+      setState(() => _currentStartHour = value);
+    }
+  }
+
+  _handleStartMinuteChanged(num value) {
+    if (value != null) {
+      setState(() => _currentStartMinute = value);
+    }
+  }
+
+  _handleEndHourChanged(num value) {
+    if (value != null) {
+      setState(() => _currentEndHour = value);
+    }
+  }
+
+  _handleEndMinuteChanged(num value) {
+    if (value != null) {
+      setState(() => _currentEndMinute = value);
     }
   }
 
   Widget buildStartDeliverSelector() {
-
-    integerNumberPicker = new NumberPicker.integer(
-      itemExtent: 50,
-      listViewWidth: 50,
-      maxValue: 50,
-      minValue: 0,
-
-      //  EdgeInsets.all(0.0)
-      initialValue: _currentIntValue,
-      step: 10,
+    integerStartHourPicker = new NumberPicker.integer(
+      maxValue: 23,
+      minValue: _handleMinValue(),
+      initialValue: _currentStartHour,
+      step: 1,
       onChanged: (value) {
-        _handleValueChanged(value);
+        _handleStartHourChanged(value);
       },
     );
 
-    return 
-    // Row(
-      // children: <Widget>[
-      //   Container(
-      //     constraints: BoxConstraints(minHeight: 20, minWidth: 40),
-      //     child: Text(
-      //       'Start: ',
-      //       style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
-      //     ),
-      //   ),
-        integerNumberPicker;
-        // integerNumberPicker
-        // GestureDetector(
-        //   onTap: _selectStartTime,
-        //   child: _buildClockSize(selectedStartHour, selectedStartMinute),
-        // ),
-      // ],
-    // );
-  }
+    integerStartMinutePicker = new NumberPicker.integer(
+      maxValue: 59,
+      minValue: 0,
+      initialValue: _currentStartMinute,
+      step: 1,
+      onChanged: (value) {
+        _handleStartMinuteChanged(value);
+      },
+    );
 
-  Row buildEndDeliverSelector() {
     return Row(
       children: <Widget>[
         Container(
-          // constraints: BoxConstraints(minHeight: 20, minWidth: 40),
+          constraints: BoxConstraints(minHeight: 20, minWidth: 40),
+          child: Text(
+            'Start: ',
+            style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
+          ),
+        ),
+        integerStartHourPicker,
+        Text(':', style: FontHelper.semiBold(Colors.black, 45)),
+        integerStartMinutePicker,
+      ],
+    );
+  }
+
+  Row buildTomorrow() {
+    if (_currentEndHour < _currentStartHour &&
+        selectedStartDate.day == DateTime.now().day &&
+        selectedStartDate.month == DateTime.now().month &&
+        selectedStartDate.year == DateTime.now().year) {
+      selectedEndDate = selectedStartDate.add(Duration(days: 1));
+
+      return Row(
+        children: <Widget>[
+          Container(
+            constraints: BoxConstraints(minHeight: 20, minWidth: 40),
+            child: Text(
+              'Date:',
+              style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
+            ),
+          ),
+          Text(
+            'Tomorrow',
+            style: FontHelper.semiBold(Colors.black, 20),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    } else if (_currentEndHour < _currentStartHour &&
+        selectedStartDate.day >= DateTime.now().day &&
+        selectedStartDate.month >= DateTime.now().month &&
+        selectedStartDate.year >= DateTime.now().year) {
+      selectedEndDate = selectedStartDate.add(Duration(days: 1));
+
+      return Row(
+        children: <Widget>[
+          Container(
+            constraints: BoxConstraints(minHeight: 20, minWidth: 40),
+            child: Text(
+              'Date:',
+              style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
+            ),
+          ),
+          Text(
+            '${selectedEndDate.day}-${selectedEndDate.month}-${selectedEndDate.year}',
+            style: FontHelper.semiBold(Colors.black, 20),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    } else {
+      selectedEndDate = selectedStartDate;
+      return Row(
+        children: <Widget>[Offstage()],
+      );
+    }
+  }
+
+  Row buildEndDeliverSelector() {
+    integerEndHourPicker = new NumberPicker.integer(
+      maxValue: 23,
+      minValue: 0,
+      initialValue: _currentEndHour,
+      step: 1,
+      onChanged: (value) {
+        _handleEndHourChanged(value);
+      },
+    );
+
+    integerEndMinutePicker = new NumberPicker.integer(
+      maxValue: 59,
+      minValue: 0,
+      initialValue: _currentEndMinute,
+      step: 1,
+      onChanged: (value) {
+        _handleEndMinuteChanged(value);
+      },
+    );
+
+    return Row(
+      children: <Widget>[
+        Container(
+          constraints: BoxConstraints(minHeight: 20, minWidth: 40),
           child: Text(
             'End: ',
             style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
           ),
         ),
-        Expanded(
-          child: Row(
-            // mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // integerNumberPicker ,
-              // integerNumberPicker
-              // GestureDetector(
-              //   onTap: _selectEndTime,
-              //   child: _buildClockSize(selectedEndHour, selectedEndMinute),
-              // ),
-            ],
-          ),
-        ),
+        integerEndHourPicker,
+        Text(':', style: FontHelper.semiBold(Colors.black, 45)),
+        integerEndMinutePicker
       ],
     );
   }
 
-  Expanded buildErrorMessage() {
-    return Expanded(
-      child: Align(
-        alignment: Alignment.center,
-        child: Container(
-          child: Text(
-            errorMessage,
-            style: FontHelper.semiBold(Colors.red, 12.0),
-          ),
+  Align buildErrorMessage() {
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        child: Text(
+          errorMessage,
+          style: FontHelper.semiBold(Colors.red, 12.0),
         ),
       ),
     );
@@ -331,34 +383,35 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
           children: <Widget>[
             Icon(Icons.access_time),
             Expanded(
-                child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Confirm",
-                      style: FontHelper.semiBold(Colors.black, 14.0),
-                    ))),
+              child: Align(
+                child: Text(
+                  "Confirm",
+                  style: FontHelper.semiBold(Colors.black, 14.0),
+                ),
+              ),
+            ),
           ],
         ),
         onPressed: () {
-          if (selectedDate != null &&
-              selectedStartHour != null &&
-              selectedStartMinute != null &&
-              selectedStartHour != selectedEndHour &&
-              selectedStartHour < selectedEndHour &&
-              selectedStartHour > selectedDate.hour) {
+          if (selectedStartDate != null &&
+              _currentStartHour != null &&
+              _currentStartMinute != null &&
+              _currentEndHour != null &&
+              _currentEndMinute != null &&
+              _currentStartHour != _currentEndHour) {
             DateTime start = DateTime(
-              selectedDate.year,
-              selectedDate.month,
-              selectedDate.day,
-              selectedStartHour,
-              selectedStartMinute,
+              selectedStartDate.year,
+              selectedStartDate.month,
+              selectedStartDate.day,
+              _currentStartHour,
+              _currentStartMinute,
             );
             DateTime end = DateTime(
-              selectedDate.year,
-              selectedDate.month,
-              selectedDate.day,
-              selectedEndHour,
-              selectedEndMinute,
+              selectedEndDate.year,
+              selectedEndDate.month,
+              selectedEndDate.day,
+              _currentEndHour,
+              _currentEndMinute,
             );
             widget.startDeliveryOnComplete(start);
             widget.endDeliveryOnComplete(end);
@@ -373,9 +426,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     );
   }
 
-  ////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////
-  //Date selection dialog
+  ///Date selection dialog
   Future _selectDate() async {
     await showDatePicker(
       context: context,
@@ -386,93 +437,49 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
           DateTime.now().year, DateTime.now().month, DateTime.now().day + 7),
     ).then((date) {
       if (date != null) {
-        setState(() {
-          selectedDate = date;
-        });
         reset();
+        setState(() {
+          selectedStartDate = date;
+          selectedEndDate = date;
+        });
       }
     });
   }
 
-  ////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////
-  //Start hour selection dialog
-  Future<TimeOfDay> _selectStartTime() => showTimePicker(
-        context: context,
-        initialTime:
-            TimeOfDay.fromDateTime(DateTime.now().add(Duration(hours: 1))),
-      ).then((value) {
-        if (value != null) {
-          setState(() {
-            selectedStartHour = value.hour;
-            selectedStartMinute = value.minute;
-          });
-        }
-      });
-
-  ////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////
-  //End hour selection dialog
-  Future<TimeOfDay> _selectEndTime() => showTimePicker(
-        context: context,
-        initialTime:
-            TimeOfDay.fromDateTime(DateTime.now().add(Duration(hours: 3))),
-      ).then((value) {
-        if (value != null) {
-          setState(() {
-            selectedEndHour = value.hour;
-            selectedEndMinute = value.minute;
-          });
-        }
-      });
-
   _handleDateToString() {
-    if (selectedDate.day == DateTime.now().day) {
+    if (selectedStartDate.day == DateTime.now().day) {
       return Text(
         'Today',
-        style: FontHelper.semiBold(Colors.black, 25),
-        textAlign: TextAlign.center,
-      );
-    } else if (selectedDate.day == DateTime.now().day + 1) {
-      return Text(
-        'Tomorrow',
         style: FontHelper.semiBold(Colors.black, 20),
         textAlign: TextAlign.center,
       );
     } else {
       return Text(
-        '${selectedDate.day}-${selectedDate.month}-${selectedDate.year}',
+        '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
         style: FontHelper.semiBold(Colors.black, 20),
         textAlign: TextAlign.center,
       );
     }
   }
 
-  Text _buildClockSize(hour, minute) {
-    return Text(
-      '$hour:${_handleMinute(minute)}',
-      style: FontHelper.semiBold(Colors.black, 45),
-      textAlign: TextAlign.center,
-    );
+  _handleMoreThan24Hours(int value) {
+    return value = value >= 24 ? value - 24 : value;
   }
 
-  ////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////
-  //1. Round up minute to the nearest ten
-  //2. Round up to the nearest hour when minute is between 51 and 60
-  _handleMinute(int value) {
-    if (value < 10 || value == null) {
-      return '00';
-    } else if (value < 20 && value > 11) {
-      return '10';
-    } else if (value < 30 && value > 21) {
-      return '20';
-    } else if (value < 40 && value > 31) {
-      return '30';
-    } else if (value < 50 && value > 41) {
-      return '40';
-    } else if (value < 60 && value > 51) {
-      return '50';
+  ///This method returns integer for minimum value for time picker.
+  ///If the [SelectedStartDate] is current date, it will returns a ((current hour) + 1).
+  ///Else it will return an integer 0.
+  _handleMinValue() {
+    if (selectedStartDate.day == DateTime.now().day &&
+        selectedStartDate.month == DateTime.now().month &&
+        selectedStartDate.year == DateTime.now().year) {
+      return _handleMoreThan24Hours(DateTime.now().hour + 1);
+    } else if (selectedStartDate.day >= DateTime.now().day &&
+        selectedStartDate.month >= DateTime.now().month &&
+        selectedStartDate.year >= DateTime.now().year) {
+      return DateTime.now().hour;
+    } else {
+      return 0;
     }
   }
 }
