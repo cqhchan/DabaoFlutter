@@ -246,7 +246,7 @@ class LocationCardState extends State<LocationCard>
       context: context,
       apiKey: kGoogleApiKey,
       onError: onError,
-      mode: Mode.overlay,
+      mode: Mode.fullscreen,
       language: "en",
       components: [Component(Component.country, "sg")],
     );
