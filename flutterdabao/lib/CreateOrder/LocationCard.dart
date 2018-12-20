@@ -156,7 +156,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
           ],
         ),
         onPressed: () {
-            showtimeCreator(
+            showTimeCreator(
               startTime: widget.holder.startDeliveryTime.value,
               endTime: widget.holder.endDeliveryTime.value,
               context: context,

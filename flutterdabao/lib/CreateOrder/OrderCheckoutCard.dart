@@ -326,21 +326,31 @@ class _OrderCheckoutState extends State<OrderCheckout>
           switch (snap.data) {
             case OrderMode.asap:
               return StreamBuilder<DateTime>(
-                stream: widget.holder.endDeliveryTime.producer,
+                stream: widget.holder.cutOffDeliveryTime.producer,
                 builder: (context, snap) {
-                  return buildTime(
-                      title: "Cut-Off Time",
-                      time: !snap.hasData
-                          ? "Optional"
-                          : DateTimeHelper.convertTimeToDisplayString(
-                              snap.data));
+                  return GestureDetector(
+                    onTap: () {
+                      showOneTimeCreator(
+                          startTime: widget.holder.cutOffDeliveryTime.value,
+                          context: context,
+                          onCompleteCallback: (DateTime time) {
+                            widget.holder.cutOffDeliveryTime.value = time;
+                          });
+                    },
+                    child: buildTime(
+                        title: "Cut-Off Time",
+                        time: !snap.hasData
+                            ? "Optional"
+                            : DateTimeHelper.convertTimeToDisplayString(
+                                snap.data)),
+                  );
                 },
               );
 
             case OrderMode.scheduled:
               return GestureDetector(
                 onTap: () {
-                  showtimeCreator(
+                  showTimeCreator(
                     startTime: widget.holder.startDeliveryTime.value,
                     endTime: widget.holder.endDeliveryTime.value,
                     context: context,
