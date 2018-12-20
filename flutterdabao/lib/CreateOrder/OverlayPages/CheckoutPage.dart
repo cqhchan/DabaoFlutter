@@ -49,7 +49,7 @@ class _CheckoutPageState extends State<CheckoutPage>
         (suggested, percentage) => suggested * percentage)));
 
     subscription.add(finalPriceProperty.bindTo(Observable.combineLatest2(
-        widget.holder.maxPrice,
+        widget.holder.maxPrice.producer,
         actualDeliveryFeeProperty.producer,
         (price, delvieryFee) => price + delvieryFee)));
   }
