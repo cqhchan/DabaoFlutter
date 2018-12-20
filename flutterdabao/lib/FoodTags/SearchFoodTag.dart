@@ -44,9 +44,9 @@ class _FoodTypeSearchState extends State<FoodTypeSearch> {
                       .collection('foodTags')
                       .orderBy(FoodTag.titleKey)
                       .where(FoodTag.titleKey,
-                          isGreaterThanOrEqualTo: criteria.toLowerCase())
+                          isGreaterThanOrEqualTo: criteria.toLowerCase().trim())
                       .where(FoodTag.titleKey,
-                          isLessThanOrEqualTo: criteria.toLowerCase() + "z")
+                          isLessThanOrEqualTo: criteria.toLowerCase().trim() + "z")
                       .limit(10))
               .future;
           List resultList = list
@@ -78,7 +78,7 @@ class _FoodTypeSearchState extends State<FoodTypeSearch> {
           } else {
             title = selected.toLowerCase();
           }
-          widget.selectedCallback(title);
+          widget.selectedCallback(title.trim());
           Navigator.of(context).pop();
         },
         //callback when the value is submitted, optional.

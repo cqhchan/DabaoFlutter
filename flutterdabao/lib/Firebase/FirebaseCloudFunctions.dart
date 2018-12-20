@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
+import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -107,6 +108,8 @@ class FirebaseCloudFunctions {
   ///[radius] radius in meters to search default 1000
   static Future<List<FoodTag>> fetchNearbyDeliveryFoodTags({
     @required LatLng location,
+    @required DateTime startTime,
+    DateTime endTime,
     int radius = 1000,
   }) async {
     List<FoodTag> list = List();
@@ -114,6 +117,11 @@ class FirebaseCloudFunctions {
       Map<String, dynamic> attributeMap = new Map<String, dynamic>();
       attributeMap["lat"] = location.latitude;
       attributeMap["long"] = location.longitude;
+      attributeMap["ST"] = DateTimeHelper.convertDateTimeToString(startTime);
+
+      if (endTime != null)
+      attributeMap["ET"] = DateTimeHelper.convertDateTimeToString(endTime);
+
       attributeMap["radius"] = radius;
       attributeMap["mode"] = 3;
       print('requesting foodTags from functions');

@@ -19,11 +19,20 @@ class OrderHolder {
   MutableProperty<String> message = MutableProperty(null);
 
   Observable<double> maxPrice;
+  Observable<double> finalPrice;
+  Observable<int> numberOfItems;
 
   OrderHolder() {
     maxPrice = orderItems.producer.map((items) => items
         .map((order) => order.price.value * order.quantity.value)
         .toList()
         .reduce((price1, price2) => price1 + price2));
+
+    finalPrice = Observable.combineLatest2<double,double,double>(maxPrice, deliveryFee.producer, (maxPrice, fee) => maxPrice + fee) ;
+
+    numberOfItems = orderItems.producer.map((items) => items
+        .map((order) => order.quantity.value)
+        .toList()
+        .reduce((qty1, qty2) => qty1 + qty2));
   }
 }

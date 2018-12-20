@@ -133,41 +133,31 @@ class Order extends FirebaseType with Selectable {
   }
 
   static bool isValid(OrderHolder holder) {
-    print("testing 1");
     if (holder.startDeliveryTime.value == null) return false;
-    print("testing 2");
 
     if (holder.foodTag.value == null) return false;
-    print("testing 3");
 
     if (holder.deliveryFee.value == null) return false;
-    print("testing 4");
 
     if (holder.deliveryLocation.value == null) return false;
-    print("testing 5");
 
     if (holder.deliveryLocationDescription.value == null) return false;
-    print("testing 6");
 
     if (holder.orderItems.value == null) return false;
-    print("testing 7");
 
     if (holder.orderItems.value.length == 0) return false;
-    print("testing 8");
 
     //Optional
     // if (holder.message.value == null) return false;
     // print("testing 9");
 
     if (holder.mode.value == null) return false;
-    print("testing 10");
 
     switch (holder.mode.value) {
       case OrderMode.asap:
         break;
 
       case OrderMode.scheduled:
-        print("testing 11");
 
         if (holder.endDeliveryTime.value == null) return false;
         break;
@@ -217,6 +207,6 @@ class Order extends FirebaseType with Selectable {
         break;
     }
 
-    Firestore.instance.collection("orderItems").add(data);
+    Firestore.instance.collection("orders").add(data);
   }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutterdabao/CreateOrder/OverlayPages/DescriptionInputPage.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
@@ -9,12 +7,10 @@ import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_webservice/places.dart';
 
 class OrderCheckout extends StatefulWidget {
   final OrderHolder holder;
@@ -133,7 +129,11 @@ class _OrderCheckoutState extends State<OrderCheckout>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text("4", style: FontHelper.semiBold(Colors.black, 24.0)),
+                  StreamBuilder(stream: widget.holder.numberOfItems,builder: (context,snap){
+                    return Text( snap.hasData? snap.data.toString() : "0"  ,
+                      style: FontHelper.semiBold(Colors.black, 24.0));
+                  },),
+
                   Container(
                     padding: EdgeInsets.only(left: 5.0, top: 8.0),
                     child: Align(
@@ -191,8 +191,12 @@ class _OrderCheckoutState extends State<OrderCheckout>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text("\$15.00",
-                      style: FontHelper.semiBold(Colors.black, 24.0)),
+
+                  StreamBuilder(stream: widget.holder.finalPrice,builder: (context,snap){
+                    return Text( StringHelper.doubleToPriceString(snap.hasData? snap.data : 0.0)  ,
+                      style: FontHelper.semiBold(Colors.black, 24.0));
+                  },),
+                  
                   Container(
                     padding: EdgeInsets.only(left: 5.0, top: 0.0),
                     child: Align(

@@ -109,7 +109,7 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
                 null ||
             widget.orderItemHolder.description.value.isEmpty)
         ? ""
-        : StringHelper.upperCaseWords(widget.orderItemHolder.description.value);
+        : (widget.orderItemHolder.description.value);
 
     _priceController.text = widget.orderItemHolder.price.value == null
         ? "\$0.00"
@@ -247,7 +247,8 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
               _titleTextController.text != null &&
               _titleTextController.text.isNotEmpty &&
               qty != 0) {
-            widget.orderItemHolder.title.value = _titleTextController.text;
+
+            widget.orderItemHolder.title.value = _titleTextController.text.trim();
             widget.orderItemHolder.description.value =
                 _subTitleTextController.text;
             widget.orderItemHolder.price.value =

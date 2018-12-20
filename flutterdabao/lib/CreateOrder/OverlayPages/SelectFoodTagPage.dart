@@ -32,9 +32,9 @@ class SelectFoodTagPage extends StatefulWidget {
 class _SelectFoodTagPageState extends State<SelectFoodTagPage>
     with HavingSubscriptionMixin {
   final MutableProperty<List<FoodTag>> reccomendedFoodTags =
-      MutableProperty(List());
+      MutableProperty(null);
   final MutableProperty<List<FoodTag>> deliveredNearbyFoodTags =
-      MutableProperty(List());
+      MutableProperty(null);
 
   LatLng lastSearchLatLng;
 
@@ -48,19 +48,17 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
     subscription
         .add(widget.holder.deliveryLocation.producer.listen((location) async {
       if (lastSearchLatLng == null || lastSearchLatLng != location)
-                print("test 1");
-
-        FirebaseCloudFunctions
-            .fetchNearbyFoodTags(location: location)
+        FirebaseCloudFunctions.fetchNearbyFoodTags(location: location)
             .then((list) {
           reccomendedFoodTags.value = list;
         });
-        print("test");
-        FirebaseCloudFunctions
-            .fetchNearbyDeliveryFoodTags(location: location)
-            .then((list) {
-          deliveredNearbyFoodTags.value = list;
-        });
+      FirebaseCloudFunctions.fetchNearbyDeliveryFoodTags(
+              location: location,
+              startTime: widget.holder.startDeliveryTime.value,
+              endTime: widget.holder.endDeliveryTime.value)
+          .then((list) {
+        deliveredNearbyFoodTags.value = list;
+      });
     }));
   }
 
@@ -73,10 +71,9 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
   @override
   Widget build(BuildContext context) {
     return Container(
-                color: ColorHelper.dabaoOffWhiteF5,
-
-          child: SingleChildScrollView(
-            child: Container(
+      color: ColorHelper.dabaoOffWhiteF5,
+      child: SingleChildScrollView(
+        child: Container(
           padding: EdgeInsets.only(left: 30.0, right: 30.0, bottom: 30.0),
           child: SafeArea(
             child: Column(
@@ -107,21 +104,21 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
       FoodTag selectedFoodTag = selected;
       print(selectedFoodTag.title.value);
       // if tapped foodTag is not selected, deselect all
-      if (!selectedFoodTag.isSelected) {
-        Selectable.deselectAll(reccomendedFoodTags.value);
-        Selectable.deselectAll(deliveredNearbyFoodTags.value);
-        Selectable.deselectAll(userFoodTags.value);
-      }
+      // if (!selectedFoodTag.isSelected) {
+      //   Selectable.deselectAll(reccomendedFoodTags.value);
+      //   Selectable.deselectAll(deliveredNearbyFoodTags.value);
+      //   Selectable.deselectAll(userFoodTags.value);
+      // }
 
       //Toggle the state of tapped foodTAg
-      selectedFoodTag.toggle();
+      // selectedFoodTag.toggle();
 
       //if Tapped FoodTAg is selected, Move to next Page
-      if (selectedFoodTag.isSelected) {
+      // if (selectedFoodTag.isSelected) {
         widget.holder.foodTag.value = selectedFoodTag.title.value;
         widget.nextPage();
       }
-    }
+    // }
   }
 
   Column buildReccomended() {
@@ -166,9 +163,19 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
             ),
           ),
         ),
-        TagWrap(
-          selectedCallBack: callback,
-          taggables: reccomendedFoodTags,
+        StreamBuilder(
+          stream: reccomendedFoodTags.producer,
+          builder: (context, snap) {
+            if (snap.hasData) {
+              return TagWrap(
+                selectedCallBack: callback,
+                taggables: reccomendedFoodTags,
+              );
+            } else {
+              return Align(alignment: Alignment.center, child: CircularProgressIndicator());
+
+            }
+          },
         ),
       ],
     );
@@ -188,7 +195,9 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
     return StreamBuilder<List<FoodTag>>(
       stream: deliveredNearbyFoodTags.producer,
       builder: (context, snap) {
-        if (!snap.hasData || snap.data.length == 0) return Container();
+        if (!snap.hasData) return Align(alignment: Alignment.center, child: CircularProgressIndicator());
+
+        if (snap.data.length == 0) return Container();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
