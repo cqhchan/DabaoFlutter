@@ -12,7 +12,9 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
+import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 
 // Page 0 in Overlays
 // 3segments, My orders, places near me and Being Delivered near you
@@ -52,14 +54,35 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
             .then((list) {
           reccomendedFoodTags.value = list;
         });
-      FirebaseCloudFunctions.fetchNearbyDeliveryFoodTags(
-              location: location,
-              startTime: widget.holder.startDeliveryTime.value,
-              endTime: widget.holder.endDeliveryTime.value)
-          .then((list) {
-        deliveredNearbyFoodTags.value = list;
-      });
     }));
+
+    Observable.combineLatest2<LatLng, OrderMode, LatLng>(
+        widget.holder.deliveryLocation.producer, widget.holder.mode.producer,
+        (location, mode) {
+      return location;
+    }).listen((location) {
+      switch (widget.holder.mode.value) {
+        case OrderMode.asap:
+          FirebaseCloudFunctions.fetchNearbyDeliveryFoodTags(
+                  location: location,
+                  startTime: DateTime.now(),
+                  endTime: widget.holder.endDeliveryTime.value)
+              .then((list) {
+            deliveredNearbyFoodTags.value = list;
+          });
+          break;
+
+        case OrderMode.scheduled:
+          FirebaseCloudFunctions.fetchNearbyDeliveryFoodTags(
+                  location: location,
+                  startTime: widget.holder.startDeliveryTime.value,
+                  endTime: widget.holder.endDeliveryTime.value)
+              .then((list) {
+            deliveredNearbyFoodTags.value = list;
+          });
+          break;
+      }
+    });
   }
 
   @override
@@ -102,23 +125,9 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
   void callback(selected) {
     if (selected is FoodTag) {
       FoodTag selectedFoodTag = selected;
-      print(selectedFoodTag.title.value);
-      // if tapped foodTag is not selected, deselect all
-      // if (!selectedFoodTag.isSelected) {
-      //   Selectable.deselectAll(reccomendedFoodTags.value);
-      //   Selectable.deselectAll(deliveredNearbyFoodTags.value);
-      //   Selectable.deselectAll(userFoodTags.value);
-      // }
-
-      //Toggle the state of tapped foodTAg
-      // selectedFoodTag.toggle();
-
-      //if Tapped FoodTAg is selected, Move to next Page
-      // if (selectedFoodTag.isSelected) {
-        widget.holder.foodTag.value = selectedFoodTag.title.value;
-        widget.nextPage();
-      }
-    // }
+      widget.holder.foodTag.value = selectedFoodTag.title.value;
+      widget.nextPage();
+    }
   }
 
   Column buildReccomended() {
@@ -172,8 +181,9 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
                 taggables: reccomendedFoodTags,
               );
             } else {
-              return Align(alignment: Alignment.center, child: CircularProgressIndicator());
-
+              return Align(
+                  alignment: Alignment.center,
+                  child: CircularProgressIndicator());
             }
           },
         ),
@@ -195,7 +205,9 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
     return StreamBuilder<List<FoodTag>>(
       stream: deliveredNearbyFoodTags.producer,
       builder: (context, snap) {
-        if (!snap.hasData) return Align(alignment: Alignment.center, child: CircularProgressIndicator());
+        if (!snap.hasData)
+          return Align(
+              alignment: Alignment.center, child: CircularProgressIndicator());
 
         if (snap.data.length == 0) return Container();
 

@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
+import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
+import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -18,8 +20,13 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<FoodTag>> currentUserFoodTagsProperty =
       MutableProperty<List<FoodTag>>(List());
 
-  MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
+  MutableProperty<List<Order>> currentUserRequestedOrdersProperty =
+      MutableProperty<List<Order>>(List());
 
+  MutableProperty<List<Order>> currentUserAcceptedOrdersProperty =
+      MutableProperty<List<Order>>(List());
+
+  MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
   MutableProperty<double> _globalFixedPrice = MutableProperty<double>(1.5);
   MutableProperty<int> _globalMinItemCount = MutableProperty<int>(2);
 
@@ -38,10 +45,20 @@ class ConfigHelper with HavingSubscriptionMixin {
     if (numberOfItems == 0) {
       return 0.0;
     } else {
-    print("testing 2 " + _globalFixedPrice.value.toString());
-    print("testing 3 " + (_globalFixedPrice.value + ((numberOfItems - _globalMinItemCount.value) <= 0 ? 0 :(numberOfItems - _globalMinItemCount.value))  * _globalPricePerItem.value).toString());
+      print("testing 2 " + _globalFixedPrice.value.toString());
+      print("testing 3 " +
+          (_globalFixedPrice.value +
+                  ((numberOfItems - _globalMinItemCount.value) <= 0
+                          ? 0
+                          : (numberOfItems - _globalMinItemCount.value)) *
+                      _globalPricePerItem.value)
+              .toString());
 
-      return _globalFixedPrice.value + ((numberOfItems - _globalMinItemCount.value) <= 0 ? 0 :(numberOfItems - _globalMinItemCount.value))  * _globalPricePerItem.value;
+      return _globalFixedPrice.value +
+          ((numberOfItems - _globalMinItemCount.value) <= 0
+                  ? 0
+                  : (numberOfItems - _globalMinItemCount.value)) *
+              _globalPricePerItem.value;
     }
   }
 
@@ -53,16 +70,28 @@ class ConfigHelper with HavingSubscriptionMixin {
         .add(currentUserFoodTagsProperty.bindTo(currentUserFoodTagProducer()));
 
     subscription.add(_globalPricePerItem.bindTo(globalConfigSettingsData()
-        .map<double>((map) =>
-            map.containsKey("PRICE PER ITEM") ? map["PRICE PER ITEM"] + 0.0 : 0.5)));
+        .map<double>((map) => map.containsKey("PRICE PER ITEM")
+            ? map["PRICE PER ITEM"] + 0.0
+            : 0.5)));
 
     subscription.add(_globalFixedPrice.bindTo(globalConfigSettingsData()
         .map<double>((map) =>
-            map.containsKey("FIXED PRICE") ? map["FIXED PRICE"] +0.0 : 1.5)));
+            map.containsKey("FIXED PRICE") ? map["FIXED PRICE"] + 0.0 : 1.5)));
 
-                subscription.add(_globalMinItemCount.bindTo(globalConfigSettingsData()
-        .map<int>((map) =>
-            map.containsKey("MIN QTY") ? map["MIN QTY"] : 2)));
+    subscription.add(_globalMinItemCount.bindTo(globalConfigSettingsData()
+        .map<int>((map) => map.containsKey("MIN QTY") ? map["MIN QTY"] : 2)));
+
+    // get current RequestedOrder
+    // get Current Accepted Orders
+    subscription.add(currentUserRequestedOrdersProperty
+        .bindTo(currentRequestedOrdersProducer()));
+    subscription.add(currentUserAcceptedOrdersProperty
+        .bindTo(currentAcceptedOrdersProducer()));
+
+    subscription
+        .add(currentUserRequestedOrdersProperty.producer.listen((orders) {
+      print("testing orders  " + orders.length.toString());
+    }));
   }
 
   bool get isInDebugMode {
@@ -74,6 +103,26 @@ class ConfigHelper with HavingSubscriptionMixin {
   Observable<List<FoodTag>> currentUserFoodTagProducer() {
     return currentUserProperty.producer.switchMap(
         (user) => user == null ? List<FoodTag>() : user.userFoodTags);
+  }
+
+  Observable<List<Order>> currentRequestedOrdersProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Order>()
+        : FirebaseCollectionReactive<Order>(Firestore.instance
+                .collection("orders")
+                .where(Order.statusKey, isEqualTo: orderStatus_Requested)
+                .where(Order.creatorKey, isEqualTo: user.uid))
+            .observable);
+  }
+
+  Observable<List<Order>> currentAcceptedOrdersProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Order>()
+        : FirebaseCollectionReactive<Order>(Firestore.instance
+                .collection("orders")
+                .where(Order.statusKey, isEqualTo: orderStatus_Accepted)
+                .where(Order.creatorKey, isEqualTo: user.uid))
+            .observable);
   }
 
   Observable<Map<String, dynamic>> globalConfigSettingsData() {

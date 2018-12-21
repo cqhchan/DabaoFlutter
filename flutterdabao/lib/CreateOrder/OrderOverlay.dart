@@ -6,10 +6,12 @@ import 'package:flutterdabao/CreateOrder/OverlayPages/SelectOrderItem.dart';
 import 'package:flutterdabao/CustomWidget/Headers/DoubleLineHeader.dart';
 import 'package:flutterdabao/CustomWidget/page_turner_widget.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
+import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:rxdart/src/subjects/behavior_subject.dart';
 
 class OrderOverlay extends StatefulWidget {
@@ -42,17 +44,37 @@ class _OrderOverlayState extends State<OrderOverlay> with PageHandler {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            DoubleLineHeader(
-              closeTapped: backToLocationCard,
-              title: widget.holder.deliveryLocationDescription.value,
-              subtitle: "Today,",
-            ),
+            StreamBuilder<OrderMode>(
+                stream: widget.holder.mode.producer,
+                builder: (context, snap) {
+                  if (!snap.hasData)
+                    return DoubleLineHeader(
+                      closeTapped: backToLocationCard,
+                      title: widget.holder.deliveryLocationDescription.value,
+                      subtitle: "",
+                    );
+
+                  switch (snap.data) {
+                    case OrderMode.asap:
+                      return DoubleLineHeader(
+                        closeTapped: backToLocationCard,
+                        title: widget.holder.deliveryLocationDescription.value,
+                        subtitle: "ASAP",
+                      );
+
+                    case OrderMode.scheduled:
+                      return DoubleLineHeader(
+                        closeTapped: backToLocationCard,
+                        title: widget.holder.deliveryLocationDescription.value,
+                        subtitle: DateTimeHelper.convertDoubleTimeToDisplayString(widget.holder.startDeliveryTime.value, widget.holder.endDeliveryTime.value),
+                      );
+                  }
+                }),
             Flexible(
-                child: SelectFoodTagPage(
-                  holder: widget.holder,
-                  nextPage: nextPage,
-                ),
-              
+              child: SelectFoodTagPage(
+                holder: widget.holder,
+                nextPage: nextPage,
+              ),
             )
           ],
         );
@@ -76,11 +98,11 @@ class _OrderOverlayState extends State<OrderOverlay> with PageHandler {
               title: StringHelper.upperCaseWords(widget.holder.foodTag.value),
             ),
             Flexible(
-                child: SelectOrderItem(
-                  holder: widget.holder,
-                  nextPage: nextPage,
-                ),
+              child: SelectOrderItem(
+                holder: widget.holder,
+                nextPage: nextPage,
               ),
+            ),
           ],
         );
         break;
@@ -105,7 +127,8 @@ class _OrderOverlayState extends State<OrderOverlay> with PageHandler {
             Flexible(
               child: SingleChildScrollView(
                 child: CheckoutPage(
-                  holder: widget.holder, checkout: toCheckout,
+                  holder: widget.holder,
+                  checkout: toCheckout,
                 ),
               ),
             )

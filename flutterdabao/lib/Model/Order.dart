@@ -8,10 +8,16 @@ import 'package:flutterdabao/Holder/OrderItemHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:rxdart/rxdart.dart';
 
+final String orderStatus_Requested = "Requested";
+final String orderStatus_Accepted = "Accepted";
+
+
 class Order extends FirebaseType with Selectable {
-  static final String createdDeliveryTimeKey = "CT";
-  static final String startDeliveryTimeKey = "ST";
-  static final String endDeliveryTimeKey = "ET";
+  
+  static final String createdTimeKey = "CT";
+  static final String startTimeKey = "ST";
+  static final String endTimeKey = "ET";
+  static final String deliveryTimeKey = "DT";
   static final String deliveryLocationKey = "L";
   static final String deliveryLocationDescriptionKey = "LD";
   static final String foodTagKey = "FT";
@@ -20,10 +26,16 @@ class Order extends FirebaseType with Selectable {
   static final String deliveryFeeKey = "DF";
   static final String modeKey = "MD";
   static final String messageKey = "ME";
+  static final String statusKey = "S";
 
-  BehaviorSubject<String> createdDeliveryTime;
-  BehaviorSubject<String> startDeliveryTime;
-  BehaviorSubject<String> endDeliveryTime;
+
+  BehaviorSubject<DateTime> createdDeliveryTime;
+  BehaviorSubject<DateTime> startDeliveryTime;
+  BehaviorSubject<DateTime> endDeliveryTime;
+
+  //Created when Dabaoer Accepts exact delivery timing
+  BehaviorSubject<DateTime> deliveryTime;
+
   BehaviorSubject<GeoPoint> deliveryLocation;
   BehaviorSubject<String> deliveryLocationDescription;
   BehaviorSubject<String> foodTag;
@@ -42,6 +54,7 @@ class Order extends FirebaseType with Selectable {
 
   @override
   void setUpVariables() {
+    deliveryTime = BehaviorSubject();
     createdDeliveryTime = BehaviorSubject();
     startDeliveryTime = BehaviorSubject();
     endDeliveryTime = BehaviorSubject();
@@ -57,16 +70,25 @@ class Order extends FirebaseType with Selectable {
 
   @override
   void map(Map<String, dynamic> data) {
-    if (data.containsKey(createdDeliveryTimeKey)) {
-      createdDeliveryTime.add(data[createdDeliveryTimeKey]);
+    if (data.containsKey(createdTimeKey)) {
+      createdDeliveryTime.add(DateTimeHelper.convertStringTimeToDateTime(
+          data[createdTimeKey]));
     } else {
       createdDeliveryTime.add(null);
     }
 
-    if (data.containsKey(startDeliveryTimeKey)) {
-      startDeliveryTime.add(data[startDeliveryTimeKey]);
+    if (data.containsKey(startTimeKey)) {
+      startDeliveryTime.add(DateTimeHelper.convertStringTimeToDateTime(
+          data[startTimeKey]));
     } else {
       startDeliveryTime.add(null);
+    }
+
+    if (data.containsKey(deliveryTimeKey)) {
+      deliveryTime.add(DateTimeHelper.convertStringTimeToDateTime(
+          data[deliveryTimeKey]));
+    } else {
+      deliveryTime.add(null);
     }
 
     if (data.containsKey(modeKey)) {
@@ -78,15 +100,17 @@ class Order extends FirebaseType with Selectable {
         case "SCHEDULED":
           mode.add(OrderMode.scheduled);
 
-          if (data.containsKey(endDeliveryTimeKey)) {
-            endDeliveryTime.add(data[endDeliveryTimeKey]);
-          } else {
-            endDeliveryTime.add(null);
-          }
           break;
       }
     } else {
       mode.add(null);
+    }
+
+    if (data.containsKey(endTimeKey)) {
+      endDeliveryTime.add(
+          DateTimeHelper.convertStringTimeToDateTime(data[endTimeKey]));
+    } else {
+      endDeliveryTime.add(null);
     }
 
     if (data.containsKey(deliveryLocationKey)) {
@@ -133,8 +157,6 @@ class Order extends FirebaseType with Selectable {
   }
 
   static bool isValid(OrderHolder holder) {
-    if (holder.startDeliveryTime.value == null) return false;
-
     if (holder.foodTag.value == null) return false;
 
     if (holder.deliveryFee.value == null) return false;
@@ -158,7 +180,7 @@ class Order extends FirebaseType with Selectable {
         break;
 
       case OrderMode.scheduled:
-
+        if (holder.startDeliveryTime.value == null) return false;
         if (holder.endDeliveryTime.value == null) return false;
         break;
     }
@@ -169,11 +191,8 @@ class Order extends FirebaseType with Selectable {
   static void createOrder(OrderHolder holder) {
     Map<String, dynamic> data = Map();
 
-    data[createdDeliveryTimeKey] =
+    data[createdTimeKey] =
         DateTimeHelper.convertDateTimeToString(DateTime.now());
-
-    data[startDeliveryTimeKey] =
-        DateTimeHelper.convertDateTimeToString(holder.startDeliveryTime.value);
 
     data[deliveryLocationKey] = GeoPoint(holder.deliveryLocation.value.latitude,
         holder.deliveryLocation.value.longitude);
@@ -196,12 +215,19 @@ class Order extends FirebaseType with Selectable {
     switch (holder.mode.value) {
       case OrderMode.asap:
         data[modeKey] = "ASAP";
-
+        data[startTimeKey] =
+            DateTimeHelper.convertDateTimeToString(DateTime.now());
+        if (holder.cutOffDeliveryTime.value != null) {
+          data[endTimeKey] = DateTimeHelper.convertDateTimeToString(
+              holder.cutOffDeliveryTime.value);
+        }
         break;
 
       case OrderMode.scheduled:
         data[modeKey] = "SCHEDULED";
-        data[endDeliveryTimeKey] = DateTimeHelper.convertDateTimeToString(
+        data[startTimeKey] = DateTimeHelper.convertDateTimeToString(
+            holder.startDeliveryTime.value);
+        data[endTimeKey] = DateTimeHelper.convertDateTimeToString(
             holder.endDeliveryTime.value);
 
         break;

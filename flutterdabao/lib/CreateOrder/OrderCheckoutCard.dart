@@ -14,6 +14,7 @@ import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 
@@ -31,23 +32,18 @@ class OrderCheckout extends StatefulWidget {
 }
 
 class _OrderCheckoutState extends State<OrderCheckout>
-    with HavingGoogleMapPlaces, HavingSubscriptionMixin  {
-
-
+    with HavingGoogleMapPlaces, HavingSubscriptionMixin {
+  @override
+  void initState() {
+    super.initState();
+    disposeAndReset();
+  }
 
   @override
-    void initState() {
-      super.initState();
-      disposeAndReset();
-
-
-    }
-
-    @override
-      void dispose() {
-      disposeAndReset();
-        super.dispose();
-      }
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,8 +202,6 @@ class _OrderCheckoutState extends State<OrderCheckout>
     );
   }
 
-  
-
   Widget buildOrderButton() {
     return Expanded(
       child: Container(
@@ -332,43 +326,66 @@ class _OrderCheckoutState extends State<OrderCheckout>
           switch (snap.data) {
             case OrderMode.asap:
               return StreamBuilder<DateTime>(
-                stream: widget.holder.endDeliveryTime.producer,
+                stream: widget.holder.cutOffDeliveryTime.producer,
                 builder: (context, snap) {
-                  return buildTime(
-                      title: "Cut-Off Time",
-                      time: !snap.hasData
-                          ? "Optional"
-                          : DateTimeHelper.convertTimeToDisplayString(
-                              snap.data));
+                  return GestureDetector(
+                    onTap: () {
+                      showOneTimeCreator(
+                          startTime: widget.holder.cutOffDeliveryTime.value,
+                          context: context,
+                          onCompleteCallback: (DateTime time) {
+                            widget.holder.cutOffDeliveryTime.value = time;
+                          });
+                    },
+                    child: buildTime(
+                        title: "Cut-Off Time",
+                        time: !snap.hasData
+                            ? "Optional"
+                            : DateTimeHelper.convertTimeToDisplayString(
+                                snap.data)),
+                  );
                 },
               );
 
             case OrderMode.scheduled:
-              return Column(
-                children: <Widget>[
-                  StreamBuilder<DateTime>(
-                    stream: widget.holder.endDeliveryTime.producer,
-                    builder: (context, snap) {
-                      return buildTime(
-                          title: "Deliver From",
-                          time: !snap.hasData
-                              ? "Select Time"
-                              : DateTimeHelper.convertTimeToDisplayString(
-                                  snap.data));
+              return GestureDetector(
+                onTap: () {
+                  showTimeCreator(
+                    startTime: widget.holder.startDeliveryTime.value,
+                    endTime: widget.holder.endDeliveryTime.value,
+                    context: context,
+                    onCompleteCallBack: (DateTime start, DateTime end) {
+                      widget.holder.startDeliveryTime.value = start;
+                      widget.holder.endDeliveryTime.value = end;
                     },
-                  ),
-                  StreamBuilder<DateTime>(
-                    stream: widget.holder.endDeliveryTime.producer,
-                    builder: (context, snap) {
-                      return buildTime(
-                          title: "Deliver By",
-                          time: !snap.hasData
-                              ? "Select Time"
-                              : DateTimeHelper.convertTimeToDisplayString(
-                                  snap.data));
-                    },
-                  ),
-                ],
+                  );
+                },
+                child: Column(
+                  children: <Widget>[
+                    StreamBuilder<DateTime>(
+                      stream: widget.holder.startDeliveryTime.producer,
+                      builder: (context, snap) {
+                        return buildTime(
+                            title: "Deliver From",
+                            time: !snap.hasData
+                                ? "Select Time"
+                                : DateTimeHelper.convertTimeToDisplayString(
+                                    snap.data));
+                      },
+                    ),
+                    StreamBuilder<DateTime>(
+                      stream: widget.holder.endDeliveryTime.producer,
+                      builder: (context, snap) {
+                        return buildTime(
+                            title: "Deliver By",
+                            time: !snap.hasData
+                                ? "Select Time"
+                                : DateTimeHelper.convertTimeToDisplayString(
+                                    snap.data));
+                      },
+                    ),
+                  ],
+                ),
               );
 
             default:
@@ -409,6 +426,7 @@ class _OrderCheckoutState extends State<OrderCheckout>
     return Column(
       children: <Widget>[
         Container(
+          color: Colors.transparent,
           padding: EdgeInsets.only(top: 10.0, bottom: 10.0, right: 2.0),
           child: Row(
             children: <Widget>[
@@ -474,7 +492,7 @@ class _OrderCheckoutState extends State<OrderCheckout>
     );
   }
 
-   Future<void> _handleTapLocation() async {
+  Future<void> _handleTapLocation() async {
     // show input autocomplete with selected mode
     // then get the Prediction selected
     Prediction p = await PlacesAutocomplete.show(
@@ -492,11 +510,10 @@ class _OrderCheckoutState extends State<OrderCheckout>
       widget.holder.deliveryLocationDescription.producer.add(p.description);
     }
   }
-    void onError(PlacesAutocompleteResponse response) {
+
+  void onError(PlacesAutocompleteResponse response) {
     SnackBar(content: Text(response.errorMessage));
   }
-
-
 
   Text buildHeader() {
     return Text(
