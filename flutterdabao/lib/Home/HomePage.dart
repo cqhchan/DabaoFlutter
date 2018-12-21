@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
+import 'package:flutterdabao/CreateOrder/TabBarPage.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -38,69 +39,77 @@ class _Home extends State<Home> {
   @override
   Widget build(BuildContext context) => new Stack(
         children: <Widget>[
-          new Scaffold(
-            backgroundColor: ColorHelper.dabaoOffWhiteF5,
-            body: ListView(
-              controller: _controller,
-              children: <Widget>[
-                //First Widget consisting of Bg, and balance
-                balanceStack(context),
+          MaterialApp(
+            home: new Scaffold(
+              backgroundColor: ColorHelper.dabaoOffWhiteF5,
+              body: ListView(
+                controller: _controller,
+                children: <Widget>[
+                  //First Widget consisting of Bg, and balance
+                  balanceStack(context),
 
-                Container(
-                  child: Text(
-                    "How can we serve you today?",
-                    style: FontHelper.semiBold18Black,
+                  Container(
+                    child: Text(
+                      "How can we serve you today?",
+                      style: FontHelper.semiBold18Black,
+                    ),
+                    padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
                   ),
-                  padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
-                ),
-                Container(
-                  padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-                  child: Wrap(
-                    spacing: 25.0,
-                    children: <Widget>[
-                      //Dabaoee
-                      squardCard('assets/icons/person.png', 'Dabaoee',
-                          'I want to Order', () {
-                        Navigator.push(
-                          context,
-                          FadeRoute(widget: OrderNow()),
-                        );
-                      }),
-                      //Dabaoer
+                  Container(
+                    padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+                    child: Wrap(
+                      spacing: 25.0,
+                      children: <Widget>[
+                        //Dabaoee
+                        squardCard('assets/icons/person.png', 'Dabaoee',
+                            'I want to Order', () {
+                          Navigator.push(
+                            context,
+                            FadeRoute(widget: OrderNow()),
+                          );
+                        }),
+                        //Dabaoer
 
-                      squardCard('assets/icons/bike.png', 'Dabaoer',
-                          'I want to Deliver', () {
-                      }),
-                      //ChatBox
-                    ],
+                        squardCard('assets/icons/bike.png', 'Dabaoer',
+                            'I want to Deliver', () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TabBarPage()));
+                        }),
+                        //ChatBox
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  child: Text(
-                    "Notifications",
-                    style: FontHelper.semiBold18Black,
+                  Container(
+                    child: Text(
+                      "Notifications",
+                      style: FontHelper.semiBold18Black,
+                    ),
+                    padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 0.0),
                   ),
-                  padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 0.0),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           // AppBar Widget
           new Material(
-              type: MaterialType.transparency,
-              child: FloatingHeader(
-                  backgroundColor: Colors.white,
-                  opacityProperty: _opacityProperty,
-                  leftButton: GestureDetector(
-                    child: Container(
-                      height: 40.0,
-                      width: 40.0,
-                      child: Image.asset(
-                        "assets/icons/profile_icon.png",
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                  )))
+            type: MaterialType.transparency,
+            child: FloatingHeader(
+              backgroundColor: Colors.white,
+              opacityProperty: _opacityProperty,
+              leftButton: GestureDetector(
+                child: Container(
+                  height: 40.0,
+                  width: 40.0,
+                  child: Image.asset(
+                    "assets/icons/profile_icon.png",
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
+            ),
+          )
         ],
       );
 

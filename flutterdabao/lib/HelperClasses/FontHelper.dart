@@ -26,6 +26,12 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w300,
       fontFamily: "SF_UI_Display");
+      static const TextStyle norma2TextStyle = TextStyle(
+      color: Colors.black,
+      fontSize: 11.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w300,
+      fontFamily: "SF_UI_Display");
   static const TextStyle chipTextStyle = TextStyle(
       color: Colors.orange,
       fontSize: 12.0,
@@ -56,6 +62,12 @@ class FontHelper {
   static const TextStyle header2TextStyle = TextStyle(
       color: Colors.black,
       fontSize: 22.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
+      static const TextStyle header3TextStyle = TextStyle(
+      color: Colors.black,
+      fontSize: 20.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
