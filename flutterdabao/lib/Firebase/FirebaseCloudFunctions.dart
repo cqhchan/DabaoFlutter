@@ -159,4 +159,41 @@ class FirebaseCloudFunctions {
             .limit(limit))
         .future;
   }
+
+
+    ///[data] data of an Order
+  static Future<bool> createOrder({
+    @required Map<String,dynamic> data,
+  }) async {
+    try {
+      data["mode"] = 0;
+      print("testing Order create 5 ");
+      Map<dynamic, dynamic> results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: data);
+      print(results);
+
+            print("testing Order create 6 ");
+
+      if (results.containsKey("status") && results["status"] == 200)
+      return true;
+
+    } on CloudFunctionsException catch (e) {
+            print("testing Order create 7 ");
+      
+      print(e.message);
+      print(e);
+
+    } catch (e) {
+           print("testing Order create 8 ");
+ 
+      print('Error: $e');
+    }
+
+    return false;
+  }
+
 }
+
+
+
+
