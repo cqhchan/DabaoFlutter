@@ -17,21 +17,21 @@ class DateTimeHelper {
 
   static String convertTimeToDisplayString(DateTime date) {
     if (isToday(date))
-      return formatDate(date, ['Today, ', h, ':', nn, ' ', am]);
+      return formatDate(date, ['Today, ', date.hour == 12 ? "12" : hh , ':', nn, am]);
     else
-      return formatDate(date, [D, ', ', dd, '-', m, ' ', h, ':', nn, ' ', am]);
+      return formatDate(date, [D, ', ', dd, '-', m, ' ', date.hour == 12 ? "12" : hh , ':', nn, am]);
   }
 
   static String convertDoubleTimeToDisplayString(DateTime start, DateTime end) {
     if (isToday(start))
-      return formatDate(start, ['Today, ', h, ':', nn, ' ', am]) +
+      return formatDate(start, ['Today, ', start.hour == 12 ? "12" : hh , ':', nn, am]) +
           " to " +
-          formatDate(end, [h, ':', nn, ' ', am]);
+          formatDate(end, [end.hour == 12 ? "12" : hh , ':', nn, am]);
     else
       return formatDate(
-              start, [D, ', ', dd, '-', m, ' ', h, ':', nn, ' ', am]) +
+              start, [D, ', ', dd, '-', m, ' ', start.hour == 12 ? "12" : hh , ':', nn, am]) +
           " to " +
-          formatDate(end, [h, ':', nn, ' ', am]);
+          formatDate(end, [end.hour == 12 ? "12" : hh , ':', nn, am]);
   }
 
 

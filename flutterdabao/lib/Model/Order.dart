@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -11,9 +12,7 @@ import 'package:rxdart/rxdart.dart';
 final String orderStatus_Requested = "Requested";
 final String orderStatus_Accepted = "Accepted";
 
-
 class Order extends FirebaseType with Selectable {
-  
   static final String createdTimeKey = "CT";
   static final String startTimeKey = "ST";
   static final String endTimeKey = "ET";
@@ -27,7 +26,6 @@ class Order extends FirebaseType with Selectable {
   static final String modeKey = "MD";
   static final String messageKey = "ME";
   static final String statusKey = "S";
-
 
   BehaviorSubject<DateTime> createdDeliveryTime;
   BehaviorSubject<DateTime> startDeliveryTime;
@@ -71,22 +69,22 @@ class Order extends FirebaseType with Selectable {
   @override
   void map(Map<String, dynamic> data) {
     if (data.containsKey(createdTimeKey)) {
-      createdDeliveryTime.add(DateTimeHelper.convertStringTimeToDateTime(
-          data[createdTimeKey]));
+      createdDeliveryTime.add(
+          DateTimeHelper.convertStringTimeToDateTime(data[createdTimeKey]));
     } else {
       createdDeliveryTime.add(null);
     }
 
     if (data.containsKey(startTimeKey)) {
-      startDeliveryTime.add(DateTimeHelper.convertStringTimeToDateTime(
-          data[startTimeKey]));
+      startDeliveryTime
+          .add(DateTimeHelper.convertStringTimeToDateTime(data[startTimeKey]));
     } else {
       startDeliveryTime.add(null);
     }
 
     if (data.containsKey(deliveryTimeKey)) {
-      deliveryTime.add(DateTimeHelper.convertStringTimeToDateTime(
-          data[deliveryTimeKey]));
+      deliveryTime.add(
+          DateTimeHelper.convertStringTimeToDateTime(data[deliveryTimeKey]));
     } else {
       deliveryTime.add(null);
     }
@@ -107,8 +105,8 @@ class Order extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(endTimeKey)) {
-      endDeliveryTime.add(
-          DateTimeHelper.convertStringTimeToDateTime(data[endTimeKey]));
+      endDeliveryTime
+          .add(DateTimeHelper.convertStringTimeToDateTime(data[endTimeKey]));
     } else {
       endDeliveryTime.add(null);
     }
@@ -126,7 +124,7 @@ class Order extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(deliveryFeeKey)) {
-      deliveryFee.add(data[deliveryFeeKey]);
+      deliveryFee.add(data[deliveryFeeKey]+ 0.0);
     } else {
       deliveryFee.add(null);
     }
@@ -188,14 +186,16 @@ class Order extends FirebaseType with Selectable {
     return true;
   }
 
-  static void createOrder(OrderHolder holder) {
+  static Future<bool> createOrder(OrderHolder holder) async {
     Map<String, dynamic> data = Map();
 
     data[createdTimeKey] =
         DateTimeHelper.convertDateTimeToString(DateTime.now());
 
-    data[deliveryLocationKey] = GeoPoint(holder.deliveryLocation.value.latitude,
-        holder.deliveryLocation.value.longitude);
+    data[deliveryLocationKey] = {
+      "lat": holder.deliveryLocation.value.latitude,
+      "long": holder.deliveryLocation.value.longitude
+    };
 
     data[deliveryLocationDescriptionKey] =
         holder.deliveryLocationDescription.value;
@@ -232,7 +232,8 @@ class Order extends FirebaseType with Selectable {
 
         break;
     }
+    print("testing Order create 4 ");
 
-    Firestore.instance.collection("orders").add(data);
+    return FirebaseCloudFunctions.createOrder(data: data);
   }
 }
