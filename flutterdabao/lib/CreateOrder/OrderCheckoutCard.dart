@@ -4,6 +4,7 @@ import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutterdabao/CreateOrder/OverlayPages/DescriptionInputPage.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
+import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -12,6 +13,7 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
+import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
@@ -253,12 +255,36 @@ class _OrderCheckoutState extends State<OrderCheckout>
                     ],
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (Order.isValid(widget.holder)) {
-                    Order.createOrder(widget.holder);
-                    Navigator.of(context).pop();
+                          print("testing Order create 9 ");
+
+
+                    showLoadingOverlay(context: context);
+                    var isSuccessful = await Order.createOrder(widget.holder);
+
+                    if (isSuccessful) {
+                      // Pop to home
+                      final PageRouteBuilder _homeRoute = new PageRouteBuilder(
+                        pageBuilder: (BuildContext context, _, __) {
+                          return Home();
+                        },
+                      );
+                      Navigator.pushAndRemoveUntil(
+                          context, _homeRoute, (Route<dynamic> r) => false);
+
+                    } else {
+                      Navigator.of(context).pop();
+                      final snackBar = SnackBar(
+                          content: Text(
+                              'An Error has occured. Please check your network connectivity'));
+                      Scaffold.of(context).showSnackBar(snackBar);
+                    }
                   } else {
-                    print("Failed");
+                    final snackBar = SnackBar(
+                        content:
+                            Text('Please ensure all details are filled up'));
+                    Scaffold.of(context).showSnackBar(snackBar);
                   }
                 },
                 shape: RoundedRectangleBorder(
@@ -614,8 +640,16 @@ class _OrderCheckoutState extends State<OrderCheckout>
                       )),
                   topSwitchBar(
                       onTap: () {
-                        widget.holder.mode.value = OrderMode.scheduled;
                         Navigator.of(context).pop();
+                        showTimeCreator(
+                            context: context,
+                            startTime: widget.holder.startDeliveryTime.value,
+                            endTime: widget.holder.endDeliveryTime.value,
+                            onCompleteCallBack: (DateTime start, DateTime end) {
+                              widget.holder.startDeliveryTime.value = start;
+                              widget.holder.endDeliveryTime.value = end;
+                              widget.holder.mode.value = OrderMode.scheduled;
+                            });
                       },
                       title: "Scheduled Delivery",
                       subTitle: "Order Delivered Within Fixed Time Period",

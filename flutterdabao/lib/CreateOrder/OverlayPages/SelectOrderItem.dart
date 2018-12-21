@@ -114,8 +114,9 @@ class _SelectOrderItemState extends State<SelectOrderItem>
       stream: suggestedOrderItems.producer,
       builder: (context, snap) {
         //return an empty container if no suggested Orders
-        if (!snap.hasData || snap.data.isEmpty) return Container();
-
+        if (!snap.hasData ) return CircularProgressIndicator();
+        if (snap.data.isEmpty) return Container();
+        
         List<Widget> suggestOrdersWidget = List();
 
         suggestOrdersWidget.add(Text(
