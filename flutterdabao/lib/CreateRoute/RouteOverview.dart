@@ -3,35 +3,31 @@ import 'package:flutterdabao/CreateOrder/CustomizedMap.dart';
 import 'package:flutterdabao/CreateOrder/LocationCard.dart';
 import 'package:flutterdabao/CreateOrder/OrderCheckoutCard.dart';
 import 'package:flutterdabao/CreateOrder/OrderOverlay.dart';
+import 'package:flutterdabao/CreateRoute/DoubleLocationCard.dart';
+import 'package:flutterdabao/CreateRoute/DoubleLocationMap.dart';
+import 'package:flutterdabao/CreateRoute/RouteOverlay.dart';
 import 'package:flutterdabao/CustomWidget/Buttons/CustomizedBackButton.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
+import 'package:flutterdabao/Holder/RouteHolder.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class OrderNow extends StatefulWidget {
-
-  _OrderNowState createState() => _OrderNowState();
+class RouteOverview extends StatefulWidget {
+  _RouteOverviewState createState() => _RouteOverviewState();
 }
 
-class _OrderNowState extends State<OrderNow>
+class _RouteOverviewState extends State<RouteOverview>
     with HavingSubscriptionMixin, SingleTickerProviderStateMixin {
-  // String _address = '20 Heng Mui Keng xTerrace';
 
+  MutableProperty<bool> focusOnStart = MutableProperty<bool>(true);
 
-  // handle the progress through the application
-  MutableProperty<int> progress = MutableProperty<int>(0);
-
-  MutableProperty<bool> checkout = MutableProperty<bool>(false);
-
-  final OrderHolder holder = OrderHolder();
-
+  final RouteHolder holder = RouteHolder();
 
   void initState() {
-
     super.initState();
   }
 
@@ -46,25 +42,20 @@ class _OrderNowState extends State<OrderNow>
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          CustomizedMap(
-            selectedlocation: holder.deliveryLocation,
-            selectedlocationDescription: holder.deliveryLocationDescription,
+          DoubleLocationCustomizedMap(
+            endSelectedLocation: holder.endDeliveryLocation,
+            endSelectedLocationDescription: holder.endDeliveryLocationDescription,
+            focusOnStart: focusOnStart,
+            startSelectedLocation: holder.startDeliveryLocation,
+            startSelectedLocationDescription: holder.startDeliveryLocationDescription,
           ),
           CustomizedBackButton(),
-          StreamBuilder<bool>(
-            stream: checkout.producer,
-            builder: (context, snap) {
-              if (snap.hasData && snap.data)
-                return OrderCheckout(
+           DoubleLocationCard(
                   showOverlayCallback: showOverlay,
-                  holder: holder,
-                );
-              else
-                return LocationCard(
-                  showOverlayCallback: showOverlay, holder: holder,
-                );
-            },
-          ),
+                  holder: holder, focusOnStart: focusOnStart,
+                ),
+          
+        
         ],
       ),
     );
@@ -74,11 +65,8 @@ class _OrderNowState extends State<OrderNow>
     showHalfBottomSheet(
         context: context,
         builder: (builder) {
-          print(holder.deliveryLocationDescription.value);
-          return OrderOverlay(
+          return RouteOverlay(
             holder: holder,
-            page: progress,
-            checkout: checkout,
           );
         });
   }

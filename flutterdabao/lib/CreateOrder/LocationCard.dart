@@ -63,15 +63,24 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
                 Line(
                   margin: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 10.0),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    _scheduleOrder(),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: 10.0, maxWidth: 20.0),
-                    ),
-                    _orderNow(),
-                  ],
+                StreamBuilder<LatLng>(
+                  stream: widget.holder.deliveryLocation.producer,
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData && snapshot.data != null)
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          _scheduleOrder(),
+                          ConstrainedBox(
+                            constraints:
+                                BoxConstraints(minWidth: 10.0, maxWidth: 20.0),
+                          ),
+                          _orderNow(),
+                        ],
+                      );
+                    else
+                      return Container();
+                  },
                 )
               ],
             ),
@@ -92,11 +101,10 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-                   ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: 15.0, maxWidth: 22.0),
-                    ),
+              ConstrainedBox(
+                constraints: BoxConstraints(minWidth: 15.0, maxWidth: 22.0),
+              ),
               Image.asset('assets/icons/run.png'),
-              
               SizedBox(
                 width: 5.0,
               ),
@@ -109,16 +117,14 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
                   ),
                 ),
               ),
-                   ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: 15.0, maxWidth: 22.0),
-                    ),
+              ConstrainedBox(
+                constraints: BoxConstraints(minWidth: 15.0, maxWidth: 22.0),
+              ),
             ],
           ),
           onPressed: () {
-
             widget.holder.mode.value = OrderMode.asap;
             widget.showOverlayCallback();
-            
           },
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -131,7 +137,8 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
 
   Widget _scheduleOrder() {
     return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: 55.0, minHeight: 55.0, minWidth: 90.0, maxWidth: 105.0),
+      constraints: BoxConstraints(
+          maxHeight: 55.0, minHeight: 55.0, minWidth: 90.0, maxWidth: 105.0),
       // height: 55.0,
       // width: 105.0,
       child: RaisedButton(
@@ -147,7 +154,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
               width: 5.0,
             ),
             FittedBox(
-                          child: Text(
+              child: Text(
                 'Scheduled\nOrder',
                 textAlign: TextAlign.center,
                 style: FontHelper.bold(Colors.black, 12.0),
@@ -156,19 +163,17 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
           ],
         ),
         onPressed: () {
-            showTimeCreator(
-              startTime: widget.holder.startDeliveryTime.value,
-              endTime: widget.holder.endDeliveryTime.value,
-              context: context,
-              onCompleteCallBack: (DateTime start,DateTime end) {
-                  widget.holder.startDeliveryTime.value = start;
-                  widget.holder.endDeliveryTime.value = end;
-                  widget.holder.mode.value = OrderMode.scheduled;
-                  widget.showOverlayCallback();
-
-              },
-             );
-
+          showTimeCreator(
+            startTime: widget.holder.startDeliveryTime.value,
+            endTime: widget.holder.endDeliveryTime.value,
+            context: context,
+            onCompleteCallBack: (DateTime start, DateTime end) {
+              widget.holder.startDeliveryTime.value = start;
+              widget.holder.endDeliveryTime.value = end;
+              widget.holder.mode.value = OrderMode.scheduled;
+              widget.showOverlayCallback();
+            },
+          );
         },
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -249,5 +254,4 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
   void onError(PlacesAutocompleteResponse response) {
     SnackBar(content: Text(response.errorMessage));
   }
-
 }

@@ -2,7 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
+<<<<<<< HEAD
 import 'package:flutterdabao/CreateOrder/TabBarPage.dart';
+=======
+import 'package:flutterdabao/CreateRoute/RouteOverview.dart';
+>>>>>>> ec5d6b2d14e813d348bf2c68837ab09e7bfdb6e2
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -70,6 +74,7 @@ class _Home extends State<Home> {
                         }),
                         //Dabaoer
 
+<<<<<<< HEAD
                         squardCard('assets/icons/bike.png', 'Dabaoer',
                             'I want to Deliver', () {
                           Navigator.push(
@@ -80,6 +85,17 @@ class _Home extends State<Home> {
                         //ChatBox
                       ],
                     ),
+=======
+                      squardCard('assets/icons/bike.png', 'Dabaoer',
+                          'I want to Deliver', () {
+                            Navigator.push(
+                          context,
+                          FadeRoute(widget: RouteOverview()),
+                        );
+                      }),
+                      //ChatBox
+                    ],
+>>>>>>> ec5d6b2d14e813d348bf2c68837ab09e7bfdb6e2
                   ),
                   Container(
                     child: Text(
