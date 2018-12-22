@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
@@ -22,8 +23,8 @@ class Route extends FirebaseType {
 
   BehaviorSubject<GeoPoint> startLocation;
   BehaviorSubject<String> startLocationDescription;
-  BehaviorSubject<GeoPoint> deliveryLocation;
-  BehaviorSubject<String> deliveryLocationDescription;
+  BehaviorSubject<List<GeoPoint>> deliveryLocation;
+  BehaviorSubject<List<String>> deliveryLocationDescription;
   BehaviorSubject<DateTime> deliveryTime;
   BehaviorSubject<String> creator;
   BehaviorSubject<List<String>> foodTags;
@@ -94,7 +95,7 @@ class Route extends FirebaseType {
         .observable);
   }
 
-  static isValid(RouteHolder holder) {
+  static bool isValid(RouteHolder holder) {
     if (holder.startDeliveryLocation.value == null) return false;
 
     if (holder.startDeliveryLocationDescription.value == null) return false;
@@ -105,6 +106,10 @@ class Route extends FirebaseType {
 
     if (holder.deliveryTime.value == null) return false;
 
+    if (holder.foodTags.value == null) return false;
+
+    if (holder.foodTags.value.length == 0) return false;
+
     return true;
   }
 
@@ -113,18 +118,25 @@ class Route extends FirebaseType {
     data[createdTimeKey] =
         DateTimeHelper.convertDateTimeToString(DateTime.now());
 
-    data[deliveryLocationKey] = {
-      "lat": holder.endDeliveryLocation.value.latitude,
-      "long": holder.endDeliveryLocation.value.longitude
-    };
-
     data[startLocationKey] = {
       "lat": holder.startDeliveryLocation.value.latitude,
       "long": holder.startDeliveryLocation.value.longitude
     };
 
-    data[deliveryLocationDescriptionKey] =
-        holder.endDeliveryLocationDescription.value;
+    List<Map> listOfDeliveryLoction = List();
+
+    listOfDeliveryLoction.add({
+      "lat": holder.endDeliveryLocation.value.latitude,
+      "long": holder.endDeliveryLocation.value.longitude
+    });
+
+    data[deliveryLocationKey] = listOfDeliveryLoction;
+
+    List<String> listOfDeliveryLoctionDescription = List();
+
+    listOfDeliveryLoctionDescription
+        .add(holder.endDeliveryLocationDescription.value);
+    data[deliveryLocationDescriptionKey] = listOfDeliveryLoctionDescription;
 
     data[startLocationDescriptionKey] =
         holder.startDeliveryLocationDescription.value;
@@ -136,7 +148,6 @@ class Route extends FirebaseType {
     data[deliveryTimeKey] =
         DateTimeHelper.convertDateTimeToString(holder.deliveryTime.value);
 
-
-    
+    return FirebaseCloudFunctions.createRoute(data: data);
   }
 }

@@ -11,6 +11,7 @@ import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DoubleLocationCard extends StatefulWidget {
   final RouteHolder holder;
@@ -58,15 +59,19 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 buildHeader(),
+                Text(
+                  "Im Buying from",
+                  style: FontHelper.semiBold(ColorHelper.dabaoOffGrey70, 14),
+                ),
                 SizedBox(
-                  height: 10.0,
+                  height: 5.0,
                 ),
                 buildSelectedlocationWidget(
                     true,
                     widget.holder.startDeliveryLocation,
                     widget.holder.startDeliveryLocationDescription,
                     "assets/icons/blue_marker.png",
-                    "Enter your location"),
+                    "Enter start destination"),
                 Row(
                   children: <Widget>[
                     Container(
@@ -87,10 +92,22 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
                     widget.holder.endDeliveryLocation,
                     widget.holder.endDeliveryLocationDescription,
                     "assets/icons/red_marker_icon.png",
-                    "Enter Destination"),
-                Container(
-                  margin: EdgeInsets.only(top: 30.0),
-                  child: _createRoute(),
+                    "Enter Delivery Destination"),
+                StreamBuilder<bool>(
+                  stream: Observable.combineLatest2(
+                      widget.holder.startDeliveryLocation.producer,
+                      widget.holder.endDeliveryLocation.producer,
+                      (startLocation, endLocation) =>
+                          startLocation != null && endLocation != null),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData && snapshot.data)
+                      return Container(
+                        margin: EdgeInsets.only(top: 30.0),
+                        child: _createRoute(),
+                      );
+                    else 
+                    return Container();
+                  },
                 )
               ],
             ),
@@ -132,16 +149,18 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
           ],
         ),
         onPressed: () {
-          showOneTimeCreator(
-              context: context,
-              startTime: widget.holder.deliveryTime.value,
-              headerTitle: "Select Delivery Time",
-              onCompleteCallback: (DateTime selectedTime) {
-                print("testing 12 ");
-                widget.holder.deliveryTime.value = selectedTime;
-                widget.showOverlayCallback();
-              },
-              subTitle: "I will be delivering at...");
+          if (widget.holder.startDeliveryLocation.value != null &&
+              widget.holder.endDeliveryLocation.value != null)
+            showOneTimeCreator(
+                context: context,
+                startTime: widget.holder.deliveryTime.value,
+                headerTitle: "Select Delivery Time",
+                onCompleteCallback: (DateTime selectedTime) {
+                  print("testing 12 ");
+                  widget.holder.deliveryTime.value = selectedTime;
+                  widget.showOverlayCallback();
+                },
+                subTitle: "I will be delivering at...");
         },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
@@ -212,7 +231,7 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
 
   Widget buildHeader() {
     return Container(
-      margin: EdgeInsets.only(bottom: 20.0),
+      margin: EdgeInsets.only(bottom: 10.0),
       child: Text(
         'Let\'s create your route!',
         style: FontHelper.semiBold16(ColorHelper.dabaoOffBlack4A),
@@ -226,6 +245,8 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
       MutableProperty<String> locationDescriptionProperty) async {
     // show input autocomplete with selected mode
     // then get the Prediction selected
+          widget.focusOnStart.value = focusOnStart;
+
     Prediction p = await PlacesAutocomplete.show(
       context: context,
       apiKey: kGoogleApiKey,
@@ -239,7 +260,6 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
       LatLng newLocation = await getLatLng(p);
       locationProperty.value = newLocation;
       locationDescriptionProperty.value = p.description;
-      widget.focusOnStart.value = focusOnStart;
     }
   }
 

@@ -257,8 +257,6 @@ class _OrderCheckoutState extends State<OrderCheckout>
                 ),
                 onPressed: () async {
                   if (Order.isValid(widget.holder)) {
-                          print("testing Order create 9 ");
-
 
                     showLoadingOverlay(context: context);
                     var isSuccessful = await Order.createOrder(widget.holder);

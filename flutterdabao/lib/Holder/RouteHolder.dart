@@ -14,7 +14,7 @@ class RouteHolder {
   MutableProperty<String> endDeliveryLocationDescription =
       MutableProperty(null);
 
-  MutableProperty<List<String>> foodTags = MutableProperty(null);
+  MutableProperty<List<String>> foodTags = MutableProperty(List());
 
   MutableProperty<DateTime> deliveryTime = MutableProperty(null);
 

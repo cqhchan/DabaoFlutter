@@ -187,6 +187,36 @@ class FirebaseCloudFunctions {
     return false;
   }
 
+
+  ///[data] data of an Route
+  static Future<bool> createRoute({
+    @required Map<String,dynamic> data,
+  }) async {
+    try {
+      data["mode"] = 1;
+      Map<dynamic, dynamic> results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: data);
+      print(results);
+
+      if (results.containsKey("status") && results["status"] == 200)
+      return true;
+
+    } on CloudFunctionsException catch (e) {
+      
+      print(e.message);
+      print(e);
+    return false;
+
+    } catch (e) {
+ 
+      print('Error: $e');
+          return false;
+
+    }
+
+    return false;
+  }
+
 }
 
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CustomWidget/Buttons/ArrowButton.dart';
 import 'package:flutterdabao/CustomWidget/Headers/DoubleLineHeader.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
+import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/FoodTags/SearchFoodTag.dart';
@@ -11,7 +13,10 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/RouteHolder.dart';
+import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
+import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RouteOverlay extends StatefulWidget {
@@ -45,7 +50,7 @@ class _RouteOverlayState extends State<RouteOverlay> {
         Flexible(
           child: _SelectFoodTagPage(
             holder: widget.holder,
-            onCompletion: (){},
+            onCompletion: () {},
           ),
         )
       ],
@@ -87,7 +92,7 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
         widget.holder.startDeliveryLocation.producer.listen((location) async {
       if (lastSearchLatLng == null || lastSearchLatLng != location)
         FirebaseCloudFunctions.fetchNearbyFoodTags(
-                location: location, radius: 300)
+                location: location, radius: 500)
             .then((list) {
           reccomendedFoodTags.value = list;
         });
@@ -116,12 +121,59 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
                     child: Container(
                         padding: EdgeInsets.only(top: 18.0, bottom: 18.0),
                         child: Text(
-                          "What are you having today?",
+                          "Where can you Dabao from Today?",
                           style: FontHelper.semiBold(
                               ColorHelper.dabaoOffBlack4A, 15.0),
                         ))),
                 buildReccomended(),
                 buildUser(),
+                buildSelected(),
+                StreamBuilder<List<String>>(
+                  stream: widget.holder.foodTags.producer,
+                  builder: (context, snap) {
+                    if (snap.hasData && snap.data.length > 0) {
+                      return ArrowButton(
+                        title: "Create Route",
+                        onPressedCallback: () async {
+                          if (DabaoRoute.Route.isValid(widget.holder)) {
+                            showLoadingOverlay(context: context);
+                            var isSuccessful =
+                                await DabaoRoute.Route.createRoute(
+                                    widget.holder);
+
+                            if (isSuccessful) {
+                              // Pop to home
+                              final PageRouteBuilder _homeRoute =
+                                  new PageRouteBuilder(
+                                pageBuilder: (BuildContext context, _, __) {
+                                  return Home();
+                                },
+                              );
+                              Navigator.pushAndRemoveUntil(context, _homeRoute,
+                                  (Route<dynamic> r) => false);
+                            } else {
+                              Navigator.of(context).pop();
+                            // TODO bug it doessnt show
+
+                              final snackBar = SnackBar(
+                                  content: Text(
+                                      'An Error has occured. Please check your network connectivity'));
+                              Scaffold.of(context).showSnackBar(snackBar);
+                            }
+                          } else {
+                            // TODO it doessnt show
+                            final snackBar = SnackBar(
+                                content: Text(
+                                    'Please ensure all details are filled up'));
+                            Scaffold.of(context).showSnackBar(snackBar);
+                          }
+                        },
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                )
               ],
             ),
           ),
@@ -130,19 +182,62 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
     );
   }
 
+  StreamBuilder<List<String>> buildSelected() {
+    return StreamBuilder<List<String>>(
+      stream: widget.holder.foodTags.producer,
+      builder: (context, snap) {
+        if (snap.hasData) {
+          List<Widget> listOfWidget = snap.data.map((foodTagTitle) {
+            return InputChip(
+              onDeleted: () {
+                widget.holder.foodTags.value.remove(foodTagTitle);
+                widget.holder.foodTags.onAdd();
+              },
+              deleteIcon: Image.asset("assets/icons/circle_close_icon.png"),
+              pressElevation: 0.0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                  side: BorderSide(
+                      color: ColorHelper.dabaoOrange,
+                      style: BorderStyle.solid)),
+              backgroundColor: ColorHelper.dabaoOrange,
+              label: Text(
+                foodTagTitle,
+                style: FontHelper.semiBold(Colors.black, 12),
+              ),
+              onPressed: () {},
+            );
+          }).toList();
+
+          return Container(
+            margin: EdgeInsets.only(bottom: 20.0, top: 20.0),
+            child: Wrap(
+              spacing: 15.0,
+              children: listOfWidget,
+            ),
+          );
+        } else {
+          return CircularProgressIndicator();
+        }
+      },
+    );
+  }
+
   void callback(selected) {
     if (selected is FoodTag) {
       FoodTag selectedFoodTag = selected;
 
-      if (widget.holder.foodTags.value.contains(selectedFoodTag.title.value))
+      if (!widget.holder.foodTags.value.contains(selectedFoodTag.title.value))
         widget.holder.foodTags.value.add(selectedFoodTag.title.value);
-      // widget.nextPage();
+      widget.holder.foodTags.onAdd();
     }
 
     if (selected is String) {
       String selectedFoodTagTitle = selected;
-      if (widget.holder.foodTags.value.contains(selectedFoodTagTitle))
+      print(selectedFoodTagTitle);
+      if (!widget.holder.foodTags.value.contains(selectedFoodTagTitle))
         widget.holder.foodTags.value.add(selectedFoodTagTitle);
+      widget.holder.foodTags.onAdd();
     }
   }
 
@@ -152,7 +247,7 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
       children: <Widget>[
         Container(
           child: Text(
-            "Reccomended",
+            "Places near you",
             style: FontHelper.medium(ColorHelper.dabaoOffBlack4A, 12.0),
           ),
           padding: EdgeInsets.only(bottom: 5.0),
@@ -216,8 +311,6 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
         );
       }));
 
-  
-
   StreamBuilder<List<FoodTag>> buildUser() {
     return StreamBuilder<List<FoodTag>>(
       stream: userFoodTags.producer,
@@ -231,7 +324,7 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
             ),
             Container(
               child: Text(
-                "Your custom orders",
+                "Your recent places",
                 style: FontHelper.medium(ColorHelper.dabaoOffBlack4A, 12.0),
               ),
               padding: EdgeInsets.only(bottom: 5.0),
