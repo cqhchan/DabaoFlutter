@@ -9,8 +9,11 @@ import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:rxdart/subjects.dart';
 
+final String routeStatus_Open = "Open";
+
 class Route extends FirebaseType {
   static final String creatorKey = "C";
+  static final String statusKey = "S";
   static final String createdTimeKey = "CT";
 
   static final String deliveryLocationKey = "DL";

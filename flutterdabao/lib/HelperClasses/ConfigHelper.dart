@@ -6,6 +6,7 @@ import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
+import 'package:flutterdabao/Model/Route.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,6 +27,9 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<Order>> currentUserAcceptedOrdersProperty =
       MutableProperty<List<Order>>(List());
 
+  MutableProperty<List<Route>> currentUserOpenRoutesProperty =
+      MutableProperty<List<Route>>(List());
+
   MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
   MutableProperty<double> _globalFixedPrice = MutableProperty<double>(1.5);
   MutableProperty<int> _globalMinItemCount = MutableProperty<int>(2);
@@ -40,27 +44,6 @@ class ConfigHelper with HavingSubscriptionMixin {
     _internal = this;
   }
 
-  double deliveryFeeCalculator({int numberOfItems}) {
-    print("testing 1 " + numberOfItems.toString());
-    if (numberOfItems == 0) {
-      return 0.0;
-    } else {
-      print("testing 2 " + _globalFixedPrice.value.toString());
-      print("testing 3 " +
-          (_globalFixedPrice.value +
-                  ((numberOfItems - _globalMinItemCount.value) <= 0
-                          ? 0
-                          : (numberOfItems - _globalMinItemCount.value)) *
-                      _globalPricePerItem.value)
-              .toString());
-
-      return _globalFixedPrice.value +
-          ((numberOfItems - _globalMinItemCount.value) <= 0
-                  ? 0
-                  : (numberOfItems - _globalMinItemCount.value)) *
-              _globalPricePerItem.value;
-    }
-  }
 
   // Called once when app loads.
   appDidLoad() {
@@ -69,6 +52,8 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription
         .add(currentUserFoodTagsProperty.bindTo(currentUserFoodTagProducer()));
 
+
+    // Global Price forumala
     subscription.add(_globalPricePerItem.bindTo(globalConfigSettingsData()
         .map<double>((map) => map.containsKey("PRICE PER ITEM")
             ? map["PRICE PER ITEM"] + 0.0
@@ -84,14 +69,15 @@ class ConfigHelper with HavingSubscriptionMixin {
     // get current RequestedOrder
     // get Current Accepted Orders
     subscription.add(currentUserRequestedOrdersProperty
-        .bindTo(currentRequestedOrdersProducer()));
+        .bindTo(currentUserRequestedOrdersProducer()));
     subscription.add(currentUserAcceptedOrdersProperty
-        .bindTo(currentAcceptedOrdersProducer()));
+        .bindTo(currentUserAcceptedOrdersProducer()));
 
-    subscription
-        .add(currentUserRequestedOrdersProperty.producer.listen((orders) {
-      print("testing orders  " + orders.length.toString());
-    }));
+
+    // get Current open Routes
+    subscription.add(currentUserOpenRoutesProperty
+        .bindTo(currentUserOpenRoutesProducer()));
+
   }
 
   bool get isInDebugMode {
@@ -105,7 +91,7 @@ class ConfigHelper with HavingSubscriptionMixin {
         (user) => user == null ? List<FoodTag>() : user.userFoodTags);
   }
 
-  Observable<List<Order>> currentRequestedOrdersProducer() {
+  Observable<List<Order>> currentUserRequestedOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
@@ -115,7 +101,17 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-  Observable<List<Order>> currentAcceptedOrdersProducer() {
+  Observable<List<Route>> currentUserOpenRoutesProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Route>()
+        : FirebaseCollectionReactive<Route>(Firestore.instance
+                .collection("routes")
+                .where(Route.statusKey, isEqualTo: routeStatus_Open)
+                .where(Route.creatorKey, isEqualTo: user.uid))
+            .observable);
+  }
+
+  Observable<List<Order>> currentUserAcceptedOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
@@ -150,4 +146,28 @@ class ConfigHelper with HavingSubscriptionMixin {
     location = currentLocationProperty
         .bindTo(LocationHelper.instance.onLocationChange());
   }
+
+    double deliveryFeeCalculator({int numberOfItems}) {
+    print("testing 1 " + numberOfItems.toString());
+    if (numberOfItems == 0) {
+      return 0.0;
+    } else {
+      print("testing 2 " + _globalFixedPrice.value.toString());
+      print("testing 3 " +
+          (_globalFixedPrice.value +
+                  ((numberOfItems - _globalMinItemCount.value) <= 0
+                          ? 0
+                          : (numberOfItems - _globalMinItemCount.value)) *
+                      _globalPricePerItem.value)
+              .toString());
+
+      return _globalFixedPrice.value +
+          ((numberOfItems - _globalMinItemCount.value) <= 0
+                  ? 0
+                  : (numberOfItems - _globalMinItemCount.value)) *
+              _globalPricePerItem.value;
+    }
+  }
+
+  
 }
