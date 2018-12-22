@@ -5,7 +5,6 @@ import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
-import 'package:flutterdabao/Holder/OrderItemHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -239,7 +238,6 @@ class Order extends FirebaseType with Selectable {
 
         break;
     }
-    print("testing Order create 4 ");
 
     return FirebaseCloudFunctions.createOrder(data: data);
   }

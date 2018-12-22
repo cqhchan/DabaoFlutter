@@ -104,13 +104,47 @@ class FirebaseCloudFunctions {
     return list;
   }
 
+
+
   ///[location] Location to search
   ///[radius] radius in meters to search default 1000
+  static Future<List<String>> fetchProximityHash({
+    @required LatLng location,
+    int radius = 500,
+  }) async {
+    List<String> list = List();
+    try {
+      Map<String, dynamic> attributeMap = new Map<String, dynamic>();
+      attributeMap["lat"] = location.latitude;
+      attributeMap["long"] = location.longitude;
+      attributeMap["radius"] = radius;
+      attributeMap["mode"] = 4;
+      print('requesting foodTags from functions');
+      Map<dynamic, dynamic> results = await CloudFunctions.instance
+          .call(functionName: 'locationRequest', parameters: attributeMap);
+      print(results);
+
+      if (results.containsKey("geohashes")){
+        list = List.castFrom<dynamic,String>(results["geohashes"]) ;
+      }
+
+      print(list.length);
+    } on CloudFunctionsException catch (e) {
+      print(e);
+    } catch (e) {
+      print('Error: $e');
+    }
+
+    return list;
+  }
+
+  ///[location] Location to search
+  ///[radius] radius in meters to search default 500
   static Future<List<FoodTag>> fetchNearbyDeliveryFoodTags({
     @required LatLng location,
     @required DateTime startTime,
     DateTime endTime,
-    int radius = 1000,
+    int radius = 300,
   }) async {
     List<FoodTag> list = List();
     try {
@@ -167,26 +201,51 @@ class FirebaseCloudFunctions {
   }) async {
     try {
       data["mode"] = 0;
-      print("testing Order create 5 ");
       Map<dynamic, dynamic> results = await CloudFunctions.instance
           .call(functionName: 'creationRequest', parameters: data);
       print(results);
-
-            print("testing Order create 6 ");
 
       if (results.containsKey("status") && results["status"] == 200)
       return true;
 
     } on CloudFunctionsException catch (e) {
-            print("testing Order create 7 ");
       
       print(e.message);
       print(e);
 
     } catch (e) {
-           print("testing Order create 8 ");
  
       print('Error: $e');
+    }
+
+    return false;
+  }
+
+
+  ///[data] data of an Route
+  static Future<bool> createRoute({
+    @required Map<String,dynamic> data,
+  }) async {
+    try {
+      data["mode"] = 1;
+      Map<dynamic, dynamic> results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: data);
+      print(results);
+
+      if (results.containsKey("status") && results["status"] == 200)
+      return true;
+
+    } on CloudFunctionsException catch (e) {
+      
+      print(e.message);
+      print(e);
+    return false;
+
+    } catch (e) {
+ 
+      print('Error: $e');
+          return false;
+
     }
 
     return false;
