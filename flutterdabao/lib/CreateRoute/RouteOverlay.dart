@@ -1,28 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutterdabao/CustomWidget/Headers/DoubleLineHeader.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
-import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/FoodTags/SearchFoodTag.dart';
 import 'package:flutterdabao/FoodTags/TagWrap.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
-import 'package:flutterdabao/Holder/OrderHolder.dart';
+import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
-import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:rxdart/rxdart.dart';
+
+class RouteOverlay extends StatefulWidget {
+  final RouteHolder holder;
+
+  RouteOverlay({
+    @required this.holder,
+  });
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _RouteOverlayState();
+  }
+}
+
+class _RouteOverlayState extends State<RouteOverlay> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        DoubleLineHeader(
+          closeTapped: () {
+            Navigator.of(context).pop();
+          },
+          title: widget.holder.endDeliveryLocationDescription.value,
+          subtitle: DateTimeHelper.convertTimeToDisplayString(
+              widget.holder.deliveryTime.value),
+        ),
+        Flexible(
+          child: _SelectFoodTagPage(
+            holder: widget.holder,
+            onCompletion: (){},
+          ),
+        )
+      ],
+    );
+  }
+}
 
 // Page 0 in Overlays
 // 3segments, My orders, places near me and Being Delivered near you
-class SelectFoodTagPage extends StatefulWidget {
-  final OrderHolder holder;
-  final VoidCallback nextPage;
+class _SelectFoodTagPage extends StatefulWidget {
+  final RouteHolder holder;
+  final VoidCallback onCompletion;
 
-  SelectFoodTagPage({Key key, @required this.holder, @required this.nextPage})
+  _SelectFoodTagPage(
+      {Key key, @required this.holder, @required this.onCompletion})
       : super(key: key);
 
   @override
@@ -31,11 +69,9 @@ class SelectFoodTagPage extends StatefulWidget {
   }
 }
 
-class _SelectFoodTagPageState extends State<SelectFoodTagPage>
+class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
     with HavingSubscriptionMixin {
   final MutableProperty<List<FoodTag>> reccomendedFoodTags =
-      MutableProperty(null);
-  final MutableProperty<List<FoodTag>> deliveredNearbyFoodTags =
       MutableProperty(null);
 
   LatLng lastSearchLatLng;
@@ -47,43 +83,15 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
   void initState() {
     super.initState();
 
-    subscription
-        .add(widget.holder.deliveryLocation.producer.listen((location) async {
+    subscription.add(
+        widget.holder.startDeliveryLocation.producer.listen((location) async {
       if (lastSearchLatLng == null || lastSearchLatLng != location)
         FirebaseCloudFunctions.fetchNearbyFoodTags(
-                location: location, radius: 1500)
+                location: location, radius: 300)
             .then((list) {
           reccomendedFoodTags.value = list;
         });
     }));
-
-    Observable.combineLatest2<LatLng, OrderMode, LatLng>(
-        widget.holder.deliveryLocation.producer, widget.holder.mode.producer,
-        (location, mode) {
-      return location;
-    }).listen((location) {
-      switch (widget.holder.mode.value) {
-        case OrderMode.asap:
-          FirebaseCloudFunctions.fetchNearbyDeliveryFoodTags(
-                  location: location,
-                  startTime: DateTime.now(),
-                  endTime: widget.holder.endDeliveryTime.value)
-              .then((list) {
-            deliveredNearbyFoodTags.value = list;
-          });
-          break;
-
-        case OrderMode.scheduled:
-          FirebaseCloudFunctions.fetchNearbyDeliveryFoodTags(
-                  location: location,
-                  startTime: widget.holder.startDeliveryTime.value,
-                  endTime: widget.holder.endDeliveryTime.value)
-              .then((list) {
-            deliveredNearbyFoodTags.value = list;
-          });
-          break;
-      }
-    });
   }
 
   @override
@@ -112,7 +120,6 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
                           style: FontHelper.semiBold(
                               ColorHelper.dabaoOffBlack4A, 15.0),
                         ))),
-                buildBeingDelivered(),
                 buildReccomended(),
                 buildUser(),
               ],
@@ -126,8 +133,16 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
   void callback(selected) {
     if (selected is FoodTag) {
       FoodTag selectedFoodTag = selected;
-      widget.holder.foodTag.value = selectedFoodTag.title.value;
-      widget.nextPage();
+
+      if (widget.holder.foodTags.value.contains(selectedFoodTag.title.value))
+        widget.holder.foodTags.value.add(selectedFoodTag.title.value);
+      // widget.nextPage();
+    }
+
+    if (selected is String) {
+      String selectedFoodTagTitle = selected;
+      if (widget.holder.foodTags.value.contains(selectedFoodTagTitle))
+        widget.holder.foodTags.value.add(selectedFoodTagTitle);
     }
   }
 
@@ -196,45 +211,12 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
           new PageRouteBuilder(pageBuilder: (BuildContext context, _, __) {
         return new FoodTypeSearch(
           selectedCallback: (String tag) {
-            widget.holder.foodTag.value = tag;
-            widget.nextPage();
+            callback(tag);
           },
         );
       }));
 
-  StreamBuilder<List<FoodTag>> buildBeingDelivered() {
-    return StreamBuilder<List<FoodTag>>(
-      stream: deliveredNearbyFoodTags.producer,
-      builder: (context, snap) {
-        if (!snap.hasData)
-          return Align(
-              alignment: Alignment.center, child: CircularProgressIndicator());
-
-        if (snap.data.length == 0) return Container();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              child: Text(
-                "Being delivered near you",
-                style: FontHelper.medium(ColorHelper.dabaoOffBlack4A, 12.0),
-              ),
-              padding: EdgeInsets.only(bottom: 5.0),
-            ),
-            TagWrap(
-              selectedCallBack: callback,
-              taggables: deliveredNearbyFoodTags,
-            ),
-            Line(
-              margin: EdgeInsets.only(
-                  right: 10.0, top: 10.0, bottom: 15.0, left: 10.0),
-            )
-          ],
-        );
-      },
-    );
-  }
+  
 
   StreamBuilder<List<FoodTag>> buildUser() {
     return StreamBuilder<List<FoodTag>>(

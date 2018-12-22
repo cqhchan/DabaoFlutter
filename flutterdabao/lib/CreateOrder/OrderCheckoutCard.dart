@@ -361,7 +361,7 @@ class _OrderCheckoutState extends State<OrderCheckout>
                           context: context,
                           onCompleteCallback: (DateTime time) {
                             widget.holder.cutOffDeliveryTime.value = time;
-                          });
+                          }, subTitle: "Cut off my order at...", headerTitle: "Select a time");
                     },
                     child: buildTime(
                         title: "Cut-Off Time",

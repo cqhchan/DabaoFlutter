@@ -1,13 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:rxdart/subjects.dart';
 
 class Route extends FirebaseType {
   static final String creatorKey = "C";
+  static final String createdTimeKey = "CT";
+
   static final String deliveryLocationKey = "DL";
   static final String deliveryLocationDescriptionKey = "LD";
   static final String deliveryTimeKey = "DT";
@@ -83,8 +87,56 @@ class Route extends FirebaseType {
     startLocationDescription = BehaviorSubject();
     deliveryLocation = BehaviorSubject();
     deliveryLocationDescription = BehaviorSubject();
-    
-    listOfOrdersAccepted.bindTo(FirebaseCollectionReactive(Firestore.instance.collection("orders").where('route',isEqualTo: this.uid)).observable);
 
+    listOfOrdersAccepted.bindTo(FirebaseCollectionReactive(Firestore.instance
+            .collection("orders")
+            .where('route', isEqualTo: this.uid))
+        .observable);
+  }
+
+  static isValid(RouteHolder holder) {
+    if (holder.startDeliveryLocation.value == null) return false;
+
+    if (holder.startDeliveryLocationDescription.value == null) return false;
+
+    if (holder.endDeliveryLocation.value == null) return false;
+
+    if (holder.endDeliveryLocationDescription.value == null) return false;
+
+    if (holder.deliveryTime.value == null) return false;
+
+    return true;
+  }
+
+  static Future<bool> createRoute(RouteHolder holder) async {
+    Map<String, dynamic> data = Map();
+    data[createdTimeKey] =
+        DateTimeHelper.convertDateTimeToString(DateTime.now());
+
+    data[deliveryLocationKey] = {
+      "lat": holder.endDeliveryLocation.value.latitude,
+      "long": holder.endDeliveryLocation.value.longitude
+    };
+
+    data[startLocationKey] = {
+      "lat": holder.startDeliveryLocation.value.latitude,
+      "long": holder.startDeliveryLocation.value.longitude
+    };
+
+    data[deliveryLocationDescriptionKey] =
+        holder.endDeliveryLocationDescription.value;
+
+    data[startLocationDescriptionKey] =
+        holder.startDeliveryLocationDescription.value;
+
+    data[foodTagKey] = holder.foodTags.value;
+
+    data[creatorKey] = ConfigHelper.instance.currentUserProperty.value.uid;
+
+    data[deliveryTimeKey] =
+        DateTimeHelper.convertDateTimeToString(holder.deliveryTime.value);
+
+
+    
   }
 }

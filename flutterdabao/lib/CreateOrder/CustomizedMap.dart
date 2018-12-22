@@ -15,15 +15,12 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart'
 class CustomizedMap extends StatefulWidget {
   CustomizedMap({
     Key key,
-    @required this.mode,
     @required this.selectedlocation,
     @required this.selectedlocationDescription,
     this.zoom = 16,
     this.radius = 3000,
-  }) : assert(mode != null);
-  // Set mode to 1 to query order requests.
-  // Set mode to 0 to query deliveries.
-  final int mode;
+  });
+
   final double zoom;
   final double radius;
   final MutableProperty<LatLng> selectedlocation;
@@ -31,7 +28,7 @@ class CustomizedMap extends StatefulWidget {
 
   @override
   _CustomizedMapState createState() => _CustomizedMapState(
-      mode, radius, zoom, selectedlocation, selectedlocationDescription);
+      radius, zoom, selectedlocation, selectedlocationDescription);
 }
 
 class _CustomizedMapState extends State<CustomizedMap>
@@ -39,10 +36,9 @@ class _CustomizedMapState extends State<CustomizedMap>
         HavingSubscriptionMixin,
         SingleTickerProviderStateMixin,
         HavingGoogleMaps {
-  _CustomizedMapState(this.mode, this.radius, this.zoom, this.selectedlocation,
+  _CustomizedMapState( this.radius, this.zoom, this.selectedlocation,
       this.selectedlocationDescription);
 
-  int mode;
   double zoom;
   double radius;
 
@@ -66,10 +62,10 @@ class _CustomizedMapState extends State<CustomizedMap>
   BitmapDescriptor get deliveryIcon {
     bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     if (isIOS)
-      return BitmapDescriptor.fromAsset('assets/icons/red_marker_icon.png');
+      return BitmapDescriptor.fromAsset('assets/icons/orange_pin.png');
     else
       return BitmapDescriptor.fromAsset(
-          'assets/icons/3.0x/red_marker_icon.png');
+          'assets/icons/3.0x/orange_pin.png');
   }
 
   //Delivery Icon when Moving
@@ -77,10 +73,10 @@ class _CustomizedMapState extends State<CustomizedMap>
     bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     if (isIOS)
       return BitmapDescriptor.fromAsset(
-          'assets/icons/red_marker_semi_opaque.png');
+          'assets/icons/orange_pin_light.png');
     else
       return BitmapDescriptor.fromAsset(
-          'assets/icons/3.0x/red_marker_semi_opaque.png');
+          'assets/icons/3.0x/orange_pin_light.png');
   }
 
   //bikeIcon of nearby Dabaoers
@@ -165,8 +161,8 @@ class _CustomizedMapState extends State<CustomizedMap>
       if (_deliveryMarker == null) {
         Marker tempMarker = await controller.addMarker(MarkerOptions(
           icon: deliveryIcon,
-          infoWindowText: InfoWindowText('Delivery Location', 'Hold to Drag'),
-          draggable: true,
+          infoWindowText: InfoWindowText('Delivery Location', ''),
+          draggable: false,
           consumeTapEvents: false,
           position: result,
         ));
@@ -237,7 +233,7 @@ class _CustomizedMapState extends State<CustomizedMap>
     _createNearbyMarkers(mapController);
 
     controller.addListener(mapCallBack);
-
+    isCallBackAdded = true;
     subscription.add(currentLocation.producer
         .where((latlng) => latlng != null)
         .listen((location) {
@@ -259,6 +255,8 @@ class _CustomizedMapState extends State<CustomizedMap>
   // called when map is moving/ stopped moving
   @override
   mapCallBack() async {
+              print("Map Callback");
+
     if (mapController.isCameraMoving) {
       
         if (_deliveryMarker != null && mapController.cameraPosition.target != lastLatLng ) {
@@ -287,6 +285,8 @@ class _CustomizedMapState extends State<CustomizedMap>
       lastLatLng = mapController.cameraPosition.target;
     } else {
       if (lastCameraIsMoving) {
+                  print("Update selectesImaged from Lat Lng ");
+
       updateSelectedLocationFromLatLng(mapController.cameraPosition.target);
       }
       lastCameraIsMoving = false;

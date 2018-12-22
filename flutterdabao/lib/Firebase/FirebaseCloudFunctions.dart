@@ -105,12 +105,12 @@ class FirebaseCloudFunctions {
   }
 
   ///[location] Location to search
-  ///[radius] radius in meters to search default 1000
+  ///[radius] radius in meters to search default 500
   static Future<List<FoodTag>> fetchNearbyDeliveryFoodTags({
     @required LatLng location,
     @required DateTime startTime,
     DateTime endTime,
-    int radius = 1000,
+    int radius = 300,
   }) async {
     List<FoodTag> list = List();
     try {
@@ -167,24 +167,19 @@ class FirebaseCloudFunctions {
   }) async {
     try {
       data["mode"] = 0;
-      print("testing Order create 5 ");
       Map<dynamic, dynamic> results = await CloudFunctions.instance
           .call(functionName: 'creationRequest', parameters: data);
       print(results);
-
-            print("testing Order create 6 ");
 
       if (results.containsKey("status") && results["status"] == 200)
       return true;
 
     } on CloudFunctionsException catch (e) {
-            print("testing Order create 7 ");
       
       print(e.message);
       print(e);
 
     } catch (e) {
-           print("testing Order create 8 ");
  
       print('Error: $e');
     }

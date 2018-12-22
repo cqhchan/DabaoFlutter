@@ -35,6 +35,8 @@ Future<T> showTimeCreator<T>({
 
 Future<T> showOneTimeCreator<T>({
   @required BuildContext context,
+  @required String headerTitle,
+  @required String subTitle,
   bool barrierDismissible = false,
   @required DateSelectedCallback onCompleteCallback,
   DateTime startTime,
@@ -46,6 +48,8 @@ Future<T> showOneTimeCreator<T>({
     builder: (context) {
       return _OnetimePickerEditor(
         startTime: startTime,
+        headerTitle: headerTitle,
+        subTitle:subTitle,
         onCompleteCallback: onCompleteCallback,
       );
     },
@@ -541,12 +545,15 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
 
 class _OnetimePickerEditor extends StatefulWidget {
   final DateSelectedCallback onCompleteCallback;
-  final startTime;
+  final DateTime startTime;
+  final String headerTitle;
+  final String subTitle;
+
 
   const _OnetimePickerEditor({
     Key key,
     @required this.onCompleteCallback,
-    this.startTime,
+    this.startTime, this.headerTitle, this.subTitle,
   }) : super(key: key);
 
   __OneTimePickerEditorState createState() => __OneTimePickerEditorState();
@@ -668,14 +675,14 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Schedule Your Order',
+                  widget.headerTitle,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
                   height: 4.0,
                 ),
                 Text(
-                  'Deliver my food between...',
+                  widget.subTitle,
                   style: TextStyle(
                     fontSize: 10,
                   ),
@@ -805,8 +812,8 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
               _currentStartHour,
               _currentStartMinute,
             );
-            widget.onCompleteCallback(start);
             Navigator.of(context).pop();
+            widget.onCompleteCallback(start);
           } else {
             setState(() {
               errorMessage = "Please input the correct time period";
