@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class FontHelper {
+  static const TextStyle semiBoldgrey12TextStyle = TextStyle(
+      color: Colors.grey,
+      fontSize: 14.0,
+      fontStyle: FontStyle.normal,
+      fontFamily: "SF_UI_Display");
   static const TextStyle fadeTextStyle = TextStyle(
       color: Colors.grey,
       fontSize: 12.0,
@@ -26,11 +31,11 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w300,
       fontFamily: "SF_UI_Display");
-      static const TextStyle norma2TextStyle = TextStyle(
+  static const TextStyle normal2TextStyle = TextStyle(
       color: Colors.black,
-      fontSize: 11.0,
+      fontSize: 11.5,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w300,
+      fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
   static const TextStyle chipTextStyle = TextStyle(
       color: Colors.orange,
@@ -44,32 +49,35 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
-
   static const TextStyle overlayHeader = TextStyle(
       color: Colors.black,
       fontSize: 16.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w500,
       fontFamily: "SF_UI_Display");
-
+  static const TextStyle medium14TextStyle = TextStyle(
+      color: Colors.black,
+      fontSize: 13.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w500,
+      fontFamily: "SF_UI_Display");
   static const TextStyle overlaySubtitleHeader = TextStyle(
       color: ColorHelper.dabaoOffBlack9B,
       fontSize: 14.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w500,
       fontFamily: "SF_UI_Display");
-
   static const TextStyle header2TextStyle = TextStyle(
       color: Colors.black,
       fontSize: 22.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
-      static const TextStyle header3TextStyle = TextStyle(
+  static const TextStyle header3TextStyle = TextStyle(
       color: Colors.black,
-      fontSize: 20.0,
+      fontSize: 18.0,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
   static const TextStyle semiBold14Black = TextStyle(
       color: Colors.black,
@@ -77,11 +85,17 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
+      static const TextStyle semiBold14Black2 = TextStyle(
+      color: Colors.black,
+      fontSize: 14.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w400,
+      fontFamily: "SF_UI_Display");
   static const TextStyle semiBold16Black = TextStyle(
       color: Colors.black,
       fontSize: 16.0,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
   static const TextStyle semiBold18Black = TextStyle(
       color: Colors.black,
@@ -95,7 +109,6 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
-
   static const TextStyle regular14Black = TextStyle(
       color: Colors.black,
       fontSize: 12.0,
@@ -107,6 +120,12 @@ class FontHelper {
       fontSize: 14.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w700,
+      fontFamily: "SF_UI_Display");
+  static const TextStyle bold16Black = TextStyle(
+      color: Colors.black,
+      fontSize: 16.0,
+      fontStyle: FontStyle.normal,
+      // fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
 
   static TextStyle semiBold(Color color, double fontSize) {
@@ -145,7 +164,7 @@ class FontHelper {
         fontFamily: "SF_UI_Display");
   }
 
-    static TextStyle medium(Color color, double size) {
+  static TextStyle medium(Color color, double size) {
     return TextStyle(
         color: color,
         fontSize: size,

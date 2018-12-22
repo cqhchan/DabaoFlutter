@@ -117,14 +117,14 @@ class Order extends FirebaseType with Selectable {
       deliveryLocation.add(null);
     }
 
-    if (data.containsKey(deliveryLocationDescription)) {
-      deliveryLocationDescription.add(data[deliveryLocationDescription]);
+    if (data.containsKey(deliveryLocationDescriptionKey)) {
+      deliveryLocationDescription.add(data[deliveryLocationDescriptionKey]);
     } else {
       deliveryLocationDescription.add(null);
     }
 
     if (data.containsKey(deliveryFeeKey)) {
-      deliveryFee.add(data[deliveryFeeKey]+ 0.0);
+      deliveryFee.add(data[deliveryFeeKey] + 0.0);
     } else {
       deliveryFee.add(null);
     }
@@ -134,11 +134,18 @@ class Order extends FirebaseType with Selectable {
     } else {
       message.add(null);
     }
-// orderItems
-    // if (data.containsKey(titleKey)) {
-    //   title.add(data[titleKey]);
+
+    // if (data.containsKey(orderItemKey)) {
+
+    //   List<Map<String, dynamic>> temp = data[orderItemKey].cast<String, dynamic>();
+
+    //   orderItems.add(temp.map((rawMap) {
+    //     var map = rawMap.cast<String, dynamic>();
+    //     return OrderItem.fromMap(
+    //         map[OrderItem.titleKey].toString().toLowerCase(), map);
+    //   }).toList());
     // } else {
-    //   title.add(null);
+    //   orderItems.add(List());
     // }
 
     if (data.containsKey(creatorKey)) {

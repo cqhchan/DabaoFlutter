@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
-import 'package:flutterdabao/CreateOrder/TabBarPage.dart';
+import 'package:flutterdabao/CreateOrder/TabViewPages/TabBarPage.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -16,7 +16,7 @@ import 'package:flutterdabao/Model/User.dart';
 
 class Home extends StatefulWidget {
   @override
-  _Home createState() => new _Home();
+  _Home createState() => _Home();
 }
 
 class _Home extends State<Home> {
@@ -37,10 +37,10 @@ class _Home extends State<Home> {
   }
 
   @override
-  Widget build(BuildContext context) => new Stack(
+  Widget build(BuildContext context) => Stack(
         children: <Widget>[
           MaterialApp(
-            home: new Scaffold(
+            home: Scaffold(
               backgroundColor: ColorHelper.dabaoOffWhiteF5,
               body: ListView(
                 controller: _controller,
@@ -75,7 +75,7 @@ class _Home extends State<Home> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => TabBarPage()));
+                                  builder: (context) => TabBarDemo()));
                         }),
                         //ChatBox
                       ],
@@ -93,7 +93,7 @@ class _Home extends State<Home> {
             ),
           ),
           // AppBar Widget
-          new Material(
+         Material(
             type: MaterialType.transparency,
             child: FloatingHeader(
               backgroundColor: Colors.white,
@@ -156,11 +156,11 @@ class _Home extends State<Home> {
       children: <Widget>[
         Container(
           height: MediaQuery.of(context).size.width * 1.02,
-          decoration: new BoxDecoration(
-              image: new DecorationImage(
+          decoration: BoxDecoration(
+              image: DecorationImage(
                   colorFilter: ColorFilter.mode(
                       ColorHelper.rgbo(0xD8, 0xD8, 0xD8, 20), BlendMode.darken),
-                  image: new AssetImage("assets/images/splashbg.png"),
+                  image: AssetImage("assets/images/splashbg.png"),
                   fit: BoxFit.fitWidth)),
         ),
         Positioned(

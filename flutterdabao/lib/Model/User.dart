@@ -51,7 +51,7 @@ class User extends FirebaseType {
 
   @override
   void map(Map<String, dynamic> data) {
-      print(data);
+      // print(data);
 
     if (data.containsKey(foodTagKey)){
       var mapOfFoodTag = data[foodTagKey] as Map;

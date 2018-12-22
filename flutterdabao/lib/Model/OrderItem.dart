@@ -18,6 +18,10 @@ class OrderItem extends FirebaseType {
 
   OrderItem.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
+  OrderItem.fromMap(String uid, Map<String, dynamic> data) : super.fromMap(uid, data);
+
+
+
   @override
   void map(Map<String, dynamic> map) {
     
