@@ -2,20 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
-<<<<<<< HEAD
 import 'package:flutterdabao/CreateOrder/TabViewPages/TabBarPage.dart';
-=======
-<<<<<<< HEAD
-import 'package:flutterdabao/CreateOrder/TabBarPage.dart';
-=======
 import 'package:flutterdabao/CreateRoute/RouteOverview.dart';
->>>>>>> ec5d6b2d14e813d348bf2c68837ab09e7bfdb6e2
->>>>>>> V2.0_development
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
-import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
@@ -78,30 +70,18 @@ class _Home extends State<Home> {
                         }),
                         //Dabaoer
 
-<<<<<<< HEAD
                         squardCard('assets/icons/bike.png', 'Dabaoer',
                             'I want to Deliver', () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TabBarPage()));
+                            context,
+                            FadeRoute(widget: RouteOverview()),
+                          );
                         }),
                         //ChatBox
                       ],
                     ),
-=======
-                      squardCard('assets/icons/bike.png', 'Dabaoer',
-                          'I want to Deliver', () {
-                            Navigator.push(
-                          context,
-                          FadeRoute(widget: RouteOverview()),
-                        );
-                      }),
-                      //ChatBox
-                    ],
->>>>>>> ec5d6b2d14e813d348bf2c68837ab09e7bfdb6e2
                   ),
-                  Container(
+                   Container(
                     child: Text(
                       "Notifications",
                       style: FontHelper.semiBold18Black,
@@ -113,7 +93,7 @@ class _Home extends State<Home> {
             ),
           ),
           // AppBar Widget
-         Material(
+          Material(
             type: MaterialType.transparency,
             child: FloatingHeader(
               backgroundColor: Colors.white,
