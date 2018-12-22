@@ -144,11 +144,56 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
                         ),
                         Center(
                           child: Container(
-                            padding: EdgeInsets.all(8),
+                            constraints: BoxConstraints(maxHeight: 40),
+                            padding: EdgeInsets.all(6),
                             color: Colors.grey[200],
-                            child: Row(
+                            child: Flex(
+                              direction: Axis.horizontal,
                               children: <Widget>[
-                                Image.asset('assets/icons/icon_menu_orange.png')
+                                Expanded(
+                                    flex: 1,
+                                    child: Image.asset(
+                                        'assets/icons/icon_menu_orange.png')),
+                                Expanded(
+                                    flex: 6,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        //OrderItem Name
+                                        Text(
+                                          'Milk Tea',
+                                          style: FontHelper.bold12Black,
+                                        ),
+                                        //Message
+                                        Text(
+                                          '50% sugar, with pearl',
+                                          style: FontHelper.medium10TextStyle,
+                                        )
+                                      ],
+                                    )),
+                                Expanded(
+                                  flex: 3,
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: <Widget>[
+                                      //Price
+                                      Text(
+                                        'Max: \$2.50',
+                                        style: FontHelper.regular10Black,
+                                      ),
+                                      //Qty
+                                      Text(
+                                        'X2',
+                                        style: FontHelper.bold12Black,
+                                      )
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -283,7 +328,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
           case ConnectionState.none:
             return Text('Select lot');
           case ConnectionState.waiting:
-            return CircularProgressIndicator();
+            return Text('Waiting');
           case ConnectionState.active:
             return ListView.builder(
               itemCount: snap.data.length,
