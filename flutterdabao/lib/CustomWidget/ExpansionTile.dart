@@ -200,7 +200,9 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           GestureDetector(
-              onTap: _handleTap,
+              onTap: ()
+              {_handleTap();
+              },
               child: Container(
                   color: headerColor,
                   child: Row(

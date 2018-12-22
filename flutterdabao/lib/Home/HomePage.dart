@@ -75,7 +75,7 @@ class _Home extends State<Home> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => TabBarDemo()));
+                                  builder: (context) => TabBarPage()));
                         }),
                         //ChatBox
                       ],
