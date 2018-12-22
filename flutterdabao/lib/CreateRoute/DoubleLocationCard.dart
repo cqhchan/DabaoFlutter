@@ -156,7 +156,6 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
                 startTime: widget.holder.deliveryTime.value,
                 headerTitle: "Select Delivery Time",
                 onCompleteCallback: (DateTime selectedTime) {
-                  print("testing 12 ");
                   widget.holder.deliveryTime.value = selectedTime;
                   widget.showOverlayCallback();
                 },

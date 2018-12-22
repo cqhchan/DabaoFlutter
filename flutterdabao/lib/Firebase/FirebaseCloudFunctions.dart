@@ -119,7 +119,7 @@ class FirebaseCloudFunctions {
       attributeMap["long"] = location.longitude;
       attributeMap["radius"] = radius;
       attributeMap["mode"] = 4;
-      print('requesting foodTags from functions');
+      print('requesting fetchProximityHash from functions');
       Map<dynamic, dynamic> results = await CloudFunctions.instance
           .call(functionName: 'locationRequest', parameters: attributeMap);
       print(results);
@@ -158,7 +158,7 @@ class FirebaseCloudFunctions {
 
       attributeMap["radius"] = radius;
       attributeMap["mode"] = 3;
-      print('requesting foodTags from functions');
+      print('requesting fetchNearbyDeliveryFoodTags from functions');
       Map<dynamic, dynamic> results = await CloudFunctions.instance
           .call(functionName: 'locationRequest', parameters: attributeMap);
       print(results);

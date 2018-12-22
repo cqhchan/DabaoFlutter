@@ -44,7 +44,6 @@ class LocationHelper {
         return subThoroughfare + " " + thoroughfare + ", " + name;
       }
     } else if (place.postalCode.isNotEmpty) {
-      print(place.postalCode);
 
       return place.postalCode;
     } else {

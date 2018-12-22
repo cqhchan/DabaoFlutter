@@ -148,18 +148,9 @@ class ConfigHelper with HavingSubscriptionMixin {
   }
 
     double deliveryFeeCalculator({int numberOfItems}) {
-    print("testing 1 " + numberOfItems.toString());
     if (numberOfItems == 0) {
       return 0.0;
     } else {
-      print("testing 2 " + _globalFixedPrice.value.toString());
-      print("testing 3 " +
-          (_globalFixedPrice.value +
-                  ((numberOfItems - _globalMinItemCount.value) <= 0
-                          ? 0
-                          : (numberOfItems - _globalMinItemCount.value)) *
-                      _globalPricePerItem.value)
-              .toString());
 
       return _globalFixedPrice.value +
           ((numberOfItems - _globalMinItemCount.value) <= 0

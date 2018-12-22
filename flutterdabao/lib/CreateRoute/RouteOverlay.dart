@@ -16,6 +16,7 @@ import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
+import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -128,57 +129,61 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
                 buildReccomended(),
                 buildUser(),
                 buildSelected(),
-                StreamBuilder<List<String>>(
-                  stream: widget.holder.foodTags.producer,
-                  builder: (context, snap) {
-                    if (snap.hasData && snap.data.length > 0) {
-                      return ArrowButton(
-                        title: "Create Route",
-                        onPressedCallback: () async {
-                          if (DabaoRoute.Route.isValid(widget.holder)) {
-                            showLoadingOverlay(context: context);
-                            var isSuccessful =
-                                await DabaoRoute.Route.createRoute(
-                                    widget.holder);
-
-                            if (isSuccessful) {
-                              // Pop to home
-                              final PageRouteBuilder _homeRoute =
-                                  new PageRouteBuilder(
-                                pageBuilder: (BuildContext context, _, __) {
-                                  return Home();
-                                },
-                              );
-                              Navigator.pushAndRemoveUntil(context, _homeRoute,
-                                  (Route<dynamic> r) => false);
-                            } else {
-                              Navigator.of(context).pop();
-                            // TODO bug it doessnt show
-
-                              final snackBar = SnackBar(
-                                  content: Text(
-                                      'An Error has occured. Please check your network connectivity'));
-                              Scaffold.of(context).showSnackBar(snackBar);
-                            }
-                          } else {
-                            // TODO it doessnt show
-                            final snackBar = SnackBar(
-                                content: Text(
-                                    'Please ensure all details are filled up'));
-                            Scaffold.of(context).showSnackBar(snackBar);
-                          }
-                        },
-                      );
-                    } else {
-                      return Container();
-                    }
-                  },
-                )
+                buildCreateRoute(),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  StreamBuilder<List<String>> buildCreateRoute() {
+    return StreamBuilder<List<String>>(
+      stream: widget.holder.foodTags.producer,
+      builder: (context, snap) {
+        if (snap.hasData && snap.data.length > 0) {
+          return ArrowButton(
+            title: "Create Route",
+            onPressedCallback: () async {
+              if (DabaoRoute.Route.isValid(widget.holder)) {
+                showLoadingOverlay(context: context);
+                var isSuccessful =
+                    await DabaoRoute.Route.createRoute(widget.holder);
+
+                if (isSuccessful) {
+                  // Pop to home
+                  final PageRouteBuilder _homeRoute = new PageRouteBuilder(
+                    pageBuilder: (BuildContext context, _, __) {
+                      return Home();
+                    },
+                  );
+
+                  Navigator.popUntil(context, ModalRoute.withName(Navigator.defaultRouteName));
+
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => TabBarPage()));
+                } else {
+                  Navigator.of(context).pop();
+                  // TODO bug it doessnt show
+
+                  final snackBar = SnackBar(
+                      content: Text(
+                          'An Error has occured. Please check your network connectivity'));
+                  Scaffold.of(context).showSnackBar(snackBar);
+                }
+              } else {
+                // TODO it doessnt show
+                final snackBar = SnackBar(
+                    content: Text('Please ensure all details are filled up'));
+                Scaffold.of(context).showSnackBar(snackBar);
+              }
+            },
+          );
+        } else {
+          return Container();
+        }
+      },
     );
   }
 
@@ -234,7 +239,7 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
 
     if (selected is String) {
       String selectedFoodTagTitle = selected;
-      print(selectedFoodTagTitle);
+      print( "selected ${selectedFoodTagTitle}");
       if (!widget.holder.foodTags.value.contains(selectedFoodTagTitle))
         widget.holder.foodTags.value.add(selectedFoodTagTitle);
       widget.holder.foodTags.onAdd();

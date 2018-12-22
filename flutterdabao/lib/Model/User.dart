@@ -63,7 +63,6 @@ class User extends FirebaseType {
         var map = rawMap.cast<String,dynamic>();
         fT.add(FoodTag.fromMap(key, map));
       });
-            print("testing" + fT.length.toString());
 
       userFoodTags.add(fT);
     } else {

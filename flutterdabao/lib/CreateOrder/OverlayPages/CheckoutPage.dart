@@ -163,7 +163,6 @@ class _CheckoutPageState extends State<CheckoutPage>
           StreamBuilder<double>(
             stream: finalPriceProperty.producer,
             builder: (context, snapshot) {
-              print(snapshot.data);
 
               return Text(
                 snapshot.hasData && snapshot.data != null

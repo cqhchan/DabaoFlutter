@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutterdabao/CreateOrder/TabViewPages/BrowseOrderTab.dart';
-import 'package:flutterdabao/CreateOrder/TabViewPages/ConfirmedTab.dart';
-import 'package:flutterdabao/CreateOrder/TabViewPages/MyRouteTab.dart';
+
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/BrowseOrderTab.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/ConfirmedTab.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/MyRouteTab.dart';
 
 class TabBarPage extends StatelessWidget {
   @override

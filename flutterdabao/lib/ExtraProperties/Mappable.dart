@@ -6,6 +6,7 @@ import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:flutterdabao/Model/Route.dart';
 import 'package:flutterdabao/Model/User.dart';
 
 // ALL MAPPABLE MUST DECLARE THEIR Mapping Method here
@@ -16,7 +17,6 @@ abstract class Mappable extends Identifiable {
   Mappable.fromDocument(DocumentSnapshot doc) : super(doc.documentID) {
     setUpVariables();
     mapFrom(doc.data);
-
   }
 
   Mappable.fromUID(uid) : super(uid) {
@@ -29,7 +29,7 @@ abstract class Mappable extends Identifiable {
 
   void setUpVariables();
 
-    Mappable.fromMap(String uid, Map<String,dynamic> data) : super(uid) {
+  Mappable.fromMap(String uid, Map<String, dynamic> data) : super(uid) {
     setUpVariables();
     map(data);
   }
@@ -48,12 +48,16 @@ abstract class Mappable extends Identifiable {
       return new FoodTag.fromDocument(doc) as T;
     }
 
-        if (T == OrderItem) {
+    if (T == OrderItem) {
       return new OrderItem.fromDocument(doc) as T;
     }
 
-            if (T == Order) {
+    if (T == Order) {
       return new Order.fromDocument(doc) as T;
+    }
+
+    if (T == Route) {
+      return new Route.fromDocument(doc) as T;
     }
 
     throw FatalError("Mappable Not Declared");
@@ -61,7 +65,7 @@ abstract class Mappable extends Identifiable {
 
   void mapFrom(Map<String, dynamic> data) {
     this.data = data;
-    
+
     if (data == null) {
       map(Map());
     } else {

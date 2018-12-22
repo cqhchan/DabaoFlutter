@@ -74,7 +74,6 @@ class _OrderNowState extends State<OrderNow>
     showHalfBottomSheet(
         context: context,
         builder: (builder) {
-          print(holder.deliveryLocationDescription.value);
           return OrderOverlay(
             holder: holder,
             page: progress,

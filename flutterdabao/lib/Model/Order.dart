@@ -173,9 +173,6 @@ class Order extends FirebaseType with Selectable {
 
     if (holder.orderItems.value.length == 0) return false;
 
-    //Optional
-    // if (holder.message.value == null) return false;
-    // print("testing 9");
 
     if (holder.mode.value == null) return false;
 

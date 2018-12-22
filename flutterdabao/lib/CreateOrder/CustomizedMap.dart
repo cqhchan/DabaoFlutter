@@ -255,7 +255,6 @@ class _CustomizedMapState extends State<CustomizedMap>
   // called when map is moving/ stopped moving
   @override
   mapCallBack() async {
-              print("Map Callback");
 
     if (mapController.isCameraMoving) {
       
@@ -263,7 +262,6 @@ class _CustomizedMapState extends State<CustomizedMap>
         
         if (lastCameraIsMoving) {
           //Update Location
-          print("Update Location");
           mapController.updateMarker(
               _deliveryMarker,
               MarkerOptions(
@@ -271,7 +269,6 @@ class _CustomizedMapState extends State<CustomizedMap>
               ));
         } else {
           //Update Image
-          print("Update Image");
           await mapController.updateMarker(
               _deliveryMarker,
               MarkerOptions(
@@ -285,7 +282,6 @@ class _CustomizedMapState extends State<CustomizedMap>
       lastLatLng = mapController.cameraPosition.target;
     } else {
       if (lastCameraIsMoving) {
-                  print("Update selectesImaged from Lat Lng ");
 
       updateSelectedLocationFromLatLng(mapController.cameraPosition.target);
       }

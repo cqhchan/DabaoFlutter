@@ -83,7 +83,6 @@ class _FoodTypeSearchState extends State<FoodTypeSearch> {
         },
         //callback when the value is submitted, optional.
         onSubmit: (String value) {
-          print(value);
         },
       );
   }

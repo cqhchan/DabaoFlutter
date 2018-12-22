@@ -283,7 +283,6 @@ class _DoubleLocationCustomizedMapState
           mapController.cameraPosition.target != lastLatLng) {
         if (lastCameraIsMoving) {
           //Update Location
-          print("Update Location");
           mapController.updateMarker(
               focusedMarker,
               MarkerOptions(
