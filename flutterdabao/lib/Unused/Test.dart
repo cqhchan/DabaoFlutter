@@ -1,224 +1,123 @@
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
-class ExpansionTileSample extends StatefulWidget {
-    @override
-    ExpansionTileSampleState createState() => new ExpansionTileSampleState();
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      title: 'NonStopIO',
+      theme: new ThemeData(
+        primarySwatch: Colors.red,
+      ),
+      home: new MyHomePage(),
+    );
+  }
 }
 
-class ExpansionTileSampleState extends State<ExpansionTileSample> {
-
-    final GlobalKey<AppExpansionTileState> expansionTile = new GlobalKey();
-    String foos = 'One';
-
-    @override
-    Widget build(BuildContext context) {
-        return new MaterialApp(
-            home: new Scaffold(
-                appBar: new AppBar(
-                    title: const Text('ExpansionTile'),
-                ),
-                body: new AppExpansionTile(
-                    key: expansionTile,
-                    title: new Text(this.foos),
-                    backgroundColor: Theme
-                        .of(context)
-                        .accentColor
-                        .withOpacity(0.025),
-                    children: <Widget>[
-                        new ListTile(
-                            title: const Text('One'),
-                            onTap: () {
-                                setState(() {
-                                    this.foos = 'One';
-                                    expansionTile.currentState.expand();
-                                });
-                            },
-                        ),
-                        new ListTile(
-                            title: const Text('Two'),
-                            onTap: () {
-                                setState(() {
-                                    this.foos = 'Two';
-                                    expansionTile.currentState.toggle();
-                                });
-                            },
-                        ),
-                        new ListTile(
-                            title: const Text('Three'),
-                            onTap: () {
-                                setState(() {
-                                    this.foos = 'Three';
-                                    expansionTile.currentState.collapse();
-                                });
-                            },
-                        ),
-                    ]
-                ),
-            ),
-        );
-    }
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => new _MyHomePageState();
 }
 
-// --- Copied and slightly modified version of the ExpansionTile.
+class _MyHomePageState extends State<MyHomePage> {
+  bool longPressFlag = false;
+  List<Element> indexList = new List();
 
-const Duration _kExpand = const Duration(milliseconds: 200);
+  onelementSelected(int index){
+    setState((){
+      indexList[index].isselected=!indexList[index].isselected;
+    });
 
-class AppExpansionTile extends StatefulWidget {
-    const AppExpansionTile({
-        Key key,
-        this.leading,
-        @required this.title,
-        this.backgroundColor,
-        this.onExpansionChanged,
-        this.children: const <Widget>[],
-        this.trailing,
-        this.initiallyExpanded: false,
-    })
-        : assert(initiallyExpanded != null),
-            super(key: key);
+  }
+  void longPress() {
+    setState(() {
+      if (indexList.isEmpty) {
+        longPressFlag = false;
+      } else {
+        longPressFlag = true;
+      }
+    });
+  }
 
-    final Widget leading;
-    final Widget title;
-    final ValueChanged<bool> onExpansionChanged;
-    final List<Widget> children;
-    final Color backgroundColor;
-    final Widget trailing;
-    final bool initiallyExpanded;
+  @override
+  Widget build(BuildContext context) {
+    for(var i=0;i<15;i++){
+      indexList.add(Element(isselected: false));
+    }
 
-    @override
-    AppExpansionTileState createState() => new AppExpansionTileState();
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Selected ${indexList.length}  ' + indexList.toString()),
+      ),
+      body: new ListView.builder(
+        itemCount: 15,
+        itemBuilder: (context, index) {
+          return new CustomWidget(
+            index: index,
+            isselected: indexList[index].isselected,
+            
+            longPressEnabled: longPressFlag,
+            callback: () {
+             onelementSelected(index);
+             if (indexList.contains(index)) {
+                indexList.remove(index);
+              } else {
+                indexList.add(Element());
+              }
+
+              longPress();
+            },
+          );
+        },
+      ),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: () {},
+        tooltip: 'Increment',
+        child: new Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
 }
 
-class AppExpansionTileState extends State<AppExpansionTile> with SingleTickerProviderStateMixin {
-    AnimationController _controller;
-    CurvedAnimation _easeOutAnimation;
-    CurvedAnimation _easeInAnimation;
-    ColorTween _borderColor;
-    ColorTween _headerColor;
-    ColorTween _iconColor;
-    ColorTween _backgroundColor;
-    Animation<double> _iconTurns;
+class CustomWidget extends StatefulWidget {
+  final int index;
+  final bool longPressEnabled;
+  final VoidCallback callback;
+  final bool isselected;
 
-    bool _isExpanded = false;
+  const CustomWidget({Key key, this.index, this.longPressEnabled, this.callback,this.isselected}) : super(key: key);
 
-    @override
-    void initState() {
-        super.initState();
-        _controller = new AnimationController(duration: _kExpand, vsync: this);
-        _easeOutAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-        _easeInAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-        _borderColor = new ColorTween();
-        _headerColor = new ColorTween();
-        _iconColor = new ColorTween();
-        _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
-        _backgroundColor = new ColorTween();
+  @override
+  _CustomWidgetState createState() => new _CustomWidgetState();
+}
 
-        _isExpanded = PageStorage.of(context)?.readState(context) ?? widget.initiallyExpanded;
-        if (_isExpanded)
-            _controller.value = 1.0;
-    }
+class _CustomWidgetState extends State<CustomWidget> {
+  bool selected = false;
 
-    @override
-    void dispose() {
-        _controller.dispose();
-        super.dispose();
-    }
-
-    void expand() {
-        _setExpanded(true);
-    }
-
-    void collapse() {
-        _setExpanded(false);
-    }
-
-    void toggle() {
-        _setExpanded(!_isExpanded);
-    }
-
-    void _setExpanded(bool isExpanded) {
-        if (_isExpanded != isExpanded) {
-            setState(() {
-                _isExpanded = isExpanded;
-                if (_isExpanded)
-                    _controller.forward();
-                else
-                    _controller.reverse().then<void>(( value) {
-                        setState(() {
-                            // Rebuild without widget.children.
-                        });
-                    });
-                PageStorage.of(context)?.writeState(context, _isExpanded);
-            });
-            if (widget.onExpansionChanged != null) {
-                widget.onExpansionChanged(_isExpanded);
-            }
+  @override
+  Widget build(BuildContext context) {
+    return new GestureDetector(
+      onLongPress: () {
+        widget.callback();
+      },
+      onTap: () {
+        if (widget.longPressEnabled) {
+          widget.callback();
         }
-    }
-
-    Widget _buildChildren(BuildContext context, Widget child) {
-        final Color borderSideColor = _borderColor.evaluate(_easeOutAnimation) ?? Colors.transparent;
-        final Color titleColor = _headerColor.evaluate(_easeInAnimation);
-
-        return new Container(
-            decoration: new BoxDecoration(
-                color: _backgroundColor.evaluate(_easeOutAnimation) ?? Colors.transparent,
-                border: new Border(
-                    top: new BorderSide(color: borderSideColor),
-                    bottom: new BorderSide(color: borderSideColor),
-                )
-            ),
-            child: new Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                    IconTheme.merge(
-                        data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
-                        child: new ListTile(
-                            onTap: toggle,
-                            leading: widget.leading,
-                            title: new DefaultTextStyle(
-                                style: Theme
-                                    .of(context)
-                                    .textTheme
-                                    .subhead
-                                    .copyWith(color: titleColor),
-                                child: widget.title,
-                            ),
-                            trailing: widget.trailing ?? new RotationTransition(
-                                turns: _iconTurns,
-                                child: const Icon(Icons.expand_more),
-                            ),
-                        ),
-                    ),
-                    new ClipRect(
-                        child: new Align(
-                            heightFactor: _easeInAnimation.value,
-                            child: child,
-                        ),
-                    ),
-                ],
-            ),
-        );
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        final ThemeData theme = Theme.of(context);
-        _borderColor.end = theme.dividerColor;
-        _headerColor
-            ..begin = theme.textTheme.subhead.color
-            ..end = theme.accentColor;
-        _iconColor
-            ..begin = theme.unselectedWidgetColor
-            ..end = theme.accentColor;
-        _backgroundColor.end = widget.backgroundColor;
-
-        final bool closed = !_isExpanded && _controller.isDismissed;
-        return new AnimatedBuilder(
-            animation: _controller.view,
-            builder: _buildChildren,
-            child: closed ? null : new Column(children: widget.children),
-        );
-    }
+      },
+      child: new Container(
+        margin: new EdgeInsets.all(5.0),
+        child: new ListTile(
+          title: new Text("Title ${widget.index}"),
+          subtitle: new Text("Description ${widget.index}"),
+        ),
+        decoration: widget.isselected
+            ? new BoxDecoration(color: Colors.black38, border: new Border.all(color: Colors.black))
+            : new BoxDecoration(),
+      ),
+    );
+  }
 }
+class Element{
+   bool isselected;
+  Element({this.isselected});
+ }

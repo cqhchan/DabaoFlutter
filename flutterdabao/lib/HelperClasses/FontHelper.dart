@@ -67,6 +67,12 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w500,
       fontFamily: "SF_UI_Display");
+      static const TextStyle medium12TextStyle = TextStyle(
+      color: Colors.grey,
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w400,
+      fontFamily: "SF_UI_Display");
   static const TextStyle overlaySubtitleHeader = TextStyle(
       color: ColorHelper.dabaoOffBlack9B,
       fontSize: 14.0,

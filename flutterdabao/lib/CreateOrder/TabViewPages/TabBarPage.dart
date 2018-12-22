@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
+import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -9,7 +10,6 @@ import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class TabBarDemo extends StatelessWidget {
   @override
@@ -80,11 +80,14 @@ class BrowseOrderTabView extends StatefulWidget {
   _BrowseOrderTabViewState createState() => _BrowseOrderTabViewState();
 }
 
-class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
+class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
+    with Selectable {
   final MutableProperty<List<Order>> userRequestedOrders =
       ConfigHelper.instance.currentUserRequestedOrdersProperty;
 
-  bool expandedFlag = false;
+  
+
+  bool _pickUpButton = false;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +100,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
     return StreamBuilder<List<Order>>(
       stream: userRequestedOrders.producer,
       builder: (context, snapshot) {
+        if (snapshot.hasError) return Text('Error: ${snapshot.error}');
         if (!snapshot.hasData) return LinearProgressIndicator();
         return _buildList(context, snapshot.data);
       },
@@ -108,6 +112,11 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
       padding: const EdgeInsets.only(top: 20.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
+    // return ListView.builder(
+    //   itemCount: snapshot.length,
+    //   itemBuilder: (context, index){
+    //   },
+    // );
   }
 
   Widget _buildListItem(BuildContext context, Order order) {
@@ -124,6 +133,11 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
               stream: order.deliveryLocationDescription,
               builder: (context, snap) {
                 return ConfigurableExpansionTile(
+                  onExpansionChanged: (value) {
+                    setState(() {
+                      _pickUpButton = value;
+                    });
+                  },
                   header: Wrap(
                     direction: Axis.vertical,
                     children: <Widget>[
@@ -137,67 +151,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
                     Column(
                       children: <Widget>[
                         buildHeightBox(),
-                        Column(
-                          children: <Widget>[
-                            _buildOrderItems(order),
-                          ],
-                        ),
-                        Center(
-                          child: Container(
-                            constraints: BoxConstraints(maxHeight: 40),
-                            padding: EdgeInsets.all(6),
-                            color: Colors.grey[200],
-                            child: Flex(
-                              direction: Axis.horizontal,
-                              children: <Widget>[
-                                Expanded(
-                                    flex: 1,
-                                    child: Image.asset(
-                                        'assets/icons/icon_menu_orange.png')),
-                                Expanded(
-                                    flex: 6,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        //OrderItem Name
-                                        Text(
-                                          'Milk Tea',
-                                          style: FontHelper.bold12Black,
-                                        ),
-                                        //Message
-                                        Text(
-                                          '50% sugar, with pearl',
-                                          style: FontHelper.medium10TextStyle,
-                                        )
-                                      ],
-                                    )),
-                                Expanded(
-                                  flex: 3,
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: <Widget>[
-                                      //Price
-                                      Text(
-                                        'Max: \$2.50',
-                                        style: FontHelper.regular10Black,
-                                      ),
-                                      //Qty
-                                      Text(
-                                        'X2',
-                                        style: FontHelper.bold12Black,
-                                      )
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
+                        _buildOrderItems(order),
                       ],
                     )
                   ],
@@ -208,6 +162,8 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
             Divider(),
             buildHeightBox(),
             _buildUser(order),
+            buildHeightBox(),
+            _buildPickUpButton(),
           ],
         ),
       ),
@@ -222,59 +178,50 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
         direction: Axis.horizontal,
         children: <Widget>[
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(1.0),
-              child: StreamBuilder<String>(
-                stream: order.foodTag,
-                builder: (context, snap) {
-                  return Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      snap.hasData
-                          ? StringHelper.upperCaseWords(snap.data)
-                          : "Error",
-                      style: FontHelper.semiBold16Black,
-                    ),
-                  );
-                },
-              ),
+            child: StreamBuilder<String>(
+              stream: order.foodTag,
+              builder: (context, snap) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    snap.hasData
+                        ? StringHelper.upperCaseWords(snap.data)
+                        : "Error",
+                    style: FontHelper.semiBold16Black,
+                  ),
+                );
+              },
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: StreamBuilder<String>(
-                stream: order.foodTag,
-                builder: (context, snap) {
-                  return Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      snap.hasData ? '5 Items' : "Error",
-                      style: FontHelper.medium14TextStyle,
-                    ),
-                  );
-                },
-              ),
+            child: StreamBuilder<String>(
+              stream: order.foodTag,
+              builder: (context, snap) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    snap.hasData ? '5 Items' : "Error",
+                    style: FontHelper.medium14TextStyle,
+                  ),
+                );
+              },
             ),
           ),
           Expanded(
             flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(1.0),
-              child: StreamBuilder<double>(
-                stream: order.deliveryFee,
-                builder: (context, snap) {
-                  return Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      snap.hasData
-                          ? StringHelper.doubleToPriceString(snap.data)
-                          : "Error",
-                      style: FontHelper.semiBold14Black2,
-                    ),
-                  );
-                },
-              ),
+            child: StreamBuilder<double>(
+              stream: order.deliveryFee,
+              builder: (context, snap) {
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    snap.hasData
+                        ? StringHelper.doubleToPriceString(snap.data)
+                        : "Error",
+                    style: FontHelper.semiBold14Black2,
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -299,15 +246,15 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
             );
           },
         ),
-        Text(' - '),
         StreamBuilder<DateTime>(
           stream: order.endDeliveryTime,
           builder: (context, snap) {
             return Material(
               child: Text(
                 snap.hasData
-                    ? DateTimeHelper.convertEndTimeToDisplayString(snap.data)
-                    : "Error",
+                    ? ' - ' +
+                        DateTimeHelper.convertEndTimeToDisplayString(snap.data)
+                    : '',
                 style: FontHelper.semiBoldgrey12TextStyle,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -322,27 +269,89 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
     return StreamBuilder<List<OrderItem>>(
       stream: order.orderItems,
       builder: (context, snap) {
-        // var i = snap.data[0].quantity;
         if (snap.hasError) return Text('Error: ${snap.error}');
-        switch (snap.connectionState) {
-          case ConnectionState.none:
-            return Text('Select lot');
-          case ConnectionState.waiting:
-            return Text('Waiting');
-          case ConnectionState.active:
-            return ListView.builder(
-              itemCount: snap.data.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('${snap.data[index]}'),
-                );
-              },
-            );
-          case ConnectionState.done:
-            return Text('Done');
-        }
-        return null;
+        if (!snap.hasData) return LinearProgressIndicator();
+        return _buildOrderItemList(context, snap.data);
       },
+    );
+  }
+
+  Widget _buildOrderItemList(BuildContext context, List<OrderItem> snapshot) {
+    return Wrap(
+      // shrinkWrap: true,
+      // padding: const EdgeInsets.only(top: 20.0),
+      children: snapshot.map((data) => _buildOrderItem(context, data)).toList(),
+    );
+  }
+
+  Widget _buildOrderItem(BuildContext context, OrderItem orderItem) {
+    return Center(
+      child: Container(
+        constraints: BoxConstraints(maxHeight: 40),
+        padding: EdgeInsets.all(6),
+        color: Colors.grey[200],
+        child: Flex(
+          direction: Axis.horizontal,
+          children: <Widget>[
+            Expanded(
+                flex: 1,
+                child: Image.asset('assets/icons/icon_menu_orange.png')),
+            Expanded(
+                flex: 6,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    StreamBuilder(
+                      stream: orderItem.name,
+                      builder: (context, item) {
+                        return Text(
+                          '${item.data}',
+                          style: FontHelper.bold12Black,
+                        );
+                      },
+                    ),
+                    StreamBuilder(
+                      stream: orderItem.description,
+                      builder: (context, item) {
+                        return Text(
+                          '${item.data}',
+                          style: FontHelper.medium10TextStyle,
+                        );
+                      },
+                    ),
+                  ],
+                )),
+            Expanded(
+              flex: 3,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  StreamBuilder(
+                    stream: orderItem.price,
+                    builder: (context, item) {
+                      return Text(
+                        StringHelper.doubleToPriceString(item.data),
+                        style: FontHelper.regular10Black,
+                      );
+                    },
+                  ),
+                  StreamBuilder(
+                    stream: orderItem.quantity,
+                    builder: (context, item) {
+                      return Text(
+                        'X${item.data}',
+                        style: FontHelper.bold12Black,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -351,22 +360,30 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Icon(Icons.location_on, color: Colors.red[800]),
-        Container(
-          child: StreamBuilder<String>(
-            stream: order.deliveryLocationDescription,
-            builder: (context, snap) {
-              return Container(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width - 75),
-                child: Text(
-                  snap.hasData ? snap.data : "Error",
-                  style: FontHelper.regular14Black,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              );
-            },
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            StreamBuilder<String>(
+              stream: order.deliveryLocationDescription,
+              builder: (context, snap) {
+                return Container(
+                  constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width - 75),
+                  child: Text(
+                    snap.hasData ? snap.data : "Error",
+                    style: FontHelper.regular14Black,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                );
+              },
+            ),
+            //TODO
+            Text(
+              '1.2km away',
+              style: FontHelper.medium12TextStyle,
+            )
+          ],
         ),
       ],
     );
@@ -407,6 +424,36 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
         );
       },
     );
+  }
+
+  Widget _buildPickUpButton() {
+    if (_pickUpButton) {
+      return Align(
+        alignment: Alignment.bottomCenter,
+        child: FlatButton(
+          color: ColorHelper.dabaoOrange,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Align(
+                  child: Text(
+                    "Pick Up",
+                    style: FontHelper.semiBold14Black2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          onPressed: () {
+            //TODO
+          },
+        ),
+      );
+    } else {
+      return Offstage();
+    }
   }
 
   SizedBox buildHeightBox() {
