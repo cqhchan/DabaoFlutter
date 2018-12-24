@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CreateOrder/CustomizedMap.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -7,27 +9,37 @@ import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/ViewMap.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class BrowseOrderTabView extends StatefulWidget {
   _BrowseOrderTabViewState createState() => _BrowseOrderTabViewState();
 }
 
-class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubscriptionMixin {
+class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
+    with HavingSubscriptionMixin {
+  GoogleMapController mapController;
+
   final MutableProperty<List<Order>> userRequestedOrders =
       ConfigHelper.instance.currentUserRequestedOrdersProperty;
 
- @override
-   void dispose() {
-     // TODO: implement dispose
-     Selectable.deselectAll(userRequestedOrders.value);
-     super.dispose();
-   }
+  // Current User Location
+  MutableProperty<LatLng> currentLocation =
+      ConfigHelper.instance.currentLocationProperty;
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    Selectable.deselectAll(userRequestedOrders.value);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +60,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
 
   ListView _buildList(BuildContext context, List<Order> snapshot) {
     return ListView(
+      shrinkWrap: true,
       padding: const EdgeInsets.only(top: 20.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
@@ -80,7 +93,6 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
                         constraints: BoxConstraints(
                             maxWidth: MediaQuery.of(context).size.width - 50),
                         child: Flex(
-                          mainAxisSize: MainAxisSize.min,
                           direction: Axis.horizontal,
                           children: <Widget>[
                             Expanded(
@@ -95,7 +107,23 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
                         ),
                       ),
                       buildHeightBox(),
-                      _buildLocationDescription(order),
+                      Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width - 50),
+                        child: Flex(
+                          direction: Axis.horizontal,
+                          children: <Widget>[
+                            Expanded(
+                              flex: 4,
+                              child: _buildLocationDescription(order),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: _buildTapToLocation(order),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                   children: <Widget>[
@@ -143,7 +171,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
     );
   }
 
-  Container _buildHeader(Order order) {
+  Widget _buildHeader(Order order) {
     return Container(
       constraints:
           BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 50),
@@ -189,7 +217,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
     );
   }
 
-  Row _buildDeliveryPeriod(Order order) {
+  Widget _buildDeliveryPeriod(Order order) {
     return Row(
       children: <Widget>[
         StreamBuilder<DateTime>(
@@ -238,7 +266,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
     );
   }
 
-  StreamBuilder _buildQuantity(Order order) {
+  Widget _buildQuantity(Order order) {
     return StreamBuilder<List<OrderItem>>(
       stream: order.orderItems,
       builder: (context, snap) {
@@ -252,7 +280,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
     );
   }
 
-  StreamBuilder _buildOrderItems(Order order) {
+  Widget _buildOrderItems(Order order) {
     return StreamBuilder<List<OrderItem>>(
       stream: order.orderItems,
       builder: (context, snap) {
@@ -262,13 +290,13 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
     );
   }
 
-  Wrap _buildOrderItemList(BuildContext context, List<OrderItem> snapshot) {
+  Widget _buildOrderItemList(BuildContext context, List<OrderItem> snapshot) {
     return Wrap(
       children: snapshot.map((data) => _buildOrderItem(context, data)).toList(),
     );
   }
 
-  Center _buildOrderItem(BuildContext context, OrderItem orderItem) {
+  Widget _buildOrderItem(BuildContext context, OrderItem orderItem) {
     return Center(
       child: Container(
         constraints: BoxConstraints(maxHeight: 40),
@@ -343,9 +371,9 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
     );
   }
 
-  Row _buildLocationDescription(Order order) {
+  Widget _buildLocationDescription(Order order) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Icon(Icons.location_on, color: Colors.red[800]),
         SizedBox(
@@ -360,7 +388,8 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
                 if (!snap.hasData) return Offstage();
                 return Container(
                   constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width - 180),
+                    maxWidth: MediaQuery.of(context).size.width - 180,
+                  ),
                   child: Text(
                     snap.hasData ? '''${snap.data}''' : "Error",
                     style: FontHelper.regular14Black,
@@ -368,17 +397,57 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
                 );
               },
             ),
-            Text(
-              '1.2km away',
-              style: FontHelper.medium12TextStyle,
-            )
+            StreamBuilder<GeoPoint>(
+              stream: order.deliveryLocation,
+              builder: (context, snap) {
+                if (!snap.hasData) return Offstage();
+                return Container(
+                  constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width - 180),
+                  child: Text(
+                    snap.hasData
+                        ? LocationHelper.calculateDistancFromSelf(
+                                    currentLocation.value.latitude,
+                                    currentLocation.value.longitude,
+                                    snap.data.latitude,
+                                    snap.data.longitude)
+                                .toStringAsFixed(1) +
+                            'km away'
+                        : "?.??km",
+                    style: FontHelper.medium12TextStyle,
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ],
     );
   }
 
-  StreamBuilder _buildUser(Order order) {
+  Widget _buildTapToLocation(Order order) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: StreamBuilder<GeoPoint>(
+        stream: order.deliveryLocation,
+        builder: (context, snap) {
+          return GestureDetector(
+              child: Image.asset('assets/icons/google-maps.png'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => ViewMap(
+                          latitude: order.deliveryLocation.value.latitude,
+                          longitude: order.deliveryLocation.value.longitude,
+                        )));
+              });
+        },
+      ),
+    );
+  }
+
+  Widget _buildUser(Order order) {
     return StreamBuilder<User>(
       stream: order.creator
           .where((uid) => uid != null)
@@ -416,7 +485,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
     );
   }
 
-  Align _buildPickUpButton(Order order) {
+  Widget _buildPickUpButton(Order order) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: FlatButton(
@@ -452,13 +521,13 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
         });
   }
 
-  SizedBox buildHeightBox() {
+  Widget buildHeightBox() {
     return SizedBox(
       height: 8,
     );
   }
 
-  SizedBox buildWidthBox() {
+  Widget buildWidthBox() {
     return SizedBox(
       width: 10,
     );

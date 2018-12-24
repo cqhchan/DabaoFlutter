@@ -18,6 +18,7 @@ class TabBarPage extends StatelessWidget {
           },
           child: Icon(
             Icons.home,
+            size: 26,
             color: Colors.black,
           ),
         ),

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
 import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class ConfirmationOverlay extends StatefulWidget {
   final Order order;
@@ -16,6 +19,11 @@ class ConfirmationOverlay extends StatefulWidget {
 }
 
 class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
+
+  // Current User Location
+  MutableProperty<LatLng> currentLocation =
+      ConfigHelper.instance.currentLocationProperty;
+
   static const _dayMenu = <String>[
     'Today',
     'Tomorrow',
