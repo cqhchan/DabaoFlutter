@@ -23,7 +23,6 @@ dependencies:
   progress_hud: ^1.1.0
   flutter_spinkit: "^3.0.0"
   latlong: ^0.6.1
-  # time_slot_picker: ^0.0.1
   cached_network_image: ^0.5.1
   image: ^2.0.5
   cloud_functions: ^0.0.5

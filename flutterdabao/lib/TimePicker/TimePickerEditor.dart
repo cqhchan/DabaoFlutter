@@ -8,7 +8,6 @@ import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 typedef DoubleDateSelectedCallback = Function(DateTime, DateTime);
 typedef DateSelectedCallback = Function(DateTime);
 
-
 Future<T> showTimeCreator<T>({
   @required BuildContext context,
   bool barrierDismissible = false,
@@ -49,7 +48,7 @@ Future<T> showOneTimeCreator<T>({
       return _OnetimePickerEditor(
         startTime: startTime,
         headerTitle: headerTitle,
-        subTitle:subTitle,
+        subTitle: subTitle,
         onCompleteCallback: onCompleteCallback,
       );
     },
@@ -253,24 +252,28 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     if (value != null) {
       setState(() => _currentStartHour = value);
     }
+    print(_currentStartHour);
   }
 
   _handleStartMinuteChanged(num value) {
     if (value != null) {
       setState(() => _currentStartMinute = value);
     }
+    print(_currentStartMinute);
   }
 
   _handleEndHourChanged(num value) {
     if (value != null) {
       setState(() => _currentEndHour = value);
     }
+    print(_currentEndHour);
   }
 
   _handleEndMinuteChanged(num value) {
     if (value != null) {
       setState(() => _currentEndMinute = value);
     }
+    print(_currentEndMinute);
   }
 
   Widget buildStartDeliverSelector() {
@@ -453,7 +456,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
               _currentEndMinute,
             );
             Navigator.of(context).pop();
-            widget.onCompleteCallBack(start,end);
+            widget.onCompleteCallBack(start, end);
           } else {
             setState(() {
               errorMessage = "Please input the correct time period";
@@ -549,11 +552,12 @@ class _OnetimePickerEditor extends StatefulWidget {
   final String headerTitle;
   final String subTitle;
 
-
   const _OnetimePickerEditor({
     Key key,
     @required this.onCompleteCallback,
-    this.startTime, this.headerTitle, this.subTitle,
+    this.startTime,
+    this.headerTitle,
+    this.subTitle,
   }) : super(key: key);
 
   __OneTimePickerEditorState createState() => __OneTimePickerEditorState();
@@ -722,6 +726,7 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
   _handleStartHourChanged(num value) {
     if (value != null) {
       setState(() => _currentStartHour = value);
+      print(_currentStartHour);
     }
   }
 
@@ -729,6 +734,7 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
     if (value != null) {
       setState(() => _currentStartMinute = value);
     }
+    print(_currentStartMinute);
   }
 
   Widget buildStartDeliverSelector() {
