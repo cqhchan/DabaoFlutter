@@ -28,6 +28,7 @@ class Order extends FirebaseType with Selectable {
   static final String potentialDeliveryKey = "PD";
 
   static final String routeKey = "R";
+  static final String delivererKey = "D";
 
 
   BehaviorSubject<DateTime> createdDeliveryTime;

@@ -8,19 +8,35 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart'
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Model/User.dart';
+import 'package:rxdart/rxdart.dart';
 
 class MyRouteTabView extends StatefulWidget {
   _MyRouteTabViewState createState() => _MyRouteTabViewState();
 }
 
 class _MyRouteTabViewState extends State<MyRouteTabView> {
-  final MutableProperty<List<DabaoRoute.Route>> userRequestedOrders =
+  final MutableProperty<List<DabaoRoute.Route>> userOpenRoutes =
       ConfigHelper.instance.currentUserOpenRoutesProperty;
 
+  final MutableProperty<List<Order>> userDeliveryingOrders =
+      ConfigHelper.instance.currentUserDeliveringOrdersProperty;
+// userOpenRoutes.producer.mergeWith([userDeliveryingOrders.producer])
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<DabaoRoute.Route>>(
-      stream: userRequestedOrders.producer,
+    return StreamBuilder<List<Object>>(
+      stream: Observable.combineLatest2<List<DabaoRoute.Route>, List<Order>,
+              List<Object>>(
+          userOpenRoutes.producer, userDeliveryingOrders.producer,
+          (routes, orders) {
+
+        List<Object> temp = List();
+
+        temp.addAll(routes);
+
+        if (orders != null && orders.length != 0) temp.add(orders);
+
+        return temp;
+      }),
       builder: (context, snapshot) {
         if (snapshot.hasError) return Text('Error: ${snapshot.error}');
         if (!snapshot.hasData) return Text('No Routes Avaliable');
@@ -29,10 +45,15 @@ class _MyRouteTabViewState extends State<MyRouteTabView> {
     );
   }
 
-  Widget _buildList(BuildContext context, List<DabaoRoute.Route> snapshot) {
+  Widget _buildList(BuildContext context, List<Object> snapshot) {
+    print("testing list " + snapshot.length.toString());
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
-      children: snapshot.map((data) => _RouteCell(route: data)).toList(),
+      children: snapshot.map((data) {
+        if (data is DabaoRoute.Route) return _RouteCell(route: data);
+        if (data is List<Order>) return _OrdersCell(orders: data);
+        return Container();
+      }).toList(),
     );
   }
 }
@@ -78,19 +99,19 @@ class _RouteCellState extends State<_RouteCell> {
 
   StreamBuilder<List<Order>> buildListOfAcceptedOrders() {
     return StreamBuilder<List<Order>>(
-            stream: widget.route.listOfOrdersAccepted.producer,
-            builder: (context, snap) {
-              if (!snap.hasData || snap.data.length == 0) return Container();
+      stream: widget.route.listOfOrdersAccepted.producer,
+      builder: (context, snap) {
+        if (!snap.hasData || snap.data.length == 0) return Container();
 
-              List<Widget> listOfWidget = snap.data
-                  .map((order) => buildOrderDeliveryLocation(order))
-                  .toList();
+        List<Widget> listOfWidget = snap.data
+            .map((order) => buildOrderDeliveryLocation(order))
+            .toList();
 
-              return Column(
-                children: listOfWidget,
-              );
-            },
-          );
+        return Column(
+          children: listOfWidget,
+        );
+      },
+    );
   }
 
   Row buildPossibleMatches() {
@@ -253,45 +274,8 @@ class _RouteCellState extends State<_RouteCell> {
   Widget buildOrderDeliveryLocation(Order order) {
     return Column(
       children: <Widget>[
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Align(
-                alignment: Alignment.topLeft,
-                child: Container(child: Image.asset("assets/icons/pin.png"))),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.only(left: 12.0, right: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    StreamBuilder<String>(
-                        stream: order.deliveryLocationDescription,
-                        builder: (context, snap) {
-                          if (!snap.hasData || snap.data == null)
-                            return CircularProgressIndicator();
-                          return Text(
-                            snap.data,
-                            style: FontHelper.regular14Black,
-                          );
-                        }),
-                    StreamBuilder<DateTime>(
-                        stream: order.deliveryTime,
-                        builder: (context, snap) {
-                          if (!snap.hasData || snap.data == null)
-                            return CircularProgressIndicator();
-                          return Text(
-                            "Deliver at " +
-                                DateTimeHelper.convertTimeToDisplayString(
-                                    snap.data),
-                            style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0),
-                          );
-                        }),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        new _OrderWidget(
+          order: order,
         ),
         buildDottedLine(),
       ],
@@ -327,6 +311,132 @@ class _RouteCellState extends State<_RouteCell> {
                     padding: EdgeInsets.only(top: 8.0),
                     child:
                         Image.asset("assets/icons/dotted_line_circular.png"))))
+      ],
+    );
+  }
+}
+
+class _OrdersCell extends StatefulWidget {
+  final List<Order> orders;
+
+  const _OrdersCell({Key key, this.orders}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _OrderCellState();
+  }
+}
+
+class _OrderCellState extends State<_OrdersCell> {
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> listOfOrders = List();
+    listOfOrders.add(buildHeaderRow());
+    widget.orders.forEach((order) {
+      listOfOrders.add(_OrderWidget(
+        order: order,
+      ));
+      listOfOrders.add(buildDottedLine());
+    });
+
+    listOfOrders.removeLast();
+
+    return Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        margin: EdgeInsets.all(10.0),
+        color: Colors.white,
+        elevation: 6.0,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(15.0, 12.0, 18.0, 12.0),
+          child: Column(
+            children: listOfOrders,
+          ),
+        ));
+  }
+
+    Row buildHeaderRow() {
+    return Row(
+      children: <Widget>[
+        Align(
+          alignment: Alignment.topLeft,
+          child: Text(
+            "Other",
+            style: FontHelper.semiBold16(ColorHelper.dabaoOffBlack4A),
+          ),
+        ),
+        Container(
+              padding: EdgeInsets.only(left: 15.0, top: 1.0),
+              child: Text("${widget.orders.length} Locations(s)",
+                  style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0)),
+          
+          
+        ),
+        Expanded(
+            child: Align(
+                alignment: Alignment.bottomRight,
+                child: Container(
+                    padding: EdgeInsets.only(top: 8.0),
+                    child:
+                        Image.asset("assets/icons/dotted_line_circular.png"))))
+      ],
+    );
+  }
+
+  Align buildDottedLine() => Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+          padding: EdgeInsets.only(left: 8.0, top: 5.0, bottom: 5.0),
+          child: Image.asset("assets/icons/dotted_line_straight.png")));
+}
+
+class _OrderWidget extends StatelessWidget {
+  final Order order;
+  const _OrderWidget({
+    Key key,
+    @required this.order,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Align(
+            alignment: Alignment.topLeft,
+            child: Container(child: Image.asset("assets/icons/pin.png"))),
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.only(left: 12.0, right: 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                StreamBuilder<String>(
+                    stream: order.deliveryLocationDescription,
+                    builder: (context, snap) {
+                      if (!snap.hasData || snap.data == null)
+                        return CircularProgressIndicator();
+                      return Text(
+                        snap.data,
+                        style: FontHelper.regular14Black,
+                      );
+                    }),
+                StreamBuilder<DateTime>(
+                    stream: order.deliveryTime,
+                    builder: (context, snap) {
+                      if (!snap.hasData || snap.data == null)
+                        return CircularProgressIndicator();
+                      return Text(
+                        "Deliver at " +
+                            DateTimeHelper.convertTimeToDisplayString(
+                                snap.data),
+                        style: FontHelper.regular(
+                            ColorHelper.dabaoOffBlack9B, 12.0),
+                      );
+                    }),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

@@ -24,7 +24,12 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<Order>> currentUserRequestedOrdersProperty =
       MutableProperty<List<Order>>(List());
 
+  // A users active Orders
   MutableProperty<List<Order>> currentUserAcceptedOrdersProperty =
+      MutableProperty<List<Order>>(List());
+
+  // All a users accepted Order which he is deliverying
+  MutableProperty<List<Order>> currentUserDeliveringOrdersProperty =
       MutableProperty<List<Order>>(List());
 
   MutableProperty<List<Route>> currentUserOpenRoutesProperty =
@@ -44,14 +49,12 @@ class ConfigHelper with HavingSubscriptionMixin {
     _internal = this;
   }
 
-
   // Called once when app loads.
   appDidLoad() {
     disposeAndReset();
 
     subscription
         .add(currentUserFoodTagsProperty.bindTo(currentUserFoodTagProducer()));
-
 
     // Global Price forumala
     subscription.add(_globalPricePerItem.bindTo(globalConfigSettingsData()
@@ -73,12 +76,14 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription.add(currentUserAcceptedOrdersProperty
         .bindTo(currentUserAcceptedOrdersProducer()));
 
+    // get current user deliveringOrderProperty;
+
+    subscription.add(currentUserDeliveringOrdersProperty
+        .bindTo(currentUserDeliveryingOrdersProducer()));
 
     // get Current open Routes
-    subscription.add(currentUserOpenRoutesProperty
-        .bindTo(currentUserOpenRoutesProducer()));
-
-
+    subscription.add(
+        currentUserOpenRoutesProperty.bindTo(currentUserOpenRoutesProducer()));
   }
 
   bool get isInDebugMode {
@@ -103,13 +108,13 @@ class ConfigHelper with HavingSubscriptionMixin {
   }
 
   Observable<List<Route>> currentUserOpenRoutesProducer() {
-    return currentUserProperty.producer.switchMap((user)=> user == null
+    return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Route>()
         : FirebaseCollectionReactive<Route>(Firestore.instance
                 .collection("routes")
                 .where(Route.statusKey, isEqualTo: routeStatus_Open)
                 .where(Route.creatorKey, isEqualTo: user.uid))
-            .observable );
+            .observable);
   }
 
   Observable<List<Order>> currentUserAcceptedOrdersProducer() {
@@ -119,6 +124,16 @@ class ConfigHelper with HavingSubscriptionMixin {
                 .collection("orders")
                 .where(Order.statusKey, isEqualTo: orderStatus_Accepted)
                 .where(Order.creatorKey, isEqualTo: user.uid))
+            .observable);
+  }
+
+  Observable<List<Order>> currentUserDeliveryingOrdersProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Order>()
+        : FirebaseCollectionReactive<Order>(Firestore.instance
+                .collection("orders")
+                .where(Order.statusKey, isEqualTo: orderStatus_Accepted)
+                .where(Order.delivererKey, isEqualTo: user.uid))
             .observable);
   }
 
@@ -148,11 +163,10 @@ class ConfigHelper with HavingSubscriptionMixin {
         .bindTo(LocationHelper.instance.onLocationChange());
   }
 
-    double deliveryFeeCalculator({int numberOfItems}) {
+  double deliveryFeeCalculator({int numberOfItems}) {
     if (numberOfItems == 0) {
       return 0.0;
     } else {
-
       return _globalFixedPrice.value +
           ((numberOfItems - _globalMinItemCount.value) <= 0
                   ? 0
@@ -160,6 +174,4 @@ class ConfigHelper with HavingSubscriptionMixin {
               _globalPricePerItem.value;
     }
   }
-
-  
 }
