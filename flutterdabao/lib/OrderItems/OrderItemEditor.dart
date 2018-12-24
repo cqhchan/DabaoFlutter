@@ -83,7 +83,7 @@ class _OrderItemEditor extends StatefulWidget {
   }) : orderItemHolder = template == null
             ? OrderItemHolder()
             : OrderItemHolder(
-                title: template.name.value, price: template.price.value);
+                title: template.name.value, price: template.price.value, description: template.description.value);
 
   @override
   State<StatefulWidget> createState() {

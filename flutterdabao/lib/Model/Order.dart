@@ -137,12 +137,13 @@ class Order extends FirebaseType with Selectable {
     if (data.containsKey(orderItemKey)) {
 
       List<Map<dynamic, dynamic>> temp =  List.castFrom<dynamic,Map<dynamic, dynamic>>( data[orderItemKey]);
-
       orderItems.add(temp.map((rawMap) {
+
         var map = rawMap.cast<String, dynamic>();
         return OrderItem.fromMap(
             map[OrderItem.titleKey].toString().toLowerCase(), map);
       }).toList());
+
     } else {
       orderItems.add(List());
     }

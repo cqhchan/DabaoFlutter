@@ -30,7 +30,6 @@ class _Home extends State<Home> {
   @override
   void initState() {
     super.initState();
-
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
   }
@@ -80,7 +79,7 @@ class _Home extends State<Home> {
                       ],
                     ),
                   ),
-                   Container(
+                  Container(
                     child: Text(
                       "Notifications",
                       style: FontHelper.semiBold18Black,

@@ -57,8 +57,6 @@ class User extends FirebaseType {
       var mapOfFoodTag = data[foodTagKey] as Map;
       List<FoodTag> fT = List();
 
-
-      print(mapOfFoodTag);
       mapOfFoodTag.forEach((key,rawMap){
         var map = rawMap.cast<String,dynamic>();
         fT.add(FoodTag.fromMap(key, map));

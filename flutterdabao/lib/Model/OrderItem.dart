@@ -25,7 +25,6 @@ class OrderItem extends FirebaseType {
   @override
   void map(Map<String, dynamic> map) {
     
-    print (map);
     if (map.containsKey(titleKey)) {
       name.add(map[titleKey]);
     } else {
