@@ -78,8 +78,7 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
                       margin: EdgeInsets.only(left: 8.0),
                       height: 20,
                       width: 1,
-                      color: Colors.black,
-                    ),
+                      child: Image.asset("assets/icons/dotted_line_straight.png"),                    ),
                     Expanded(
                       child: Line(
                         margin: EdgeInsets.fromLTRB(20.0, 15.0, 0.0, 15.0),

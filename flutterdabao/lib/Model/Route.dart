@@ -7,6 +7,7 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:flutterdabao/Model/Order.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/subjects.dart';
 
 final String routeStatus_Open = "Open";
@@ -32,7 +33,9 @@ class Route extends FirebaseType {
   BehaviorSubject<String> creator;
   BehaviorSubject<List<String>> foodTags;
 
-  MutableProperty<List<Order>> listOfOrdersAccepted;
+  MutableProperty<List<Order>> listOfOrdersAccepted = MutableProperty(List<Order>());
+  Observable<List<Order>> listOfPotentialOrders;
+
 
   Route.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   Route.fromUID(String uid) : super.fromUID(uid);
@@ -46,25 +49,28 @@ class Route extends FirebaseType {
     }
 
     if (data.containsKey(deliveryLocationKey)) {
-      deliveryLocation.add(data[deliveryLocationKey]);
+      List<GeoPoint> temp = List.castFrom<dynamic,GeoPoint>((data[deliveryLocationKey]));
+      deliveryLocation.add(temp);
     } else {
       deliveryLocation.add(null);
     }
 
-    if (data.containsKey(deliveryLocationDescription)) {
-      deliveryLocationDescription.add(data[deliveryLocationDescription]);
+    if (data.containsKey(deliveryLocationDescriptionKey)) {
+      List<String> temp = List.castFrom<dynamic,String>((data[deliveryLocationDescriptionKey]));
+      deliveryLocationDescription.add(temp);
     } else {
       deliveryLocationDescription.add(null);
-    }
+    }    
 
-    if (data.containsKey(deliveryLocationKey)) {
-      startLocation.add(data[deliveryLocationKey]);
+
+    if (data.containsKey(startLocationKey)) {
+      startLocation.add(data[startLocationKey]);
     } else {
       startLocation.add(null);
     }
 
-    if (data.containsKey(deliveryLocationDescription)) {
-      startLocationDescription.add(data[deliveryLocationDescription]);
+    if (data.containsKey(startLocationDescriptionKey)) {
+      startLocationDescription.add(data[startLocationDescriptionKey]);
     } else {
       startLocationDescription.add(null);
     }
@@ -77,9 +83,12 @@ class Route extends FirebaseType {
     }
 
     if (data.containsKey(foodTagKey)) {
-      foodTags.add(data[foodTagKey]);
-    }
+      List<String> temp = List.castFrom<dynamic,String>((data[foodTagKey]));
+      foodTags.add(temp);
+    } else {
     foodTags.add(data[List()]);
+    }
+
   }
 
   @override
@@ -92,9 +101,15 @@ class Route extends FirebaseType {
     deliveryLocation = BehaviorSubject();
     deliveryLocationDescription = BehaviorSubject();
 
-    listOfOrdersAccepted.bindTo(FirebaseCollectionReactive(Firestore.instance
+    listOfPotentialOrders = FirebaseCollectionReactive<Order>(Firestore.instance
             .collection("orders")
-            .where('route', isEqualTo: this.uid))
+            .where(Order.statusKey, isEqualTo: orderStatus_Requested)
+            .where(Order.potentialDeliveryKey, arrayContains: this.uid))
+        .observable;
+
+    listOfOrdersAccepted.bindTo(FirebaseCollectionReactive<Order>(Firestore.instance
+            .collection("orders")
+            .where(Order.routeKey, isEqualTo: this.uid))
         .observable);
   }
 

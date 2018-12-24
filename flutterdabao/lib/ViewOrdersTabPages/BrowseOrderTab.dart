@@ -15,8 +15,7 @@ class BrowseOrderTabView extends StatefulWidget {
   _BrowseOrderTabViewState createState() => _BrowseOrderTabViewState();
 }
 
-class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
-    with Selectable {
+class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
   final MutableProperty<List<Order>> userRequestedOrders =
       ConfigHelper.instance.currentUserRequestedOrdersProperty;
 

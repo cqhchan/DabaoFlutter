@@ -78,6 +78,7 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription.add(currentUserOpenRoutesProperty
         .bindTo(currentUserOpenRoutesProducer()));
 
+
   }
 
   bool get isInDebugMode {
@@ -102,13 +103,13 @@ class ConfigHelper with HavingSubscriptionMixin {
   }
 
   Observable<List<Route>> currentUserOpenRoutesProducer() {
-    return currentUserProperty.producer.switchMap((user) => user == null
+    return currentUserProperty.producer.switchMap((user)=> user == null
         ? List<Route>()
         : FirebaseCollectionReactive<Route>(Firestore.instance
                 .collection("routes")
                 .where(Route.statusKey, isEqualTo: routeStatus_Open)
                 .where(Route.creatorKey, isEqualTo: user.uid))
-            .observable);
+            .observable );
   }
 
   Observable<List<Order>> currentUserAcceptedOrdersProducer() {

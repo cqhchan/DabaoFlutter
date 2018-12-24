@@ -1,5 +1,6 @@
-import 'dart:math';
+import 'dart:math' as math;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CreateRoute/RouteOverview.dart';
@@ -12,6 +13,8 @@ import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
+import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -23,72 +26,70 @@ class _Home extends State<Home> {
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
   _Home() {
     _controller.addListener(() {
-      _opacityProperty.value = max(min((_controller.offset / 150.0), 1.0), 0.0);
+      _opacityProperty.value =
+          math.max(math.min((_controller.offset / 150.0), 1.0), 0.0);
     });
   }
 
   @override
   void initState() {
     super.initState();
+
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
   }
 
   @override
-  Widget build(BuildContext context) => Stack(
-        children: <Widget>[
-          MaterialApp(
-            home: Scaffold(
-              backgroundColor: ColorHelper.dabaoOffWhiteF5,
-              body: ListView(
-                controller: _controller,
-                children: <Widget>[
-                  //First Widget consisting of Bg, and balance
-                  balanceStack(context),
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: ColorHelper.dabaoOffWhiteF5,
+        body: Stack(children: <Widget>[
+          ListView(
+            controller: _controller,
+            children: <Widget>[
+              //First Widget consisting of Bg, and balance
+              balanceStack(context),
 
-                  Container(
-                    child: Text(
-                      "How can we serve you today?",
-                      style: FontHelper.semiBold18Black,
-                    ),
-                    padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
-                  ),
-                  Container(
-                    padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-                    child: Wrap(
-                      spacing: 25.0,
-                      children: <Widget>[
-                        //Dabaoee
-                        squardCard('assets/icons/person.png', 'Dabaoee',
-                            'I want to Order', () {
-                          Navigator.push(
-                            context,
-                            FadeRoute(widget: OrderNow()),
-                          );
-                        }),
-                        //Dabaoer
-
-                        squardCard('assets/icons/bike.png', 'Dabaoer',
-                            'I want to Deliver', () {
-                          Navigator.push(
-                            context,
-                            FadeRoute(widget: RouteOverview()),
-                          );
-                        }),
-                        //ChatBox
-                      ],
-                    ),
-                  ),
-                  Container(
-                    child: Text(
-                      "Notifications",
-                      style: FontHelper.semiBold18Black,
-                    ),
-                    padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 0.0),
-                  ),
-                ],
+              Container(
+                child: Text(
+                  "How can we serve you today?",
+                  style: FontHelper.semiBold18Black,
+                ),
+                padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
               ),
-            ),
+              Container(
+                padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+                child: Wrap(
+                  spacing: 25.0,
+                  children: <Widget>[
+                    //Dabaoee
+                    squardCard(
+                        'assets/icons/person.png', 'Dabaoee', 'I want to Order',
+                        () {
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: OrderNow()),
+                      );
+                    }),
+                    //Dabaoer
+                    squardCard(
+                        'assets/icons/bike.png', 'Dabaoer', 'I want to Deliver',
+                        () {
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: RouteOverview()),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              Container(
+                child: Text(
+                  "Notifications",
+                  style: FontHelper.semiBold18Black,
+                ),
+                padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 0.0),
+              ),
+            ],
           ),
           // AppBar Widget
           Material(
@@ -107,8 +108,71 @@ class _Home extends State<Home> {
                 ),
               ),
             ),
+          ),
+          StreamBuilder<List>(
+            stream:
+                ConfigHelper.instance.currentUserOpenRoutesProperty.producer,
+            builder: (context, snap) {
+              if (!snap.hasData || snap.data.length == 0)
+                return Container();
+              else
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      FadeRoute(widget: TabBarPage()),
+                    );
+                  },
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      decoration:
+                          BoxDecoration(color: Colors.yellow, boxShadow: [
+                        BoxShadow(
+                          offset: Offset(0.0, 1.0),
+                          color: Colors.grey,
+                          blurRadius: 5.0,
+                        )
+                      ]),
+                      child: SafeArea(
+                        top: false,
+                        child: Container(
+                          padding: EdgeInsets.only(left: 20.0),
+                          height: 50,
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            children: <Widget>[
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "View your Routes (${snap.data.length})",
+                                  style: FontHelper.semiBold14Black,
+                                ),
+                              ),
+                              Expanded(
+                                child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Container(
+                                      padding: EdgeInsets.only(bottom: 4.0),
+                                      height: 19.0,
+                                      width: 24.0,
+                                      child: Transform(
+                                        transform:
+                                            Matrix4.rotationZ(math.pi / 2),
+                                        child: Image.asset(
+                                            "assets/icons/arrow_left_icon.png"),
+                                      ),
+                                    )),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+            },
           )
-        ],
+        ]),
       );
 
   Container squardCard(
@@ -139,7 +203,7 @@ class _Home extends State<Home> {
             ),
             Text(
               body,
-              style: FontHelper.regular14Black,
+              style: FontHelper.regular(Colors.black, 12.0),
             ),
           ],
         ),

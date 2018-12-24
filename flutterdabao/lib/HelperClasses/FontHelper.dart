@@ -123,7 +123,7 @@ class FontHelper {
       fontFamily: "SF_UI_Display");
   static const TextStyle regular14Black = TextStyle(
       color: Colors.black,
-      fontSize: 12.0,
+      fontSize: 14.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
