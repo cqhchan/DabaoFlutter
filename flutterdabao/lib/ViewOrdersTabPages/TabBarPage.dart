@@ -29,6 +29,7 @@ class TabBarPage extends StatelessWidget {
       ),
       body: DefaultTabController(
         length: 3,
+        initialIndex: 2,
         child: Column(
           children: <Widget>[
             Container(
@@ -43,13 +44,13 @@ class TabBarPage extends StatelessWidget {
                   unselectedLabelColor: ColorHelper.dabaoOffGrey70,
                   tabs: [
                     Tab(
-                      text: 'Browse Orders',
+                      child:Text("Browse Orders", style: FontHelper.semiBold(null, 12.0),),
                     ),
                     Tab(
-                      text: 'Confirmed',
+                      child:Text("Confirmed", style: FontHelper.semiBold(null, 12.0),),
                     ),
                     Tab(
-                      text: 'My Route',
+                      child:Text("My Routes", style: FontHelper.semiBold(null, 12.0),),
                     ),
                   ],
                 ),

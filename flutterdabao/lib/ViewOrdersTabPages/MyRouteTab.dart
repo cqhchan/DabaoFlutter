@@ -46,7 +46,6 @@ class _MyRouteTabViewState extends State<MyRouteTabView> {
   }
 
   Widget _buildList(BuildContext context, List<Object> snapshot) {
-    print("testing list " + snapshot.length.toString());
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
       children: snapshot.map((data) {
