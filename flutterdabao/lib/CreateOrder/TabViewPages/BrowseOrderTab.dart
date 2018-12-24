@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CreateOrder/TabViewPages/ConfirmationOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
+import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
@@ -95,7 +97,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                       Divider(),
                       buildHeightBox(),
                       _buildUser(order),
-                      _buildPickUpButton(),
+                      _buildPickUpButton(order),
                     ],
                   );
                   // what to do if expanded
@@ -142,13 +144,13 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
             ),
           ),
           Expanded(
-            child: StreamBuilder<String>(
-              stream: order.foodTag,
+            child: StreamBuilder<List<OrderItem>>(
+              stream: order.orderItems,
               builder: (context, snap) {
                 return Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    snap.hasData ? '5 Items' : "Error",
+                    snap.hasData ? '${snap.data.length} Item(s)' : "Error",
                     style: FontHelper.medium14TextStyle,
                   ),
                 );
@@ -314,12 +316,10 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
               builder: (context, snap) {
                 return Container(
                   constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width - 75),
+                      maxWidth: MediaQuery.of(context).size.width - 150),
                   child: Text(
-                    snap.hasData ? snap.data : "Error",
+                    snap.hasData ? '''${snap.data}''' : "Error",
                     style: FontHelper.regular14Black,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
                   ),
                 );
               },
@@ -371,7 +371,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
     );
   }
 
-  Widget _buildPickUpButton() {
+  Widget _buildPickUpButton(Order order) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: FlatButton(
@@ -390,9 +390,21 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
             ),
           ],
         ),
-        onPressed: () {},
+        onPressed: () {
+          showOverlay(order);
+        },
       ),
     );
+  }
+
+  showOverlay(Order order) {
+    showHalfBottomSheet(
+        context: context,
+        builder: (builder) {
+          return ConfirmationOverlay(
+            order: order,
+          );
+        });
   }
 
   SizedBox buildHeightBox() {

@@ -58,7 +58,8 @@ class _Home extends State<Home> {
                   Container(
                     padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
                     child: Wrap(
-                      spacing: 25.0,
+                      spacing: 25,
+                      runSpacing: 25,
                       children: <Widget>[
                         //Dabaoee
                         squardCard('assets/icons/person.png', 'Dabaoee',
@@ -78,10 +79,18 @@ class _Home extends State<Home> {
                           );
                         }),
                         //ChatBox
+                        squardCard(
+                            'assets/icons/chat.png', 'Chat', 'I want to Chat',
+                            () {
+                          Navigator.push(
+                            context,
+                            FadeRoute(widget: TabBarPage()),
+                          );
+                        }),
                       ],
                     ),
                   ),
-                   Container(
+                  Container(
                     child: Text(
                       "Notifications",
                       style: FontHelper.semiBold18Black,
