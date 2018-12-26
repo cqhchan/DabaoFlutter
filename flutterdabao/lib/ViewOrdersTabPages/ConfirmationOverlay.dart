@@ -5,11 +5,13 @@ import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
 import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class ConfirmationOverlay extends StatefulWidget {
   final Order order;
@@ -19,6 +21,11 @@ class ConfirmationOverlay extends StatefulWidget {
 }
 
 class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
+
+  // Current User Location
+  MutableProperty<LatLng> currentLocation =
+      ConfigHelper.instance.currentLocationProperty;
+
   static const _dayMenu = <String>[
     'Today',
     'Tomorrow',
@@ -204,42 +211,44 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _buildDeliveryPeriod(widget.order),
-            _buildArrivalTime(widget.order),
-            _buildHeader(widget.order),
-            _buildLocationDescription(widget.order),
-            Flex(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              verticalDirection: VerticalDirection.up,
-              direction: Axis.horizontal,
-              children: <Widget>[
-                Expanded(
-                  flex: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: _buildBackButton(),
+    return SafeArea(
+          child: Container(
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _buildDeliveryPeriod(widget.order),
+              _buildArrivalTime(widget.order),
+              _buildHeader(widget.order),
+              _buildLocationDescription(widget.order),
+              Flex(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                verticalDirection: VerticalDirection.up,
+                direction: Axis.horizontal,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: _buildBackButton(),
+                    ),
                   ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: _buildPickUpButton(widget.order),
+                  Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: _buildPickUpButton(widget.order),
+                    ),
                   ),
-                ),
-              ],
-            )
-          ],
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

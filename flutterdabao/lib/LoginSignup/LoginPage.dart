@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage>
               obscureText: true,
             ),
             
-            ButtonBar(
+            Column(
               children: <Widget>[
                 FlatButton(
                   child: Text('SIGN UP'),
