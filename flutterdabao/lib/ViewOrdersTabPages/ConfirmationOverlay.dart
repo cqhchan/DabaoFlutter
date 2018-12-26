@@ -435,7 +435,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   // Pop t
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
-
                 } else {
                   Navigator.of(context).pop();
                   // TODO bug it doessnt show
