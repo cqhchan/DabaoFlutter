@@ -18,12 +18,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class OrderList extends StatefulWidget {
-    final Observable<List<Order>> input;
-    final LatLng location;
-    final context;
+  final Observable<List<Order>> input;
+  final LatLng location;
+  final context;
 
-  OrderList({Key key, this.context,@required this.input, this.location}) : super(key: key);
-
+  OrderList({Key key, this.context, @required this.input, this.location})
+      : super(key: key);
 
   _OrderListState createState() => _OrderListState();
 }
@@ -31,24 +31,9 @@ class OrderList extends StatefulWidget {
 class _OrderListState extends State<OrderList> {
   bool expandedFlag = false;
 
-  @override
-  void initState() {
-      // TODO: implement initState
-      super.initState();
-
-      print("testing");
-      widget.input.listen((onData){
-
-        print("testing on" + onData.length.toString());
-      });
-    }
-
   // Current User Location
   @override
   Widget build(BuildContext context) {
-
-
-
     return Scaffold(
       body: _buildBody(widget.context),
     );
@@ -78,7 +63,7 @@ class _OrderListState extends State<OrderList> {
       color: Colors.white,
       elevation: 6.0,
       child: Container(
-        margin: EdgeInsets.all(13),
+        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
         child: Wrap(
           children: <Widget>[
             StreamBuilder(
@@ -119,8 +104,14 @@ class _OrderListState extends State<OrderList> {
                         constraints: BoxConstraints(
                             maxWidth: MediaQuery.of(context).size.width - 50),
                         child: Flex(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           direction: Axis.horizontal,
                           children: <Widget>[
+                            Container(
+                              height: 30,
+                              child: Image.asset(
+                                  "assets/icons/red_marker_icon.png"),
+                            ),
                             Expanded(
                               flex: 4,
                               child: _buildLocationDescription(order),
@@ -153,8 +144,21 @@ class _OrderListState extends State<OrderList> {
                   return Column(
                     children: <Widget>[
                       buildHeightBox(),
-                      _buildUser(order),
-                      _buildPickUpButton(order),
+                      Flex(
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 4,
+                            child: _buildUser(order),
+                          ),
+                          Expanded(flex: 2, child: _buildChatButton(order)),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+
+                      _buildPickUpButton(order)
                     ],
                   );
                   // what to do if expanded
@@ -162,8 +166,16 @@ class _OrderListState extends State<OrderList> {
                   return Column(
                     children: <Widget>[
                       Divider(),
-                      buildHeightBox(),
-                      _buildUser(order),
+                      Flex(
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 4,
+                            child: _buildUser(order),
+                          ),
+                          Expanded(flex: 2, child: _buildChatButton(order)),
+                        ],
+                      ),
                     ],
                   );
                   // what to do if not expanded
@@ -195,7 +207,7 @@ class _OrderListState extends State<OrderList> {
                     snap.hasData
                         ? StringHelper.upperCaseWords(snap.data)
                         : "Error",
-                    style: FontHelper.semiBold16(ColorHelper.dabaoOffBlack4A),
+                    style: FontHelper.semiBold16Black,
                   ),
                 );
               },
@@ -211,7 +223,7 @@ class _OrderListState extends State<OrderList> {
                   snap.hasData
                       ? StringHelper.doubleToPriceString(snap.data)
                       : "Error",
-                  style: FontHelper.semiBold14Black2,
+                  style: FontHelper.bold16Black,
                   textAlign: TextAlign.right,
                 );
               },
@@ -314,9 +326,12 @@ class _OrderListState extends State<OrderList> {
         child: Flex(
           direction: Axis.horizontal,
           children: <Widget>[
-            Expanded(
-                flex: 1,
-                child: Image.asset('assets/icons/icon_menu_orange.png')),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(3, 0, 8, 0),
+              child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Image.asset('assets/icons/icon_menu_orange.png')),
+            ),
             Expanded(
                 flex: 6,
                 child: Column(
@@ -339,7 +354,7 @@ class _OrderListState extends State<OrderList> {
                         if (!item.hasData) return Offstage();
                         return Text(
                           '${item.data}',
-                          style: FontHelper.medium10TextStyle,
+                          style: FontHelper.medium10greyTextStyle,
                         );
                       },
                     ),
@@ -384,7 +399,6 @@ class _OrderListState extends State<OrderList> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        Icon(Icons.location_on, color: Colors.red[800]),
         SizedBox(
           width: 10,
         ),
@@ -525,9 +539,33 @@ class _OrderListState extends State<OrderList> {
   }
 
   Widget _buildPickUpButton(Order order) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: FlatButton(
+    return RaisedButton(
+      elevation: 6,
+      color: ColorHelper.dabaoOffPaleBlue,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Align(
+              child: Text(
+                "Pick Up",
+                style: FontHelper.semiBold14White,
+              ),
+            ),
+          ),
+        ],
+      ),
+      onPressed: () {
+        showOverlay(order);
+      },
+    );
+  }
+
+  Widget _buildChatButton(Order order) {
+    return Container(
+      height: 30,
+      child: RaisedButton(
+        elevation: 6,
         color: ColorHelper.dabaoOrange,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
@@ -536,16 +574,14 @@ class _OrderListState extends State<OrderList> {
             Expanded(
               child: Align(
                 child: Text(
-                  "Pick Up",
-                  style: FontHelper.semiBold14Black2,
+                  "Chat",
+                  style: FontHelper.semiBold14White,
                 ),
               ),
             ),
           ],
         ),
-        onPressed: () {
-          showOverlay(order);
-        },
+        onPressed: () {},
       ),
     );
   }
@@ -562,7 +598,7 @@ class _OrderListState extends State<OrderList> {
 
   Widget buildHeightBox() {
     return SizedBox(
-      height: 8,
+      height: 18,
     );
   }
 
@@ -572,4 +608,3 @@ class _OrderListState extends State<OrderList> {
     );
   }
 }
-
