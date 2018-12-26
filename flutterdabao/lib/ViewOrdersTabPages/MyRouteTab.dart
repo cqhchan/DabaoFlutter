@@ -14,7 +14,12 @@ class MyRouteTabView extends StatefulWidget {
   _MyRouteTabViewState createState() => _MyRouteTabViewState();
 }
 
-class _MyRouteTabViewState extends State<MyRouteTabView> {
+class _MyRouteTabViewState extends State<MyRouteTabView>
+    with AutomaticKeepAliveClientMixin<MyRouteTabView> {
+      
+  @override
+  bool get wantKeepAlive => true;
+
   final MutableProperty<List<DabaoRoute.Route>> userOpenRoutes =
       ConfigHelper.instance.currentUserOpenRoutesProperty;
 
@@ -25,9 +30,9 @@ class _MyRouteTabViewState extends State<MyRouteTabView> {
   Widget build(BuildContext context) {
     return StreamBuilder<List<Object>>(
       stream: Observable.combineLatest2<List<DabaoRoute.Route>, List<Order>,
-              List<Object>>(userOpenRoutes.producer, userDeliveryingOrders.producer,
+              List<Object>>(
+          userOpenRoutes.producer, userDeliveryingOrders.producer,
           (routes, orders) {
-
         List<Object> temp = List();
         temp.addAll(routes);
 
@@ -351,7 +356,7 @@ class _OrderCellState extends State<_OrdersCell> {
         ));
   }
 
-    Row buildHeaderRow() {
+  Row buildHeaderRow() {
     return Row(
       children: <Widget>[
         Align(
@@ -362,11 +367,9 @@ class _OrderCellState extends State<_OrdersCell> {
           ),
         ),
         Container(
-              padding: EdgeInsets.only(left: 15.0, top: 1.0),
-              child: Text("${widget.orders.length} Locations(s)",
-                  style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0)),
-          
-          
+          padding: EdgeInsets.only(left: 15.0, top: 1.0),
+          child: Text("${widget.orders.length} Locations(s)",
+              style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0)),
         ),
         Expanded(
             child: Align(
