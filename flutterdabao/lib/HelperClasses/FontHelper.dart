@@ -3,7 +3,7 @@ import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class FontHelper {
   static const TextStyle semiBoldgrey14TextStyle = TextStyle(
-      color: Colors.grey,
+      color: Color(0xFF9B9B9B),
       fontSize: 14.0,
       fontStyle: FontStyle.normal,
       fontFamily: "SF_UI_Display");
@@ -67,8 +67,14 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w500,
       fontFamily: "SF_UI_Display");
+  static const TextStyle medium10greyTextStyle = TextStyle(
+      color: Color(0xFF4A4A4A),
+      fontSize: 10.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w500,
+      fontFamily: "SF_UI_Display");
   static const TextStyle medium12TextStyle = TextStyle(
-      color: Colors.grey,
+      color: Color(0xFF9B9B9B),
       fontSize: 12.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
