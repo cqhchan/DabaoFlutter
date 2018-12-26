@@ -48,7 +48,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> with HavingSubs
 
   ListView _buildList(BuildContext context, List<Order> snapshot) {
     return ListView(
-      padding: const EdgeInsets.only(top: 20.0),
+      padding: const EdgeInsets.only(top: 20.0,bottom: 30.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
   }

@@ -25,12 +25,10 @@ class _MyRouteTabViewState extends State<MyRouteTabView> {
   Widget build(BuildContext context) {
     return StreamBuilder<List<Object>>(
       stream: Observable.combineLatest2<List<DabaoRoute.Route>, List<Order>,
-              List<Object>>(
-          userOpenRoutes.producer, userDeliveryingOrders.producer,
+              List<Object>>(userOpenRoutes.producer, userDeliveryingOrders.producer,
           (routes, orders) {
 
         List<Object> temp = List();
-
         temp.addAll(routes);
 
         if (orders != null && orders.length != 0) temp.add(orders);
@@ -47,7 +45,7 @@ class _MyRouteTabViewState extends State<MyRouteTabView> {
 
   Widget _buildList(BuildContext context, List<Object> snapshot) {
     return ListView(
-      padding: const EdgeInsets.only(top: 20.0),
+      padding: const EdgeInsets.only(top: 20.0,bottom: 30.0),
       children: snapshot.map((data) {
         if (data is DabaoRoute.Route) return _RouteCell(route: data);
         if (data is List<Order>) return _OrdersCell(orders: data);
@@ -148,13 +146,13 @@ class _RouteCellState extends State<_RouteCell> {
                 Container(
                     margin: EdgeInsets.only(left: 17.0),
                     child: snap.data == null || snap.data.length <= 1
-                        ? Image.asset("assets/icons/filler_image_girl.png")
+                        ? Image.asset("assets/icons/filler_image_food.png")
                         : StreamBuilder<String>(
                             stream: snap.data.elementAt(1).thumbnailImage,
                             builder: (context, snap) {
                               if (!snap.hasData)
                                 return Image.asset(
-                                    "assets/icons/filler_image_girl.png");
+                                    "assets/icons/filler_image_food.png");
 
                               return Container(
                                   height: 30.0,
