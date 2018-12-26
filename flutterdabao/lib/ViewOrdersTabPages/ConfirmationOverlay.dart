@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
@@ -402,7 +405,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   style: FontHelper.semiBold14White,
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
                 DateTime asapTime = DateTime(
                   selectedDate.year,
                   selectedDate.month,
@@ -410,9 +413,29 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   _asapInitialHour,
                   _asapInitialMinute * 10,
                 );
-                print(asapTime.toString());
-                Navigator.pop(context);
-              },
+                showLoadingOverlay(context: context);
+                var isSuccessful = await FirebaseCloudFunctions.acceptRoute(
+                  orderID: widget.order.uid,
+                  acceptorID:
+                      ConfigHelper.instance.currentUserProperty.value.uid,
+                  deliveryTime:
+                      DateTimeHelper.convertDateTimeToString(asapTime),
+                );
+
+                if (isSuccessful) {
+                  // Pop t
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+
+                } else {
+                  Navigator.of(context).pop();
+                  // TODO bug it doessnt show
+
+                  final snackBar = SnackBar(
+                      content: Text(
+                          'An Error has occured. Please check your network connectivity'));
+                  Scaffold.of(context).showSnackBar(snackBar);
+                }              },
             );
           case OrderMode.scheduled:
             return RaisedButton(
@@ -427,7 +450,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   style: FontHelper.semiBold14White,
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
                 DateTime scheduledTime = DateTime(
                   selectedDate.year,
                   selectedDate.month,
@@ -435,8 +458,29 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   _scheduledInitialHour,
                   _scheduledInitialMinute * 10,
                 );
-                print(scheduledTime.toString());
-                Navigator.pop(context);
+                showLoadingOverlay(context: context);
+                var isSuccessful = await FirebaseCloudFunctions.acceptRoute(
+                  orderID: widget.order.uid,
+                  acceptorID:
+                      ConfigHelper.instance.currentUserProperty.value.uid,
+                  deliveryTime:
+                      DateTimeHelper.convertDateTimeToString(scheduledTime),
+                );
+
+                if (isSuccessful) {
+                  // Pop t
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+
+                } else {
+                  Navigator.of(context).pop();
+                  // TODO bug it doessnt show
+
+                  final snackBar = SnackBar(
+                      content: Text(
+                          'An Error has occured. Please check your network connectivity'));
+                  Scaffold.of(context).showSnackBar(snackBar);
+                }
               },
             );
             break;
