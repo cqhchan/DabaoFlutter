@@ -59,12 +59,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
 
   ListView _buildList(BuildContext context, List<Order> snapshot) {
     return ListView(
-<<<<<<< HEAD
       padding: const EdgeInsets.only(bottom: 30.0),
-=======
-      shrinkWrap: true,
-      padding: const EdgeInsets.only(top: 20.0),
->>>>>>> V2.0_confirmed
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
   }
