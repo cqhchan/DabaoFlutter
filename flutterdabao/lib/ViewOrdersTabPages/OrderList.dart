@@ -99,28 +99,38 @@ class _OrderListState extends State<OrderList> {
                           ],
                         ),
                       ),
-                      buildHeightBox(),
-                      Container(
-                        constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width - 50),
-                        child: Flex(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          direction: Axis.horizontal,
-                          children: <Widget>[
-                            Container(
-                              height: 30,
-                              child: Image.asset(
-                                  "assets/icons/red_marker_icon.png"),
-                            ),
-                            Expanded(
-                              flex: 4,
-                              child: _buildLocationDescription(order),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: _buildTapToLocation(order),
-                            ),
-                          ],
+                      SizedBox(
+                        height: 8.0,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width - 60),
+                          child: Flex(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 5,
+                                ),
+                                child: Container(
+                                  height: 30,
+                                  child: Image.asset(
+                                      "assets/icons/red_marker_icon.png"),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 4,
+                                child: _buildLocationDescription(order),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: _buildTapToLocation(order),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -157,7 +167,6 @@ class _OrderListState extends State<OrderList> {
                       SizedBox(
                         height: 8,
                       ),
-
                       _buildPickUpButton(order)
                     ],
                   );

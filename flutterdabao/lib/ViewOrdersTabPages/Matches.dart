@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/OrderList.dart';
@@ -24,7 +25,10 @@ class MatchesState extends State<Matches> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            appBar: AppBar(automaticallyImplyLeading: true,),
+            appBar: AppBar(automaticallyImplyLeading: true, title: Text(
+          'MATCHES',
+          style: FontHelper.header3TextStyle,
+        ),),
         body: OrderList(
           context: context,
           input: widget.route.listOfPotentialOrders,
