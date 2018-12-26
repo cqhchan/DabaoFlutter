@@ -251,6 +251,57 @@ class FirebaseCloudFunctions {
     return false;
   }
 
+
+  ///[data] acceptRoute
+  /// orderID
+  /// acceptorID
+  /// deliveryTime
+  /// routeID Optional
+  static Future<bool> acceptRoute({
+    @required String orderID,
+    @required String acceptorID,
+    @required String deliveryTime,
+    String routeID,
+
+  }) async {
+    try {
+
+      Map<String, dynamic> attributeMap = new Map<String, dynamic>();
+      attributeMap["mode"] = 2;
+      attributeMap["orderID"] = orderID;
+      attributeMap["acceptorID"] = acceptorID;
+      attributeMap["deliveryTime"] = deliveryTime;
+
+      if (routeID != null)
+      attributeMap["routeID"] = routeID;
+
+      Map<dynamic, dynamic> results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: attributeMap);
+      print(results);
+
+      if (results.containsKey("status") && results["status"] == 200)
+      return true;
+
+      if (results.containsKey("status") && results["status"] == 400)
+      return false;
+
+    } on CloudFunctionsException catch (e) {
+      
+      print(e.message);
+      print(e);
+    return false;
+
+    } catch (e) {
+ 
+      print('Error: $e');
+          return false;
+
+    }
+
+    return false;
+  }
+
+
 }
 
 
