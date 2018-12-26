@@ -29,19 +29,20 @@ class LocationHelper {
 
   String addressFromPlacemarker(Placemark place) {
     if (place.name.isNotEmpty) {
-      var name = place.name == null ? '' : place.name;
+      var name = place.name == null || place.name.isEmpty ? '' : place.name + " ";
       var thoroughfare = place.thoroughfare == null ? '' : place.thoroughfare;
       var subThoroughfare =
-          place.subThoroughfare == null ? '' : place.subThoroughfare;
+          place.subThoroughfare == null || place.subThoroughfare.isEmpty ? '' : place.subThoroughfare + " ";
 
       if (Platform.isAndroid) {
         if (StringHelper.isNumeric(name)) {
-          return name + " " + thoroughfare;
+          return name + "" + thoroughfare;
         } else {
+
           return name + ", " + subThoroughfare + " " + thoroughfare;
         }
       } else {
-        return subThoroughfare + " " + thoroughfare + ", " + name;
+        return subThoroughfare + thoroughfare + ", " + name;
       }
     } else if (place.postalCode.isNotEmpty) {
       return place.postalCode;
