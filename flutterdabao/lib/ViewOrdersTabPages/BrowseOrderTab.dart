@@ -3,7 +3,7 @@ import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Model/Order.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ReusableCards.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/OrderList.dart';
 
 class BrowseOrderTabView extends StatefulWidget {
   _BrowseOrderTabViewState createState() => _BrowseOrderTabViewState();
@@ -23,7 +23,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ReusableCards(
+      body: OrderList(
         context: context,
         input: userRequestedOrders.producer,
         location: ConfigHelper.instance.currentLocationProperty.value,
