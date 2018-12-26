@@ -15,6 +15,7 @@ import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -81,14 +82,33 @@ class _Home extends State<Home> {
                       );
                     }),
                     //ChatBox
-                        squardCard(
-                            'assets/icons/chat.png', 'Chat', 'I want to Chat',
-                            () {
-                          Navigator.push(
-                            context,
-                            FadeRoute(widget: TabBarPage()),
-                          );
-                        }),
+                    squardCard(
+                        'assets/icons/chat.png', 'Chat', 'I want to Chat',
+                        () async {
+                      final DynamicLinkParameters parameters =
+                          DynamicLinkParameters(
+                        dynamicLinkParametersOptions:
+                            DynamicLinkParametersOptions(
+                                shortDynamicLinkPathLength:
+                                    ShortDynamicLinkPathLength.short),
+                        domain: 'dabaotest.page.link',
+                        link: Uri.parse('https://www.dabaoapp.sg/?invitedby=${ConfigHelper.instance.currentUserProperty.value.uid}'),
+                        androidParameters: AndroidParameters(
+                          packageName: 'com.example.android',
+                          minimumVersion: 125,
+                        ),
+                        iosParameters: IosParameters(
+                          bundleId: 'com.example.ios',
+                          minimumVersion: '1.0.1',
+                          appStoreId: '123456789',
+                        ),
+                      );
+                      final ShortDynamicLink shortDynamicLink =
+                          await parameters.buildShortLink();
+                      final Uri shortUrl = shortDynamicLink.shortUrl;
+
+                      print(shortUrl.toString());
+                    }),
                   ],
                 ),
               ),
