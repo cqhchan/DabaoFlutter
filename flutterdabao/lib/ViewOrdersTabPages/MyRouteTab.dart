@@ -8,6 +8,7 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart'
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/Matches.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyRouteTabView extends StatefulWidget {
@@ -25,6 +26,7 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
 
   final MutableProperty<List<Order>> userDeliveryingOrders =
       ConfigHelper.instance.currentUserDeliveringOrdersProperty;
+
 // userOpenRoutes.producer.mergeWith([userDeliveryingOrders.producer])
   @override
   Widget build(BuildContext context) {
@@ -205,14 +207,27 @@ class _RouteCellState extends State<_RouteCell> {
                     "${snap.data.length} matches for Your Route!",
                     style: FontHelper.semiBold14Black,
                   )
-                : Text("No Matches Found for this Route",
-                    style: FontHelper.semiBold14Black),
+                : Text(
+                    "No Matches Found for this Route",
+                    style: FontHelper.semiBold14Black,
+                  ),
           ),
         ),
         Flexible(
           child: Align(
               alignment: Alignment.centerRight,
-              child: Image.asset("assets/icons/arrow_right_black_outline.png")),
+              child: GestureDetector(
+                  onTap: () {
+                    print('Tapped');
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Matches(
+                                  route: widget.route,
+                                )));
+                  },
+                  child: Image.asset(
+                      "assets/icons/arrow_right_black_outline.png"))),
         )
       ],
     );
