@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterdabao/CreateOrder/CustomizedMap.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -18,6 +17,7 @@ import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ViewMap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class BrowseOrderTabView extends StatefulWidget {
   _BrowseOrderTabViewState createState() => _BrowseOrderTabViewState();
@@ -25,10 +25,10 @@ class BrowseOrderTabView extends StatefulWidget {
 
 class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
     with HavingSubscriptionMixin {
-  GoogleMapController mapController;
-
   final MutableProperty<List<Order>> userRequestedOrders =
       ConfigHelper.instance.currentUserRequestedOrdersProperty;
+
+  bool expandedFlag = false;
 
   // Current User Location
   MutableProperty<LatLng> currentLocation =
@@ -83,6 +83,9 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                 return ConfigurableExpansionTile(
                   initiallyExpanded: false,
                   onExpansionChanged: (expanded) {
+                    setState(() {
+                      expandedFlag = expanded;
+                    });
                     order.toggle();
                   },
                   header: Column(
@@ -145,8 +148,6 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                   return Column(
                     children: <Widget>[
                       buildHeightBox(),
-                      Divider(),
-                      buildHeightBox(),
                       _buildUser(order),
                       _buildPickUpButton(order),
                     ],
@@ -155,7 +156,6 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                 } else {
                   return Column(
                     children: <Widget>[
-                      buildHeightBox(),
                       Divider(),
                       buildHeightBox(),
                       _buildUser(order),
@@ -228,7 +228,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                 snap.data.month == DateTime.now().month &&
                 snap.data.year == DateTime.now().year) {
               return Text(
-                'Today' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
+                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data) + ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data.add(Duration(hours: 2))) ,
                 style: FontHelper.semiBoldgrey14TextStyle,
                 overflow: TextOverflow.ellipsis,
               );
@@ -382,47 +382,77 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            StreamBuilder<String>(
-              stream: order.deliveryLocationDescription,
-              builder: (context, snap) {
-                if (!snap.hasData) return Offstage();
-                return Container(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width - 180,
-                  ),
-                  child: Text(
-                    snap.hasData ? '''${snap.data}''' : "Error",
-                    style: FontHelper.regular14Black,
-                  ),
-                );
-              },
-            ),
+            _buildCollapsableLocationDescription(order),
             StreamBuilder<GeoPoint>(
               stream: order.deliveryLocation,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
-                return Container(
-                  constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width - 180),
-                  child: Text(
-                    snap.hasData
-                        ? LocationHelper.calculateDistancFromSelf(
-                                    currentLocation.value.latitude,
-                                    currentLocation.value.longitude,
-                                    snap.data.latitude,
-                                    snap.data.longitude)
-                                .toStringAsFixed(1) +
-                            'km away'
-                        : "?.??km",
-                    style: FontHelper.medium12TextStyle,
-                  ),
-                );
+                if (currentLocation.value.latitude != null &&
+                    currentLocation.value.longitude != null &&
+                    snap.data.latitude != null &&
+                    snap.data.longitude != null) {
+                  return Container(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width - 180),
+                    child: Text(
+                      snap.hasData
+                          ? LocationHelper.calculateDistancFromSelf(
+                                      currentLocation.value.latitude,
+                                      currentLocation.value.longitude,
+                                      snap.data.latitude,
+                                      snap.data.longitude)
+                                  .toStringAsFixed(1) +
+                              'km away'
+                          : "?.??km",
+                      style: FontHelper.medium12TextStyle,
+                    ),
+                  );
+                } else {
+                  return Offstage();
+                }
               },
             ),
           ],
         ),
       ],
     );
+  }
+
+  Widget _buildCollapsableLocationDescription(Order order) {
+    if (!expandedFlag) {
+      return StreamBuilder<String>(
+        stream: order.deliveryLocationDescription,
+        builder: (context, snap) {
+          if (!snap.hasData) return Offstage();
+          return Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width - 180,
+            ),
+            child: Text(
+              snap.hasData ? '''${snap.data}''' : "Error",
+              style: FontHelper.regular14Black,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+        },
+      );
+    } else {
+      return StreamBuilder<String>(
+        stream: order.deliveryLocationDescription,
+        builder: (context, snap) {
+          if (!snap.hasData) return Offstage();
+          return Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width - 180,
+            ),
+            child: Text(
+              snap.hasData ? '''${snap.data}''' : "Error",
+              style: FontHelper.regular14Black,
+            ),
+          );
+        },
+      );
+    }
   }
 
   Widget _buildTapToLocation(Order order) {
@@ -438,9 +468,9 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                     context,
                     MaterialPageRoute(
                         builder: (BuildContext context) => ViewMap(
-                          latitude: order.deliveryLocation.value.latitude,
-                          longitude: order.deliveryLocation.value.longitude,
-                        )));
+                              latitude: order.deliveryLocation.value.latitude,
+                              longitude: order.deliveryLocation.value.longitude,
+                            )));
               });
         },
       ),

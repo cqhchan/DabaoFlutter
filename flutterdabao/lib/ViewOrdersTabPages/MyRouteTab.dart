@@ -28,7 +28,6 @@ class _MyRouteTabViewState extends State<MyRouteTabView> {
               List<Object>>(
           userOpenRoutes.producer, userDeliveryingOrders.producer,
           (routes, orders) {
-
         List<Object> temp = List();
 
         temp.addAll(routes);
@@ -202,8 +201,11 @@ class _RouteCellState extends State<_RouteCell> {
                     "${snap.data.length} matches for Your Route!",
                     style: FontHelper.semiBold14Black,
                   )
-                : Text("No Matches Found for this Route",
-                    style: FontHelper.semiBold14Black),
+                : Text(
+                    "No Matches Found for this Route",
+                    style: FontHelper.semiBold14Black,
+
+                  ),
           ),
         ),
         Flexible(
@@ -353,7 +355,7 @@ class _OrderCellState extends State<_OrdersCell> {
         ));
   }
 
-    Row buildHeaderRow() {
+  Row buildHeaderRow() {
     return Row(
       children: <Widget>[
         Align(
@@ -364,11 +366,9 @@ class _OrderCellState extends State<_OrdersCell> {
           ),
         ),
         Container(
-              padding: EdgeInsets.only(left: 15.0, top: 1.0),
-              child: Text("${widget.orders.length} Locations(s)",
-                  style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0)),
-          
-          
+          padding: EdgeInsets.only(left: 15.0, top: 1.0),
+          child: Text("${widget.orders.length} Locations(s)",
+              style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0)),
         ),
         Expanded(
             child: Align(
