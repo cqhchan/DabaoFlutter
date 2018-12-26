@@ -59,6 +59,7 @@ class _Home extends State<Home> {
               Container(
                 padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
                 child: Wrap(
+                  runSpacing: 25,
                   spacing: 25.0,
                   children: <Widget>[
                     //Dabaoee
@@ -79,6 +80,15 @@ class _Home extends State<Home> {
                         FadeRoute(widget: RouteOverview()),
                       );
                     }),
+                    //ChatBox
+                        squardCard(
+                            'assets/icons/chat.png', 'Chat', 'I want to Chat',
+                            () {
+                          Navigator.push(
+                            context,
+                            FadeRoute(widget: TabBarPage()),
+                          );
+                        }),
                   ],
                 ),
               ),

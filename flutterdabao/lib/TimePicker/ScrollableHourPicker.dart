@@ -28,7 +28,7 @@ class HourPicker extends StatelessWidget {
   })  : assert(initialValue != null),
         assert(minValue != null),
         assert(maxValue != null),
-        assert(maxValue > minValue),
+        assert(maxValue >= minValue),
         assert(initialValue >= minValue && initialValue <= maxValue),
         assert(step > 0),
         selectedIntValue = initialValue,
@@ -41,7 +41,6 @@ class HourPicker extends StatelessWidget {
         decimalScrollController = null,
         _listViewHeight = 3 * itemExtent,
         super(key: key);
-
 
   ///called when selected value changes
   final ValueChanged<num> onChanged;
@@ -131,8 +130,8 @@ class HourPicker extends StatelessWidget {
             return isExtra
                 ? new Container() //empty first and last element
                 : new Center(
-                    child: new Text(_handleZeroPadding(value),
-                        style: itemStyle),
+                    child:
+                        new Text(_handleZeroPadding(value), style: itemStyle),
                   );
           },
         ),

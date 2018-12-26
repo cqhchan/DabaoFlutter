@@ -44,13 +44,25 @@ class TabBarPage extends StatelessWidget {
                   unselectedLabelColor: ColorHelper.dabaoOffGrey70,
                   tabs: [
                     Tab(
-                      child:Text("Browse Orders", style: FontHelper.semiBold(null, 12.0),),
+                      child: Text(
+                        "Browse Orders",
+                        style: FontHelper.semiBold(null, 12.0),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     Tab(
-                      child:Text("Confirmed", style: FontHelper.semiBold(null, 12.0),),
+                      child: Text(
+                        "Confirmed",
+                        style: FontHelper.semiBold(null, 12.0),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     Tab(
-                      child:Text("My Routes", style: FontHelper.semiBold(null, 12.0),),
+                      child: Text(
+                        "My Routes",
+                        style: FontHelper.semiBold(null, 12.0),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ],
                 ),
