@@ -45,7 +45,7 @@ class _MyRouteTabViewState extends State<MyRouteTabView> {
 
   Widget _buildList(BuildContext context, List<Object> snapshot) {
     return ListView(
-      padding: const EdgeInsets.only(top: 20.0,bottom: 30.0),
+      padding: const EdgeInsets.only(bottom: 30.0),
       children: snapshot.map((data) {
         if (data is DabaoRoute.Route) return _RouteCell(route: data);
         if (data is List<Order>) return _OrdersCell(orders: data);
