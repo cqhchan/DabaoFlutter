@@ -6,6 +6,7 @@ class FontHelper {
       color: Color(0xFF9B9B9B),
       fontSize: 14.0,
       fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
   static const TextStyle fadeTextStyle = TextStyle(
       color: Colors.grey,
@@ -77,7 +78,7 @@ class FontHelper {
       color: Color(0xFF9B9B9B),
       fontSize: 12.0,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.normal,
       fontFamily: "SF_UI_Display");
   static const TextStyle overlaySubtitleHeader = TextStyle(
       color: ColorHelper.dabaoOffBlack9B,
@@ -113,13 +114,13 @@ class FontHelper {
       color: Colors.white,
       fontSize: 14.0,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.bold,
       fontFamily: "SF_UI_Display");
   static const TextStyle semiBold16Black = TextStyle(
       color: Colors.black,
       fontSize: 16.0,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
   static const TextStyle semiBold18Black = TextStyle(
       color: Colors.black,
@@ -149,7 +150,7 @@ class FontHelper {
       color: Colors.black,
       fontSize: 12.0,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.bold,
       fontFamily: "SF_UI_Display");
   static const TextStyle bold14Black = TextStyle(
       color: Colors.black,
@@ -161,7 +162,7 @@ class FontHelper {
       color: Colors.black,
       fontSize: 16.0,
       fontStyle: FontStyle.normal,
-      // fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.bold,
       fontFamily: "SF_UI_Display");
 
   static TextStyle semiBold(Color color, double fontSize) {

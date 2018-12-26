@@ -60,11 +60,11 @@ class _OrderListState extends State<OrderList> {
   Card _buildListItem(BuildContext context, Order order) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      margin: EdgeInsets.all(10.0),
+      margin: EdgeInsets.all(11.0),
       color: Colors.white,
       elevation: 6.0,
       child: Container(
-        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
         child: Wrap(
           children: <Widget>[
             StreamBuilder(
@@ -90,57 +90,64 @@ class _OrderListState extends State<OrderList> {
                           direction: Axis.horizontal,
                           children: <Widget>[
                             Expanded(
-                              flex: 4,
+                              flex: 5,
                               child: _buildDeliveryPeriod(order),
                             ),
                             Expanded(
-                              flex: 1,
-                              child: _buildQuantity(order),
+                              flex: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 6.0),
+                                child: _buildQuantity(order),
+                              ),
                             ),
                           ],
                         ),
                       ),
                       SizedBox(
-                        height: 8.0,
+                        height: 17.0,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width - 60),
-                          child: Flex(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            direction: Axis.horizontal,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  right: 5,
-                                ),
-                                child: Container(
-                                  height: 30,
-                                  child: Image.asset(
-                                      "assets/icons/red_marker_icon.png"),
-                                ),
+                      Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width - 50),
+                        child: Flex(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          direction: Axis.horizontal,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: 2,
                               ),
-                              Expanded(
-                                flex: 4,
-                                child: _buildLocationDescription(order),
+                              child: Container(
+                                height: 30,
+                                child: Image.asset(
+                                    "assets/icons/red_marker_icon.png"),
                               ),
-                              Expanded(
-                                flex: 1,
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: _buildLocationDescription(order),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
                                 child: _buildTapToLocation(order),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
+                      SizedBox(
+                        height: 10,
+                      )
                     ],
                   ),
                   children: <Widget>[
                     Column(
                       children: <Widget>[
-                        buildHeightBox(),
                         _buildOrderItems(order),
+                                    SizedBox(height: 8,),
+
                       ],
                     )
                   ],
@@ -154,7 +161,6 @@ class _OrderListState extends State<OrderList> {
                 if (snapshot.data) {
                   return Column(
                     children: <Widget>[
-                      buildHeightBox(),
                       Flex(
                         direction: Axis.horizontal,
                         children: <Widget>[
@@ -171,24 +177,27 @@ class _OrderListState extends State<OrderList> {
                       _buildPickUpButton(order)
                     ],
                   );
-                  // what to do if expanded
                 } else {
                   return Column(
                     children: <Widget>[
-                      Divider(),
-                      Flex(
-                        direction: Axis.horizontal,
-                        children: <Widget>[
-                          Expanded(
-                            flex: 4,
-                            child: _buildUser(order),
-                          ),
-                          Expanded(flex: 2, child: _buildChatButton(order)),
-                        ],
+                      Divider(
+                        height: 13,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 5),
+                        child: Flex(
+                          direction: Axis.horizontal,
+                          children: <Widget>[
+                            Expanded(
+                              flex: 4,
+                              child: _buildUser(order),
+                            ),
+                            Expanded(flex: 2, child: _buildChatButton(order)),
+                          ],
+                        ),
                       ),
                     ],
                   );
-                  // what to do if not expanded
                 }
               },
             ),
@@ -206,7 +215,7 @@ class _OrderListState extends State<OrderList> {
         direction: Axis.horizontal,
         children: <Widget>[
           Expanded(
-            flex: 4,
+            flex: 5,
             child: StreamBuilder<String>(
               stream: order.foodTag,
               builder: (context, snap) {
@@ -218,13 +227,15 @@ class _OrderListState extends State<OrderList> {
                         ? StringHelper.upperCaseWords(snap.data)
                         : "Error",
                     style: FontHelper.semiBold16Black,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 );
               },
             ),
           ),
           Expanded(
-            flex: 1,
+            flex: 2,
             child: StreamBuilder<double>(
               stream: order.deliveryFee,
               builder: (context, snap) {
@@ -330,9 +341,9 @@ class _OrderListState extends State<OrderList> {
   Widget _buildOrderItem(BuildContext context, OrderItem orderItem) {
     return Center(
       child: Container(
-        constraints: BoxConstraints(maxHeight: 40),
+        constraints: BoxConstraints(maxHeight: 50),
         padding: EdgeInsets.all(6),
-        color: Colors.grey[200],
+        color: Color(0xFFF5F5F5),
         child: Flex(
           direction: Axis.horizontal,
           children: <Widget>[
@@ -345,7 +356,6 @@ class _OrderListState extends State<OrderList> {
             Expanded(
                 flex: 6,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     StreamBuilder(
@@ -364,7 +374,9 @@ class _OrderListState extends State<OrderList> {
                         if (!item.hasData) return Offstage();
                         return Text(
                           '${item.data}',
+                          maxLines: 2,
                           style: FontHelper.medium10greyTextStyle,
+                          overflow: TextOverflow.ellipsis,
                         );
                       },
                     ),
@@ -381,7 +393,7 @@ class _OrderListState extends State<OrderList> {
                     builder: (context, item) {
                       if (!item.hasData) return Offstage();
                       return Text(
-                        StringHelper.doubleToPriceString(item.data),
+                        'Max: ' + StringHelper.doubleToPriceString(item.data),
                         style: FontHelper.regular10Black,
                       );
                     },
@@ -524,14 +536,14 @@ class _OrderListState extends State<OrderList> {
               builder: (context, user) {
                 if (!user.hasData) return Offstage();
                 return CircleAvatar(
-                  child: user.hasData
-                      ? Image.network(user.data)
-                      : Icon(Icons.person),
-                  radius: 11.5,
+                  backgroundImage: NetworkImage(user.data),
+                  radius: 14.5,
                 );
               },
             ),
-            buildWidthBox(),
+            SizedBox(
+              width: 10,
+            ),
             StreamBuilder<String>(
               stream: user.data.name,
               builder: (context, user) {
@@ -602,19 +614,8 @@ class _OrderListState extends State<OrderList> {
         builder: (builder) {
           return ConfirmationOverlay(
             order: order,
+            route: widget.route,
           );
         });
-  }
-
-  Widget buildHeightBox() {
-    return SizedBox(
-      height: 18,
-    );
-  }
-
-  Widget buildWidthBox() {
-    return SizedBox(
-      width: 10,
-    );
   }
 }

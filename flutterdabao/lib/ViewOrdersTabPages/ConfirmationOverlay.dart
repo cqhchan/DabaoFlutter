@@ -24,7 +24,6 @@ class ConfirmationOverlay extends StatefulWidget {
 }
 
 class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
-
   static const _dayMenu = <String>[
     'Today',
     'Tomorrow',
@@ -368,15 +367,14 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Padding(
-                                padding: const EdgeInsets.only(
-                                  right: 5,
-                                ),
-                                child: Container(
-                                  height: 30,
-                                  child: Image.asset(
-                                      "assets/icons/red_marker_icon.png"),
-                                ),
-                              ),
+          padding: const EdgeInsets.only(
+            right: 5,
+          ),
+          child: Container(
+            height: 30,
+            child: Image.asset("assets/icons/red_marker_icon.png"),
+          ),
+        ),
         SizedBox(
           width: 10,
         ),
@@ -478,6 +476,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 );
                 showLoadingOverlay(context: context);
                 var isSuccessful = await FirebaseCloudFunctions.acceptRoute(
+                  routeID: widget.route.uid,
                   orderID: widget.order.uid,
                   acceptorID:
                       ConfigHelper.instance.currentUserProperty.value.uid,
