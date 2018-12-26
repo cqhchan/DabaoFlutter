@@ -35,7 +35,7 @@ class FirebaseCollectionReactive<T extends FirebaseType> {
       });
 
       return list;
-    }, List<T>());
+    }, List<T>()).shareReplay();
   }
 }
 
