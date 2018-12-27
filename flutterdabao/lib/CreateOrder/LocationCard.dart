@@ -5,7 +5,6 @@ import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
@@ -220,7 +219,12 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
             }
           },
         ),
-        onTap: _handlePressButton,
+        onTap: () {
+          handlePressButton(context, (location, description) {
+            widget.holder.deliveryLocation.producer.add(location);
+            widget.holder.deliveryLocationDescription.producer.add(description);
+          });
+        },
       ),
     );
   }
@@ -230,28 +234,5 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
       'Deliver to...',
       style: FontHelper.semiBold16(ColorHelper.dabaoOffBlack4A),
     );
-  }
-
-  Future<void> _handlePressButton() async {
-    // show input autocomplete with selected mode
-    // then get the Prediction selected
-    Prediction p = await PlacesAutocomplete.show(
-      context: context,
-      apiKey: kGoogleApiKey,
-      onError: onError,
-      mode: Mode.overlay,
-      language: "en",
-      components: [Component(Component.country, "sg")],
-    );
-
-    if (p != null) {
-      LatLng newLocation = await getLatLng(p);
-      widget.holder.deliveryLocation.producer.add(newLocation);
-      widget.holder.deliveryLocationDescription.producer.add(p.description);
-    }
-  }
-
-  void onError(PlacesAutocompleteResponse response) {
-    SnackBar(content: Text(response.errorMessage));
   }
 }

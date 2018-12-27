@@ -47,7 +47,7 @@ class TabBarPage extends StatelessWidget {
                   tabs: [
                     Tab(
                       child: Text(
-                        "Browse Orders",
+                        "Browse",
                         style: FontHelper.semiBold(null, 12.0),
                         textAlign: TextAlign.center,
                       ),

@@ -5,7 +5,7 @@ import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
@@ -78,7 +78,9 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
                       margin: EdgeInsets.only(left: 8.0),
                       height: 20,
                       width: 1,
-                      child: Image.asset("assets/icons/dotted_line_straight.png"),                    ),
+                      child:
+                          Image.asset("assets/icons/dotted_line_straight.png"),
+                    ),
                     Expanded(
                       child: Line(
                         margin: EdgeInsets.fromLTRB(20.0, 15.0, 0.0, 15.0),
@@ -104,8 +106,8 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
                         margin: EdgeInsets.only(top: 30.0),
                         child: _createRoute(),
                       );
-                    else 
-                    return Container();
+                    else
+                      return Container();
                   },
                 )
               ],
@@ -241,24 +243,10 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
       bool focusOnStart,
       MutableProperty<LatLng> locationProperty,
       MutableProperty<String> locationDescriptionProperty) async {
-    // show input autocomplete with selected mode
-    // then get the Prediction selected
-          widget.focusOnStart.value = focusOnStart;
-
-    Prediction p = await PlacesAutocomplete.show(
-      context: context,
-      apiKey: kGoogleApiKey,
-      onError: onError,
-      mode: Mode.overlay,
-      language: "en",
-      components: [Component(Component.country, "sg")],
-    );
-
-    if (p != null) {
-      LatLng newLocation = await getLatLng(p);
-      locationProperty.value = newLocation;
-      locationDescriptionProperty.value = p.description;
-    }
+    await handlePressButton(context, (location, description) {
+      locationProperty.producer.add(location);
+      locationDescriptionProperty.producer.add(description);
+    });
   }
 
   void onError(PlacesAutocompleteResponse response) {
