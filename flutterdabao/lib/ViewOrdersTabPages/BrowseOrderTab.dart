@@ -19,7 +19,12 @@ class BrowseOrderTabView extends StatefulWidget {
 }
 
 class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
-    with HavingGoogleMapPlaces, HavingSubscriptionMixin {
+    with HavingGoogleMapPlaces, HavingSubscriptionMixin, AutomaticKeepAliveClientMixin<BrowseOrderTabView> {
+      
+  @override
+  bool get wantKeepAlive => true;
+
+
   MutableProperty<List<Order>> searchOrders =
       MutableProperty<List<Order>>(List());
   BehaviorSubject<LatLng> searchLocation;
@@ -52,8 +57,10 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
       }).toList();
     }).switchMap((list) {
       return combineAndMerge<Order>(list);
-    }).map((orders){
-      orders.removeWhere((order)=> order.creator.value == ConfigHelper.instance.currentUserProperty.value.uid);
+    }).map((orders) {
+      orders.removeWhere((order) =>
+          order.creator.value ==
+          ConfigHelper.instance.currentUserProperty.value.uid);
       return orders;
     })));
   }
@@ -109,14 +116,35 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                   ),
                 )),
                 Container(
+                  height: 30.0,
                   margin: EdgeInsets.only(left: 3.0),
-                  width: 135,
+                  width: 155,
                   decoration: BoxDecoration(
                       border: Border.all(
                           width: 1.0,
                           color: ColorHelper.rgbo(0xD0, 0xD0, 0xD0)),
                       color: ColorHelper.rgbo(0xF5, 0xE4, 0xC6),
                       borderRadius: BorderRadius.circular(5.0)),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.only(left: 7.0),
+                          child: Text(
+                            "Distance from Location",
+                            style: FontHelper.regular(ColorHelper.dabaoOffGrey70, 12.0),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      Container(
+                          padding: EdgeInsets.only(left: 5, right: 7.0),
+                          child: Image.asset(
+                            "assets/icons/filter_icon.png",
+                            color: ColorHelper.dabaoOffBlack9B,
+                          )),
+                    ],
+                  ),
                 )
               ],
             ),
