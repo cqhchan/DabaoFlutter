@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CreateRoute/RouteOverview.dart';
@@ -79,6 +80,19 @@ class _Home extends State<Home> {
                       ],
                     ),
                   ),
+                  //DEBUG
+                 RaisedButton(
+                    child: Text('LOGOUT // DEBUG'),
+                    color: Colors.orange[300],
+                    elevation: 8.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    ),
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                    }),
+              
+                  /////////////////////////
                   Container(
                     child: Text(
                       "Notifications",
