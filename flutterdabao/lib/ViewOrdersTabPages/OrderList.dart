@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
+import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -509,13 +510,11 @@ class _OrderListState extends State<OrderList> {
           return GestureDetector(
               child: Image.asset('assets/icons/google-maps.png'),
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => ViewMap(
-                              latitude: order.deliveryLocation.value.latitude,
-                              longitude: order.deliveryLocation.value.longitude,
-                            )));
+
+              LatLng temp = LatLng(snap.data.latitude, snap.data.longitude);
+                
+              launchMaps(temp);
+              
               });
         },
       ),
