@@ -31,6 +31,7 @@ class MatchesState extends State<Matches> {
         ),),
         body: OrderList(
           context: context,
+          route: widget.route,
           input: widget.route.listOfPotentialOrders,
           location: widget.route.deliveryLocation.value.map((geopoint)=> LatLng(geopoint.latitude, geopoint.longitude)).first,
         ),

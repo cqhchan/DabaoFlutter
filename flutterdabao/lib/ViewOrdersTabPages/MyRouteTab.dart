@@ -17,7 +17,6 @@ class MyRouteTabView extends StatefulWidget {
 
 class _MyRouteTabViewState extends State<MyRouteTabView>
     with AutomaticKeepAliveClientMixin<MyRouteTabView> {
-      
   @override
   bool get wantKeepAlive => true;
 

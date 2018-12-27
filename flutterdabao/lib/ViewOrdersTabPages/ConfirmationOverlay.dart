@@ -12,20 +12,18 @@ import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
 import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 
 class ConfirmationOverlay extends StatefulWidget {
   final Order order;
+  final DabaoRoute.Route route;
 
-  const ConfirmationOverlay({Key key, @required this.order}) : super(key: key);
+  const ConfirmationOverlay({Key key, @required this.order, this.route})
+      : super(key: key);
   _ConfirmationOverlayState createState() => _ConfirmationOverlayState();
 }
 
 class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
-
-  // Current User Location
-  MutableProperty<LatLng> currentLocation =
-      ConfigHelper.instance.currentLocationProperty;
-
   static const _dayMenu = <String>[
     'Today',
     'Tomorrow',
@@ -212,7 +210,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-          child: Container(
+      child: Container(
         color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -368,7 +366,15 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Icon(Icons.location_on, color: Colors.red[800]),
+        Padding(
+          padding: const EdgeInsets.only(
+            right: 5,
+          ),
+          child: Container(
+            height: 30,
+            child: Image.asset("assets/icons/red_marker_icon.png"),
+          ),
+        ),
         SizedBox(
           width: 10,
         ),
@@ -424,6 +430,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 );
                 showLoadingOverlay(context: context);
                 var isSuccessful = await FirebaseCloudFunctions.acceptRoute(
+                  routeID: widget.route.uid,
                   orderID: widget.order.uid,
                   acceptorID:
                       ConfigHelper.instance.currentUserProperty.value.uid,
@@ -443,7 +450,8 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                       content: Text(
                           'An Error has occured. Please check your network connectivity'));
                   Scaffold.of(context).showSnackBar(snackBar);
-                }              },
+                }
+              },
             );
           case OrderMode.scheduled:
             return RaisedButton(
@@ -468,6 +476,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 );
                 showLoadingOverlay(context: context);
                 var isSuccessful = await FirebaseCloudFunctions.acceptRoute(
+                  routeID: widget.route.uid,
                   orderID: widget.order.uid,
                   acceptorID:
                       ConfigHelper.instance.currentUserProperty.value.uid,
@@ -479,7 +488,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   // Pop t
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
-
                 } else {
                   Navigator.of(context).pop();
                   // TODO bug it doessnt show
