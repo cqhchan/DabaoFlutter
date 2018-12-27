@@ -7,7 +7,7 @@ class FirebaseDocumentReactive<T extends Mappable>{
   Observable<T> observable;
   
   FirebaseDocumentReactive(DocumentReference ref){
-  observable = Observable<T>(ref.snapshots().map((snap) => Mappable.mapping<T>(snap))).shareReplay();
+  observable = Observable<T>(ref.snapshots().map((snap) => Mappable.mapping<T>(snap))).shareReplay(maxSize: 1);
 
   }
 

@@ -30,6 +30,7 @@ class Order extends FirebaseType with Selectable {
 
   static final String routeKey = "R";
   static final String delivererKey = "D";
+  static final String geoHashKey = "GH";
 
   BehaviorSubject<DateTime> createdDeliveryTime;
   BehaviorSubject<DateTime> startDeliveryTime;
@@ -45,6 +46,8 @@ class Order extends FirebaseType with Selectable {
   BehaviorSubject<List<OrderItem>> orderItems;
   BehaviorSubject<String> creator;
   BehaviorSubject<String> message;
+  BehaviorSubject<String> routeID;
+
   BehaviorSubject<OrderMode> mode;
   BehaviorSubject<double> deliveryFee;
 
@@ -70,6 +73,7 @@ class Order extends FirebaseType with Selectable {
     deliveryFee = BehaviorSubject();
     mode = BehaviorSubject();
     message = BehaviorSubject();
+    routeID = BehaviorSubject();
   }
 
   @override
@@ -137,6 +141,12 @@ class Order extends FirebaseType with Selectable {
       deliveryLocation.add(data[deliveryLocationKey]);
     } else {
       deliveryLocation.add(null);
+    }
+
+    if (data.containsKey(routeKey)) {
+      routeID.add(data[routeKey]);
+    } else {
+      routeID.add(null);
     }
 
     if (data.containsKey(deliveryLocationDescriptionKey)) {

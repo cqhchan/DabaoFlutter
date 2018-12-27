@@ -1,4 +1,4 @@
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:rxdart/rxdart.dart';
 

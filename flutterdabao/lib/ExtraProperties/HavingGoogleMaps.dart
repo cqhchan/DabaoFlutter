@@ -1,4 +1,27 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+
+launchMaps(LatLng location) async {
+  
+  print(location.latitude );
+  print(location.latitude );
+
+  String googleUrl =
+    'comgooglemaps://?center=${location.latitude},${location.longitude}';
+  String appleUrl =
+    'https://maps.apple.com/?q=${location.latitude},${location.longitude}';
+  if (await canLaunch("comgooglemaps://")) {
+    print('launching com googleUrl');
+    await launch(googleUrl);
+  } else if (await canLaunch(appleUrl)) {
+    print('launching apple url');
+    await launch(appleUrl);
+  } else {
+    throw 'Could not launch url';
+  }
+}
+
 
 abstract class HavingGoogleMaps {
 
@@ -35,4 +58,5 @@ abstract class HavingGoogleMaps {
 
     });
   }
+  
 }

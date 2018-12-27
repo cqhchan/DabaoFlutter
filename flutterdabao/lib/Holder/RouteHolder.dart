@@ -1,5 +1,5 @@
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Holder/OrderItemHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

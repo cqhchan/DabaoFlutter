@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 
 /// A configurable Expansion Tile edited from the flutter material implementation
 /// that allows for customization of most of the behaviour. Includes providing colours,
