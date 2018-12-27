@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/AcceptedList.dart';
 import 'package:rxdart/rxdart.dart';
