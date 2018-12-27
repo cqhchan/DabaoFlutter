@@ -76,10 +76,10 @@ class _OrderListState extends State<OrderList> {
                 return ConfigurableExpansionTile(
                   initiallyExpanded: false,
                   onExpansionChanged: (expanded) {
-                    setState(() {
-                      expandedFlag = expanded;
-                    });
-                    order.toggle();
+                     order.toggle();
+                        setState(() {
+                          expandedFlag = order.isSelectedProperty.value;
+                        });
                   },
                   header: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,8 +148,9 @@ class _OrderListState extends State<OrderList> {
                     Column(
                       children: <Widget>[
                         _buildOrderItems(order),
-                                    SizedBox(height: 8,),
-
+                        SizedBox(
+                          height: 8,
+                        ),
                       ],
                     )
                   ],
@@ -466,7 +467,7 @@ class _OrderListState extends State<OrderList> {
   }
 
   Widget _buildCollapsableLocationDescription(Order order) {
-    if (!expandedFlag) {
+    if (!order.isSelectedProperty.value) {
       return StreamBuilder<String>(
         stream: order.deliveryLocationDescription,
         builder: (context, snap) {
@@ -511,11 +512,9 @@ class _OrderListState extends State<OrderList> {
           return GestureDetector(
               child: Image.asset('assets/icons/google-maps.png'),
               onTap: () {
+                LatLng temp = LatLng(snap.data.latitude, snap.data.longitude);
 
-              LatLng temp = LatLng(snap.data.latitude, snap.data.longitude);
-                
-              launchMaps(temp);
-              
+                launchMaps(temp);
               });
         },
       ),
@@ -604,15 +603,14 @@ class _OrderListState extends State<OrderList> {
           ],
         ),
         onPressed: () {
-
           Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => ChatPage(
-                            order: order,
-                          ),
-                        ),
-                      );
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => ChatPage(
+                    order: order,
+                  ),
+            ),
+          );
         },
       ),
     );
