@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
-import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
-import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
-import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
-import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 
 class CompletedOverlay extends StatefulWidget {
@@ -23,42 +17,11 @@ class CompletedOverlay extends StatefulWidget {
 }
 
 class _CompletedOverlayState extends State<CompletedOverlay> {
-  DateTime isToday;
-
-  HourPicker integerScheduledHourPicker;
-  MinutePicker integerScheduledMinutePicker;
-  HourPicker integerASAPHourPicker;
-  MinutePicker integerASAPMinutePicker;
-
-  int _scheduledInitialHour;
-  int _scheduledInitialMinute;
-  int _scheduledMaximumMinute;
-  int _scheduledMinimumMinute;
-  int _scheduledMaximumHour;
-  int _scheduledMinimumHour;
-
-  int _asapInitialHour;
-  int _asapInitialMinute;
-  int _asapMaximumMinute;
-  int _asapMinimumMinute;
-  int _asapMaximumHour;
-  int _asapMinimumHour;
-
-  String selectedDay = 'Today';
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    isToday = DateTime.now();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        color: Colors.white,
+    return Container(
+      color: Colors.white,
+      child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
