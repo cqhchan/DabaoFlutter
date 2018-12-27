@@ -4,6 +4,7 @@ import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/LoginSignup/NewLoginPage.dart';
 import 'package:flutterdabao/LoginSignup/ProcessingPage.dart';
 import 'package:flutterdabao/LoginSignup/LoginPage.dart';
 
@@ -42,7 +43,8 @@ class DabaoApp extends StatelessWidget {
             } else {
               return Navigator(onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(builder: (context) {
-                  return LoginPage();
+                  //return LoginPage();
+                  return NewLoginPage();
                 });
               });
             }

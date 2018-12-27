@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class FontHelper {
+  static const TextStyle semiBoldgrey16TextStyle = TextStyle(
+      color: Color(0xFFD0D0D0),
+      fontSize: 16.0,
+      fontStyle: FontStyle.normal,
+      fontFamily: "SF_UI_Display");
   static const TextStyle semiBoldgrey12TextStyle = TextStyle(
       color: Colors.grey,
       fontSize: 14.0,
@@ -165,6 +170,15 @@ class FontHelper {
     return TextStyle(
         color: color,
         fontSize: 16.0,
+        fontStyle: FontStyle.normal,
+        fontWeight: FontWeight.w600,
+        fontFamily: "SF_UI_Display");
+  }
+
+  static TextStyle semiBold15(Color color) {
+    return TextStyle(
+        color: color,
+        fontSize: 15.0,
         fontStyle: FontStyle.normal,
         fontWeight: FontWeight.w600,
         fontFamily: "SF_UI_Display");
