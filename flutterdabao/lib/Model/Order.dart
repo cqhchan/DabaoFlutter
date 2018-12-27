@@ -10,6 +10,7 @@ import 'package:rxdart/rxdart.dart';
 
 final String orderStatus_Requested = "Requested";
 final String orderStatus_Accepted = "Accepted";
+final String orderStatus_Completed = "Completed";
 
 class Order extends FirebaseType with Selectable {
   static final String createdTimeKey = "CT";
@@ -30,7 +31,6 @@ class Order extends FirebaseType with Selectable {
   static final String routeKey = "R";
   static final String delivererKey = "D";
 
-
   BehaviorSubject<DateTime> createdDeliveryTime;
   BehaviorSubject<DateTime> startDeliveryTime;
   BehaviorSubject<DateTime> endDeliveryTime;
@@ -41,6 +41,7 @@ class Order extends FirebaseType with Selectable {
   BehaviorSubject<GeoPoint> deliveryLocation;
   BehaviorSubject<String> deliveryLocationDescription;
   BehaviorSubject<String> foodTag;
+  BehaviorSubject<String> status;
   BehaviorSubject<List<OrderItem>> orderItems;
   BehaviorSubject<String> creator;
   BehaviorSubject<String> message;
@@ -63,6 +64,7 @@ class Order extends FirebaseType with Selectable {
     deliveryLocation = BehaviorSubject();
     deliveryLocationDescription = BehaviorSubject();
     foodTag = BehaviorSubject();
+    status = BehaviorSubject();
     orderItems = BehaviorSubject();
     creator = BehaviorSubject();
     deliveryFee = BehaviorSubject();
@@ -108,6 +110,22 @@ class Order extends FirebaseType with Selectable {
       mode.add(null);
     }
 
+    if (data.containsKey(statusKey)) {
+      switch (data[statusKey]) {
+        case "Completed":
+          status.add(data[statusKey]);
+          break;
+        case "Accepted":
+          status.add(data[statusKey]);
+          break;
+        case "Requested":
+          status.add(data[statusKey]);
+          break;
+      }
+    } else {
+      status.add(null);
+    }
+
     if (data.containsKey(endTimeKey)) {
       endDeliveryTime
           .add(DateTimeHelper.convertStringTimeToDateTime(data[endTimeKey]));
@@ -140,15 +158,13 @@ class Order extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(orderItemKey)) {
-
-      List<Map<dynamic, dynamic>> temp =  List.castFrom<dynamic,Map<dynamic, dynamic>>( data[orderItemKey]);
+      List<Map<dynamic, dynamic>> temp =
+          List.castFrom<dynamic, Map<dynamic, dynamic>>(data[orderItemKey]);
       orderItems.add(temp.map((rawMap) {
-
         var map = rawMap.cast<String, dynamic>();
         return OrderItem.fromMap(
             map[OrderItem.titleKey].toString().toLowerCase(), map);
       }).toList());
-
     } else {
       orderItems.add(List());
     }
@@ -178,7 +194,6 @@ class Order extends FirebaseType with Selectable {
     if (holder.orderItems.value == null) return false;
 
     if (holder.orderItems.value.length == 0) return false;
-
 
     if (holder.mode.value == null) return false;
 

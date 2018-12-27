@@ -10,10 +10,10 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 ///NumberPicker is a widget designed to pick a number between #minValue and #maxValue
 class HourPicker extends StatelessWidget {
   ///height of every list element
-  static const double DEFAULT_ITEM_EXTENT = 50.0;
+  static const double DEFAULT_ITEM_EXTENT = 60.0;
 
   ///width of list view
-  static const double DEFAULT_LISTVIEW_WIDTH = 60.0;
+  static const double DEFAULT_LISTVIEW_WIDTH = 70.0;
 
   ///constructor for integer number picker
   HourPicker.hour({
@@ -108,7 +108,7 @@ class HourPicker extends StatelessWidget {
   }
 
   Widget _intListView() {
-    TextStyle selectedStyle = FontHelper.semiBold(Colors.black, 45);
+    TextStyle selectedStyle = FontHelper.robotoRegular50Black;
     int itemCount = (maxValue - minValue) ~/ step + 3;
     return new NotificationListener(
       child: new Container(

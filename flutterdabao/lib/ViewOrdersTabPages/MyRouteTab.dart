@@ -117,116 +117,127 @@ class _RouteCellState extends State<_RouteCell> {
     );
   }
 
-  Row buildPossibleMatches() {
-    return Row(
+  Flex buildPossibleMatches() {
+    return Flex(
+      direction: Axis.horizontal,
       children: <Widget>[
-        StreamBuilder<List<User>>(
-          stream: widget.route.listOfPotentialOrders.map((orders) {
-            return orders
-                .take(3)
-                .map((order) => User.fromUID(order.creator.value))
-                .toList();
-          }),
-          builder: (context, snap) {
-            return Stack(
-              children: <Widget>[
-                snap.data == null || snap.data.length <= 2
-                    ? Image.asset("assets/icons/filler_image_girl.png")
-                    : StreamBuilder<String>(
-                        stream: snap.data.elementAt(2).thumbnailImage,
-                        builder: (context, snap) {
-                          if (!snap.hasData)
-                            return Image.asset(
-                                "assets/icons/filler_image_girl.png");
+        Expanded(
+                  child: StreamBuilder<List<User>>(
+            stream: widget.route.listOfPotentialOrders.map((orders) {
+              return orders
+                  .take(3)
+                  .map((order) => User.fromUID(order.creator.value))
+                  .toList();
+            }),
+            builder: (context, snap) {
+              return Stack(
+                children: <Widget>[
+                  snap.data == null || snap.data.length <= 2
+                      ? Image.asset("assets/icons/filler_image_girl.png")
+                      : StreamBuilder<String>(
+                          stream: snap.data.elementAt(2).thumbnailImage,
+                          builder: (context, snap) {
+                            if (!snap.hasData)
+                              return Image.asset(
+                                  "assets/icons/filler_image_girl.png");
 
-                          return Container(
-                              height: 30.0,
-                              width: 30.0,
-                              decoration: new BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: new DecorationImage(
-                                      fit: BoxFit.fill,
-                                      image: new NetworkImage(snap.data))));
-                        },
-                      ),
-                Container(
-                    margin: EdgeInsets.only(left: 17.0),
-                    child: snap.data == null || snap.data.length <= 1
-                        ? Image.asset("assets/icons/filler_image_food.png")
-                        : StreamBuilder<String>(
-                            stream: snap.data.elementAt(1).thumbnailImage,
-                            builder: (context, snap) {
-                              if (!snap.hasData)
-                                return Image.asset(
-                                    "assets/icons/filler_image_food.png");
+                            return Container(
+                                height: 30.0,
+                                width: 30.0,
+                                decoration: new BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: new DecorationImage(
+                                        fit: BoxFit.fill,
+                                        image: new NetworkImage(snap.data))));
+                          },
+                        ),
+                  Container(
+                      margin: EdgeInsets.only(left: 17.0),
+                      child: snap.data == null || snap.data.length <= 1
+                          ? Image.asset("assets/icons/filler_image_food.png")
+                          : StreamBuilder<String>(
+                              stream: snap.data.elementAt(1).thumbnailImage,
+                              builder: (context, snap) {
+                                if (!snap.hasData)
+                                  return Image.asset(
+                                      "assets/icons/filler_image_food.png");
 
-                              return Container(
-                                  height: 30.0,
-                                  width: 30.0,
-                                  decoration: new BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: new DecorationImage(
-                                          fit: BoxFit.fill,
-                                          image: new NetworkImage(snap.data))));
-                            },
-                          )),
-                Container(
-                    margin: EdgeInsets.only(left: 34.0),
-                    child: snap.data == null || snap.data.length == 0
-                        ? Image.asset("assets/icons/filler_image_girl.png")
-                        : StreamBuilder<String>(
-                            stream: snap.data.elementAt(0).thumbnailImage,
-                            builder: (context, snap) {
-                              if (!snap.hasData)
-                                return Image.asset(
-                                    "assets/icons/filler_image_girl.png");
+                                return Container(
+                                    height: 30.0,
+                                    width: 30.0,
+                                    decoration: new BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: new DecorationImage(
+                                            fit: BoxFit.fill,
+                                            image: new NetworkImage(snap.data))));
+                              },
+                            )),
+                  Container(
+                      margin: EdgeInsets.only(left: 34.0),
+                      child: snap.data == null || snap.data.length == 0
+                          ? Image.asset("assets/icons/filler_image_girl.png")
+                          : StreamBuilder<String>(
+                              stream: snap.data.elementAt(0).thumbnailImage,
+                              builder: (context, snap) {
+                                if (!snap.hasData)
+                                  return Image.asset(
+                                      "assets/icons/filler_image_girl.png");
 
-                              return Container(
-                                  height: 30.0,
-                                  width: 30.0,
-                                  decoration: new BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: new DecorationImage(
-                                          fit: BoxFit.fill,
-                                          image: new NetworkImage(snap.data))));
-                            },
-                          )),
-              ],
-            );
-          },
-        ),
-        Container(
-          padding: EdgeInsets.only(
-            left: 10.0,
-          ),
-          child: StreamBuilder<List<Order>>(
-            stream: widget.route.listOfPotentialOrders,
-            builder: (context, snap) => snap.hasData && snap.data.length > 0
-                ? Text(
-                    "${snap.data.length} matches for Your Route!",
-                    style: FontHelper.semiBold14Black,
-                  )
-                : Text(
-                    "No Matches Found for this Route",
-                    style: FontHelper.semiBold14Black,
-                  ),
+                                return Container(
+                                    height: 30.0,
+                                    width: 30.0,
+                                    decoration: new BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: new DecorationImage(
+                                            fit: BoxFit.fill,
+                                            image: new NetworkImage(snap.data))));
+                              },
+                            )),
+                ],
+              );
+            },
           ),
         ),
-        Flexible(
-          child: Align(
-              alignment: Alignment.centerRight,
-              child: GestureDetector(
-                  onTap: () {
-                    print('Tapped');
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Matches(
-                                  route: widget.route,
-                                )));
-                  },
-                  child: Image.asset(
-                      "assets/icons/arrow_right_black_outline.png"))),
+        Expanded(
+          flex: 2,
+                  child: Container(
+            padding: EdgeInsets.only(
+              left: 10.0,
+            ),
+            child: StreamBuilder<List<Order>>(
+              stream: widget.route.listOfPotentialOrders,
+              builder: (context, snap) => snap.hasData && snap.data.length > 0
+                  ? Text(
+                      "${snap.data.length} matches for Your Route!",
+                      style: FontHelper.semiBold14Black,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  : Text(
+                      "No Matches Found for this Route",
+                      style: FontHelper.semiBold14Black,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+            ),
+          ),
+        ),
+        Expanded(
+            child: Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                    onTap: () {
+                      print('Tapped');
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Matches(
+                                    route: widget.route,
+                                  )));
+                    },
+                    child: Image.asset(
+                        "assets/icons/arrow_right_black_outline.png"))),
+
         )
       ],
     );

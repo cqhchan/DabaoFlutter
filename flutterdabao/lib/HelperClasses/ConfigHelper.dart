@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
+import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
@@ -26,6 +27,9 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   // A users active Orders
   MutableProperty<List<Order>> currentUserAcceptedOrdersProperty =
+      MutableProperty<List<Order>>(List());
+
+  MutableProperty<List<Order>> currentUserDeliveredCompletedOrdersProperty =
       MutableProperty<List<Order>>(List());
 
   // All a users accepted Order which he is deliverying
@@ -81,6 +85,9 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription.add(currentUserDeliveringOrdersProperty
         .bindTo(currentUserDeliveryingOrdersProducer()));
 
+    subscription.add(currentUserDeliveredCompletedOrdersProperty
+        .bindTo(currentUserDeliveredCompletedOrdersProducer()));
+
     // get Current open Routes
     subscription.add(
         currentUserOpenRoutesProperty.bindTo(currentUserOpenRoutesProducer()));
@@ -133,6 +140,17 @@ class ConfigHelper with HavingSubscriptionMixin {
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
                 .where(Order.statusKey, isEqualTo: orderStatus_Accepted)
+                .where(Order.delivererKey, isEqualTo: user.uid))
+            .observable);
+  }
+
+  Observable<List<Order>> currentUserDeliveredCompletedOrdersProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Order>()
+        : FirebaseCollectionReactive<Order>(Firestore.instance
+                .collection("orders")
+                .where(Order.deliveryTimeKey, isGreaterThan: DateTimeHelper.convertDateTimeToString(DateTime.now().add(Duration(days: -2))))
+                .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
             .observable);
   }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
@@ -11,26 +13,27 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ChatPage.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ViewMap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 
-class OrderList extends StatefulWidget {
+class AcceptedList extends StatefulWidget {
   final Observable<List<Order>> input;
   final LatLng location;
   final DabaoRoute.Route route;
   final context;
 
-  OrderList(
+  AcceptedList(
       {Key key, this.context, @required this.input, this.location, this.route})
       : super(key: key);
 
-  _OrderListState createState() => _OrderListState();
+  _AcceptedListState createState() => _AcceptedListState();
 }
 
-class _OrderListState extends State<OrderList> {
+class _AcceptedListState extends State<AcceptedList> {
   bool expandedFlag = false;
 
   // Current User Location
@@ -58,152 +61,196 @@ class _OrderListState extends State<OrderList> {
     );
   }
 
-  Card _buildListItem(BuildContext context, Order order) {
+  Widget _buildListItem(BuildContext context, Order order) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       margin: EdgeInsets.all(11.0),
       color: Colors.white,
       elevation: 6.0,
-      child: Container(
-        margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
-        child: Wrap(
-          children: <Widget>[
-            StreamBuilder(
-              stream: order.deliveryLocationDescription,
+      child: Stack(
+        fit: StackFit.loose,
+        children: <Widget>[
+          Container(
+            height: 9,
+            decoration: BoxDecoration(
+                color: ColorHelper.dabaoOrange,
+                borderRadius: BorderRadius.circular(10)),
+          ),
+          Container(
+            margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
+            child: Wrap(
+              children: <Widget>[
+                StreamBuilder(
+                  stream: order.deliveryLocationDescription,
+                  builder: (context, snap) {
+                    if (!snap.hasData) return Offstage();
+                    return ConfigurableExpansionTile(
+                      initiallyExpanded: false,
+                      onExpansionChanged: (expanded) {
+                        setState(() {
+                          expandedFlag = expanded;
+                        });
+                        order.toggle();
+                      },
+                      header: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          _buildHeader(order),
+                          Container(
+                            constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width - 50),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 5,
+                                  child: _buildDeliveryPeriod(order),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 6.0),
+                                    child: _buildQuantity(order),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 17.0,
+                          ),
+                          Container(
+                            constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width - 50),
+                            child: Flex(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              direction: Axis.horizontal,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: 2,
+                                  ),
+                                  child: Container(
+                                    height: 30,
+                                    child: Image.asset(
+                                        "assets/icons/red_marker_icon.png"),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 4,
+                                  child: _buildLocationDescription(order),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: _buildTapToLocation(order),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          )
+                        ],
+                      ),
+                      children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            _buildOrderItems(order),
+                            SizedBox(
+                              height: 8,
+                            ),
+                          ],
+                        )
+                      ],
+                    );
+                  },
+                ),
+                StreamBuilder<bool>(
+                  stream: order.isSelectedProperty.producer,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return Offstage();
+                    if (snapshot.data) {
+                      return Column(
+                        children: <Widget>[
+                          Flex(
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 4,
+                                child: _buildUser(order),
+                              ),
+                              Expanded(flex: 2, child: _buildChatButton(order)),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          _buildPickUpButton(order)
+                        ],
+                      );
+                    } else {
+                      return Column(
+                        children: <Widget>[
+                          Divider(
+                            height: 13,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 8, 0, 5),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 4,
+                                  child: _buildUser(order),
+                                ),
+                                Expanded(
+                                    flex: 2, child: _buildChatButton(order)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          Positioned.fill(
+            child: StreamBuilder<String>(
+              stream: order.status,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
-                return ConfigurableExpansionTile(
-                  initiallyExpanded: false,
-                  onExpansionChanged: (expanded) {
-                    setState(() {
-                      expandedFlag = expanded;
-                    });
-                    order.toggle();
-                  },
-                  header: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      _buildHeader(order),
-                      Container(
-                        constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width - 50),
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          children: <Widget>[
-                            Expanded(
-                              flex: 5,
-                              child: _buildDeliveryPeriod(order),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 6.0),
-                                child: _buildQuantity(order),
-                              ),
-                            ),
-                          ],
-                        ),
+                return Offstage(
+                  offstage: snap.data == 'Completed' ? false : true,
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          color: Color(0xFF707070).withOpacity(0.5)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            'Completed',
+                            style: FontHelper.bold50White,
+                          ),
+                          _buildTapToViewButton(order)
+                        ],
                       ),
-                      SizedBox(
-                        height: 17.0,
-                      ),
-                      Container(
-                        constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width - 50),
-                        child: Flex(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          direction: Axis.horizontal,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                right: 2,
-                              ),
-                              child: Container(
-                                height: 30,
-                                child: Image.asset(
-                                    "assets/icons/red_marker_icon.png"),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 4,
-                              child: _buildLocationDescription(order),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: _buildTapToLocation(order),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      )
-                    ],
+                    ),
                   ),
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        _buildOrderItems(order),
-                                    SizedBox(height: 8,),
-
-                      ],
-                    )
-                  ],
                 );
               },
             ),
-            StreamBuilder<bool>(
-              stream: order.isSelectedProperty.producer,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return Offstage();
-                if (snapshot.data) {
-                  return Column(
-                    children: <Widget>[
-                      Flex(
-                        direction: Axis.horizontal,
-                        children: <Widget>[
-                          Expanded(
-                            flex: 4,
-                            child: _buildUser(order),
-                          ),
-                          Expanded(flex: 2, child: _buildChatButton(order)),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      _buildPickUpButton(order)
-                    ],
-                  );
-                } else {
-                  return Column(
-                    children: <Widget>[
-                      Divider(
-                        height: 13,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 5),
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          children: <Widget>[
-                            Expanded(
-                              flex: 4,
-                              child: _buildUser(order),
-                            ),
-                            Expanded(flex: 2, child: _buildChatButton(order)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -564,15 +611,15 @@ class _OrderListState extends State<OrderList> {
   Widget _buildPickUpButton(Order order) {
     return RaisedButton(
       elevation: 6,
-      color: ColorHelper.dabaoOffPaleBlue,
+      color: ColorHelper.dabaoOrange,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Row(
         children: <Widget>[
           Expanded(
             child: Align(
               child: Text(
-                "Pick Up",
-                style: FontHelper.semiBold14White,
+                "Complete",
+                style: FontHelper.semiBold14Black,
               ),
             ),
           ),
@@ -581,6 +628,40 @@ class _OrderListState extends State<OrderList> {
       onPressed: () {
         showOverlay(order);
       },
+    );
+  }
+
+  Widget _buildTapToViewButton(Order order) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 70.0),
+      child: RaisedButton(
+        elevation: 6,
+        color: ColorHelper.dabaoOffPaleBlue,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Align(
+                child: Text(
+                  "Tap To View",
+                  style: FontHelper.semiBold14White,
+                ),
+              ),
+            ),
+          ],
+        ),
+        onPressed: () {
+          Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => ChatPage(
+                            order: order,
+                          ),
+                        ),
+                      );
+        },
+      ),
     );
   }
 
@@ -598,14 +679,13 @@ class _OrderListState extends State<OrderList> {
               child: Align(
                 child: Text(
                   "Chat",
-                  style: FontHelper.semiBold14White,
+                  style: FontHelper.semiBold14Black,
                 ),
               ),
             ),
           ],
         ),
         onPressed: () {
-
           Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -623,7 +703,7 @@ class _OrderListState extends State<OrderList> {
     showHalfBottomSheet(
         context: context,
         builder: (builder) {
-          return ConfirmationOverlay(
+          return CompletedOverlay(
             order: order,
             route: widget.route,
           );

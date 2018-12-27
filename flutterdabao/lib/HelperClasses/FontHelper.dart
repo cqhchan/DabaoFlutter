@@ -134,6 +134,12 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
+      static const TextStyle robotoRegular50Black = TextStyle(
+      color: Colors.black,
+      fontSize: 50.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "Roboto");
   static const TextStyle regular14Black = TextStyle(
       color: Colors.black,
       fontSize: 14.0,
@@ -149,6 +155,12 @@ class FontHelper {
   static const TextStyle bold12Black = TextStyle(
       color: Colors.black,
       fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.bold,
+      fontFamily: "SF_UI_Display");
+      static const TextStyle bold50White = TextStyle(
+      color: Colors.white,
+      fontSize: 50.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.bold,
       fontFamily: "SF_UI_Display");

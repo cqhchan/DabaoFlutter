@@ -11,6 +11,8 @@ class OrderHolder with HavingSubscriptionMixin {
   MutableProperty<LatLng> deliveryLocation = MutableProperty(null);
   MutableProperty<String> deliveryLocationDescription = MutableProperty(null);
   MutableProperty<String> foodTag = MutableProperty(null);
+    MutableProperty<String> status = MutableProperty(null);
+
   MutableProperty<List<OrderItemHolder>> orderItems = MutableProperty(List());
   MutableProperty<double> deliveryFee = MutableProperty(0.0);
 

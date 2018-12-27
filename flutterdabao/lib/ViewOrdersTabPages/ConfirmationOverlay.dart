@@ -221,7 +221,13 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
               _buildDeliveryPeriod(widget.order),
               _buildArrivalTime(widget.order),
               _buildHeader(widget.order),
+              SizedBox(
+                height: 15,
+              ),
               _buildLocationDescription(widget.order),
+              SizedBox(
+                height: 15,
+              ),
               Flex(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -265,7 +271,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
               return Container(
                 child: Text(
                   snap.hasData ? 'For Today' : "Error",
-                  style: FontHelper.regular14Black,
+                  style: FontHelper.semiBold14Black,
                   overflow: TextOverflow.ellipsis,
                 ),
               );
@@ -310,15 +316,25 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Expanded(
-          child: StreamBuilder<String>(
-            stream: widget.order.foodTag,
-            builder: (context, snap) {
-              if (!snap.hasData) return Offstage();
-              return Text(
-                StringHelper.upperCaseWords(snap.data),
-                style: FontHelper.semiBold16Black,
-              );
-            },
+          child: Column(
+            children: <Widget>[
+              Align(
+                alignment: Alignment.topLeft,
+                child: StreamBuilder<String>(
+                  stream: widget.order.foodTag,
+                  builder: (context, snap) {
+                    if (!snap.hasData) return Offstage();
+                    return Text(
+                      StringHelper.upperCaseWords(snap.data),
+                      style: FontHelper.semiBold16Black,
+                    );
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 11.0,
+              ),
+            ],
           ),
         ),
         Expanded(
@@ -329,15 +345,21 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 stream: widget.order.deliveryFee,
                 builder: (context, snap) {
                   if (!snap.hasData) return Offstage();
-                  return Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      StringHelper.doubleToPriceString(
-                        snap.data,
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      Text(
+                        StringHelper.doubleToPriceString(
+                          snap.data,
+                        ),
+                        style: FontHelper.bold14Black,
+                        textAlign: TextAlign.right,
                       ),
-                      style: FontHelper.semiBold14Black2,
-                      textAlign: TextAlign.right,
-                    ),
+                      SizedBox(
+                        width: 2.0,
+                      ),
+                      Image.asset('assets/icons/question_mark.png'),
+                    ],
                   );
                 },
               ),
@@ -347,10 +369,13 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   if (!snap.hasData) return Offstage();
                   return Align(
                     alignment: Alignment.centerRight,
-                    child: Text(
-                      snap.hasData ? '${snap.data.length} Item(s)' : "Error",
-                      style: FontHelper.medium14TextStyle,
-                      textAlign: TextAlign.right,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 26.0),
+                      child: Text(
+                        snap.hasData ? '${snap.data.length} Item(s)' : "Error",
+                        style: FontHelper.medium14TextStyle,
+                        textAlign: TextAlign.right,
+                      ),
                     ),
                   );
                 },
@@ -392,6 +417,8 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   child: Text(
                     snap.hasData ? '''${snap.data}''' : "Error",
                     style: FontHelper.regular14Black,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 );
               },
@@ -559,8 +586,11 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                     style: FontHelper.regular14Black,
                   ),
                 ),
+                SizedBox(
+                  width: 10.0,
+                ),
                 integerASAPHourPicker,
-                Text(':', style: FontHelper.semiBold(Colors.black, 45)),
+                Text(':', style: FontHelper.robotoRegular50Black),
                 integerASAPMinutePicker,
                 _buildASAPMoreThan24Hour(),
               ],
