@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 
 class CustomizedBackButton extends StatelessWidget {
   

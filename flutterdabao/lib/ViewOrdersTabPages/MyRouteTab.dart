@@ -4,7 +4,7 @@ import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
-import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Model/User.dart';
@@ -36,6 +36,8 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
           (routes, orders) {
         List<Object> temp = List();
         temp.addAll(routes);
+
+        orders.removeWhere((order) => order.routeID.value != null);
 
         if (orders != null && orders.length != 0) temp.add(orders);
 
