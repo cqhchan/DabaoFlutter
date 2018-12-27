@@ -119,12 +119,11 @@ class _RouteCellState extends State<_RouteCell> {
     );
   }
 
-  Flex buildPossibleMatches() {
-    return Flex(
-      direction: Axis.horizontal,
-      children: <Widget>[
-        Expanded(
-                  child: StreamBuilder<List<User>>(
+  Row buildPossibleMatches() {
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+          StreamBuilder<List<User>>(
             stream: widget.route.listOfPotentialOrders.map((orders) {
               return orders
                   .take(3)
@@ -132,6 +131,9 @@ class _RouteCellState extends State<_RouteCell> {
                   .toList();
             }),
             builder: (context, snap) {
+
+              if(!snap.hasData || snap.data.length == 0) return Offstage();
+
               return Stack(
                 children: <Widget>[
                   snap.data == null || snap.data.length <= 2
@@ -199,12 +201,13 @@ class _RouteCellState extends State<_RouteCell> {
               );
             },
           ),
-        ),
+
+          ConstrainedBox(constraints: BoxConstraints(maxWidth: 10.0, minWidth: 5.0),),
+        
         Expanded(
-          flex: 2,
+          
                   child: Container(
             padding: EdgeInsets.only(
-              left: 10.0,
             ),
             child: StreamBuilder<List<Order>>(
               stream: widget.route.listOfPotentialOrders,
@@ -224,8 +227,7 @@ class _RouteCellState extends State<_RouteCell> {
             ),
           ),
         ),
-        Expanded(
-            child: Align(
+        Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
                     onTap: () {
@@ -240,7 +242,7 @@ class _RouteCellState extends State<_RouteCell> {
                     child: Image.asset(
                         "assets/icons/arrow_right_black_outline.png"))),
 
-        )
+      
       ],
     );
   }

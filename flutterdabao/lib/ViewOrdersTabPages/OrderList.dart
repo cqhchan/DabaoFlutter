@@ -511,11 +511,8 @@ class _OrderListState extends State<OrderList> {
           return GestureDetector(
               child: Image.asset('assets/icons/google-maps.png'),
               onTap: () {
-
               LatLng temp = LatLng(snap.data.latitude, snap.data.longitude);
-                
               launchMaps(temp);
-              
               });
         },
       ),
