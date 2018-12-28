@@ -252,12 +252,12 @@ class FirebaseCloudFunctions {
   }
 
 
-  ///[data] acceptRoute
+  ///[data] acceptOrder
   /// orderID
   /// acceptorID
   /// deliveryTime
   /// routeID Optional
-  static Future<bool> acceptRoute({
+  static Future<bool> acceptOrder({
     @required String orderID,
     @required String acceptorID,
     @required String deliveryTime,
@@ -274,6 +274,52 @@ class FirebaseCloudFunctions {
 
       if (routeID != null)
       attributeMap["routeID"] = routeID;
+
+      Map<dynamic, dynamic> results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: attributeMap);
+      print(results);
+
+      if (results.containsKey("status") && results["status"] == 200)
+      return true;
+
+      if (results.containsKey("status") && results["status"] == 400)
+      return false;
+
+    } on CloudFunctionsException catch (e) {
+      
+      print(e.message);
+      print(e);
+    return false;
+
+    } catch (e) {
+ 
+      print('Error: $e');
+          return false;
+
+    }
+
+    return false;
+  }
+
+
+
+ ///[data] acceptOrder
+  /// orderID
+  /// acceptorID
+  /// completedTime
+  static Future<bool> completeOrder({
+    @required String orderID,
+    @required String acceptorID,
+    @required String completedTime,
+
+  }) async {
+    try {
+
+      Map<String, dynamic> attributeMap = new Map<String, dynamic>();
+      attributeMap["mode"] = 3;
+      attributeMap["orderID"] = orderID;
+      attributeMap["acceptorID"] = acceptorID;
+      attributeMap["completedTime"] = completedTime;
 
       Map<dynamic, dynamic> results = await CloudFunctions.instance
           .call(functionName: 'creationRequest', parameters: attributeMap);

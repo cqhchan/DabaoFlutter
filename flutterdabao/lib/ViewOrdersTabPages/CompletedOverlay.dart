@@ -23,35 +23,10 @@ class CompletedOverlay extends StatefulWidget {
 }
 
 class _CompletedOverlayState extends State<CompletedOverlay> {
-  DateTime isToday;
-
-  HourPicker integerScheduledHourPicker;
-  MinutePicker integerScheduledMinutePicker;
-  HourPicker integerASAPHourPicker;
-  MinutePicker integerASAPMinutePicker;
-
-  int _scheduledInitialHour;
-  int _scheduledInitialMinute;
-  int _scheduledMaximumMinute;
-  int _scheduledMinimumMinute;
-  int _scheduledMaximumHour;
-  int _scheduledMinimumHour;
-
-  int _asapInitialHour;
-  int _asapInitialMinute;
-  int _asapMaximumMinute;
-  int _asapMinimumMinute;
-  int _asapMaximumHour;
-  int _asapMinimumHour;
-
-  String selectedDay = 'Today';
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    isToday = DateTime.now();
   }
 
   @override
@@ -260,47 +235,35 @@ class _CompletedOverlayState extends State<CompletedOverlay> {
   }
 
   Widget _buildPickUpButton(Order order) {
-    return StreamBuilder(
-      stream: order.mode,
-      builder: (context, snap) {
-        if (!snap.hasData) return Offstage();
-        switch (snap.data) {
-          case OrderMode.asap:
-            return RaisedButton(
-              elevation: 12,
-              color: ColorHelper.dabaoOrange,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0)),
-              child: Center(
-                child: Text(
-                  "Complete",
-                  style: FontHelper.semiBold14Black,
-                ),
-              ),
-              onPressed: () async {
-                //TODO: blur this widget
-              },
-            );
-          case OrderMode.scheduled:
-            return RaisedButton(
-              elevation: 12,
-              color: ColorHelper.dabaoOrange,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Center(
-                child: Text(
-                  "Complete",
-                  style: FontHelper.semiBold14White,
-                ),
-              ),
-              onPressed: () async {
-                //TODO: blur this widget
-              },
-            );
-            break;
-          default:
-            return Offstage();
+    return RaisedButton(
+      elevation: 12,
+      color: ColorHelper.dabaoOrange,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      child: Center(
+        child: Text(
+          "Complete",
+          style: FontHelper.semiBold14Black,
+        ),
+      ),
+      onPressed: () async {
+        showLoadingOverlay(context: context);
+        var isSuccessful = await FirebaseCloudFunctions.completeOrder(
+          orderID: widget.order.uid,
+          acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
+          completedTime: DateTimeHelper.convertDateTimeToString(DateTime.now()),
+        );
+
+        if (isSuccessful) {
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
+        } else {
+          Navigator.of(context).pop();
+
+          //TODO fix Bug that it doesnt show
+          final snackBar = SnackBar(
+              content: Text(
+                  'An Error has occured. Please check your network connectivity'));
+          Scaffold.of(context).showSnackBar(snackBar);
         }
       },
     );

@@ -149,7 +149,7 @@ class ConfigHelper with HavingSubscriptionMixin {
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
-                .where(Order.deliveryTimeKey, isGreaterThan: DateTimeHelper.convertDateTimeToString(DateTime.now().add(Duration(days: -2))))
+                .where(Order.completedTimeKey, isGreaterThan: DateTimeHelper.convertDateTimeToString(DateTime.now().add(Duration(days: -2))))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
             .observable);
