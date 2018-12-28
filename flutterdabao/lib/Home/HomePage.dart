@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,7 @@ import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -23,6 +25,8 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home> {
+  FirebaseMessaging _firebaseMessaging;
+
   ScrollController _controller = ScrollController();
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
   _Home() {
@@ -38,6 +42,39 @@ class _Home extends State<Home> {
 
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
+
+    //Firebase Push  Notifications
+    _firebaseMessaging = FirebaseMessaging();
+    firebaseCloudMessaging_Listeners();
+  }
+
+  void firebaseCloudMessaging_Listeners() {
+    if (Platform.isIOS) iOS_Permission();
+
+    _firebaseMessaging.getToken().then((token) {
+      print(token);
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
+  }
+
+  void iOS_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
   }
 
   @override
@@ -82,14 +119,13 @@ class _Home extends State<Home> {
                       );
                     }),
                     //ChatBox
-                        squardCard(
-                            'assets/icons/chat.png', 'Chat', 'I want to Chat',
-                            () {
-                          Navigator.push(
-                            context,
-                            FadeRoute(widget: TabBarPage()),
-                          );
-                        }),
+                    squardCard(
+                        'assets/icons/chat.png', 'Chat', 'I want to Chat', () {
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: TabBarPage()),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -113,10 +149,10 @@ class _Home extends State<Home> {
                   height: 40.0,
                   width: 40.0,
                   child: GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       FirebaseAuth.instance.signOut();
                     },
-                                      child: Image.asset(
+                    child: Image.asset(
                       "assets/icons/profile_icon.png",
                       fit: BoxFit.fill,
                     ),
