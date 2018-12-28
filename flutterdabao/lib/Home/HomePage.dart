@@ -57,13 +57,15 @@ class _Home extends State<Home> {
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print('on message $message');
+        
+        // ConfigHelper.instance.navigatorKey.currentState
+        //     .push(FadeRoute(widget: TabBarPage()));
       },
       onResume: (Map<String, dynamic> message) async {
-        print('on resume $message');
+  
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print('on launch $message');
+        
       },
     );
   }
@@ -75,6 +77,11 @@ class _Home extends State<Home> {
         .listen((IosNotificationSettings settings) {
       print("Settings registered: $settings");
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -121,10 +128,7 @@ class _Home extends State<Home> {
                     //ChatBox
                     squardCard(
                         'assets/icons/chat.png', 'Chat', 'I want to Chat', () {
-                      Navigator.push(
-                        context,
-                        FadeRoute(widget: TabBarPage()),
-                      );
+                      FirebaseAuth.instance.signOut();
                     }),
                   ],
                 ),

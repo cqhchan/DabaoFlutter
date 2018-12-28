@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -8,7 +9,7 @@ import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
-import 'package:flutterdabao/Model/Route.dart';
+import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Model/User.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -36,12 +37,13 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<Order>> currentUserDeliveringOrdersProperty =
       MutableProperty<List<Order>>(List());
 
-  MutableProperty<List<Route>> currentUserOpenRoutesProperty =
-      MutableProperty<List<Route>>(List());
+  MutableProperty<List<DabaoRoute.Route>> currentUserOpenRoutesProperty =
+      MutableProperty<List<DabaoRoute.Route>>(List());
 
   MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
   MutableProperty<double> _globalFixedPrice = MutableProperty<double>(1.5);
   MutableProperty<int> _globalMinItemCount = MutableProperty<int>(2);
+  final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
   String error;
 
@@ -114,13 +116,13 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-  Observable<List<Route>> currentUserOpenRoutesProducer() {
+  Observable<List<DabaoRoute.Route>> currentUserOpenRoutesProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
-        ? List<Route>()
-        : FirebaseCollectionReactive<Route>(Firestore.instance
+        ? List<DabaoRoute.Route>()
+        : FirebaseCollectionReactive<DabaoRoute.Route>(Firestore.instance
                 .collection("routes")
-                .where(Route.statusKey, isEqualTo: routeStatus_Open)
-                .where(Route.creatorKey, isEqualTo: user.uid))
+                .where(DabaoRoute.Route.statusKey, isEqualTo: DabaoRoute.routeStatus_Open)
+                .where(DabaoRoute.Route.creatorKey, isEqualTo: user.uid))
             .observable);
   }
 
