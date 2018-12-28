@@ -1,9 +1,9 @@
 import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
+import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -14,8 +14,6 @@ import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ChatPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ViewMap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
@@ -87,10 +85,10 @@ class _AcceptedListState extends State<AcceptedList> {
                     return ConfigurableExpansionTile(
                       initiallyExpanded: false,
                       onExpansionChanged: (expanded) {
-                        setState(() {
-                          expandedFlag = expanded;
-                        });
                         order.toggle();
+                        setState(() {
+                          expandedFlag = order.isSelectedProperty.value;
+                        });
                       },
                       header: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -512,7 +510,7 @@ class _AcceptedListState extends State<AcceptedList> {
   }
 
   Widget _buildCollapsableLocationDescription(Order order) {
-    if (!expandedFlag) {
+    if (!order.isSelectedProperty.value) {
       return StreamBuilder<String>(
         stream: order.deliveryLocationDescription,
         builder: (context, snap) {
@@ -557,13 +555,9 @@ class _AcceptedListState extends State<AcceptedList> {
           return GestureDetector(
               child: Image.asset('assets/icons/google-maps.png'),
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => ViewMap(
-                              latitude: order.deliveryLocation.value.latitude,
-                              longitude: order.deliveryLocation.value.longitude,
-                            )));
+                LatLng temp = LatLng(snap.data.latitude, snap.data.longitude);
+
+                launchMaps(temp);
               });
         },
       ),
@@ -653,13 +647,13 @@ class _AcceptedListState extends State<AcceptedList> {
         ),
         onPressed: () {
           Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => ChatPage(
-                            order: order,
-                          ),
-                        ),
-                      );
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => ChatPage(
+                    order: order,
+                  ),
+            ),
+          );
         },
       ),
     );
@@ -687,13 +681,13 @@ class _AcceptedListState extends State<AcceptedList> {
         ),
         onPressed: () {
           Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => ChatPage(
-                            order: order,
-                          ),
-                        ),
-                      );
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => ChatPage(
+                    order: order,
+                  ),
+            ),
+          );
         },
       ),
     );
