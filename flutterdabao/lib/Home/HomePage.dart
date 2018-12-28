@@ -52,20 +52,26 @@ class _Home extends State<Home> {
     if (Platform.isIOS) iOS_Permission();
 
     _firebaseMessaging.getToken().then((token) {
+      print("testing Token ");
       print(token);
     });
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        
-        // ConfigHelper.instance.navigatorKey.currentState
-        //     .push(FadeRoute(widget: TabBarPage()));
+        ConfigHelper.instance.navigatorKey.currentState
+            .push(FadeRoute(widget: TabBarPage()));
       },
       onResume: (Map<String, dynamic> message) async {
-  
+
+        print ("onResume " + message.toString());
+        ConfigHelper.instance.navigatorKey.currentState
+            .push(FadeRoute(widget: TabBarPage()));
       },
       onLaunch: (Map<String, dynamic> message) async {
-        
+                print ("onLaunch " + message.toString());
+
+        ConfigHelper.instance.navigatorKey.currentState
+            .push(FadeRoute(widget: TabBarPage()));
       },
     );
   }
