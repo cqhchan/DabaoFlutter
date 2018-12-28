@@ -53,7 +53,7 @@ class BalanceCard extends StatelessWidget {
         // How much saved
         child: Container(
       child: StreamBuilder(
-        stream: user.data.amountSaved,
+        stream: user.data.email,
         builder: (BuildContext context, snapshot) => snapshot.hasData
             ? Center(
                 child: Column(
@@ -109,7 +109,7 @@ class BalanceCard extends StatelessWidget {
         // How much Earned
         child: Container(
       child: StreamBuilder(
-        stream: user.data.amountEarned,
+        stream: user.data.email,
         builder: (BuildContext context, snapshot) => snapshot.hasData
             ? Center(
                 child: Column(

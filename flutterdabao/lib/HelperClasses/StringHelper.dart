@@ -11,6 +11,15 @@ class StringHelper {
     }
   }
 
+
+  static bool validatePhoneNumber(String value) {
+    if (value.length != 8 || (value[0] != '8' && value[0] != '9')  || !isNumeric(value) ) {
+      return false;
+    }
+
+    return true;
+  }
+
   static String upperCaseWords(String str) {
     List<String> splitStr = str.toLowerCase().split(' ');
     for (var i = 0; i < splitStr.length; i++) {
