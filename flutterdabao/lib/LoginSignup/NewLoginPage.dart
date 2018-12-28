@@ -5,6 +5,7 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/MutableProperty.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutterdabao/LoginSignup/EntryTextField.dart';
+import 'package:flutter/services.dart';
 
 class NewLoginPage extends StatefulWidget {
   @override
@@ -35,6 +36,12 @@ class _NewLoginPageState extends State<NewLoginPage>
   String _email;
   String _password;
   TabController _tabController;
+
+  ////////////
+  //This is to check whether otp has been sent
+  //sms-PinTextBoxes, and text and color of"send OTP" button depends on this boolean
+  bool otpsent = false;
+
   @override
   Animation<double> animation;
   AnimationController _animationController;
@@ -45,8 +52,7 @@ class _NewLoginPageState extends State<NewLoginPage>
   bool emailLoginSelected = false;
   bool signUpSelected = false;
   bool mobileLoginSelected = false;
-
-  // _controller = AnimationController(vsync: this);
+  FocusNode _focusNode = FocusNode();
 
   Future<Null> _playAnimation() async {
     try {
@@ -71,6 +77,7 @@ class _NewLoginPageState extends State<NewLoginPage>
   }
 
   void initState() {
+    super.initState();
     _tabController = new TabController(vsync: this, initialIndex: 0, length: 2);
     _tabController.addListener(() {
       selectedTabProperty.value = _tabController.index;
@@ -82,8 +89,6 @@ class _NewLoginPageState extends State<NewLoginPage>
     );
     animation =
         Tween(begin: maxScale, end: minScale).animate(_animationController);
-
-    super.initState();
   }
 
   void _showSnackBar(message) {
@@ -93,6 +98,154 @@ class _NewLoginPageState extends State<NewLoginPage>
     _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 
+  //sign up page that shows up after signup button is pressed
+  Widget buildSignUpPage(){
+    return GestureDetector(
+      excludeFromSemantics: true,
+      onTap: _focusNode.unfocus,
+      child: Container(
+        color: Colors.transparent,
+        child: Column(children: <Widget>[
+          Container(
+              padding: EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                autovalidate: _autoValidate,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(height: 40.0),
+                      Text("Enter your Mobile Number",
+                          style: FontHelper.semiBold(Color(0xFF000000), 18)),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Flex(
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 7,
+                            child: Container(
+                              padding: EdgeInsets.only(left: 15.0, right: 15.0),
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12.0)),
+                                border: Border.all(color: Color(0xFF707070)),
+                              ),
+                              child: TextFormField(
+                                focusNode: _focusNode,
+
+                                //autofocus: true,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(8),
+                                ],
+                                onSaved: (value) {
+                                  setState(() {
+                                    phoneNo = "+65" + value;
+                                  });
+                                },
+                                validator: _validatePhoneNumber,
+                                keyboardType: TextInputType.number,
+                                style:
+                                    FontHelper.semiBold(Color(0xFF000000), 20),
+                                decoration: InputDecoration(
+                                  prefixText: "+65 ",
+                                  prefixStyle: FontHelper.semiBold(
+                                      Color(0xFF000000), 20),
+                                  hintText: '8-digit number',
+                                  hintStyle: FontHelper.semiBold(
+                                      Color(0xFFD0D0D0), 14),
+                                  fillColor: Colors.white,
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(flex: 1, child: SizedBox(width: 5)),
+                          Expanded(
+                              flex: 4,
+                              child: OutlineButton(
+                                  borderSide: otpsent
+                                      ? BorderSide(color: Colors.red[300])
+                                      : BorderSide(color: Color(0xFF707070)),
+                                  child: otpsent
+                                      ? Container(
+                                          child: Text('RESENT OTP',
+                                              style: FontHelper.semiBold(
+                                                  Colors.red[300], 14)))
+                                      : Container(
+                                          child: Text('SEND OTP',
+                                              style: FontHelper.semiBold(
+                                                  Color(0xFF454F63), 14))),
+                                  color: Color(0xFFFFFFFF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(30.0)),
+                                  ),
+                                  onPressed: () {
+                                    _validate();
+                                  })),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          otpsent == false
+                              ? SizedBox(
+                                  height: 20,
+                                )
+                              : Container(
+                                  height: 20,
+                                  child: Text(
+                                    "Verification code sent!",
+                                    style: FontHelper.semiBold(
+                                        Colors.red[300], 14),
+                                  ))
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            "Please enter the verification code sent to",
+                            style: FontHelper.semiBold(Color(0xFF454F63), 14),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            phoneNo,
+                            style: FontHelper.semiBold(Color(0xFF454F63), 14),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      PinEntryTextField(
+                        fieldHeight: 40.0,
+                        fieldWidth: 30.0,
+                        midGap: 15.0,
+                        enableTextField: otpsent,
+                        onSubmit: (String pin) {
+                          setState(() {
+                            this.smsCode = pin;
+                          });
+                          signInWithPhone();
+                        },
+                      ),
+                    ]),
+              )),
+        ]),
+      ),
+    );
+  }
+  //the default sign up page before the "Sign Me Up" button is selected
   Widget buildSignUpTab() {
     return Container(
         height: 200,
@@ -136,8 +289,11 @@ class _NewLoginPageState extends State<NewLoginPage>
         ));
   }
 
-  //////PHONE LOGIN AND SIGN UP/////////////////////////////////
+  //////////////////////////////////////////////////////////////
+  //////MOBILE LOGIN AND SIGN UP/////////////////////////////////
+  /////////////////////////////////////////////////////////////////
   Future<void> verifyPhone() async {
+    print("Herer");
     final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
       verificationId = verId;
     };
@@ -160,21 +316,14 @@ class _NewLoginPageState extends State<NewLoginPage>
         verificationFailed: veriFailed);
   }
 
-  //THIS IS THE CAUSE OF ERROR!!!!
-
+  //CAUTION!! This can shall only be called after OTP is sent, otherwise, app will crash
   signInWithPhone() async {
-    try{
-      print("HELLO");
     FirebaseAuth.instance
         .signInWithCredential(PhoneAuthProvider.getCredential(
             verificationId: verificationId, smsCode: smsCode))
         .catchError((e) {
-      _showSnackBar("Wrong Code");
+      _showSnackBar("Wrong Code! Please try again");
     });
-    } catch(e) {
-      print("HOHO");
-      _showSnackBar("Wrong Code");
-    }
   }
 
   void _validate() {
@@ -182,10 +331,10 @@ class _NewLoginPageState extends State<NewLoginPage>
     if (form.validate()) {
       // Text forms was validated.
       form.save();
-      // setState(() {
-      //   _inProgress = true;
-      // });
       verifyPhone();
+      setState(() {
+        otpsent = true;
+      });
     } else {
       setState(() => _autoValidate = true);
     }
@@ -198,154 +347,13 @@ class _NewLoginPageState extends State<NewLoginPage>
       return "Invalid Phone Number";
     }
   }
+  /////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////
 
-  //Sign up and Mobile Login Page
-  //Displayed after user selected login with mobile number or signup
-  Widget buildSignUpPage() {
-    return Container(
-        padding: EdgeInsets.symmetric(horizontal: 40.0),
-        child: Form(
-            key: _formKey,
-            autovalidate: _autoValidate,
-            child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
-              children: <Widget>[
-                SizedBox(height: 96.0),
-                Text('SIGNUP',
-                    style: Theme.of(context).textTheme.headline,
-                    textAlign: TextAlign.center),
-                SizedBox(height: 80.0),
-                Text(
-                  'Please Enter A Singapore Mobile Number',
-                  style: Theme.of(context).textTheme.title,
-                ),
-                SizedBox(height: 10.0),
-                Row(
-                  children: <Widget>[
-                    Text(
-                      '+65',
-                      style: Theme.of(context).textTheme.subhead,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'Enter Phone Number',
-                        ),
-                        onSaved: (value) {
-                          phoneNo = "+65" + value;
-                        },
-                        validator: _validatePhoneNumber,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.0),
-                RaisedButton(
-                  child: Text('SIGN UP'),
-                  color: Colors.orange[300],
-                  elevation: 8.0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                  ),
-                  onPressed: _validate,
-                ),
-              ],
-            )));
-  }
-
-  //Email Login Page
-  //Displayed after user pressed "Login with Email"
-  Widget buildEmailLoginPage() {
-    return Container(
-        padding: EdgeInsets.symmetric(horizontal: 40.0),
-        child: Column(
-          children: <Widget>[
-            SizedBox(height: 70.0),
-            Container(
-              padding: EdgeInsets.only(left: 15.0, right: 15.0),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Color(0xFF454F63)),
-              child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    _email = value;
-                  });
-                },
-                controller: _usernameController,
-                style: TextStyle(color: Color(0xFFD0D0D0)),
-                decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.email,
-                    color: Color(0xFFD0D0D0),
-                  ),
-                  hintText: 'Email',
-                  fillColor: Color(0xFFD0D0D0),
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
-            SizedBox(height: 12.0),
-            Container(
-              padding: EdgeInsets.only(left: 15.0, right: 15.0),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Color(0xFF454F63)),
-              child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    _password = value;
-                  });
-                },
-                controller: _passwordController,
-                style: FontHelper.semiBoldgrey16TextStyle,
-                obscureText: true,
-                decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.email,
-                    color: Color(0xFFD0D0D0),
-                  ),
-                  hintText: 'Password',
-                  fillColor: Color(0xFFD0D0D0),
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 50,
-            ),
-            RaisedButton(
-                child: Container(
-                  height: 40,
-                  child: Center(
-                    child: Text(
-                      'LOG IN',
-                      style: FontHelper.overlayHeader,
-                    ),
-                  ),
-                ),
-                color: Color(0xFFF5A510),
-                elevation: 2.5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                ),
-                onPressed: () {
-                  FirebaseAuth.instance
-                      .signInWithEmailAndPassword(
-                          email: _email, password: _password)
-                      .catchError((e) {
-                    _showSnackBar('Wrong username and password!');
-                    print(e);
-                  });
-                }),
-          ],
-        ));
-  }
-
+  ////////////////////////////////////////////////////////////////////
+  ////////////////////////LOGIN///////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////
+  //the default login page before any login buttons are selected
   Widget buildLoginTab() {
     return Container(
       height: 200,
@@ -409,134 +417,299 @@ class _NewLoginPageState extends State<NewLoginPage>
     );
   }
 
+  
   //Sign up and Mobile Login Page
   //Displayed after user selected login with mobile number or signup
   Widget buildMobileLoginPage() {
-    return Column(children: <Widget>[
-      Container(
-          padding: EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            autovalidate: _autoValidate,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(height: 70.0),
-                  Text("Enter your Mobile Number",
-                      style: FontHelper.semiBold(Color(0xFF000000), 18)),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Flex(
-                    direction: Axis.horizontal,
+    return GestureDetector(
+      excludeFromSemantics: true,
+      onTap: _focusNode.unfocus,
+      child: Container(
+        color: Colors.transparent,
+        child: Column(children: <Widget>[
+          Container(
+              padding: EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                autovalidate: _autoValidate,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Expanded(
-                        flex: 6,
-                        child: Container(
-                          padding: EdgeInsets.only(left: 15.0, right: 15.0),
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(12.0)),
-                            border: Border.all(color: Color(0xFF707070)),
-                          ),
-                          child: TextFormField(
-                            onSaved: (value) {
-                              setState(() {
-                                phoneNo = "+65" + value;
-                              });
-                            },
-                            validator: _validatePhoneNumber,
-                            keyboardType: TextInputType.number,
-                            style: FontHelper.semiBoldgrey16TextStyle,
-                            decoration: InputDecoration(
-                              prefixText: "+65 ",
-                              prefixStyle:
-                                  FontHelper.semiBold(Color(0xFF000000), 22),
-                              hintText: 'Mobile No.',
-                              fillColor: Colors.white,
-                              border: InputBorder.none,
+                      SizedBox(height: 40.0),
+                      Text("Enter your Mobile Number",
+                          style: FontHelper.semiBold(Color(0xFF000000), 18)),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Flex(
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 7,
+                            child: Container(
+                              padding: EdgeInsets.only(left: 15.0, right: 15.0),
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12.0)),
+                                border: Border.all(color: Color(0xFF707070)),
+                              ),
+                              child: TextFormField(
+                                focusNode: _focusNode,
+
+                                //autofocus: true,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(8),
+                                ],
+                                onSaved: (value) {
+                                  setState(() {
+                                    phoneNo = "+65" + value;
+                                  });
+                                },
+                                validator: _validatePhoneNumber,
+                                keyboardType: TextInputType.number,
+                                style:
+                                    FontHelper.semiBold(Color(0xFF000000), 20),
+                                decoration: InputDecoration(
+                                  prefixText: "+65 ",
+                                  prefixStyle: FontHelper.semiBold(
+                                      Color(0xFF000000), 20),
+                                  hintText: '8-digit number',
+                                  hintStyle: FontHelper.semiBold(
+                                      Color(0xFFD0D0D0), 14),
+                                  fillColor: Colors.white,
+                                  border: InputBorder.none,
+                                ),
+                              ),
                             ),
                           ),
+                          Expanded(flex: 1, child: SizedBox(width: 5)),
+                          Expanded(
+                              flex: 4,
+                              child: OutlineButton(
+                                  borderSide: otpsent
+                                      ? BorderSide(color: Colors.red[300])
+                                      : BorderSide(color: Color(0xFF707070)),
+                                  child: otpsent
+                                      ? Container(
+                                          child: Text('RESENT OTP',
+                                              style: FontHelper.semiBold(
+                                                  Colors.red[300], 14)))
+                                      : Container(
+                                          child: Text('SEND OTP',
+                                              style: FontHelper.semiBold(
+                                                  Color(0xFF454F63), 14))),
+                                  color: Color(0xFFFFFFFF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(30.0)),
+                                  ),
+                                  onPressed: () {
+                                    _validate();
+                                  })),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          otpsent == false
+                              ? SizedBox(
+                                  height: 20,
+                                )
+                              : Container(
+                                  height: 20,
+                                  child: Text(
+                                    "Verification code sent!",
+                                    style: FontHelper.semiBold(
+                                        Colors.red[300], 14),
+                                  ))
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            "Please enter the verification code sent to",
+                            style: FontHelper.semiBold(Color(0xFF454F63), 14),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            phoneNo,
+                            style: FontHelper.semiBold(Color(0xFF454F63), 14),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      PinEntryTextField(
+                        fieldHeight: 40.0,
+                        fieldWidth: 30.0,
+                        midGap: 15.0,
+                        enableTextField: otpsent,
+                        onSubmit: (String pin) {
+                          setState(() {
+                            this.smsCode = pin;
+                          });
+                          signInWithPhone();
+                        },
+                      ),
+                      SizedBox(height: 20,),
+                      RaisedButton(
+                    child: Container(
+                      height: 40,
+                      child: Center(
+                        child: Text(
+                          'Email Login',
+                          style: FontHelper.overlayHeader,
                         ),
                       ),
-                      Expanded(flex: 1, child: SizedBox(width: 5)),
-                      Expanded(
-                          flex: 4,
-                          child: OutlineButton(
-                            borderSide: BorderSide(color: Color(0xFF707070)),
-                            child: Container(
-                                child: Text('SEND OTP',
-                                    style: FontHelper.semiBold(
-                                        Color(0xFF454F63), 14))),
-                            color: Color(0xFFFFFFFF),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30.0)),
-                            ),
-                            onPressed: _validate,
-                          )),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        "Please enter the verification code sent to",
-                        style: FontHelper.semiBold(Color(0xFF454F63), 14),
-                      )
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        phoneNo,
-                        style: FontHelper.semiBold(Color(0xFF454F63), 14),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  PinEntryTextField(
-                    fieldHeight: 40.0,
-                    fieldWidth: 30.0,
-                    midGap: 15.0,
-                    onSubmit: (String pin) {
-                      print(pin);
+                    ),
+                    color: ColorHelper.dabaoGreyE0,
+                    elevation: 2.5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                    ),
+                    onPressed: () {
                       setState(() {
-                        this.smsCode = pin;
+                        mobileLoginSelected = false;
+                        emailLoginSelected = true;
                       });
-                      print(pin);
-                      signInWithPhone();
+                    }),
+                    ]),
+              )),
+        ]),
+      ),
+    );
+  }
+
+  //Email Login Page
+  //Displayed after user pressed "Login with Email"
+  Widget buildEmailLoginPage() {
+    return GestureDetector(
+        excludeFromSemantics: true,
+        onTap: _focusNode.unfocus,
+        child: Container(
+            color: Colors.transparent,
+            padding: EdgeInsets.symmetric(horizontal: 40.0),
+            child: Column(
+              children: <Widget>[
+                SizedBox(height: 70.0),
+                Container(
+                  padding: EdgeInsets.only(left: 15.0, right: 15.0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      color: Color(0xFF454F63)),
+                  child: TextField(
+                    focusNode: _focusNode,
+                    onChanged: (value) {
+                      setState(() {
+                        _email = value;
+                      });
                     },
+                    controller: _usernameController,
+                    style: FontHelper.semiBold(Color(0xFFD0D0D0), 16),
+                    decoration: InputDecoration(
+                      icon: Icon(
+                        Icons.email,
+                        color: Color(0xFFD0D0D0),
+                      ),
+                      hintText: 'Email',
+                      hintStyle: TextStyle(color: Color(0xFFD0D0D0)),
+                      fillColor: Color(0xFFD0D0D0),
+                      border: InputBorder.none,
+                    ),
                   ),
-                ]),
-          ))
-    ]);
+                ),
+                SizedBox(height: 12.0),
+                Container(
+                  padding: EdgeInsets.only(left: 15.0, right: 15.0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      color: Color(0xFF454F63)),
+                  child: TextField(
+                    focusNode: _focusNode,
+                    onChanged: (value) {
+                      setState(() {
+                        _password = value;
+                      });
+                    },
+                    controller: _passwordController,
+                    style: FontHelper.semiBoldgrey16TextStyle,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      icon: Icon(
+                        Icons.email,
+                        color: Color(0xFFD0D0D0),
+                      ),
+                      hintText: 'Password',
+                      hintStyle: TextStyle(color: Color(0xFFD0D0D0)),
+                      fillColor: Color(0xFFD0D0D0),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 50,
+                ),
+                RaisedButton(
+                    child: Container(
+                      height: 40,
+                      child: Center(
+                        child: Text(
+                          'LOG IN',
+                          style: FontHelper.overlayHeader,
+                        ),
+                      ),
+                    ),
+                    color: Color(0xFFF5A510),
+                    elevation: 2.5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                    ),
+                    onPressed: () {
+                      FirebaseAuth.instance
+                          .signInWithEmailAndPassword(
+                              email: _email, password: _password)
+                          .catchError((e) {
+                        _showSnackBar('Wrong username and password!');
+                        print(e);
+                      });
+                    }),
+                RaisedButton(
+                    child: Container(
+                      height: 40,
+                      child: Center(
+                        child: Text(
+                          'Mobile Login',
+                          style: FontHelper.overlayHeader,
+                        ),
+                      ),
+                    ),
+                    color: ColorHelper.dabaoGreyE0,
+                    elevation: 2.5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        mobileLoginSelected = true;
+                        emailLoginSelected = false;
+                      });
+                    }),
+              ],
+            )));
   }
+  ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
 
-  Widget loginTabLogic() {
-    if (emailLoginSelected) {
-      return buildEmailLoginPage();
-    } else if (mobileLoginSelected) {
-      return buildMobileLoginPage();
-    } else {
-      return buildLoginTab();
-    }
-  }
-
-  Widget signUpTabLogic() {
-    if (signUpSelected) {
-      return buildMobileLoginPage();
-    } else {
-      return buildSignUpTab();
-    }
-  }
-
+  //The back arrow that appears when either login with mobile/login with email/sign up is selected
   Widget backArrow() {
     if (mobileLoginSelected || emailLoginSelected || signUpSelected) {
       return Positioned(
@@ -553,9 +726,31 @@ class _NewLoginPageState extends State<NewLoginPage>
                 });
               }));
     } else {
-      return Positioned(
-          //this is just a placeholder
-          child: Text(""));
+      //this is just a placeholder
+      //facilitate the disappearance of the back arrow when none of the buttons are selected
+      return Positioned(child: Text(""));
+    }
+  }
+
+  //Handles the content within the Log In tab
+  //display depends on whether user selected either login buttons
+  Widget loginTabLogic() {
+    if (emailLoginSelected) {
+      return buildEmailLoginPage();
+    } else if (mobileLoginSelected) {
+      return buildMobileLoginPage();
+    } else {
+      return buildLoginTab();
+    }
+  }
+
+  //Handles the content within the Sign Up tab
+  //display depends on whether user selected the sign up button
+  Widget signUpTabLogic() {
+    if (signUpSelected) {
+      return buildSignUpPage();
+    } else {
+      return buildSignUpTab();
     }
   }
 
@@ -575,14 +770,10 @@ class _NewLoginPageState extends State<NewLoginPage>
                         height: animation.value *
                             (MediaQuery.of(context).size.height - 250),
                         width: MediaQuery.of(context).size.width,
-                        // child: ScaleTransition(
-                        // scale: animation,
                         child: Image.asset(
-                          'assets/images/splashbg.png',
+                          'assets/images/splashbgLoginpage.png',
                           fit: BoxFit.cover,
-                        )
-                        // ),
-                        );
+                        ));
                   },
                 ),
               ),
@@ -591,8 +782,9 @@ class _NewLoginPageState extends State<NewLoginPage>
                   children: <Widget>[
                     Stack(children: <Widget>[
                       TabBar(
+                        unselectedLabelColor: Color(0xFFD0D0D0),
                         controller: _tabController,
-                        labelStyle: FontHelper.header3TextStyle,
+                        labelStyle: FontHelper.semiBold(Color(0xFF333333), 18),
                         tabs: [
                           Tab(
                               icon: Icon(Icons.add_to_home_screen),

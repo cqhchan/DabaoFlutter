@@ -71,6 +71,7 @@ class _VerifyPhoneNumberPageState extends State<VerifyPhoneNumberPage> {
     };
 
     await FirebaseAuth.instance.verifyPhoneNumber(
+        linkCredentials: true,
         phoneNumber: phoneNo,
         codeAutoRetrievalTimeout: autoRetrieve,
         codeSent: smsCodeSent,
