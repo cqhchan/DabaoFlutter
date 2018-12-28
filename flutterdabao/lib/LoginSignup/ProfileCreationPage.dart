@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
-import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -14,6 +12,10 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 class ProfileCreationPage extends StatefulWidget {
+  final VoidCallback onCompleteCallback;
+
+  const ProfileCreationPage({Key key, this.onCompleteCallback})
+      : super(key: key);
   @override
   _ProfileCreationPageState createState() => _ProfileCreationPageState();
 }
@@ -21,13 +23,7 @@ class ProfileCreationPage extends StatefulWidget {
 class _ProfileCreationPageState extends State<ProfileCreationPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String _name;
-  String _phoneNumber;
-  String _email;
-  String _password;
-  bool passwordVisibility = true;
-  String verificationId;
-  String smsCode;
+  final _nameController = TextEditingController();
   File _image;
   File _thumbnail;
   //for loading spinner, appears if true, hidden if false
@@ -37,11 +33,6 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.currentUser().then((user) {
-      setState(() {
-        _phoneNumber = user.phoneNumber;
-      });
-    });
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -125,89 +116,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       }
     });
   }
-  ///////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////
 
-  ///////////////////////////////////////////////////////////////////////////////
-  //TO DEAL WITH "ERROR_REQUIRES_RECENT_LOGIN" EXCEPTION/////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////
-  Future<void> verifyPhone() async {
-    final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
-      verificationId = verId;
-    };
-    final PhoneCodeSent smsCodeSent = (String verId, [int forceCodeResend]) {
-      verificationId = verId;
-      smsCodeDialog(context).then((value) {
-        print('Signed in');
-      });
-    };
-    final PhoneVerificationCompleted verifiedSuccess = (FirebaseUser user) {
-      print('verified');
-    };
-    final PhoneVerificationFailed veriFailed = (AuthException exception) {
-      print('${exception.message}');
-    };
-
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: _phoneNumber,
-        codeAutoRetrievalTimeout: autoRetrieve,
-        codeSent: smsCodeSent,
-        timeout: Duration(seconds: 5),
-        verificationCompleted: verifiedSuccess,
-        verificationFailed: veriFailed);
-  }
-
-  Future<bool> smsCodeDialog(BuildContext context) {
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return new AlertDialog(
-            title: Text('Enter sms Code'),
-            content: TextField(
-              onChanged: (value) {
-                this.smsCode = value;
-              },
-            ),
-            contentPadding: EdgeInsets.all(10.0),
-            actions: <Widget>[
-              new FlatButton(
-                child: Text('Verify'),
-                onPressed: () {
-                  FirebaseAuth.instance.currentUser().then((user) {
-                    //only need to signIn if verification is not done automatically
-                    if (user == null) {
-                      //Navigator.of(context).pop();
-                      Navigator.of(context)
-                          .pop(); //To get rid of smsCodeDialog before moving on.
-                      signIn();
-                      //Quick fix to profile page because app.dart didn't direct me to signup like it's suppose to
-                      /*
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProfileCreationPage())
-                      );
-                      */
-                    }
-                  });
-                },
-              )
-            ],
-          );
-        });
-  }
-
-  signIn() async {
-    FirebaseAuth.instance
-        .signInWithCredential(PhoneAuthProvider.getCredential(
-            verificationId: verificationId, smsCode: smsCode))
-        .then((user) {})
-        .catchError((e) {
-      print(e);
-    }).catchError((e) {
-      print(e);
-    });
-  }
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
 
@@ -215,9 +124,15 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   //PROFILE CREATION FUNCTIONS///////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
   void createProfile() {
-    //if-else statements prevent user from proceeding further if they have not filled up credentials properly yet
+    //if-else statements prevent user from proceeding further if they have not filled up credentials properly yet'
+    print("it came here");
     if (_image == null) {
       _showSnackBar("Please upload a profile image");
+      return;
+    }
+
+    if (_nameController.text == null) {
+      _showSnackBar("Please add a name");
       return;
     }
 
@@ -226,39 +141,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       _inProgress = true;
     });
 
-    //setting email first. In this function, it will call upload image
-    addEmailCredentials();
-
-    //Deactivating loading spinner
-    setState(() {
-      _inProgress = false;
-    });
-  }
-
-  //only works if you are creating a new account
-  void addEmailCredentials() {
-    //FirebaseAuth.instance.crea
-    FirebaseAuth.instance
-        .linkWithCredential(
-            EmailAuthProvider.getCredential(email: _email, password: _password))
-        .then((user) {
-      uploadImages(); //only upload image and set information into firestore if email credentials are valid
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
-    }).catchError((PlatformException e) {
-      if (e.code == "ERROR_PROVIDER_ALREADY_LINKED" ||
-          e.code == "ERROR_CREDENTIAL_ALREADY_IN_USE") {
-        print(e);
-        _showSnackBar("Email is already in use!");
-      } else if (e.code == "ERROR_REQUIRES_RECENT_LOGIN") {
-        print(e);
-        verifyPhone();
-      } else {
-        print(e);
-      }
-    });
+    uploadImages();
   }
 
   //Pre-condition: Called only when _image has been sethg
@@ -281,31 +164,47 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
             thumbnailRef.ref.getDownloadURL().then((thumbnailLink) {
               FirebaseAuth.instance.currentUser().then((user) {
                 ConfigHelper.instance.currentUserProperty.value.setUser(
-                    _email,
-                    0,
-                    0,
-                    profileLink,
-                    _name,
-                    user.metadata.creationTimestamp,
-                    user.metadata.lastSignInTimestamp,
-                    thumbnailLink,
-                    _phoneNumber);
+                  profileLink,
+                  _nameController.text,
+                  user.metadata.creationTimestamp,
+                  user.metadata.lastSignInTimestamp,
+                  thumbnailLink,
+                );
+                widget.onCompleteCallback();
               }).catchError((e) {
+                setState(() {
+                  _inProgress = false;
+                });
                 print(e);
               });
             }).catchError((e) {
+              setState(() {
+                _inProgress = false;
+              });
               print(e);
             });
           }).catchError((e) {
+            setState(() {
+              _inProgress = false;
+            });
             print(e);
           });
         }).catchError((e) {
+          setState(() {
+            _inProgress = false;
+          });
           print(e);
         });
       }).catchError((e) {
+        setState(() {
+          _inProgress = false;
+        });
         print(e);
       });
     }).catchError((e) {
+      setState(() {
+        _inProgress = false;
+      });
       print(e);
     });
   }
@@ -325,93 +224,53 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     showModalBottomSheet(
         context: context,
         builder: (builder) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                title: Text(
-                  'Please select your source:',
-                  style: Theme.of(context).textTheme.title,
+          return Container(
+            color: Colors.white,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListTile(
+                  title: Text(
+                    'Please select your source:',
+                    style: Theme.of(context).textTheme.title,
+                  ),
                 ),
-              ),
-              ListTile(
-                leading: Icon(Icons.camera),
-                title: Text('Camera'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  getImageFromCamera();
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.photo_album),
-                title: Text('Photos'),
-                onTap: () {
-                  Navigator.of(context).pop();
-
-                  getImageFromGallery();
-                },
-              ),
-              ListTile(
-                  leading: Icon(Icons.cancel),
-                  title: Text('Cancel'),
+                ListTile(
+                  leading: Icon(Icons.camera),
+                  title: Text('Camera'),
                   onTap: () {
                     Navigator.of(context).pop();
-                  }),
-              SizedBox(
-                height: 20,
-              ),
-            ],
+                    getImageFromCamera();
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo_album),
+                  title: Text('Photos'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+
+                    getImageFromGallery();
+                  },
+                ),
+                ListTile(
+                    leading: Icon(Icons.cancel),
+                    title: Text('Cancel'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    }),
+                SizedBox(
+                  height: 20,
+                ),
+              ],
+            ),
           );
         });
-  }
-
-  void _validate() {
-    final form = _formKey.currentState;
-    if (form.validate()) {
-      // Text forms was validated.
-      form.save();
-      createProfile();
-    } else {
-      setState(() => _autoValidate = true);
-    }
   }
 
   String _validateName(String value) {
     if (value.isEmpty) {
       return "Enter your name";
     }
-  }
-
-  String _validatePassword(String value) {
-    if (value.isEmpty) {
-      return "Enter your password";
-    } else if (value.length < 7) {
-      return "Password must be at least 7 characters long";
-    }
-  }
-
-  String _validateEmail(String value) {
-    if (value.isEmpty) {
-      // The form is empty
-      return "Enter email address";
-    }
-    // This is just a regular expression for email addresses
-    String p = "[a-zA-Z0-9\+\.\_\%\-\+]{1,256}" +
-        "\\@" +
-        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-        "(" +
-        "\\." +
-        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-        ")+";
-    RegExp regExp = new RegExp(p);
-
-    if (regExp.hasMatch(value)) {
-      // So, the email is valid
-      return null;
-    }
-
-    // The pattern of the email didn't match the regex above.
-    return 'Pleas enter a valid email address';
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -452,93 +311,28 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(children: <Widget>[
-                    TextField(
-                      enabled: false,
-                      decoration: InputDecoration(
-                        labelText: _phoneNumber,
-                      ),
-                    ),
                     TextFormField(
-                      onSaved: (value) {
-                        _name = value;
-                      },
+                      controller: _nameController,
                       decoration: InputDecoration(
                         labelText: 'Name',
                       ),
                       validator: _validateName,
                     ),
-                    TextFormField(
-                      onSaved: (value) {
-                        _email = value;
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Email Address',
-                      ),
-                      validator: _validateEmail,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    Container(
-                        child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: TextFormField(
-                            onSaved: (value) {
-                              _password = value;
-                            },
-                            decoration: InputDecoration(
-                              labelText: 'Password',
-                            ),
-                            obscureText: passwordVisibility,
-                            validator: _validatePassword,
-                          ),
-                        ),
-                        GestureDetector(
-                            onTap: () {
-                              if (passwordVisibility == false) {
-                                setState(() {
-                                  passwordVisibility = true;
-                                });
-                              } else {
-                                setState(() {
-                                  passwordVisibility = false;
-                                });
-                              }
-                            },
-                            child: passwordVisibility == true
-                                ? Icon(Icons.visibility)
-                                : Icon(Icons.visibility_off)),
-                      ],
-                    )),
                     SizedBox(height: 50.0),
-                    /* FOR DEBUGGING PURPOSES
                     RaisedButton(
-                        child: Container(
-                          height: 40,
-                          child: Center(
-                            child: Text('Logout'),
-                          ),
+                      child: Container(
+                        height: 40,
+                        child: Center(
+                          child: Text('Create Profile'),
                         ),
-                        color: ColorHelper.dabaoGreyE0,
-                        elevation: 5.0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                        ),
-                        onPressed: () {
-                          FirebaseAuth.instance.signOut();
-                        }),*/
-                    RaisedButton(
-                        child: Container(
-                          height: 40,
-                          child: Center(
-                            child: Text('Create Profile'),
-                          ),
-                        ),
-                        color: ColorHelper.dabaoOrange,
-                        elevation: 5.0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                        ),
-                        onPressed: _validate),
+                      ),
+                      color: ColorHelper.dabaoOrange,
+                      elevation: 5.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      ),
+                      onPressed: createProfile,
+                    )
                   ]),
                 ),
               ],

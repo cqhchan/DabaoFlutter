@@ -9,7 +9,7 @@ Future<T> showLoadingOverlay<T>({
 }) {
   assert(debugCheckHasMaterialLocalizations(context));
 
-  return Navigator.of(context, rootNavigator: true)
+  return Navigator.of(context,)
       .push<T>(CustomOverlayRoute<T>(
     builder: (context) {
       return LoadingPage(transparent: true,);

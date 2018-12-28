@@ -4,10 +4,8 @@ import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
-import 'package:flutterdabao/LoginSignup/NewLoginPage.dart';
-import 'package:flutterdabao/LoginSignup/ProcessingPage.dart';
 import 'package:flutterdabao/LoginSignup/LoginPage.dart';
-
+import 'package:flutterdabao/LoginSignup/ProcessingPage.dart';
 import 'package:flutterdabao/Model/User.dart';
 
 class DabaoApp extends StatelessWidget {
@@ -39,12 +37,13 @@ class DabaoApp extends StatelessWidget {
               //This line of code sets the current user in ConfigHelper
               User user = User.fromAuth(snapshot.data);
               //Check if its logged in
+              
               return ProcessingPage(user);
             } else {
               return Navigator(onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(builder: (context) {
                   //return LoginPage();
-                  return NewLoginPage();
+                  return LoginPage();
                 });
               });
             }
