@@ -13,7 +13,6 @@ import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ChatPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ViewMap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
@@ -69,11 +68,8 @@ class _OrderListState extends State<OrderList> {
         margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
         child: Wrap(
           children: <Widget>[
-            StreamBuilder(
-              stream: order.deliveryLocationDescription,
-              builder: (context, snap) {
-                if (!snap.hasData) return Offstage();
-                return ConfigurableExpansionTile(
+        
+                ConfigurableExpansionTile(
                   initiallyExpanded: false,
                   onExpansionChanged: (expanded) {
                      order.toggle();
@@ -154,9 +150,7 @@ class _OrderListState extends State<OrderList> {
                       ],
                     )
                   ],
-                );
-              },
-            ),
+                ),
             StreamBuilder<bool>(
               stream: order.isSelectedProperty.producer,
               builder: (context, snapshot) {
@@ -603,14 +597,14 @@ class _OrderListState extends State<OrderList> {
           ],
         ),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) => ChatPage(
-                    order: order,
-                  ),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (BuildContext context) => ChatPage(
+          //           order: order,
+          //         ),
+          //   ),
+          // );
         },
       ),
     );

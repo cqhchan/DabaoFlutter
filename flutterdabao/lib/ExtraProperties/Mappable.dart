@@ -3,7 +3,9 @@ import 'package:flutterdabao/CustomError/FatalError.dart';
 import 'package:flutterdabao/CustomWidget/Headers/Category.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
+import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
+import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/Route.dart';
@@ -58,6 +60,14 @@ abstract class Mappable extends Identifiable {
 
     if (T == Route) {
       return new Route.fromDocument(doc) as T;
+    }
+
+    if (T == Channel) {
+      return new Channel.fromDocument(doc) as T;
+    }
+
+    if (T == Message) {
+      return new Message.fromDocument(doc) as T;
     }
 
     throw FatalError("Mappable Not Declared");

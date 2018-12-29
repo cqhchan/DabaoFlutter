@@ -5,10 +5,12 @@ import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
+import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
@@ -34,7 +36,8 @@ class AcceptedList extends StatefulWidget {
 class _AcceptedListState extends State<AcceptedList> {
   bool expandedFlag = false;
 
-  // Current User Location
+  LatLng saveLocation;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,101 +75,95 @@ class _AcceptedListState extends State<AcceptedList> {
             height: 9,
             decoration: BoxDecoration(
                 color: ColorHelper.dabaoOrange,
-                borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10))),
           ),
           Container(
             margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
             child: Wrap(
               children: <Widget>[
-                StreamBuilder(
-                  stream: order.deliveryLocationDescription,
-                  builder: (context, snap) {
-                    if (!snap.hasData) return Offstage();
-                    return ConfigurableExpansionTile(
-                      initiallyExpanded: false,
-                      onExpansionChanged: (expanded) {
-                        order.toggle();
-                        setState(() {
-                          expandedFlag = order.isSelectedProperty.value;
-                        });
-                      },
-                      header: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          _buildHeader(order),
-                          Container(
-                            constraints: BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width - 50),
-                            child: Flex(
-                              direction: Axis.horizontal,
-                              children: <Widget>[
-                                Expanded(
-                                  flex: 5,
-                                  child: _buildDeliveryPeriod(order),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 6.0),
-                                    child: _buildQuantity(order),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 17.0,
-                          ),
-                          Container(
-                            constraints: BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width - 50),
-                            child: Flex(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              direction: Axis.horizontal,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    right: 2,
-                                  ),
-                                  child: Container(
-                                    height: 30,
-                                    child: Image.asset(
-                                        "assets/icons/red_marker_icon.png"),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 4,
-                                  child: _buildLocationDescription(order),
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: _buildTapToLocation(order),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          )
-                        ],
-                      ),
-                      children: <Widget>[
-                        Column(
+                ConfigurableExpansionTile(
+                  initiallyExpanded: false,
+                  onExpansionChanged: (expanded) {
+                    order.toggle();
+                    setState(() {
+                      expandedFlag = order.isSelectedProperty.value;
+                    });
+                  },
+                  header: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      _buildHeader(order),
+                      Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width - 50),
+                        child: Flex(
+                          direction: Axis.horizontal,
                           children: <Widget>[
-                            _buildOrderItems(order),
-                            SizedBox(
-                              height: 8,
+                            Expanded(
+                              flex: 5,
+                              child: _buildDeliveryPeriod(order),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 6.0),
+                                child: _buildQuantity(order),
+                              ),
                             ),
                           ],
-                        )
+                        ),
+                      ),
+                      SizedBox(
+                        height: 17.0,
+                      ),
+                      Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width - 50),
+                        child: Flex(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          direction: Axis.horizontal,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: 2,
+                              ),
+                              child: Container(
+                                height: 30,
+                                child: Image.asset(
+                                    "assets/icons/red_marker_icon.png"),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: _buildLocationDescription(order),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: _buildTapToLocation(order),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      )
+                    ],
+                  ),
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        _buildOrderItems(order),
+                        SizedBox(
+                          height: 8,
+                        ),
                       ],
-                    );
-                  },
+                    )
+                  ],
                 ),
                 StreamBuilder<bool>(
                   stream: order.isSelectedProperty.producer,
@@ -482,6 +479,8 @@ class _AcceptedListState extends State<AcceptedList> {
                     widget.location.longitude != null &&
                     snap.data.latitude != null &&
                     snap.data.longitude != null) {
+                  saveLocation = LatLng(
+                      widget.location.latitude, widget.location.longitude);
                   return Container(
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width - 180),
@@ -646,14 +645,13 @@ class _AcceptedListState extends State<AcceptedList> {
           ],
         ),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) => ChatPage(
-                    order: order,
-                  ),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (BuildContext context) =>
+          //         ChatPage(order: order, location: saveLocation),
+          //   ),
+          // );
         },
       ),
     );
@@ -679,15 +677,33 @@ class _AcceptedListState extends State<AcceptedList> {
             ),
           ],
         ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) => ChatPage(
-                    order: order,
-                  ),
-            ),
-          );
+        onPressed: () async {
+          Channel channel = Channel.fromUID(
+              order.uid + ConfigHelper.instance.currentUserProperty.value.uid);
+          Firestore.instance
+              .collection("channels")
+              .document(channel.uid)
+              .setData(
+            {
+              "LS": DateTimeHelper.convertDateTimeToString(DateTime.now()),
+              "O": order.uid,
+              "P": [
+                ConfigHelper.instance.currentUserProperty.value.uid,
+                order.creator.value
+              ],
+            },
+            merge: true,
+          ).then((_) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => ChatPage(
+                      channel: channel,
+                      location: widget.location,
+                    ),
+              ),
+            );
+          });
         },
       ),
     );

@@ -6,6 +6,7 @@ import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
+import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart';
@@ -14,6 +15,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ConfigHelper with HavingSubscriptionMixin {
+
   MutableProperty<User> currentUserProperty = MutableProperty<User>(null);
 
   MutableProperty<LatLng> currentLocationProperty =
@@ -149,7 +151,9 @@ class ConfigHelper with HavingSubscriptionMixin {
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
-                .where(Order.deliveryTimeKey, isGreaterThan: DateTimeHelper.convertDateTimeToString(DateTime.now().add(Duration(days: -2))))
+                .where(Order.deliveryTimeKey,
+                    isGreaterThan: DateTimeHelper.convertDateTimeToString(
+                        DateTime.now().add(Duration(days: -2))))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
             .observable);

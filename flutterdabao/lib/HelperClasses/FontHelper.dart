@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class FontHelper {
+  static const TextStyle semiBoldBrown14TextStyle = TextStyle(
+      color: Color(0xFF93622D),
+      fontSize: 14.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
   static const TextStyle semiBoldgrey14TextStyle = TextStyle(
       color: Color(0xFF9B9B9B),
       fontSize: 14.0,
@@ -110,6 +116,12 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
+       static const TextStyle semiBold12White = TextStyle(
+      color: Colors.white,
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
   static const TextStyle semiBold14White = TextStyle(
       color: Colors.white,
       fontSize: 14.0,
@@ -145,6 +157,24 @@ class FontHelper {
       fontSize: 14.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
+      fontFamily: "SF_UI_Display");
+       static const TextStyle regular15LightGrey = TextStyle(
+      color: Color(0xFF4A4A4A),
+      fontSize: 15.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w400,
+      fontFamily: "SF_UI_Display");
+        static const TextStyle regular15Grey = TextStyle(
+      color: Color(0xFF9B9B9B),
+      fontSize: 15.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontFamily: "SF_UI_Display");
+      static const TextStyle regular15Black = TextStyle(
+      color: Color(0xff4A4A4A),
+      fontSize: 15.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
       fontFamily: "SF_UI_Display");
   static const TextStyle regular10Black = TextStyle(
       color: Colors.black,
