@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -24,7 +25,7 @@ class ChatPage extends StatefulWidget {
   _ChatPageState createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
   MutableProperty<Order> order = MutableProperty(null);
 
   final _textController = TextEditingController();
@@ -41,10 +42,17 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+    print(widget.channel.uid);
 
-    order.bindTo(widget.channel.orderUid
+    widget.channel.listOfMessages.listen((onData){
+
+      print(onData.toString());
+      print(onData.length);
+
+    });
+     subscription.add(order.bindTo(widget.channel.orderUid
         .where((uid) => uid != null)
-        .map((uid) => Order.fromUID(uid)));
+        .map((uid) => Order.fromUID(uid))));
   }
 
   @override
@@ -648,10 +656,9 @@ class _ChatPageState extends State<ChatPage> {
       stream: widget.channel.listOfMessages,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Text('no data');
-        // return Text(snapshot.data);
         // return Text(snapshot.data.toString());
-        // print(snapshot.data);
-        // print(snapshot.data.length);
+        print(snapshot.data);
+        print(snapshot.data.length);
 
         return _buildList(context, snapshot.data);
 
@@ -732,4 +739,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+}
+
+class HavingSubscriptionMixing {
 }
