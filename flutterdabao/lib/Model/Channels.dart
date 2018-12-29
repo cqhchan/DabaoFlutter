@@ -58,11 +58,15 @@ class Channel extends FirebaseType with Selectable {
     }
   }
 
-  addMessage(String message) {
+  addMessage(String message, String sender) {
     Firestore.instance
         .collection(className)
-        .document(uid)
+        .document(this.uid)
         .collection('messages')
-        .add({"M": message});
+        .add({
+      "M": message,
+      "S": sender,
+      "T": DateTimeHelper.convertDateTimeToString(DateTime.now()),
+    });
   }
 }

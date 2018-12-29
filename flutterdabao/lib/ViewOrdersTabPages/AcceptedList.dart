@@ -645,13 +645,7 @@ class _AcceptedListState extends State<AcceptedList> {
           ],
         ),
         onPressed: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (BuildContext context) =>
-          //         ChatPage(order: order, location: saveLocation),
-          //   ),
-          // );
+          _toChat(order);
         },
       ),
     );
@@ -678,32 +672,7 @@ class _AcceptedListState extends State<AcceptedList> {
           ],
         ),
         onPressed: () async {
-          Channel channel = Channel.fromUID(
-              order.uid + ConfigHelper.instance.currentUserProperty.value.uid);
-          Firestore.instance
-              .collection("channels")
-              .document(channel.uid)
-              .setData(
-            {
-              "LS": DateTimeHelper.convertDateTimeToString(DateTime.now()),
-              "O": order.uid,
-              "P": [
-                ConfigHelper.instance.currentUserProperty.value.uid,
-                order.creator.value
-              ],
-            },
-            merge: true,
-          ).then((_) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => ChatPage(
-                      channel: channel,
-                      location: widget.location,
-                    ),
-              ),
-            );
-          });
+          _toChat(order);
         },
       ),
     );
@@ -718,5 +687,31 @@ class _AcceptedListState extends State<AcceptedList> {
             route: widget.route,
           );
         });
+  }
+
+  _toChat(Order order) {
+    Channel channel = Channel.fromUID(
+        order.uid + ConfigHelper.instance.currentUserProperty.value.uid);
+    Firestore.instance.collection("channels").document(channel.uid).setData(
+      {
+        "LS": DateTimeHelper.convertDateTimeToString(DateTime.now()),
+        "O": order.uid,
+        "P": [
+          ConfigHelper.instance.currentUserProperty.value.uid,
+          order.creator.value
+        ],
+      },
+      merge: true,
+    ).then((_) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => ChatPage(
+                channel: channel,
+                location: widget.location,
+              ),
+        ),
+      );
+    });
   }
 }

@@ -15,7 +15,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ConfigHelper with HavingSubscriptionMixin {
-
   MutableProperty<User> currentUserProperty = MutableProperty<User>(null);
 
   MutableProperty<LatLng> currentLocationProperty =

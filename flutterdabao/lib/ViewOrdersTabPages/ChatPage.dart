@@ -4,6 +4,7 @@ import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
@@ -25,32 +26,30 @@ class ChatPage extends StatefulWidget {
   _ChatPageState createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
+class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
   MutableProperty<Order> order = MutableProperty(null);
 
   final _textController = TextEditingController();
 
-  bool expandFlag = false;
+  ScrollController _scrollController = ScrollController();
+
+  bool expandFlag;
+
+  bool expansionFlag;
 
   @override
   void dispose() {
     // TODO: implement dispose
     _textController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    print(widget.channel.uid);
-
-    widget.channel.listOfMessages.listen((onData){
-
-      print(onData.toString());
-      print(onData.length);
-
-    });
-     subscription.add(order.bindTo(widget.channel.orderUid
+    expandFlag = false;
+    subscription.add(order.bindTo(widget.channel.orderUid
         .where((uid) => uid != null)
         .map((uid) => Order.fromUID(uid))));
   }
@@ -150,6 +149,7 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         _buildTop(),
+        _buildMessages(),
         _buildInput(),
       ],
     );
@@ -163,8 +163,6 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
           child: _buildCard(),
         ),
         _buildButtons(),
-        _buildMessages(),
-        // _buildFreq(),
       ],
     );
   }
@@ -204,10 +202,10 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
                         return ConfigurableExpansionTile(
                           initiallyExpanded: false,
                           onExpansionChanged: (expanded) {
-                            // order.toggle();
-                            // setState(() {
-                            //   expandedFlag = order.isSelectedProperty.value;
-                            // });
+                            widget.channel.toggle();
+                            setState(() {
+                              expansionFlag = widget.channel.isSelectedProperty.value;
+                            });
                           },
                           header: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -448,7 +446,7 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
   }
 
   Widget _buildCollapsableLocationDescription() {
-    if (!order.value.isSelectedProperty.value) {
+    if (!widget.channel.isSelectedProperty.value) {
       return StreamBuilder<String>(
         stream: order.value.deliveryLocationDescription,
         builder: (context, snap) {
@@ -651,49 +649,73 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
   }
 
   Widget _buildMessages() {
-    return StreamBuilder<List<Message>>(
-      // stream: Firestore.instance.collection('channels').document(widget.channel.uid).collection('messages').snapshots(),
-      stream: widget.channel.listOfMessages,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return Text('no data');
-        // return Text(snapshot.data.toString());
-        print(snapshot.data);
-        print(snapshot.data.length);
-
-        return _buildList(context, snapshot.data);
-
-        // return ListView.builder(
-        //   padding: EdgeInsets.all(10.0),
-        //   shrinkWrap: true,
-        // itemBuilder: (context, index) => _buildItem(index, snapshot.data.documents[index]),
-        // itemCount: snapshot.data.documents.length,
-        // );
-      },
+    return Flexible(
+      child: StreamBuilder<List<Message>>(
+        stream: widget.channel.listOfMessages,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return CircularProgressIndicator();
+          return ListView.builder(
+            controller: _scrollController,
+            reverse: false,
+            padding: EdgeInsets.all(10.0),
+            itemBuilder: (context, index) {
+              return _buildItem(index, snapshot.data[index]);
+            },
+            itemCount: snapshot.data.length,
+          );
+        },
+      ),
     );
   }
 
-  // Widget _buildItem(index,Message data) {
-  //   return Text(data.message);
-
-  // }
-
-  Widget _buildList(BuildContext context, List<Message> snapshot) {
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 30.0),
-      children: snapshot.map((data) => _buildListItem(context, data)).toList(),
-    );
+  Widget _buildItem(index, Message data) {
+    if (data.sender.value ==
+        ConfigHelper.instance.currentUserProperty.value.uid) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Container(
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8),
+            padding: EdgeInsets.all(9),
+            margin: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                color: ColorHelper.dabaoPaleOrange,
+                borderRadius: BorderRadius.circular(10)),
+            child: StreamBuilder(
+              stream: data.message,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return CircularProgressIndicator();
+                return Text(snapshot.data);
+              },
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8),
+            padding: EdgeInsets.all(9),
+            margin: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                color: ColorHelper.dabaoGreyE0,
+                borderRadius: BorderRadius.circular(10)),
+            child: StreamBuilder(
+              stream: data.message,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return CircularProgressIndicator();
+                return Text(snapshot.data);
+              },
+            ),
+          ),
+        ],
+      );
+    }
   }
-
-  Widget _buildListItem(BuildContext context, Message data) {
-    return StreamBuilder(
-      stream: data.message,
-      builder: (context, snapshot) {
-        return Text(snapshot.data);
-      },
-    );
-  }
-
-  _buildFreq() {}
 
   Widget _buildInput() {
     return SafeArea(
@@ -730,7 +752,10 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
                     child: GestureDetector(
                         onTap: () {
                           if (_textController.text != null) {}
-                          widget.channel.addMessage(_textController.text);
+                          widget.channel.addMessage(
+                              _textController.text,
+                              ConfigHelper
+                                  .instance.currentUserProperty.value.uid);
                           _textController.clear();
                         },
                         child: Icon(Icons.send))))
@@ -741,5 +766,4 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin{
   }
 }
 
-class HavingSubscriptionMixing {
-}
+class HavingSubscriptionMixing {}

@@ -6,6 +6,7 @@ class ColorHelper {
   static int dabaoOrangeHexCode = 0xFFF5A510;
 
   static const Color dabaoOrange = Color.fromRGBO(0xF5, 0xA5, 0x10, 1.0);
+  static const Color dabaoPaleOrange = Color.fromRGBO(0xFF, 0xE0, 0xB3, 1.0);
 
   static Color dabaoOffWhiteF5 = rgbo(0xF5, 0xF5, 0xF5);
 
