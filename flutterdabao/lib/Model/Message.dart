@@ -11,7 +11,7 @@ class Message extends FirebaseType with Selectable {
 
   BehaviorSubject<String> sender;
   BehaviorSubject<DateTime> timestamp;
-  BehaviorSubject<GeoPoint> message;
+  BehaviorSubject<String> message;
   BehaviorSubject<String> imageUrl;
 
 
