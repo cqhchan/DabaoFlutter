@@ -8,6 +8,7 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/Route.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/Model/Voucher.dart';
 
 // ALL MAPPABLE MUST DECLARE THEIR Mapping Method here
 
@@ -54,6 +55,11 @@ abstract class Mappable extends Identifiable {
 
     if (T == Order) {
       return new Order.fromDocument(doc) as T;
+    }
+
+
+    if (T == Voucher) {
+      return new Voucher.fromDocument(doc) as T;
     }
 
     if (T == Route) {

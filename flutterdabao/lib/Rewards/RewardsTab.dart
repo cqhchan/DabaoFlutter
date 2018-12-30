@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/BrowseOrderTab.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ConfirmedTab.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/MyRouteTab.dart';
+import 'package:flutterdabao/Rewards/MyVoucherPage.dart';
 
-class TabBarPage extends StatelessWidget {
+
+class RewardsTabBarPage extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
@@ -18,14 +17,14 @@ class TabBarPage extends StatelessWidget {
             Navigator.pop(context);
           },
           child: Icon(
-            Icons.home,
+            Icons.arrow_back,
             size: 26,
             color: Colors.black,
           ),
         ),
         elevation: 0.0,
         title: Text(
-          'DABAOER',
+          'DabaoRewards',
           style: FontHelper.header3TextStyle,
         ),
       ),
@@ -55,14 +54,14 @@ class TabBarPage extends StatelessWidget {
                     ),
                     Tab(
                       child: Text(
-                        "Confirmed",
+                        "My Vouchers",
                         style: FontHelper.semiBold(null, 12.0),
                         textAlign: TextAlign.center,
                       ),
                     ),
                     Tab(
                       child: Text(
-                        "My Routes",
+                        "My Dabaoer",
                         style: FontHelper.semiBold(null, 12.0),
                         textAlign: TextAlign.center,
                       ),
@@ -74,9 +73,9 @@ class TabBarPage extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  BrowseOrderTabView(),
-                  ConfirmedTabView(),
-                  MyRouteTabView(),
+                  MyVoucherPage(),
+                  MyVoucherPage(),
+                  MyVoucherPage(),
                 ],
               ),
             ),

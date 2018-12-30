@@ -15,6 +15,7 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
+import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 
 class Home extends StatefulWidget {
@@ -87,7 +88,7 @@ class _Home extends State<Home> {
                             () {
                           Navigator.push(
                             context,
-                            FadeRoute(widget: TabBarPage()),
+                            FadeRoute(widget: RewardsTabBarPage()),
                           );
                         }),
                   ],

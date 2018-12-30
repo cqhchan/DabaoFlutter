@@ -15,6 +15,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class BrowseOrderTabView extends StatefulWidget {
+
+  const BrowseOrderTabView({Key key}): super(key: key);
+
   _BrowseOrderTabViewState createState() => _BrowseOrderTabViewState();
 }
 
@@ -74,6 +77,8 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
 
   @override
   Widget build(BuildContext context) {
+
+    super.build(context);
     return Scaffold(
       body: Column(
         children: <Widget>[

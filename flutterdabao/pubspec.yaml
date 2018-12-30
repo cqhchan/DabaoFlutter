@@ -54,6 +54,7 @@ dependencies:
   image_cropper: ^0.0.9
   geohash: ^0.2.1
   flutter_swiper: ^1.1.4
+  path_drawing: ^0.4.0
   settings:
     git:
       url: https://github.com/cqhchan/settings

@@ -10,6 +10,7 @@ import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -38,6 +39,9 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   MutableProperty<List<Route>> currentUserOpenRoutesProperty =
       MutableProperty<List<Route>>(List());
+
+  MutableProperty<List<Voucher>> currentUserOpenVouchersProperty =
+      MutableProperty<List<Voucher>>(List());
 
   MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
   MutableProperty<double> _globalFixedPrice = MutableProperty<double>(1.5);
@@ -87,6 +91,8 @@ class ConfigHelper with HavingSubscriptionMixin {
 
     subscription.add(currentUserDeliveredCompletedOrdersProperty
         .bindTo(currentUserDeliveredCompletedOrdersProducer()));
+
+
 
     // get Current open Routes
     subscription.add(
@@ -149,11 +155,14 @@ class ConfigHelper with HavingSubscriptionMixin {
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
-                .where(Order.completedTimeKey, isGreaterThan: DateTimeHelper.convertDateTimeToString(DateTime.now().add(Duration(days: -2))))
+                .where(Order.completedTimeKey,
+                    isGreaterThan: DateTimeHelper.convertDateTimeToString(
+                        DateTime.now().add(Duration(days: -2))))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
             .observable);
   }
+
 
   Observable<Map<String, dynamic>> globalConfigSettingsData() {
     return currentUserProperty.producer.switchMap((user) => user == null

@@ -7,10 +7,13 @@ import 'package:flutterdabao/ViewOrdersTabPages/AcceptedList.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ConfirmedTabView extends StatefulWidget {
+
+    const ConfirmedTabView({Key key}): super(key: key);
+
   _ConfirmedTabViewState createState() => _ConfirmedTabViewState();
 }
 
-class _ConfirmedTabViewState extends State<ConfirmedTabView> {
+class _ConfirmedTabViewState extends State<ConfirmedTabView>   with AutomaticKeepAliveClientMixin<ConfirmedTabView>{
   final MutableProperty<List<Order>> userAcceptedOrders =
       ConfigHelper.instance.currentUserDeliveringOrdersProperty;
 
@@ -27,6 +30,9 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView> {
 
   @override
   Widget build(BuildContext context) {
+
+    super.build(context);
+    
     return Scaffold(
       body: AcceptedList(
         context: context,
@@ -43,4 +49,8 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView> {
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

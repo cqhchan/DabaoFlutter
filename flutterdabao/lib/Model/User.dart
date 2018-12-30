@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
+import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 
 class User extends FirebaseType {
-
   static String foodTagKey = 'FT';
   static String profileImageKey = 'PI';
   static String nameKey = "N";
@@ -17,26 +18,35 @@ class User extends FirebaseType {
   static String creationTime = 'CT';
   static String lastLoginTime = 'LLT';
 
-
-  BehaviorSubject<String> email; 
+  BehaviorSubject<String> email;
   BehaviorSubject<String> profileImage;
   BehaviorSubject<String> name;
   BehaviorSubject<String> handPhone;
   BehaviorSubject<String> thumbnailImage;
-  BehaviorSubject<List<FoodTag>> userFoodTags; 
-
+  BehaviorSubject<List<FoodTag>> userFoodTags;
+  Observable<List<Voucher>> listOfAvalibleVouchers;
+  Observable<List<Voucher>> listOfInUsedVouchers;
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   User.fromUID(String uid) : super.fromUID(uid);
 
   User.fromAuth(FirebaseUser user) : super.fromUID(user.uid) {
     ConfigHelper.instance.currentUserProperty.value = this;
-    //Map<String, String> data = Map<String, String>();
+    listOfAvalibleVouchers = FirebaseCollectionReactive<Voucher>(Firestore
+            .instance
+            .collection(this.className)
+            .document(this.uid)
+            .collection("vouchers")
+            .where(Voucher.statusKey, isEqualTo: voucher_Status_Open))
+        .observable;
 
-    // data["email"] = user.email;
-
-    // Firestore.instance
-    // .collection(this.className).document(uid).updateData(data);
+    listOfInUsedVouchers = FirebaseCollectionReactive<Voucher>(Firestore
+            .instance
+            .collection(this.className)
+            .document(this.uid)
+            .collection("vouchers")
+            .where(Voucher.statusKey, isEqualTo: voucher_Status_InUse))
+        .observable;
   }
 
   @override
@@ -51,14 +61,14 @@ class User extends FirebaseType {
 
   @override
   void map(Map<String, dynamic> data) {
-      // print(data);
+    // print(data);
 
-    if (data.containsKey(foodTagKey)){
+    if (data.containsKey(foodTagKey)) {
       var mapOfFoodTag = data[foodTagKey] as Map;
       List<FoodTag> fT = List();
 
-      mapOfFoodTag.forEach((key,rawMap){
-        var map = rawMap.cast<String,dynamic>();
+      mapOfFoodTag.forEach((key, rawMap) {
+        var map = rawMap.cast<String, dynamic>();
         fT.add(FoodTag.fromMap(key, map));
       });
 
@@ -102,8 +112,6 @@ class User extends FirebaseType {
       handPhone.add(null);
       //print("hp null");
     }
-
-
   }
 
   void setPhoneNumber(String phoneNumber) {
@@ -113,7 +121,7 @@ class User extends FirebaseType {
         .setData({handPhoneKey: phoneNumber}, merge: true);
   }
 
-    void setEmail(String email) {
+  void setEmail(String email) {
     Firestore.instance
         .collection(className)
         .document(uid)
@@ -122,14 +130,14 @@ class User extends FirebaseType {
 
   //last login date
   //creation date
-  void setUser(String pi, String name,int creationTime, int lastLoginTime, String tn) {
+  void setUser(
+      String pi, String name, int creationTime, int lastLoginTime, String tn) {
     Firestore.instance.collection('/users').document(uid).setData({
       profileImageKey: pi,
       thumbnailImageKey: tn,
       nameKey: name,
       "CT": DateTimeHelper.convertTimeToString(creationTime),
       'LLT': DateTimeHelper.convertTimeToString(lastLoginTime),
-    },
-    merge: true);
+    }, merge: true);
   }
 }

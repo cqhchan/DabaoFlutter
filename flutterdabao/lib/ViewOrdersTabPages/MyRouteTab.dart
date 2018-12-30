@@ -12,6 +12,8 @@ import 'package:flutterdabao/ViewOrdersTabPages/Matches.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyRouteTabView extends StatefulWidget {
+  const MyRouteTabView({Key key}) : super(key: key);
+
   _MyRouteTabViewState createState() => _MyRouteTabViewState();
 }
 
@@ -26,9 +28,10 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
   final MutableProperty<List<Order>> userDeliveryingOrders =
       ConfigHelper.instance.currentUserDeliveringOrdersProperty;
 
-// userOpenRoutes.producer.mergeWith([userDeliveryingOrders.producer])
   @override
   Widget build(BuildContext context) {
+      
+      super.build(context);
     return StreamBuilder<List<Object>>(
       stream: Observable.combineLatest2<List<DabaoRoute.Route>, List<Order>,
               List<Object>>(
