@@ -1,12 +1,38 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/BrowseOrderTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmedTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/MyRouteTab.dart';
 
-class TabBarPage extends StatelessWidget {
+class TabBarPage extends StatefulWidget {
+  @override
+  TabBarPageState createState() {
+    return new TabBarPageState();
+  }
+}
+
+class TabBarPageState extends State<TabBarPage> {
+
+  void initState() { 
+    super.initState();
+     // Request permission and start listening to current location
+    startListeningToCurrentLocation();
+  }
+
+  //Ask for permission and start listening to current location
+  void startListeningToCurrentLocation() async {
+    ConfigHelper.instance.startListeningToCurrentLocation(
+        LocationHelper.instance.hardAskForPermission(
+            context,
+            Text("Please Enable Location"),
+            Text(
+                "Dabao needs your location to verify your Orders/Deliveries")));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

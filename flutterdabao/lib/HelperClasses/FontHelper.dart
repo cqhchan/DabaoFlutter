@@ -26,6 +26,12 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
+       static const TextStyle smallTimeTextStyle = TextStyle(
+      color: Colors.black54,
+      fontSize: 10.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontFamily: "SF_UI_Display");
   static const TextStyle placeholderTextStyle = TextStyle(
       color: Colors.grey,
       fontSize: 13.0,
@@ -181,6 +187,12 @@ class FontHelper {
       fontSize: 10.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
+      fontFamily: "SF_UI_Display");
+      static const TextStyle regular12Black = TextStyle(
+      color: Colors.black,
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
       fontFamily: "SF_UI_Display");
   static const TextStyle bold12Black = TextStyle(
       color: Colors.black,

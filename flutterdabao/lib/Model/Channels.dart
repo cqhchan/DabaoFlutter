@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
@@ -28,10 +30,20 @@ class Channel extends FirebaseType with Selectable {
     orderUid = BehaviorSubject();
 
     listOfMessages = FirebaseCollectionReactive<Message>(Firestore.instance
-            .collection("channels")
-            .document(this.uid)
-            .collection("messages"))
-        .observable;
+                .collection(className)
+                .document(this.uid)
+                .collection("messages")
+            )
+        .observable
+        .map((data) {
+      List<Message> temp = List<Message>();
+
+      data.forEach((element) {
+        temp.add(element);
+      });
+      temp.sort((a, b) => b.timestamp.value.compareTo(a.timestamp.value));
+      return temp.toList();
+    });
   }
 
   @override
@@ -58,15 +70,17 @@ class Channel extends FirebaseType with Selectable {
     }
   }
 
-  addMessage(String message, String sender) {
+  addMessage(String message, String sender, String image) {
     Firestore.instance
         .collection(className)
         .document(this.uid)
         .collection('messages')
         .add({
+      "I": image,
       "M": message,
       "S": sender,
-      "T": DateTimeHelper.convertDateTimeToString(DateTime.now()),
+      "T": DateTime.now().millisecondsSinceEpoch.toString(),
+      // "T": DateTimeHelper.convertDateTimeToString(DateTime.now()),
     });
   }
 }

@@ -14,7 +14,7 @@ import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ChatPage.dart';
+import 'package:flutterdabao/ChatPage/Conversation.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -475,10 +475,7 @@ class _AcceptedListState extends State<AcceptedList> {
               stream: order.deliveryLocation,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
-                if (widget.location.latitude != null &&
-                    widget.location.longitude != null &&
-                    snap.data.latitude != null &&
-                    snap.data.longitude != null) {
+                if (widget.location != null && snap.data != null) {
                   saveLocation = LatLng(
                       widget.location.latitude, widget.location.longitude);
                   return Container(
@@ -498,7 +495,10 @@ class _AcceptedListState extends State<AcceptedList> {
                     ),
                   );
                 } else {
-                  return Offstage();
+                  return Text(
+                    "?.??km",
+                    style: FontHelper.medium12TextStyle,
+                  );
                 }
               },
             ),
@@ -706,7 +706,7 @@ class _AcceptedListState extends State<AcceptedList> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (BuildContext context) => ChatPage(
+          builder: (BuildContext context) => Conversation(
                 channel: channel,
                 location: widget.location,
               ),

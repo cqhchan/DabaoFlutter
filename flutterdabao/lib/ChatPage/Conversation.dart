@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/ChatPage/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
+import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -16,42 +20,107 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 
-class ChatPage extends StatefulWidget {
+class Conversation extends StatefulWidget {
   final Channel channel;
   final LatLng location;
 
-  const ChatPage({Key key, this.channel, this.location}) : super(key: key);
+  const Conversation({Key key, this.channel, this.location}) : super(key: key);
 
-  _ChatPageState createState() => _ChatPageState();
+  _ConversationState createState() => _ConversationState();
 }
 
-class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
+class _ConversationState extends State<Conversation>
+    with HavingSubscriptionMixin {
   MutableProperty<Order> order = MutableProperty(null);
 
-  final _textController = TextEditingController();
+  //text input properties in textfield
+  TextEditingController _textController;
 
-  ScrollController _scrollController = ScrollController();
+  //textfield on tap
+  FocusNode _myFocusNode;
 
+  //scroll properties in the listview
+  ScrollController _scrollController;
+
+  //expansion of whole card
   bool expandFlag;
 
+  //expansion of location description only
   bool expansionFlag;
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    _textController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
+  //initial position of vertical scroll
+  double initial;
+
+  //upload image as message
+  File _image;
 
   @override
   void initState() {
     super.initState();
     expandFlag = false;
+    _myFocusNode = FocusNode();
+    _myFocusNode.addListener(_keyboardListener);
+    _textController = TextEditingController();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_scrollListener);
     subscription.add(order.bindTo(widget.channel.orderUid
         .where((uid) => uid != null)
         .map((uid) => Order.fromUID(uid))));
+  }
+
+  @override
+  void dispose() {
+    _myFocusNode.dispose();
+    _textController.dispose();
+    _scrollController.dispose();
+    subscription.dispose();
+    super.dispose();
+  }
+
+  _keyboardListener() {
+    if (_myFocusNode.hasFocus) {
+      setState(() {
+        expandFlag = true;
+      });
+    } else {
+      setState(() {
+        expandFlag = false;
+      });
+    }
+  }
+
+  _scrollListener() {
+    if (_scrollController.offset > initial) {
+      setState(() {
+        expandFlag = false;
+      });
+    }
+
+    if (_scrollController.offset < initial) {
+      setState(() {
+        expandFlag = true;
+      });
+    }
+
+    if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange) {
+      setState(() {
+        expandFlag = false;
+      });
+    }
+
+    if (_scrollController.offset <=
+            _scrollController.position.minScrollExtent &&
+        !_scrollController.position.outOfRange) {
+      setState(() {
+        expandFlag = true;
+      });
+    }
   }
 
   @override
@@ -156,7 +225,8 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
   }
 
   Widget _buildTop() {
-    return Column(
+    return Wrap(
+      alignment: WrapAlignment.start,
       children: <Widget>[
         Offstage(
           offstage: expandFlag,
@@ -204,7 +274,8 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
                           onExpansionChanged: (expanded) {
                             widget.channel.toggle();
                             setState(() {
-                              expansionFlag = widget.channel.isSelectedProperty.value;
+                              expansionFlag =
+                                  widget.channel.isSelectedProperty.value;
                             });
                           },
                           header: Column(
@@ -414,10 +485,7 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
               stream: order.value.deliveryLocation,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
-                if (widget.location.latitude != null &&
-                    widget.location.longitude != null &&
-                    snap.data.latitude != null &&
-                    snap.data.longitude != null) {
+                if (widget.location != null && snap.data != null) {
                   return Container(
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width - 180),
@@ -435,7 +503,10 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
                     ),
                   );
                 } else {
-                  return Offstage();
+                  return Text(
+                    "?.??km",
+                    style: FontHelper.medium12TextStyle,
+                  );
                 }
               },
             ),
@@ -506,7 +577,6 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
               child: Image.asset('assets/icons/google-maps.png'),
               onTap: () {
                 LatLng temp = LatLng(snap.data.latitude, snap.data.longitude);
-
                 launchMaps(temp);
               });
         },
@@ -615,7 +685,7 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
       children: <Widget>[
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(11.0),
+            padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
             child: OutlineButton(
               onPressed: () {},
               child: Container(
@@ -630,10 +700,12 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(11.0),
+            padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
             child: FlatButton(
               color: Color(0xFF959DAD),
-              onPressed: () {},
+              onPressed: () {
+                showOverlay(order.value);
+              },
               child: Container(
                 child: Text(
                   'COUNTER-OFFER DELIVERY FEE',
@@ -648,69 +720,205 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
     );
   }
 
+  showOverlay(Order order) {
+    showHalfBottomSheet(
+        context: context,
+        builder: (builder) {
+          return CounterOfferOverlay(
+            order: order,
+            // route: widget.route,
+          );
+        });
+  }
+
   Widget _buildMessages() {
     return Flexible(
       child: StreamBuilder<List<Message>>(
         stream: widget.channel.listOfMessages,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return CircularProgressIndicator();
-          return ListView.builder(
-            controller: _scrollController,
-            reverse: false,
-            padding: EdgeInsets.all(10.0),
-            itemBuilder: (context, index) {
-              return _buildItem(index, snapshot.data[index]);
+          return GestureDetector(
+            onTap: () {
+              if (_myFocusNode.hasFocus) {
+                _myFocusNode.unfocus();
+                setState(() {
+                  expandFlag = false;
+                });
+              }
             },
-            itemCount: snapshot.data.length,
+            onPanDown: (_) {
+              initial = _scrollController.position.pixels;
+            },
+            child: ListView.builder(
+              physics: AlwaysScrollableScrollPhysics(),
+              controller: _scrollController,
+              reverse: true,
+              padding: EdgeInsets.all(10.0),
+              itemBuilder: (context, index) {
+                return _buildChatBox(index, snapshot.data[index]);
+              },
+              itemCount: snapshot.data.length,
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildItem(index, Message data) {
-    if (data.sender.value ==
-        ConfigHelper.instance.currentUserProperty.value.uid) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+  Widget _buildChatBox(index, Message data) {
+    if (data.message.value == null && data.imageUrl.value != null) {
+      //query images
+      return Column(
         children: <Widget>[
-          Container(
-            constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.8),
-            padding: EdgeInsets.all(9),
-            margin: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-                color: ColorHelper.dabaoPaleOrange,
-                borderRadius: BorderRadius.circular(10)),
-            child: StreamBuilder(
-              stream: data.message,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return CircularProgressIndicator();
-                return Text(snapshot.data);
-              },
-            ),
+          Row(
+            mainAxisAlignment: data.sender.value ==
+                    ConfigHelper.instance.currentUserProperty.value.uid
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
+            children: <Widget>[
+              Offstage(
+                offstage: data.sender.value ==
+                        ConfigHelper.instance.currentUserProperty.value.uid
+                    ? false
+                    : true,
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    child: Text(
+                      DateTimeHelper.convertDateTimeToDate(
+                          data.timestamp.value),
+                      style: FontHelper.smallTimeTextStyle,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.8),
+                padding: EdgeInsets.all(9),
+                margin: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                    color: data.sender.value ==
+                            ConfigHelper.instance.currentUserProperty.value.uid
+                        ? ColorHelper.dabaoPaleOrange
+                        : ColorHelper.dabaoGreyE0,
+                    borderRadius: BorderRadius.circular(10)),
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: GestureDetector(
+                        child: Image.network(data.imageUrl.value,filterQuality: FilterQuality.high,),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HeroPhotoViewWrapper(
+                                      tag: data.imageUrl.value,
+                                      imageProvider:
+                                          NetworkImage(data.imageUrl.value),
+                                    ),
+                              ));
+                        },
+                      ),
+                    ),
+                    Text(
+                      DateTimeHelper.convertDateTimeToTime(
+                          data.timestamp.value),
+                      style: FontHelper.smallTimeTextStyle,
+                    )
+                  ],
+                ),
+              ),
+              Offstage(
+                offstage: data.sender.value ==
+                        ConfigHelper.instance.currentUserProperty.value.uid
+                    ? true
+                    : false,
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    child: Text(
+                      DateTimeHelper.convertDateTimeToDate(
+                          data.timestamp.value),
+                      style: FontHelper.smallTimeTextStyle,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       );
     } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+      //query messages
+      return Column(
         children: <Widget>[
-          Container(
-            constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.8),
-            padding: EdgeInsets.all(9),
-            margin: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-                color: ColorHelper.dabaoGreyE0,
-                borderRadius: BorderRadius.circular(10)),
-            child: StreamBuilder(
-              stream: data.message,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return CircularProgressIndicator();
-                return Text(snapshot.data);
-              },
-            ),
+          Row(
+            mainAxisAlignment: data.sender.value ==
+                    ConfigHelper.instance.currentUserProperty.value.uid
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
+            children: <Widget>[
+              Offstage(
+                offstage: data.sender.value ==
+                        ConfigHelper.instance.currentUserProperty.value.uid
+                    ? false
+                    : true,
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    child: Text(
+                      DateTimeHelper.convertDateTimeToDate(
+                          data.timestamp.value),
+                      style: FontHelper.smallTimeTextStyle,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.8),
+                padding: EdgeInsets.all(9),
+                margin: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                    color: data.sender.value ==
+                            ConfigHelper.instance.currentUserProperty.value.uid
+                        ? ColorHelper.dabaoPaleOrange
+                        : ColorHelper.dabaoGreyE0,
+                    borderRadius: BorderRadius.circular(10)),
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  children: <Widget>[
+                    Text(data.message.value),
+                    Text(
+                      DateTimeHelper.convertDateTimeToTime(
+                          data.timestamp.value),
+                      style: FontHelper.smallTimeTextStyle,
+                    )
+                  ],
+                ),
+              ),
+              Offstage(
+                offstage: data.sender.value ==
+                        ConfigHelper.instance.currentUserProperty.value.uid
+                    ? true
+                    : false,
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    child: Text(
+                      DateTimeHelper.convertDateTimeToDate(
+                          data.timestamp.value),
+                      style: FontHelper.smallTimeTextStyle,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       );
@@ -724,18 +932,23 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
         child: Flex(
           direction: Axis.horizontal,
           children: <Widget>[
-            Expanded(child: Icon(Icons.camera_alt)),
+            Expanded(
+                child: GestureDetector(
+              onTap: getImageFromGallery,
+              child: Icon(Icons.camera_alt),
+            )),
             Expanded(
                 flex: 5,
                 child: TextField(
-                  onSubmitted: (_) {
-                    setState(() {
-                      expandFlag = false;
-                    });
-                  },
+                  focusNode: _myFocusNode,
                   onTap: () {
                     setState(() {
                       expandFlag = true;
+                    });
+                  },
+                  onSubmitted: (_) {
+                    setState(() {
+                      expandFlag = false;
                     });
                   },
                   controller: _textController,
@@ -751,12 +964,17 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
                 child: Container(
                     child: GestureDetector(
                         onTap: () {
-                          if (_textController.text != null) {}
-                          widget.channel.addMessage(
-                              _textController.text,
-                              ConfigHelper
-                                  .instance.currentUserProperty.value.uid);
-                          _textController.clear();
+                          if (_textController.text != '') {
+                            widget.channel.addMessage(
+                                _textController.text,
+                                ConfigHelper
+                                    .instance.currentUserProperty.value.uid,
+                                null);
+                            _textController.clear();
+                            _scrollController.animateTo(0,
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeOut);
+                          }
                         },
                         child: Icon(Icons.send))))
           ],
@@ -764,6 +982,96 @@ class _ChatPageState extends State<ChatPage> with HavingSubscriptionMixin {
       ),
     );
   }
+
+  void getImageFromGallery() async {
+    ImagePicker.pickImage(source: ImageSource.camera).then((image) async {
+      if (image != null) {
+        _image = await _cropImage(image);
+        final StorageReference profileRef = FirebaseStorage.instance.ref().child(
+            'user/${ConfigHelper.instance.currentUserProperty.value.uid}/image_message.jpg');
+
+        final StorageUploadTask imageTask = profileRef.putFile(_image);
+
+        imageTask.onComplete.then((result) {
+          result.ref.getDownloadURL().then((url) {
+            widget.channel.addMessage(
+                null, ConfigHelper.instance.currentUserProperty.value.uid, url);
+          });
+        });
+      }
+    });
+  }
+
+  Future<File> _cropImage(File imageFile) async {
+    File croppedFile = await ImageCropper.cropImage(
+      toolbarColor: ColorHelper.dabaoOrange,
+      sourcePath: imageFile.path,
+      ratioX: 1.0,
+      ratioY: 1.0,
+      maxWidth: 300,
+      maxHeight: 300,
+    );
+    return croppedFile;
+  }
 }
 
-class HavingSubscriptionMixing {}
+class PhotoHero extends StatelessWidget {
+  const PhotoHero({Key key, this.photo, this.onTap, this.width})
+      : super(key: key);
+
+  final String photo;
+  final VoidCallback onTap;
+  final double width;
+
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      child: Hero(
+        tag: photo,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Image.asset(
+              photo,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class HeroPhotoViewWrapper extends StatelessWidget {
+  const HeroPhotoViewWrapper(
+      {this.imageProvider,
+      this.loadingChild,
+      this.backgroundDecoration,
+      this.minScale,
+      this.maxScale,
+      this.tag});
+
+  final ImageProvider imageProvider;
+  final Widget loadingChild;
+  final Decoration backgroundDecoration;
+  final dynamic minScale;
+  final dynamic maxScale;
+  final String tag;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        constraints: BoxConstraints.expand(
+          height: MediaQuery.of(context).size.height,
+        ),
+        child: PhotoView(
+          imageProvider: imageProvider,
+          loadingChild: loadingChild,
+          backgroundDecoration: backgroundDecoration,
+          minScale: minScale,
+          maxScale: maxScale,
+          heroTag: tag,
+        ));
+  }
+}

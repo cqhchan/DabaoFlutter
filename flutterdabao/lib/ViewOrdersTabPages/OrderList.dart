@@ -4,14 +4,16 @@ import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
+import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ChatPage.dart';
+import 'package:flutterdabao/ChatPage/Conversation.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -429,10 +431,7 @@ class _OrderListState extends State<OrderList> {
               stream: order.deliveryLocation,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
-                if (widget.location.latitude != null &&
-                    widget.location.longitude != null &&
-                    snap.data.latitude != null &&
-                    snap.data.longitude != null) {
+                if (widget.location != null && snap.data != null) {
                   return Container(
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width - 180),
@@ -450,7 +449,10 @@ class _OrderListState extends State<OrderList> {
                     ),
                   );
                 } else {
-                  return Offstage();
+                  return Text(
+                    "?.??km",
+                    style: FontHelper.medium12TextStyle,
+                  );
                 }
               },
             ),
@@ -597,14 +599,7 @@ class _OrderListState extends State<OrderList> {
           ],
         ),
         onPressed: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (BuildContext context) => ChatPage(
-          //           order: order,
-          //         ),
-          //   ),
-          // );
+          _toChat(order);
         },
       ),
     );
@@ -619,5 +614,31 @@ class _OrderListState extends State<OrderList> {
             route: widget.route,
           );
         });
+  }
+
+  _toChat(Order order) {
+    Channel channel = Channel.fromUID(
+        order.uid + ConfigHelper.instance.currentUserProperty.value.uid);
+    Firestore.instance.collection("channels").document(channel.uid).setData(
+      {
+        "LS": DateTimeHelper.convertDateTimeToString(DateTime.now()),
+        "O": order.uid,
+        "P": [
+          ConfigHelper.instance.currentUserProperty.value.uid,
+          order.creator.value
+        ],
+      },
+      merge: true,
+    ).then((_) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => Conversation(
+                channel: channel,
+                location: widget.location,
+              ),
+        ),
+      );
+    });
   }
 }

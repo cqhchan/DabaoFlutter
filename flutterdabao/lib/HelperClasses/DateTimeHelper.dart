@@ -2,6 +2,11 @@ import 'package:date_format/date_format.dart';
 import 'package:intl/intl.dart';
 
 class DateTimeHelper {
+
+  static DateTime convertEpochTimeToDateTime(String epoch) {
+    return DateTime.fromMillisecondsSinceEpoch(int.parse(epoch));
+  }
+
   static String convertDateTimeToAMPM(DateTime date) {
     return DateFormat.jm().format(date);
   }
@@ -18,6 +23,11 @@ class DateTimeHelper {
   static String convertDateTimeToString(DateTime date) {
     return formatDate(
         date, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss, ' ', z]);
+  }
+
+  static String convertDateTimeToTime(DateTime date) {
+    return formatDate(
+        date, [ HH, ':', nn]);
   }
 
   //2018-12-17 18:03:26 +0800 input
