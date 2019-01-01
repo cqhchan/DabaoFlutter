@@ -33,6 +33,9 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<Order>> currentUserDeliveredCompletedOrdersProperty =
       MutableProperty<List<Order>>(List());
 
+  MutableProperty<List<Channel>> currentUserInboxProperty =
+      MutableProperty<List<Channel>>(List());
+
   // All a users accepted Order which he is deliverying
   MutableProperty<List<Order>> currentUserDeliveringOrdersProperty =
       MutableProperty<List<Order>>(List());
@@ -85,6 +88,10 @@ class ConfigHelper with HavingSubscriptionMixin {
 
     subscription.add(currentUserDeliveringOrdersProperty
         .bindTo(currentUserDeliveryingOrdersProducer()));
+
+    // get current user inbox
+    subscription
+        .add(currentUserInboxProperty.bindTo(currentUserInboxProducer()));
 
     subscription.add(currentUserDeliveredCompletedOrdersProperty
         .bindTo(currentUserDeliveredCompletedOrdersProducer()));
@@ -155,6 +162,15 @@ class ConfigHelper with HavingSubscriptionMixin {
                         DateTime.now().add(Duration(days: -2))))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
+            .observable);
+  }
+
+  Observable<List<Channel>> currentUserInboxProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Channel>()
+        : FirebaseCollectionReactive<Channel>(Firestore.instance
+                .collection('channels')
+                .where('P', arrayContains: user.uid))
             .observable);
   }
 

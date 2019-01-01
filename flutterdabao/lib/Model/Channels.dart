@@ -12,9 +12,11 @@ import 'package:rxdart/rxdart.dart';
 class Channel extends FirebaseType with Selectable {
   static final String participantsKey = "P";
   static final String lastSentKey = "LS";
+  static final String lastMessageKey = "LM";
   static final String orderUidKey = "O";
 
   BehaviorSubject<List<String>> participantsID;
+  BehaviorSubject<String> lastMessage;
   BehaviorSubject<DateTime> lastSent;
   Observable<List<Message>> listOfMessages;
   BehaviorSubject<String> orderUid;
@@ -25,6 +27,7 @@ class Channel extends FirebaseType with Selectable {
 
   @override
   void setUpVariables() {
+    lastMessage = BehaviorSubject();
     participantsID = BehaviorSubject();
     lastSent = BehaviorSubject();
     orderUid = BehaviorSubject();
@@ -47,6 +50,12 @@ class Channel extends FirebaseType with Selectable {
 
   @override
   void map(Map<String, dynamic> data) {
+    if (data.containsKey(lastMessageKey)) {
+      lastMessage.add(data[lastMessageKey]);
+    } else {
+      lastMessage.add(null);
+    }
+
     if (data.containsKey(orderUidKey)) {
       orderUid.add(data[orderUidKey]);
     } else {
