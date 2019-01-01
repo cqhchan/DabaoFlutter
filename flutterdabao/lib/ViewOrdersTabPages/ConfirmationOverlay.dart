@@ -258,6 +258,8 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
 
   Row _buildDeliveryPeriod(Order order) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         StreamBuilder<DateTime>(
           stream: order.startDeliveryTime,
@@ -293,14 +295,12 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
           stream: order.endDeliveryTime,
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
-            return Material(
-              child: Text(
-                snap.hasData
-                    ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                    : '',
-                style: FontHelper.regular14Black,
-                overflow: TextOverflow.ellipsis,
-              ),
+            return Text(
+              snap.hasData
+                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                  : '',
+              style: FontHelper.regular14Black,
+              overflow: TextOverflow.ellipsis,
             );
           },
         ),

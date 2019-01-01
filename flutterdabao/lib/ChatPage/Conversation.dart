@@ -432,6 +432,8 @@ class _ConversationState extends State<Conversation>
 
   Widget _buildDeliveryPeriod() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         StreamBuilder<DateTime>(
           stream: order.value.startDeliveryTime,
@@ -468,14 +470,12 @@ class _ConversationState extends State<Conversation>
           stream: order.value.endDeliveryTime,
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
-            return Material(
-              child: Text(
-                snap.hasData
-                    ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                    : '',
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              ),
+            return Text(
+              snap.hasData
+                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                  : '',
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
             );
           },
         ),

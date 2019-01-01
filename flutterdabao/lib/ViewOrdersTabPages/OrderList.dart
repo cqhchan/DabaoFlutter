@@ -256,6 +256,8 @@ class _OrderListState extends State<OrderList> {
 
   Widget _buildDeliveryPeriod(Order order) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         StreamBuilder<DateTime>(
           stream: order.startDeliveryTime,
@@ -292,14 +294,12 @@ class _OrderListState extends State<OrderList> {
           stream: order.endDeliveryTime,
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
-            return Material(
-              child: Text(
-                snap.hasData
-                    ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                    : '',
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              ),
+            return Text(
+              snap.hasData
+                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                  : '',
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
             );
           },
         ),
