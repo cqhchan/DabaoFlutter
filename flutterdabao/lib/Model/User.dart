@@ -9,18 +9,22 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 class User extends FirebaseType {
 
   static String foodTagKey = 'FT';
+  static String profileImageKey = 'PI';
+  static String nameKey = "N";
+  static String handPhoneKey = 'HP';
+  static String emailKey = 'E';
+  static String thumbnailImageKey = 'TI';
+  static String creationTime = 'CT';
+  static String lastLoginTime = 'LLT';
+
 
   BehaviorSubject<String> email; 
-  BehaviorSubject<double> amountSaved; 
-  BehaviorSubject<double> amountEarned; 
   BehaviorSubject<String> profileImage;
   BehaviorSubject<String> name;
   BehaviorSubject<String> handPhone;
   BehaviorSubject<String> thumbnailImage;
   BehaviorSubject<List<FoodTag>> userFoodTags; 
-  //this verified boolean helps ensure old user's phone number is verified
-  //new users are set to verified = true by default
-  BehaviorSubject<bool> verified;
+
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   User.fromUID(String uid) : super.fromUID(uid);
@@ -38,15 +42,11 @@ class User extends FirebaseType {
   @override
   void setUpVariables() {
     email = BehaviorSubject();
-    amountEarned = BehaviorSubject();
-    amountSaved = BehaviorSubject();
     profileImage = BehaviorSubject();
     name = BehaviorSubject();
     thumbnailImage = BehaviorSubject();
     userFoodTags = BehaviorSubject(seedValue: List());
-
     handPhone = BehaviorSubject();
-    verified = BehaviorSubject();
   }
 
   @override
@@ -65,83 +65,68 @@ class User extends FirebaseType {
       userFoodTags.add(List());
     }
 
-    if (data.containsKey("email")) {
-      email.add(data["email"]);
+    if (data.containsKey(emailKey)) {
+      email.add(data[emailKey]);
     } else {
       email.add(null);
     }
 
-    if (data.containsKey("save")) {
-      amountSaved.add(data["save"].toDouble());
-    } else {
-      amountSaved.add(null);
-    }
-
-    if (data.containsKey("earn")) {
-      amountEarned.add(data["earn"].toDouble());
-    } else {
-      amountEarned.add(null);
-    }
-
-    if (data.containsKey("PI")) {
-      profileImage.add(data["PI"]);
+    if (data.containsKey(profileImageKey)) {
+      profileImage.add(data[profileImageKey]);
       //print("PI added");
     } else {
       profileImage.add(null);
       //print("PI null");
     }
 
-    if (data.containsKey("tn")) {
-      thumbnailImage.add(data["tn"]);
+    if (data.containsKey(thumbnailImageKey)) {
+      thumbnailImage.add(data[thumbnailImageKey]);
     } else {
       thumbnailImage.add(null);
     }
 
-    if (data.containsKey("name")) {
-      name.add(data["name"]);
+    if (data.containsKey(nameKey)) {
+      name.add(data[nameKey]);
       //print("name added");
     } else {
       name.add(null);
       //print("name null");
     }
 
-    if (data.containsKey("hp")) {
-      handPhone.add(data["hp"]);
+    if (data.containsKey(handPhoneKey)) {
+      handPhone.add(data[handPhoneKey]);
       //print("hp added");
     } else {
       handPhone.add(null);
       //print("hp null");
     }
 
-    if (data.containsKey("verified")) {
-      verified.add(data["verified"]);
-    } else {
-      verified.add(false);
-    }
+
   }
 
   void setPhoneNumber(String phoneNumber) {
     Firestore.instance
-        .collection('/users')
+        .collection(className)
         .document(uid)
-        .setData({'hp': phoneNumber, 'verified': true}, merge: true);
+        .setData({handPhoneKey: phoneNumber}, merge: true);
+  }
+
+    void setEmail(String email) {
+    Firestore.instance
+        .collection(className)
+        .document(uid)
+        .setData({emailKey: email}, merge: true);
   }
 
   //last login date
   //creation date
-  void setUser(String email, double save, double earn, String pi, String name,
-      int creationTime, int lastLoginTime, String tn, String handPhone) {
+  void setUser(String pi, String name,int creationTime, int lastLoginTime, String tn) {
     Firestore.instance.collection('/users').document(uid).setData({
-      'email': email,
-      'save': save,
-      'earn': earn,
-      'pi': pi,
-      'tn': tn,
-      'name': name,
-      'hp': handPhone,
-      'ct': DateTimeHelper.convertTimeToString(creationTime),
-      'llt': DateTimeHelper.convertTimeToString(lastLoginTime),
-      'verified': true, 
+      profileImageKey: pi,
+      thumbnailImageKey: tn,
+      nameKey: name,
+      "CT": DateTimeHelper.convertTimeToString(creationTime),
+      'LLT': DateTimeHelper.convertTimeToString(lastLoginTime),
     },
     merge: true);
   }

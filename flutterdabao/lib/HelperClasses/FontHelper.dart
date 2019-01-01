@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
 class FontHelper {
-  static const TextStyle semiBoldBrown14TextStyle = TextStyle(
-      color: Color(0xFF93622D),
-      fontSize: 14.0,
+  static const TextStyle semiBoldgrey16TextStyle = TextStyle(
+      color: Color(0xFFD0D0D0),
+      fontSize: 16.0,
       fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
   static const TextStyle semiBoldgrey14TextStyle = TextStyle(
       color: Color(0xFF9B9B9B),
@@ -116,7 +115,7 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
-       static const TextStyle semiBold12White = TextStyle(
+  static const TextStyle semiBold12White = TextStyle(
       color: Colors.white,
       fontSize: 12.0,
       fontStyle: FontStyle.normal,
@@ -146,7 +145,7 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
-      static const TextStyle robotoRegular50Black = TextStyle(
+  static const TextStyle robotoRegular50Black = TextStyle(
       color: Colors.black,
       fontSize: 50.0,
       fontStyle: FontStyle.normal,
@@ -158,19 +157,19 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
-       static const TextStyle regular15LightGrey = TextStyle(
+  static const TextStyle regular15LightGrey = TextStyle(
       color: Color(0xFF4A4A4A),
       fontSize: 15.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
-        static const TextStyle regular15Grey = TextStyle(
+  static const TextStyle regular15Grey = TextStyle(
       color: Color(0xFF9B9B9B),
       fontSize: 15.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
       fontFamily: "SF_UI_Display");
-      static const TextStyle regular15Black = TextStyle(
+  static const TextStyle regular15Black = TextStyle(
       color: Color(0xff4A4A4A),
       fontSize: 15.0,
       fontStyle: FontStyle.normal,
@@ -188,7 +187,7 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.bold,
       fontFamily: "SF_UI_Display");
-      static const TextStyle bold50White = TextStyle(
+  static const TextStyle bold50White = TextStyle(
       color: Colors.white,
       fontSize: 50.0,
       fontStyle: FontStyle.normal,
@@ -220,6 +219,15 @@ class FontHelper {
     return TextStyle(
         color: color,
         fontSize: 16.0,
+        fontStyle: FontStyle.normal,
+        fontWeight: FontWeight.w600,
+        fontFamily: "SF_UI_Display");
+  }
+
+  static TextStyle semiBold15(Color color) {
+    return TextStyle(
+        color: color,
+        fontSize: 15.0,
         fontStyle: FontStyle.normal,
         fontWeight: FontWeight.w600,
         fontFamily: "SF_UI_Display");

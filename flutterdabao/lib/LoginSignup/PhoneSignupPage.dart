@@ -40,6 +40,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     };
     final PhoneCodeSent smsCodeSent = (String verId, [int forceCodeResend]) {
       verificationId = verId;
+      
       smsCodeDialog(context).then((value) {
         print('Signed in');
       });
@@ -59,7 +60,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
         verificationCompleted: verifiedSuccess,
         verificationFailed: veriFailed);
   }
-
+   
   Future<bool> smsCodeDialog(BuildContext context) {
     setState(() {
       _inProgress = false;
@@ -96,6 +97,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
         });
   }
 
+  //THIS SHOULD BE A CAUSE OF BUG, TAKE NOTE
   signIn() async {
     FirebaseAuth.instance
         .signInWithCredential(PhoneAuthProvider.getCredential(

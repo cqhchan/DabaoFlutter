@@ -14,6 +14,8 @@ final String orderStatus_Completed = "Completed";
 
 class Order extends FirebaseType with Selectable {
   static final String createdTimeKey = "CT";
+  static final String completedTimeKey = "CMT";
+
   static final String startTimeKey = "ST";
   static final String endTimeKey = "ET";
   static final String deliveryTimeKey = "DT";

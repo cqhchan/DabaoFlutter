@@ -454,7 +454,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   _asapInitialMinute * 10,
                 );
                 showLoadingOverlay(context: context);
-                var isSuccessful = await FirebaseCloudFunctions.acceptRoute(
+                var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
                   routeID: widget.route.uid,
                   orderID: widget.order.uid,
                   acceptorID:
@@ -500,7 +500,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                   _scheduledInitialMinute * 10,
                 );
                 showLoadingOverlay(context: context);
-                var isSuccessful = await FirebaseCloudFunctions.acceptRoute(
+                var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
                   routeID: widget.route.uid,
                   orderID: widget.order.uid,
                   acceptorID:

@@ -615,7 +615,7 @@ class _ChatPageState extends State<ChatPage> {
               child: Container(
                 child: Text(
                   'LEAVE FEEDBACK',
-                  style: FontHelper.semiBoldBrown14TextStyle,
+                  style: FontHelper.semiBoldgrey14TextStyle,
                   textAlign: TextAlign.center,
                 ),
               ),

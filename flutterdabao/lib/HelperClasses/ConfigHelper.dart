@@ -15,7 +15,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ConfigHelper with HavingSubscriptionMixin {
-
   MutableProperty<User> currentUserProperty = MutableProperty<User>(null);
 
   MutableProperty<LatLng> currentLocationProperty =
@@ -151,7 +150,7 @@ class ConfigHelper with HavingSubscriptionMixin {
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
-                .where(Order.deliveryTimeKey,
+                .where(Order.completedTimeKey,
                     isGreaterThan: DateTimeHelper.convertDateTimeToString(
                         DateTime.now().add(Duration(days: -2))))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)

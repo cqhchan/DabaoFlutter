@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
@@ -223,47 +226,35 @@ class _CompletedOverlayState extends State<CompletedOverlay> {
   }
 
   Widget _buildPickUpButton(Order order) {
-    return StreamBuilder(
-      stream: order.mode,
-      builder: (context, snap) {
-        if (!snap.hasData) return Offstage();
-        switch (snap.data) {
-          case OrderMode.asap:
-            return RaisedButton(
-              elevation: 12,
-              color: ColorHelper.dabaoOrange,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0)),
-              child: Center(
-                child: Text(
-                  "Complete",
-                  style: FontHelper.semiBold14Black,
-                ),
-              ),
-              onPressed: () async {
-                //TODO: blur this widget
-              },
-            );
-          case OrderMode.scheduled:
-            return RaisedButton(
-              elevation: 12,
-              color: ColorHelper.dabaoOrange,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Center(
-                child: Text(
-                  "Complete",
-                  style: FontHelper.semiBold14White,
-                ),
-              ),
-              onPressed: () async {
-                //TODO: blur this widget
-              },
-            );
-            break;
-          default:
-            return Offstage();
+    return RaisedButton(
+      elevation: 12,
+      color: ColorHelper.dabaoOrange,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      child: Center(
+        child: Text(
+          "Complete",
+          style: FontHelper.semiBold14Black,
+        ),
+      ),
+      onPressed: () async {
+        showLoadingOverlay(context: context);
+        var isSuccessful = await FirebaseCloudFunctions.completeOrder(
+          orderID: widget.order.uid,
+          acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
+          completedTime: DateTimeHelper.convertDateTimeToString(DateTime.now()),
+        );
+
+        if (isSuccessful) {
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
+        } else {
+          Navigator.of(context).pop();
+
+          //TODO fix Bug that it doesnt show
+          final snackBar = SnackBar(
+              content: Text(
+                  'An Error has occured. Please check your network connectivity'));
+          Scaffold.of(context).showSnackBar(snackBar);
         }
       },
     );

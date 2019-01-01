@@ -52,8 +52,8 @@ dependencies:
   date_format: ^1.0.5
   modal_progress_hud: ^0.1.2
   image_cropper: ^0.0.9
-  
   geohash: ^0.2.1
+  flutter_swiper: ^1.1.4
   settings:
     git:
       url: https://github.com/cqhchan/settings
