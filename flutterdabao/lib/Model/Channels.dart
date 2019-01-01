@@ -30,10 +30,9 @@ class Channel extends FirebaseType with Selectable {
     orderUid = BehaviorSubject();
 
     listOfMessages = FirebaseCollectionReactive<Message>(Firestore.instance
-                .collection(className)
-                .document(this.uid)
-                .collection("messages")
-            )
+            .collection(className)
+            .document(this.uid)
+            .collection("messages"))
         .observable
         .map((data) {
       List<Message> temp = List<Message>();
