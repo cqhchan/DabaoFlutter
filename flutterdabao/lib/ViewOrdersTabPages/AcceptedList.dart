@@ -57,6 +57,7 @@ class _AcceptedListState extends State<AcceptedList> {
 
   ListView _buildList(BuildContext context, List<Order> snapshot) {
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
@@ -694,7 +695,6 @@ class _AcceptedListState extends State<AcceptedList> {
         order.uid + ConfigHelper.instance.currentUserProperty.value.uid);
     Firestore.instance.collection("channels").document(channel.uid).setData(
       {
-        "LS": DateTimeHelper.convertDateTimeToString(DateTime.now()),
         "O": order.uid,
         "P": [
           ConfigHelper.instance.currentUserProperty.value.uid,

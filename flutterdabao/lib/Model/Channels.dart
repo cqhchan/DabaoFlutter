@@ -79,8 +79,7 @@ class Channel extends FirebaseType with Selectable {
       "I": image,
       "M": message,
       "S": sender,
-      "T": DateTime.now().millisecondsSinceEpoch.toString(),
-      // "T": DateTimeHelper.convertDateTimeToString(DateTime.now()),
+      "T": DateTimeHelper.convertDateTimeToString(DateTime.now()),
     });
   }
 }

@@ -58,10 +58,14 @@ class _ConversationState extends State<Conversation>
   //upload image as message
   File _image;
 
+  //control color of send button
+  bool sendButtonFlag;
+
   @override
   void initState() {
     super.initState();
     expandFlag = false;
+    sendButtonFlag = false;
     _myFocusNode = FocusNode();
     _myFocusNode.addListener(_keyboardListener);
     _textController = TextEditingController();
@@ -225,15 +229,24 @@ class _ConversationState extends State<Conversation>
   }
 
   Widget _buildTop() {
-    return Wrap(
-      alignment: WrapAlignment.start,
-      children: <Widget>[
-        Offstage(
-          offstage: expandFlag,
-          child: _buildCard(),
+    return Container(
+      decoration: BoxDecoration(color: Colors.white, boxShadow: [
+        BoxShadow(
+          color: const Color(0x11000000),
+          offset: new Offset(0.0, 5.0),
+          blurRadius: 8.0,
         ),
-        _buildButtons(),
-      ],
+      ]),
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        children: <Widget>[
+          Offstage(
+            offstage: expandFlag,
+            child: _buildCard(),
+          ),
+          _buildButtons(),
+        ],
+      ),
     );
   }
 
@@ -685,7 +698,7 @@ class _ConversationState extends State<Conversation>
       children: <Widget>[
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
+            padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
             child: OutlineButton(
               onPressed: () {},
               child: Container(
@@ -700,7 +713,7 @@ class _ConversationState extends State<Conversation>
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
+            padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
             child: FlatButton(
               color: Color(0xFF959DAD),
               onPressed: () {
@@ -750,7 +763,7 @@ class _ConversationState extends State<Conversation>
               initial = _scrollController.position.pixels;
             },
             child: ListView.builder(
-              physics: AlwaysScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               controller: _scrollController,
               reverse: true,
               padding: EdgeInsets.all(10.0),
@@ -768,85 +781,128 @@ class _ConversationState extends State<Conversation>
   Widget _buildChatBox(index, Message data) {
     if (data.message.value == null && data.imageUrl.value != null) {
       //query images
-      return Column(
+      return Row(
+        mainAxisAlignment: data.sender.value ==
+                ConfigHelper.instance.currentUserProperty.value.uid
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: data.sender.value ==
+          Offstage(
+            offstage: data.sender.value ==
                     ConfigHelper.instance.currentUserProperty.value.uid
-                ? MainAxisAlignment.end
-                : MainAxisAlignment.start,
-            children: <Widget>[
-              Offstage(
-                offstage: data.sender.value ==
-                        ConfigHelper.instance.currentUserProperty.value.uid
-                    ? false
-                    : true,
-                child: Center(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    child: Text(
-                      DateTimeHelper.convertDateTimeToDate(
-                          data.timestamp.value),
-                      style: FontHelper.smallTimeTextStyle,
-                    ),
+                ? true
+                : false,
+            child: StreamBuilder<User>(
+              stream: order.value.creator.where((uid) => uid != null).map(
+                    (uid) => User.fromUID(uid),
                   ),
-                ),
-              ),
-              Container(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.8),
-                padding: EdgeInsets.all(9),
-                margin: EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                    color: data.sender.value ==
-                            ConfigHelper.instance.currentUserProperty.value.uid
-                        ? ColorHelper.dabaoPaleOrange
-                        : ColorHelper.dabaoGreyE0,
-                    borderRadius: BorderRadius.circular(10)),
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
+              builder: (context, user) {
+                if (!user.hasData) return Offstage();
+                return Row(
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: GestureDetector(
-                        child: Image.network(data.imageUrl.value,filterQuality: FilterQuality.high,),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HeroPhotoViewWrapper(
-                                      tag: data.imageUrl.value,
-                                      imageProvider:
-                                          NetworkImage(data.imageUrl.value),
-                                    ),
-                              ));
-                        },
+                    StreamBuilder<String>(
+                      stream: user.data.thumbnailImage,
+                      builder: (context, user) {
+                        if (!user.hasData) return Offstage();
+                        return CircleAvatar(
+                          backgroundImage: NetworkImage(user.data),
+                          radius: 14.5,
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          Column(
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Offstage(
+                    offstage: data.sender.value ==
+                            ConfigHelper.instance.currentUserProperty.value.uid
+                        ? false
+                        : true,
+                    child: Center(
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        child: Text(
+                          DateTimeHelper.convertDateTimeToDate(
+                              data.timestamp.value),
+                          style: FontHelper.smallTimeTextStyle,
+                        ),
                       ),
                     ),
-                    Text(
-                      DateTimeHelper.convertDateTimeToTime(
-                          data.timestamp.value),
-                      style: FontHelper.smallTimeTextStyle,
-                    )
-                  ],
-                ),
-              ),
-              Offstage(
-                offstage: data.sender.value ==
-                        ConfigHelper.instance.currentUserProperty.value.uid
-                    ? true
-                    : false,
-                child: Center(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    child: Text(
-                      DateTimeHelper.convertDateTimeToDate(
-                          data.timestamp.value),
-                      style: FontHelper.smallTimeTextStyle,
+                  ),
+                  Container(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.7),
+                    padding: EdgeInsets.all(9),
+                    margin: EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: data.sender.value ==
+                                ConfigHelper
+                                    .instance.currentUserProperty.value.uid
+                            ? ColorHelper.dabaoPaleOrange
+                            : ColorHelper.dabaoGreyE0,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Wrap(
+                      alignment: data.sender.value ==
+                              ConfigHelper
+                                  .instance.currentUserProperty.value.uid
+                          ? WrapAlignment.end
+                          : WrapAlignment.start,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 4,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: GestureDetector(
+                            child: Image.network(
+                              data.imageUrl.value,
+                              filterQuality: FilterQuality.high,
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => HeroPhotoViewWrapper(
+                                          tag: data.imageUrl.value,
+                                          imageProvider:
+                                              NetworkImage(data.imageUrl.value),
+                                        ),
+                                  ));
+                            },
+                          ),
+                        ),
+                        Text(
+                          DateTimeHelper.convertDateTimeToTime(
+                              data.timestamp.value),
+                          style: FontHelper.smallTimeTextStyle,
+                        )
+                      ],
                     ),
                   ),
-                ),
+                  Offstage(
+                    offstage: data.sender.value ==
+                            ConfigHelper.instance.currentUserProperty.value.uid
+                        ? true
+                        : false,
+                    child: Center(
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        child: Text(
+                          DateTimeHelper.convertDateTimeToDate(
+                              data.timestamp.value),
+                          style: FontHelper.smallTimeTextStyle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -854,69 +910,104 @@ class _ConversationState extends State<Conversation>
       );
     } else {
       //query messages
-      return Column(
+      return Row(
+        mainAxisAlignment: data.sender.value ==
+                ConfigHelper.instance.currentUserProperty.value.uid
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: data.sender.value ==
+          Offstage(
+            offstage: data.sender.value ==
                     ConfigHelper.instance.currentUserProperty.value.uid
-                ? MainAxisAlignment.end
-                : MainAxisAlignment.start,
-            children: <Widget>[
-              Offstage(
-                offstage: data.sender.value ==
-                        ConfigHelper.instance.currentUserProperty.value.uid
-                    ? false
-                    : true,
-                child: Center(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    child: Text(
-                      DateTimeHelper.convertDateTimeToDate(
-                          data.timestamp.value),
-                      style: FontHelper.smallTimeTextStyle,
-                    ),
+                ? true
+                : false,
+            child: StreamBuilder<User>(
+              stream: order.value.creator.where((uid) => uid != null).map(
+                    (uid) => User.fromUID(uid),
                   ),
-                ),
-              ),
-              Container(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.8),
-                padding: EdgeInsets.all(9),
-                margin: EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                    color: data.sender.value ==
-                            ConfigHelper.instance.currentUserProperty.value.uid
-                        ? ColorHelper.dabaoPaleOrange
-                        : ColorHelper.dabaoGreyE0,
-                    borderRadius: BorderRadius.circular(10)),
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
+              builder: (context, user) {
+                if (!user.hasData) return Offstage();
+                return Row(
                   children: <Widget>[
-                    Text(data.message.value),
-                    Text(
-                      DateTimeHelper.convertDateTimeToTime(
-                          data.timestamp.value),
-                      style: FontHelper.smallTimeTextStyle,
-                    )
+                    StreamBuilder<String>(
+                      stream: user.data.thumbnailImage,
+                      builder: (context, user) {
+                        if (!user.hasData) return Offstage();
+                        return CircleAvatar(
+                          backgroundImage: NetworkImage(user.data),
+                          radius: 14.5,
+                        );
+                      },
+                    ),
                   ],
-                ),
-              ),
-              Offstage(
-                offstage: data.sender.value ==
-                        ConfigHelper.instance.currentUserProperty.value.uid
-                    ? true
-                    : false,
-                child: Center(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    child: Text(
-                      DateTimeHelper.convertDateTimeToDate(
-                          data.timestamp.value),
-                      style: FontHelper.smallTimeTextStyle,
+                );
+              },
+            ),
+          ),
+          Column(
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Offstage(
+                    offstage: data.sender.value ==
+                            ConfigHelper.instance.currentUserProperty.value.uid
+                        ? false
+                        : true,
+                    child: Center(
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        child: Text(
+                          DateTimeHelper.convertDateTimeToDate(
+                              data.timestamp.value),
+                          style: FontHelper.smallTimeTextStyle,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  Container(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.8),
+                    padding: EdgeInsets.all(9),
+                    margin: EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: data.sender.value ==
+                                ConfigHelper
+                                    .instance.currentUserProperty.value.uid
+                            ? ColorHelper.dabaoPaleOrange
+                            : ColorHelper.dabaoGreyE0,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 4,
+                      children: <Widget>[
+                        Text(data.message.value),
+                        Text(
+                          DateTimeHelper.convertDateTimeToTime(
+                              data.timestamp.value),
+                          style: FontHelper.smallTimeTextStyle,
+                        )
+                      ],
+                    ),
+                  ),
+                  Offstage(
+                    offstage: data.sender.value ==
+                            ConfigHelper.instance.currentUserProperty.value.uid
+                        ? true
+                        : false,
+                    child: Center(
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        child: Text(
+                          DateTimeHelper.convertDateTimeToDate(
+                              data.timestamp.value),
+                          style: FontHelper.smallTimeTextStyle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -940,6 +1031,17 @@ class _ConversationState extends State<Conversation>
             Expanded(
                 flex: 5,
                 child: TextField(
+                  onChanged: (typedText) {
+                    if (_textController.text.length > 0) {
+                      setState(() {
+                        sendButtonFlag = true;
+                      });
+                    } else {
+                      setState(() {
+                        sendButtonFlag = false;
+                      });
+                    }
+                  },
                   focusNode: _myFocusNode,
                   onTap: () {
                     setState(() {
@@ -970,13 +1072,20 @@ class _ConversationState extends State<Conversation>
                                 ConfigHelper
                                     .instance.currentUserProperty.value.uid,
                                 null);
+                            setState(() {
+                              sendButtonFlag = false;
+                            });
                             _textController.clear();
                             _scrollController.animateTo(0,
                                 duration: Duration(milliseconds: 300),
                                 curve: Curves.easeOut);
                           }
                         },
-                        child: Icon(Icons.send))))
+                        child: Icon(
+                          Icons.send,
+                          color:
+                              sendButtonFlag ? Colors.black : Colors.grey[300],
+                        ))))
           ],
         ),
       ),
@@ -988,7 +1097,7 @@ class _ConversationState extends State<Conversation>
       if (image != null) {
         _image = await _cropImage(image);
         final StorageReference profileRef = FirebaseStorage.instance.ref().child(
-            'user/${ConfigHelper.instance.currentUserProperty.value.uid}/image_message.jpg');
+            'user/${ConfigHelper.instance.currentUserProperty.value.uid}/${_image.hashCode}.jpg');
 
         final StorageUploadTask imageTask = profileRef.putFile(_image);
 

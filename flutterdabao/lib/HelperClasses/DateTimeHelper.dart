@@ -2,7 +2,6 @@ import 'package:date_format/date_format.dart';
 import 'package:intl/intl.dart';
 
 class DateTimeHelper {
-
   static DateTime convertEpochTimeToDateTime(String epoch) {
     return DateTime.fromMillisecondsSinceEpoch(int.parse(epoch));
   }
@@ -12,7 +11,10 @@ class DateTimeHelper {
   }
 
   static String convertDateTimeToDate(DateTime date) {
-    return formatDate(date, [dd, '/', mm]);
+    if (isToday(date))
+      return formatDate(date, ['Today,\n', dd, '-', mm]);
+    else
+      return formatDate(date, [D, ',\n', dd, '-', mm]);
   }
 
   static String convertTimeToString(int time) {
@@ -26,8 +28,7 @@ class DateTimeHelper {
   }
 
   static String convertDateTimeToTime(DateTime date) {
-    return formatDate(
-        date, [ HH, ':', nn]);
+    return formatDate(date, [date.hour == 12 ? "12" : hh, ':', nn, ' ', am]);
   }
 
   //2018-12-17 18:03:26 +0800 input

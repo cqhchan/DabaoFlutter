@@ -55,6 +55,7 @@ class _OrderListState extends State<OrderList> {
 
   ListView _buildList(BuildContext context, List<Order> snapshot) {
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
@@ -70,89 +71,88 @@ class _OrderListState extends State<OrderList> {
         margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
         child: Wrap(
           children: <Widget>[
-        
-                ConfigurableExpansionTile(
-                  initiallyExpanded: false,
-                  onExpansionChanged: (expanded) {
-                     order.toggle();
-                        setState(() {
-                          expandedFlag = order.isSelectedProperty.value;
-                        });
-                  },
-                  header: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      _buildHeader(order),
-                      Container(
-                        constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width - 50),
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          children: <Widget>[
-                            Expanded(
-                              flex: 5,
-                              child: _buildDeliveryPeriod(order),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 6.0),
-                                child: _buildQuantity(order),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 17.0,
-                      ),
-                      Container(
-                        constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width - 50),
-                        child: Flex(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          direction: Axis.horizontal,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                right: 2,
-                              ),
-                              child: Container(
-                                height: 30,
-                                child: Image.asset(
-                                    "assets/icons/red_marker_icon.png"),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 4,
-                              child: _buildLocationDescription(order),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: _buildTapToLocation(order),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      )
-                    ],
-                  ),
-                  children: <Widget>[
-                    Column(
+            ConfigurableExpansionTile(
+              initiallyExpanded: false,
+              onExpansionChanged: (expanded) {
+                order.toggle();
+                setState(() {
+                  expandedFlag = order.isSelectedProperty.value;
+                });
+              },
+              header: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _buildHeader(order),
+                  Container(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width - 50),
+                    child: Flex(
+                      direction: Axis.horizontal,
                       children: <Widget>[
-                        _buildOrderItems(order),
-                        SizedBox(
-                          height: 8,
+                        Expanded(
+                          flex: 5,
+                          child: _buildDeliveryPeriod(order),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 6.0),
+                            child: _buildQuantity(order),
+                          ),
                         ),
                       ],
-                    )
+                    ),
+                  ),
+                  SizedBox(
+                    height: 17.0,
+                  ),
+                  Container(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width - 50),
+                    child: Flex(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      direction: Axis.horizontal,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            right: 2,
+                          ),
+                          child: Container(
+                            height: 30,
+                            child:
+                                Image.asset("assets/icons/red_marker_icon.png"),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: _buildLocationDescription(order),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: _buildTapToLocation(order),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  )
+                ],
+              ),
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    _buildOrderItems(order),
+                    SizedBox(
+                      height: 8,
+                    ),
                   ],
-                ),
+                )
+              ],
+            ),
             StreamBuilder<bool>(
               stream: order.isSelectedProperty.producer,
               builder: (context, snapshot) {
@@ -621,7 +621,6 @@ class _OrderListState extends State<OrderList> {
         order.uid + ConfigHelper.instance.currentUserProperty.value.uid);
     Firestore.instance.collection("channels").document(channel.uid).setData(
       {
-        "LS": DateTimeHelper.convertDateTimeToString(DateTime.now()),
         "O": order.uid,
         "P": [
           ConfigHelper.instance.currentUserProperty.value.uid,
