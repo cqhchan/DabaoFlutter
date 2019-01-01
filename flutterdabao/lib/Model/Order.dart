@@ -32,6 +32,8 @@ class Order extends FirebaseType with Selectable {
 
   static final String routeKey = "R";
   static final String delivererKey = "D";
+  static final String deliveryFeeDiscountKey = "DFD";
+  static final String voucherKey = "V";
   static final String geoHashKey = "GH";
 
   BehaviorSubject<DateTime> createdDeliveryTime;
@@ -52,6 +54,7 @@ class Order extends FirebaseType with Selectable {
 
   BehaviorSubject<OrderMode> mode;
   BehaviorSubject<double> deliveryFee;
+  BehaviorSubject<double> deliveryFeeDiscount;
 
   Order.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
@@ -76,6 +79,7 @@ class Order extends FirebaseType with Selectable {
     mode = BehaviorSubject();
     message = BehaviorSubject();
     routeID = BehaviorSubject();
+    deliveryFeeDiscount = BehaviorSubject();
   }
 
   @override
@@ -163,6 +167,12 @@ class Order extends FirebaseType with Selectable {
       deliveryFee.add(null);
     }
 
+    if (data.containsKey(deliveryFeeDiscountKey)) {
+      deliveryFeeDiscount.add(data[deliveryFeeDiscountKey] + 0.0);
+    } else {
+      deliveryFeeDiscount.add(null);
+    }
+
     if (data.containsKey(messageKey)) {
       message.add(data[messageKey]);
     } else {
@@ -209,6 +219,12 @@ class Order extends FirebaseType with Selectable {
 
     if (holder.mode.value == null) return false;
 
+    if (holder.voucherProperty.value != null && (holder.voucherDeliveryFeeDiscount.value == null || holder.voucherDeliveryFeeDiscount.value == 0.0)) {
+    return false;
+    }
+    
+
+
     switch (holder.mode.value) {
       case OrderMode.asap:
         break;
@@ -243,6 +259,11 @@ class Order extends FirebaseType with Selectable {
     data[messageKey] = holder.message.value;
 
     data[creatorKey] = ConfigHelper.instance.currentUserProperty.value.uid;
+
+    if(holder.voucherProperty.value != null){
+    data[voucherKey] = holder.voucherProperty.value.uid;
+    data[deliveryFeeDiscountKey] = holder.voucherDeliveryFeeDiscount.value;
+    }
 
     data[orderItemKey] = holder.orderItems.value.map((item) {
       return item.toMap();

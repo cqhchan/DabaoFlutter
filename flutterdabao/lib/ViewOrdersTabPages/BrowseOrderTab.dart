@@ -79,8 +79,9 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
   Widget build(BuildContext context) {
 
     super.build(context);
-    return Scaffold(
-      body: Column(
+    return Container(
+      color: ColorHelper.dabaoOffWhiteF5,
+      child:  Column(
         children: <Widget>[
           Container(
             margin: EdgeInsets.fromLTRB(7.0, 12.0, 7.0, 0.0),

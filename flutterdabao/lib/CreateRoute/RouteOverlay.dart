@@ -152,13 +152,7 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
                     await DabaoRoute.Route.createRoute(widget.holder);
 
                 if (isSuccessful) {
-                  // Pop to home
-                  final PageRouteBuilder _homeRoute = new PageRouteBuilder(
-                    pageBuilder: (BuildContext context, _, __) {
-                      return Home();
-                    },
-                  );
-
+                  
                   Navigator.popUntil(context, ModalRoute.withName(Navigator.defaultRouteName));
 
                   Navigator.of(context).push(

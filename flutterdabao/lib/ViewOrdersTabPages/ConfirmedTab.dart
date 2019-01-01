@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/Order.dart';
@@ -33,8 +34,9 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView>   with AutomaticKee
 
     super.build(context);
     
-    return Scaffold(
-      body: AcceptedList(
+    return Container(
+      color: ColorHelper.dabaoOffWhiteF5,
+      child: AcceptedList(
         context: context,
         input:
             Observable.combineLatest2<List<Order>, List<Order>, List<Order>>(

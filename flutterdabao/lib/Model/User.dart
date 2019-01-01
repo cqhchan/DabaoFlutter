@@ -7,6 +7,7 @@ import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 class User extends FirebaseType {
   static String foodTagKey = 'FT';
@@ -139,5 +140,26 @@ class User extends FirebaseType {
       "CT": DateTimeHelper.convertTimeToString(creationTime),
       'LLT': DateTimeHelper.convertTimeToString(lastLoginTime),
     }, merge: true);
+  }
+
+  Future<Uri> referalLink() async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short),
+      domain: 'dabaotest.page.link',
+      link: Uri.parse(
+          'https://www.dabaoapp.sg/?invitedby=${ConfigHelper.instance.currentUserProperty.value.uid}'),
+      androidParameters: AndroidParameters(
+        packageName: 'com.example.android',
+        minimumVersion: 125,
+      ),
+      iosParameters: IosParameters(
+        bundleId: 'com.example.ios',
+        minimumVersion: '1.0.1',
+        appStoreId: '123456789',
+      ),
+    );
+    final ShortDynamicLink shortDynamicLink = await parameters.buildShortLink();
+    return shortDynamicLink.shortUrl;
   }
 }

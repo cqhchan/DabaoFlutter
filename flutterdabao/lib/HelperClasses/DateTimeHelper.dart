@@ -9,6 +9,9 @@ class DateTimeHelper {
   static String convertDateTimeToDate(DateTime date) {
     return formatDate(date, [dd, '/', mm]);
   }
+    static String convertDateTimeToDateAndYear(DateTime date) {
+    return formatDate(date, [dd, '-', MM, '-', yyyy]);
+  }
 
   static String convertTimeToString(int time) {
     return convertDateTimeToString(

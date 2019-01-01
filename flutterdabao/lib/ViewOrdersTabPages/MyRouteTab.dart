@@ -30,28 +30,29 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
 
   @override
   Widget build(BuildContext context) {
-      
-      super.build(context);
-    return StreamBuilder<List<Object>>(
-      stream: Observable.combineLatest2<List<DabaoRoute.Route>, List<Order>,
-              List<Object>>(
-          userOpenRoutes.producer, userDeliveryingOrders.producer,
-          (routes, orders) {
-        List<Object> temp = List();
-        temp.addAll(routes);
+    super.build(context);
+    return Container(
+        color: ColorHelper.dabaoOffWhiteF5,
+        child: StreamBuilder<List<Object>>(
+          stream: Observable.combineLatest2<List<DabaoRoute.Route>, List<Order>,
+                  List<Object>>(
+              userOpenRoutes.producer, userDeliveryingOrders.producer,
+              (routes, orders) {
+            List<Object> temp = List();
+            temp.addAll(routes);
 
-        orders.removeWhere((order) => order.routeID.value != null);
+            orders.removeWhere((order) => order.routeID.value != null);
 
-        if (orders != null && orders.length != 0) temp.add(orders);
+            if (orders != null && orders.length != 0) temp.add(orders);
 
-        return temp;
-      }),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-        if (!snapshot.hasData) return Text('No Routes Avaliable');
-        return _buildList(context, snapshot.data);
-      },
-    );
+            return temp;
+          }),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            if (!snapshot.hasData) return Text('No Routes Avaliable');
+            return _buildList(context, snapshot.data);
+          },
+        ));
   }
 
   Widget _buildList(BuildContext context, List<Object> snapshot) {

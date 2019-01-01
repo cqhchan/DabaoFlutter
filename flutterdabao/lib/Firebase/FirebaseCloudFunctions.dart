@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -104,8 +105,6 @@ class FirebaseCloudFunctions {
     return list;
   }
 
-
-
   ///[location] Location to search
   ///[radius] radius in meters to search default 1000
   static Future<List<String>> fetchProximityHash({
@@ -124,8 +123,8 @@ class FirebaseCloudFunctions {
           .call(functionName: 'locationRequest', parameters: attributeMap);
       print(results);
 
-      if (results.containsKey("geohashes")){
-        list = List.castFrom<dynamic,String>(results["geohashes"]) ;
+      if (results.containsKey("geohashes")) {
+        list = List.castFrom<dynamic, String>(results["geohashes"]);
       }
 
       print(list.length);
@@ -154,7 +153,7 @@ class FirebaseCloudFunctions {
       attributeMap["ST"] = DateTimeHelper.convertDateTimeToString(startTime);
 
       if (endTime != null)
-      attributeMap["ET"] = DateTimeHelper.convertDateTimeToString(endTime);
+        attributeMap["ET"] = DateTimeHelper.convertDateTimeToString(endTime);
 
       attributeMap["radius"] = radius;
       attributeMap["mode"] = 3;
@@ -178,7 +177,6 @@ class FirebaseCloudFunctions {
     return list;
   }
 
-
   ///[foodTagTitle] foodTag To Search
   ///[limit] limit number of Suggested Food Type
   static Future<List<OrderItem>> fetchOrderItemForFoodTag({
@@ -194,10 +192,9 @@ class FirebaseCloudFunctions {
         .future;
   }
 
-
-    ///[data] data of an Order
+  ///[data] data of an Order
   static Future<bool> createOrder({
-    @required Map<String,dynamic> data,
+    @required Map<String, dynamic> data,
   }) async {
     try {
       data["mode"] = 0;
@@ -206,25 +203,50 @@ class FirebaseCloudFunctions {
       print(results);
 
       if (results.containsKey("status") && results["status"] == 200)
-      return true;
-
+        return true;
     } on CloudFunctionsException catch (e) {
-      
       print(e.message);
       print(e);
-
     } catch (e) {
- 
       print('Error: $e');
     }
 
     return false;
   }
 
+  ///[data] data of an Order
+  static Future<bool> redeemVoucher({
+    @required String voucherID,
+    @required String userID,
+  }) async {
+    Map<dynamic, dynamic> results = Map();
+    try {
+      Map<String, dynamic> data = Map();
+      data["mode"] = 0;
+      data["voucherID"] = voucherID;
+      data["userID"] = userID;
+
+      results = await CloudFunctions.instance
+          .call(functionName: 'addRequests', parameters: data);
+    } on CloudFunctionsException catch (e) {
+      print(e.message);
+      print(e);
+    } catch (e) {
+      print('Error: $e');
+    }
+    print(results);
+
+    if (results.containsKey("status") && results["status"] == 200) return true;
+
+    throw new PlatformException(code: results["status"].toString(), message: results["message"])
+;
+
+
+  }
 
   ///[data] data of an Route
   static Future<bool> createRoute({
-    @required Map<String,dynamic> data,
+    @required Map<String, dynamic> data,
   }) async {
     try {
       data["mode"] = 1;
@@ -233,24 +255,18 @@ class FirebaseCloudFunctions {
       print(results);
 
       if (results.containsKey("status") && results["status"] == 200)
-      return true;
-
+        return true;
     } on CloudFunctionsException catch (e) {
-      
       print(e.message);
       print(e);
-    return false;
-
+      return false;
     } catch (e) {
- 
       print('Error: $e');
-          return false;
-
+      return false;
     }
 
     return false;
   }
-
 
   ///[data] acceptOrder
   /// orderID
@@ -262,48 +278,38 @@ class FirebaseCloudFunctions {
     @required String acceptorID,
     @required String deliveryTime,
     String routeID,
-
   }) async {
     try {
-
       Map<String, dynamic> attributeMap = new Map<String, dynamic>();
       attributeMap["mode"] = 2;
       attributeMap["orderID"] = orderID;
       attributeMap["acceptorID"] = acceptorID;
       attributeMap["deliveryTime"] = deliveryTime;
 
-      if (routeID != null)
-      attributeMap["routeID"] = routeID;
+      if (routeID != null) attributeMap["routeID"] = routeID;
 
       Map<dynamic, dynamic> results = await CloudFunctions.instance
           .call(functionName: 'creationRequest', parameters: attributeMap);
       print(results);
 
       if (results.containsKey("status") && results["status"] == 200)
-      return true;
+        return true;
 
       if (results.containsKey("status") && results["status"] == 400)
-      return false;
-
+        return false;
     } on CloudFunctionsException catch (e) {
-      
       print(e.message);
       print(e);
-    return false;
-
+      return false;
     } catch (e) {
- 
       print('Error: $e');
-          return false;
-
+      return false;
     }
 
     return false;
   }
 
-
-
- ///[data] acceptOrder
+  ///[data] acceptOrder
   /// orderID
   /// acceptorID
   /// completedTime
@@ -311,10 +317,8 @@ class FirebaseCloudFunctions {
     @required String orderID,
     @required String acceptorID,
     @required String completedTime,
-
   }) async {
     try {
-
       Map<String, dynamic> attributeMap = new Map<String, dynamic>();
       attributeMap["mode"] = 3;
       attributeMap["orderID"] = orderID;
@@ -326,30 +330,19 @@ class FirebaseCloudFunctions {
       print(results);
 
       if (results.containsKey("status") && results["status"] == 200)
-      return true;
+        return true;
 
       if (results.containsKey("status") && results["status"] == 400)
-      return false;
-
+        return false;
     } on CloudFunctionsException catch (e) {
-      
       print(e.message);
       print(e);
-    return false;
-
+      return false;
     } catch (e) {
- 
       print('Error: $e');
-          return false;
-
+      return false;
     }
 
     return false;
   }
-
-
 }
-
-
-
-
