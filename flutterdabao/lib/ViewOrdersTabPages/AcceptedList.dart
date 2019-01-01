@@ -14,7 +14,7 @@ import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ChatPage.dart';
+import 'package:flutterdabao/ChatPage/Conversation.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
@@ -57,6 +57,7 @@ class _AcceptedListState extends State<AcceptedList> {
 
   ListView _buildList(BuildContext context, List<Order> snapshot) {
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
@@ -300,6 +301,8 @@ class _AcceptedListState extends State<AcceptedList> {
 
   Widget _buildDeliveryPeriod(Order order) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         StreamBuilder<DateTime>(
           stream: order.startDeliveryTime,
@@ -336,14 +339,12 @@ class _AcceptedListState extends State<AcceptedList> {
           stream: order.endDeliveryTime,
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
-            return Material(
-              child: Text(
-                snap.hasData
-                    ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                    : '',
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              ),
+            return Text(
+              snap.hasData
+                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                  : '',
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
             );
           },
         ),
@@ -475,10 +476,7 @@ class _AcceptedListState extends State<AcceptedList> {
               stream: order.deliveryLocation,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
-                if (widget.location.latitude != null &&
-                    widget.location.longitude != null &&
-                    snap.data.latitude != null &&
-                    snap.data.longitude != null) {
+                if (widget.location != null && snap.data != null) {
                   saveLocation = LatLng(
                       widget.location.latitude, widget.location.longitude);
                   return Container(
@@ -498,7 +496,10 @@ class _AcceptedListState extends State<AcceptedList> {
                     ),
                   );
                 } else {
-                  return Offstage();
+                  return Text(
+                    "?.??km",
+                    style: FontHelper.medium12TextStyle,
+                  );
                 }
               },
             ),
@@ -645,13 +646,7 @@ class _AcceptedListState extends State<AcceptedList> {
           ],
         ),
         onPressed: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (BuildContext context) =>
-          //         ChatPage(order: order, location: saveLocation),
-          //   ),
-          // );
+          _toChat(order);
         },
       ),
     );
@@ -678,32 +673,7 @@ class _AcceptedListState extends State<AcceptedList> {
           ],
         ),
         onPressed: () async {
-          Channel channel = Channel.fromUID(
-              order.uid + ConfigHelper.instance.currentUserProperty.value.uid);
-          Firestore.instance
-              .collection("channels")
-              .document(channel.uid)
-              .setData(
-            {
-              "LS": DateTimeHelper.convertDateTimeToString(DateTime.now()),
-              "O": order.uid,
-              "P": [
-                ConfigHelper.instance.currentUserProperty.value.uid,
-                order.creator.value
-              ],
-            },
-            merge: true,
-          ).then((_) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => ChatPage(
-                      channel: channel,
-                      location: widget.location,
-                    ),
-              ),
-            );
-          });
+          _toChat(order);
         },
       ),
     );
@@ -718,5 +688,30 @@ class _AcceptedListState extends State<AcceptedList> {
             route: widget.route,
           );
         });
+  }
+
+  _toChat(Order order) {
+    Channel channel = Channel.fromUID(
+        order.uid + ConfigHelper.instance.currentUserProperty.value.uid);
+    Firestore.instance.collection("channels").document(channel.uid).setData(
+      {
+        "O": order.uid,
+        "P": [
+          ConfigHelper.instance.currentUserProperty.value.uid,
+          order.creator.value
+        ],
+      },
+      merge: true,
+    ).then((_) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => Conversation(
+                channel: channel,
+                location: widget.location,
+              ),
+        ),
+      );
+    });
   }
 }

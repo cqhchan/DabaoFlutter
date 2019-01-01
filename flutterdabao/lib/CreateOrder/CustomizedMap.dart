@@ -1,7 +1,3 @@
-// TODO:
-// https://stackoverflow.com/questions/24302112/how-to-get-the-latitude-and-longitude-of-location-where-user-taps-on-the-map-in
-// https://stackoverflow.com/questions/53397826/flutter-get-coordinates-from-google-maps
-
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';

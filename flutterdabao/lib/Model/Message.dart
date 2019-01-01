@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
+import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:rxdart/rxdart.dart';
 
 class Message extends FirebaseType with Selectable {
@@ -11,9 +12,8 @@ class Message extends FirebaseType with Selectable {
 
   BehaviorSubject<String> sender;
   BehaviorSubject<DateTime> timestamp;
-  BehaviorSubject<GeoPoint> message;
+  BehaviorSubject<String> message;
   BehaviorSubject<String> imageUrl;
-
 
   Message.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
@@ -21,17 +21,14 @@ class Message extends FirebaseType with Selectable {
 
   @override
   void setUpVariables() {
-
     sender = BehaviorSubject();
     timestamp = BehaviorSubject();
     message = BehaviorSubject();
     imageUrl = BehaviorSubject();
-
   }
 
   @override
   void map(Map<String, dynamic> data) {
-
     if (data.containsKey(senderKey)) {
       sender.add(data[senderKey]);
     } else {
@@ -39,7 +36,8 @@ class Message extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(timestampKey)) {
-      timestamp.add(data[timestampKey]);
+      timestamp
+          .add(DateTimeHelper.convertStringTimeToDateTime(data[timestampKey]));
     } else {
       timestamp.add(null);
     }

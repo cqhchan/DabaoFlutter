@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/ChatPage/ChatPage.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CreateRoute/RouteOverview.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
@@ -87,7 +88,7 @@ class _Home extends State<Home> {
                             () {
                           Navigator.push(
                             context,
-                            FadeRoute(widget: TabBarPage()),
+                            FadeRoute(widget: ChatPage()),
                           );
                         }),
                   ],
