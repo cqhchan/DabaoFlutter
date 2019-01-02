@@ -19,7 +19,6 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     Selectable.deselectAll(userAcceptedOrders.value);
     Selectable.deselectAll(userCompletedOrders.value);
     super.dispose();

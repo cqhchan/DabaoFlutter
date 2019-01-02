@@ -5,7 +5,6 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
-import 'package:flutterdabao/Model/Message.dart';
 
 class ChatPage extends StatefulWidget {
   _ChatPageState createState() => _ChatPageState();
