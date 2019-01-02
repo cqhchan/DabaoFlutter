@@ -455,7 +455,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 );
                 showLoadingOverlay(context: context);
                 var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
-                  routeID: widget.route.uid,
+                  routeID: widget.route == null ? null : widget.route.uid,
                   orderID: widget.order.uid,
                   acceptorID:
                       ConfigHelper.instance.currentUserProperty.value.uid,
@@ -501,7 +501,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 );
                 showLoadingOverlay(context: context);
                 var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
-                  routeID: widget.route.uid,
+                  routeID: widget.route == null ? null : widget.route.uid,
                   orderID: widget.order.uid,
                   acceptorID:
                       ConfigHelper.instance.currentUserProperty.value.uid,

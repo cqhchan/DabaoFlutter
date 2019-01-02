@@ -47,6 +47,7 @@ dependencies:
   image_picker: 
   firebase_storage:
   random_string:
+  firebase_dynamic_links: ^0.1.0+1
   path_provider: ^0.4.1
   date_format: ^1.0.5
   photo_view: ^0.1.2
@@ -54,6 +55,7 @@ dependencies:
   image_cropper: ^0.0.9
   geohash: ^0.2.1
   flutter_swiper: ^1.1.4
+  path_drawing: ^0.4.0
   settings:
     git:
       url: https://github.com/cqhchan/settings

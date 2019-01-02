@@ -20,7 +20,7 @@ class WelcomePage extends StatefulWidget {
 class WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(

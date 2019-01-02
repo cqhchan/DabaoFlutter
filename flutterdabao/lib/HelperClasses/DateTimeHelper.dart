@@ -16,6 +16,9 @@ class DateTimeHelper {
     else
       return formatDate(date, [D, ',\n', dd, '-', mm]);
   }
+    static String convertDateTimeToDateAndYear(DateTime date) {
+    return formatDate(date, [dd, '-', MM, '-', yyyy]);
+  }
 
   static String convertTimeToString(int time) {
     return convertDateTimeToString(

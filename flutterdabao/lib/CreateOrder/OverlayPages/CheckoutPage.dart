@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/Buttons/ArrowButton.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -9,13 +12,17 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Holder/OrderItemHolder.dart';
+import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:flutterdabao/OrderItems/OrderItemSummary.dart';
+import 'package:flutterdabao/Rewards/MyVoucherPage.dart';
+import 'package:flutterdabao/Rewards/SearchPromoCodePage.dart';
 import 'package:rxdart/rxdart.dart';
 
 class CheckoutPage extends StatefulWidget {
   final OrderHolder holder;
   final VoidCallback checkout;
-  CheckoutPage({Key key, this.holder, @required this.checkout}) : super(key: key);
+  CheckoutPage({Key key, this.holder, @required this.checkout})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -29,7 +36,9 @@ class _CheckoutPageState extends State<CheckoutPage>
   MutableProperty<double> actualDeliveryFeeProperty;
   MutableProperty<double> chosenPercentage = MutableProperty(1.0);
 
-  MutableProperty<double> finalPriceProperty = MutableProperty(0.0);
+  MutableProperty<double> finalPriceProperty;
+
+  MutableProperty<double> discountDeliveryFee;
 
   @override
   void initState() {
@@ -37,21 +46,30 @@ class _CheckoutPageState extends State<CheckoutPage>
 
     actualDeliveryFeeProperty = widget.holder.deliveryFee;
 
+    discountDeliveryFee = widget.holder.voucherDeliveryFeeDiscount;
+
+    finalPriceProperty = widget.holder.finalPrice;
+
     subscription.add(suggestedDeliveryFeeProperty.bindTo(
-        widget.holder.orderItems.producer.map((items) => ConfigHelper.instance
-            .deliveryFeeCalculator(numberOfItems: items.map((item){
-              return item.quantity.value;
-            }).reduce((qty1,qty2)=> qty1 + qty2)))));
+        Observable.combineLatest2<double, double, double>(
+            widget.holder.orderItems.producer
+                .map((items) => ConfigHelper.instance.deliveryFeeCalculator(
+                        numberOfItems: items.map((item) {
+                      return item.quantity.value;
+                    }).reduce((qty1, qty2) => qty1 + qty2))),
+            discountDeliveryFee.producer,
+            (suggestedPrice, deliveryFeeDiscount) {
+      if (deliveryFeeDiscount == null) return suggestedPrice;
+
+      return max(deliveryFeeDiscount, suggestedPrice);
+    })));
 
     subscription.add(actualDeliveryFeeProperty.bindTo(Observable.combineLatest2(
         suggestedDeliveryFeeProperty.producer,
         chosenPercentage.producer,
         (suggested, percentage) => suggested * percentage)));
 
-    subscription.add(finalPriceProperty.bindTo(Observable.combineLatest2(
-        widget.holder.maxPrice.producer,
-        actualDeliveryFeeProperty.producer,
-        (price, delvieryFee) => price + delvieryFee)));
+ 
   }
 
   @override
@@ -108,20 +126,73 @@ class _CheckoutPageState extends State<CheckoutPage>
         )));
   }
 
-  Container buildPromoCode() {
-    return Container(
-      padding: EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-              child: Text(
-            "Promo Code",
-            style: FontHelper.bold(Colors.black, 14.0),
-          )),
-          Icon(Icons.arrow_forward_ios)
-        ],
-      ),
-    );
+  Widget buildPromoCode() {
+    return GestureDetector(
+        child: Container(
+          color: Colors.transparent,
+          padding: EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0),
+          child: Row(
+            children: <Widget>[
+              Text(
+                "Promo Code",
+                style: FontHelper.bold(Colors.black, 14.0),
+              ),
+              Expanded(
+                child: StreamBuilder<Voucher>(
+                  stream: widget.holder.voucherProperty.producer,
+                  builder: (BuildContext context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null)
+                      return Align(
+                          alignment: Alignment.centerRight,
+                          child: Icon(Icons.arrow_forward_ios));
+
+                    return Column(
+                      children: <Widget>[
+                        StreamBuilder<String>(
+                            stream: snapshot.data.title,
+                            builder: (context, snap) {
+                              if (!snap.hasData) return Offstage();
+                              return Text(snap.data);
+                            }),
+                        StreamBuilder<double>(
+                            stream: snapshot.data.deliveryFeeDiscount,
+                            builder: (context, snap) {
+                              if (!snap.hasData || snap.data == 0)
+                                return Offstage();
+
+                              return Row(children: <Widget>[
+                                Text(
+                                  "Off Delivery Fee",
+                                  style: FontHelper.bold(Colors.black, 14.0),
+                                ),
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      "-" +
+                                          StringHelper.doubleToPriceString(
+                                              snap.data),
+                                      style:
+                                          FontHelper.bold(Colors.black, 14.0),
+                                    ),
+                                  ),
+                                ),
+                              ]);
+                            }),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => new VoucherApplicationPage(
+                    voucherProperty: widget.holder.voucherProperty,
+                  )));
+        });
   }
 
   Container buildPrice() {
@@ -163,7 +234,6 @@ class _CheckoutPageState extends State<CheckoutPage>
           StreamBuilder<double>(
             stream: finalPriceProperty.producer,
             builder: (context, snapshot) {
-
               return Text(
                 snapshot.hasData && snapshot.data != null
                     ? StringHelper.doubleToPriceString(snapshot.data)
