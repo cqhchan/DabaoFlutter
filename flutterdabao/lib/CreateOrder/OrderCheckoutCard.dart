@@ -256,7 +256,6 @@ class _OrderCheckoutState extends State<OrderCheckout>
                 ),
                 onPressed: () async {
                   if (Order.isValid(widget.holder)) {
-
                     showLoadingOverlay(context: context);
                     var isSuccessful = await Order.createOrder(widget.holder);
 
@@ -267,9 +266,8 @@ class _OrderCheckoutState extends State<OrderCheckout>
                           return Home();
                         },
                       );
-                      Navigator.pushAndRemoveUntil(
-                          context, _homeRoute, (Route<dynamic> r) => false);
-
+                      Navigator.popUntil(context,
+                          ModalRoute.withName(Navigator.defaultRouteName));
                     } else {
                       Navigator.of(context).pop();
                       final snackBar = SnackBar(
@@ -358,7 +356,9 @@ class _OrderCheckoutState extends State<OrderCheckout>
                           context: context,
                           onCompleteCallback: (DateTime time) {
                             widget.holder.cutOffDeliveryTime.value = time;
-                          }, subTitle: "Cut off my order at...", headerTitle: "Select a time");
+                          },
+                          subTitle: "Cut off my order at...",
+                          headerTitle: "Select a time");
                     },
                     child: buildTime(
                         title: "Cut-Off Time",

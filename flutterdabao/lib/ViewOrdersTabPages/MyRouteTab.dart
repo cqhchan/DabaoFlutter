@@ -35,15 +35,18 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
         color: ColorHelper.dabaoOffWhiteF5,
         child: StreamBuilder<List<Object>>(
           stream: Observable.combineLatest2<List<DabaoRoute.Route>, List<Order>,
-                  List<Object>>(
-              userOpenRoutes.producer, userDeliveryingOrders.producer,
-              (routes, orders) {
+                  List<Object>>(userOpenRoutes.producer,
+              userDeliveryingOrders.producer.map((orders) {
+            List<Order> tempOrders = List.from(orders);
+            tempOrders.removeWhere((order) => order.routeID.value != null);
+            return tempOrders;
+          }), (routes, orders) {
             List<Object> temp = List();
+
             temp.addAll(routes);
 
-            orders.removeWhere((order) => order.routeID.value != null);
-
-            if (orders != null && orders.length != 0) temp.add(orders);
+            if (orders != null && orders.length != 0)
+              temp.add(orders);
 
             return temp;
           }),

@@ -260,7 +260,6 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
           success: (sucess) async {
           await FirebaseAuth.instance.currentUser().then((firebaseUser) {
 
-              print("testing" + firebaseUser.uid + " phone " + firebaseUser.phoneNumber);
               User.fromAuth(firebaseUser)
                   .setPhoneNumber(firebaseUser.phoneNumber);
             });

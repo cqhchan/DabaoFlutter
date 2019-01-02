@@ -15,18 +15,18 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class BrowseOrderTabView extends StatefulWidget {
-
-  const BrowseOrderTabView({Key key}): super(key: key);
+  const BrowseOrderTabView({Key key}) : super(key: key);
 
   _BrowseOrderTabViewState createState() => _BrowseOrderTabViewState();
 }
 
 class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
-    with HavingGoogleMapPlaces, HavingSubscriptionMixin, AutomaticKeepAliveClientMixin<BrowseOrderTabView> {
-      
+    with
+        HavingGoogleMapPlaces,
+        HavingSubscriptionMixin,
+        AutomaticKeepAliveClientMixin<BrowseOrderTabView> {
   @override
   bool get wantKeepAlive => true;
-
 
   MutableProperty<List<Order>> searchOrders =
       MutableProperty<List<Order>>(List());
@@ -77,11 +77,10 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
 
   @override
   Widget build(BuildContext context) {
-
     super.build(context);
     return Container(
       color: ColorHelper.dabaoOffWhiteF5,
-      child:  Column(
+      child: Column(
         children: <Widget>[
           Container(
             margin: EdgeInsets.fromLTRB(7.0, 12.0, 7.0, 0.0),
@@ -112,10 +111,12 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                               "assets/icons/search_icon.png",
                               color: ColorHelper.dabaoOffBlack9B,
                             )),
-                        Text(
-                          searchText,
-                          style: FontHelper.regular(Colors.black, 12.0),
-                          overflow: TextOverflow.ellipsis,
+                        Expanded(
+                          child: Text(
+                            searchText,
+                            style: FontHelper.regular(Colors.black, 12.0),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         )
                       ],
                     ),
@@ -138,7 +139,8 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                           padding: EdgeInsets.only(left: 7.0),
                           child: Text(
                             "Distance from Location",
-                            style: FontHelper.regular(ColorHelper.dabaoOffGrey70, 12.0),
+                            style: FontHelper.regular(
+                                ColorHelper.dabaoOffGrey70, 12.0),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),

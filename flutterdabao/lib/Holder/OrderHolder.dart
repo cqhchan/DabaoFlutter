@@ -43,6 +43,7 @@ class OrderHolder with HavingSubscriptionMixin {
 
 
     voucherProperty.producer.switchMap((voucher)=> voucher.deliveryFeeDiscount).listen((discount){
+
       if (discount!= null)
       voucherDeliveryFeeDiscount.value = discount;
     });

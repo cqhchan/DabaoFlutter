@@ -30,6 +30,13 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView>   with AutomaticKee
   }
 
   @override
+    void initState() {
+      // TODO: implement initState
+      super.initState();
+      userAcceptedOrders.producer.listen((onData){
+      });
+    }
+  @override
   Widget build(BuildContext context) {
 
     super.build(context);
@@ -42,6 +49,8 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView>   with AutomaticKee
             Observable.combineLatest2<List<Order>, List<Order>, List<Order>>(
                 userAcceptedOrders.producer, userCompletedOrders.producer,
                 (x, y) {
+
+
           List<Order> temp = List();
           if (x != null && x.length != 0) temp.addAll(x);
           if (y != null && y.length != 0) temp.addAll(y);

@@ -7,7 +7,16 @@ import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:flutterdabao/Rewards/MyVoucherPage.dart';
 import 'package:flutterdabao/Rewards/SearchPromoCodePage.dart';
 
-class RewardsTabBarPage extends StatelessWidget {
+class RewardsTabBarPage extends StatefulWidget {
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return RewardsTabBarPageState();
+  }
+}
+
+class RewardsTabBarPageState extends State<RewardsTabBarPage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,4 +137,6 @@ class RewardsTabBarPage extends StatelessWidget {
       ),
     );
   }
+
+
 }
