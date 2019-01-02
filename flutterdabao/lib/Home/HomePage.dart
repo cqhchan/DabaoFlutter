@@ -83,14 +83,13 @@ class _Home extends State<Home> {
                       );
                     }),
                     //ChatBox
-                        squardCard(
-                            'assets/icons/chat.png', 'Chat', 'I want to Chat',
-                            () {
-                          Navigator.push(
-                            context,
-                            FadeRoute(widget: ChatPage()),
-                          );
-                        }),
+                    squardCard(
+                        'assets/icons/chat.png', 'Chat', 'I want to Chat', () {
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: ChatPage()),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -114,12 +113,27 @@ class _Home extends State<Home> {
                   height: 40.0,
                   width: 40.0,
                   child: GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       FirebaseAuth.instance.signOut();
                     },
-                                      child: Image.asset(
-                      "assets/icons/profile_icon.png",
-                      fit: BoxFit.fill,
+                    child: StreamBuilder(
+                      stream: Firestore.instance
+                          .collection('users')
+                          .document(ConfigHelper
+                              .instance.currentUserProperty.value.uid)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Image.asset(
+                            'assets/icons/profile_icon.png',
+                            fit: BoxFit.fill,
+                          );
+                        }
+                        return CircleAvatar(
+                          backgroundImage: NetworkImage(snapshot.data['TI']),
+                          radius: 20,
+                        );
+                      },
                     ),
                   ),
                 ),

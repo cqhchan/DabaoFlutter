@@ -12,14 +12,15 @@ import 'package:rxdart/rxdart.dart';
 class Channel extends FirebaseType with Selectable {
   static final String participantsKey = "P";
   static final String lastSentKey = "LS";
-  static final String lastMessageKey = "LM";
   static final String orderUidKey = "O";
+  static final String delivererKey = "D";
 
   BehaviorSubject<List<String>> participantsID;
-  BehaviorSubject<String> lastMessage;
   BehaviorSubject<DateTime> lastSent;
-  Observable<List<Message>> listOfMessages;
   BehaviorSubject<String> orderUid;
+  BehaviorSubject<String> deliverer;
+
+  Observable<List<Message>> listOfMessages;
 
   Channel.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
@@ -27,10 +28,10 @@ class Channel extends FirebaseType with Selectable {
 
   @override
   void setUpVariables() {
-    lastMessage = BehaviorSubject();
     participantsID = BehaviorSubject();
     lastSent = BehaviorSubject();
     orderUid = BehaviorSubject();
+    deliverer = BehaviorSubject();
 
     listOfMessages = FirebaseCollectionReactive<Message>(Firestore.instance
             .collection(className)
@@ -50,10 +51,10 @@ class Channel extends FirebaseType with Selectable {
 
   @override
   void map(Map<String, dynamic> data) {
-    if (data.containsKey(lastMessageKey)) {
-      lastMessage.add(data[lastMessageKey]);
+    if (data.containsKey(delivererKey)) {
+      deliverer.add(data[delivererKey]);
     } else {
-      lastMessage.add(null);
+      deliverer.add(null);
     }
 
     if (data.containsKey(orderUidKey)) {

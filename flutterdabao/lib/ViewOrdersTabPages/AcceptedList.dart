@@ -335,19 +335,6 @@ class _AcceptedListState extends State<AcceptedList> {
             }
           },
         ),
-        StreamBuilder<DateTime>(
-          stream: order.endDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            return Text(
-              snap.hasData
-                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                  : '',
-              style: FontHelper.semiBoldgrey14TextStyle,
-              overflow: TextOverflow.ellipsis,
-            );
-          },
-        ),
       ],
     );
   }
@@ -700,6 +687,7 @@ class _AcceptedListState extends State<AcceptedList> {
           ConfigHelper.instance.currentUserProperty.value.uid,
           order.creator.value
         ],
+        "D": ConfigHelper.instance.currentUserProperty.value.uid
       },
       merge: true,
     ).then((_) {

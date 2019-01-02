@@ -466,19 +466,6 @@ class _ConversationState extends State<Conversation>
             }
           },
         ),
-        StreamBuilder<DateTime>(
-          stream: order.value.endDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            return Text(
-              snap.hasData
-                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                  : '',
-              style: FontHelper.semiBoldgrey14TextStyle,
-              overflow: TextOverflow.ellipsis,
-            );
-          },
-        ),
       ],
     );
   }
@@ -838,16 +825,8 @@ class _ConversationState extends State<Conversation>
                   ),
                   Container(
                     constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.7),
-                    padding: EdgeInsets.all(9),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                        color: data.sender.value ==
-                                ConfigHelper
-                                    .instance.currentUserProperty.value.uid
-                            ? ColorHelper.dabaoPaleOrange
-                            : ColorHelper.dabaoGreyE0,
-                        borderRadius: BorderRadius.circular(10)),
+                        maxWidth: MediaQuery.of(context).size.width * 0.5),
+                    margin: EdgeInsets.fromLTRB(5, 5, 12, 5),
                     child: Wrap(
                       alignment: data.sender.value ==
                               ConfigHelper
@@ -857,25 +836,22 @@ class _ConversationState extends State<Conversation>
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 4,
                       children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: GestureDetector(
-                            child: Image.network(
-                              data.imageUrl.value,
-                              filterQuality: FilterQuality.high,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => HeroPhotoViewWrapper(
-                                          tag: data.imageUrl.value,
-                                          imageProvider:
-                                              NetworkImage(data.imageUrl.value),
-                                        ),
-                                  ));
-                            },
+                        GestureDetector(
+                          child: Image.network(
+                            data.imageUrl.value,
+                            filterQuality: FilterQuality.high,
                           ),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HeroPhotoViewWrapper(
+                                        tag: data.imageUrl.value,
+                                        imageProvider:
+                                            NetworkImage(data.imageUrl.value),
+                                      ),
+                                ));
+                          },
                         ),
                         Text(
                           DateTimeHelper.convertDateTimeToTime(
@@ -1170,17 +1146,22 @@ class HeroPhotoViewWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        constraints: BoxConstraints.expand(
-          height: MediaQuery.of(context).size.height,
-        ),
-        child: PhotoView(
-          imageProvider: imageProvider,
-          loadingChild: loadingChild,
-          backgroundDecoration: backgroundDecoration,
-          minScale: minScale,
-          maxScale: maxScale,
-          heroTag: tag,
-        ));
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Container(
+          constraints: BoxConstraints.expand(
+            height: MediaQuery.of(context).size.height,
+          ),
+          child: PhotoView(
+            imageProvider: imageProvider,
+            loadingChild: loadingChild,
+            backgroundDecoration: backgroundDecoration,
+            minScale: minScale,
+            maxScale: maxScale,
+            heroTag: tag,
+          )),
+    );
   }
 }

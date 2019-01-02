@@ -5,12 +5,15 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
+import 'package:flutterdabao/Model/Message.dart';
 
 class ChatPage extends StatefulWidget {
   _ChatPageState createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
+  String otherUser;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +40,8 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  ListView _buildChatList(BuildContext context, List<DocumentSnapshot> snapshot) {
+  ListView _buildChatList(
+      BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
@@ -46,22 +50,18 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildChat(BuildContext context, DocumentSnapshot data) {
-    String deliverer;
     final channel = Channel.fromDocument(data);
     //check for deliverer in the list of participants
     final List<String> participants = channel.participantsID.value;
     participants.forEach((result) {
       if (result != ConfigHelper.instance.currentUserProperty.value.uid) {
-        return deliverer = result;
+        return otherUser = result;
       }
     });
+    print('deliverer: $otherUser');
 
-    print('----------------${channel.orderUid.value}');
-
-    print(deliverer);
     //the user cannot converse with himself
-    //TODO: channel.lastMessage.value
-    if (channel.lastSent.value == null || deliverer == null) {
+    if (channel.lastSent.value == null || otherUser == null) {
       return Offstage();
     } else {
       return Column(
@@ -72,7 +72,7 @@ class _ChatPageState extends State<ChatPage> {
             leading: StreamBuilder(
               stream: Firestore.instance
                   .collection('users')
-                  .document(deliverer)
+                  .document(otherUser)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return Offstage();
@@ -98,12 +98,14 @@ class _ChatPageState extends State<ChatPage> {
                     StreamBuilder(
                         stream: Firestore.instance
                             .collection('users')
-                            .document(deliverer)
+                            .document(otherUser)
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) return Offstage();
                           return Text(
-                            snapshot.data['N'] != null ? snapshot.data['N'] : '',
+                            snapshot.data['N'] != null
+                                ? snapshot.data['N']
+                                : '',
                             style: FontHelper.regular10Black,
                           );
                         }),
@@ -122,7 +124,7 @@ class _ChatPageState extends State<ChatPage> {
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) return Offstage();
                       return Text(
-                        snapshot.data['FT'] != null? snapshot.data['FT'] : '',
+                        snapshot.data['FT'] != null ? snapshot.data['FT'] : '',
                         style: FontHelper.semiBold16Black,
                       );
                     }),
@@ -130,15 +132,26 @@ class _ChatPageState extends State<ChatPage> {
             ),
             subtitle: Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 100, 0),
-              child: Text(
-                channel.lastMessage.value != null
-                    ? channel.lastMessage.value
-                    : '[Photo]',
-                style: FontHelper.regular12Black,
-              ),
+              child: StreamBuilder(
+                  stream: Firestore.instance
+                      .collection('channels')
+                      .document(
+                          channel.orderUid.value + channel.deliverer.value)
+                      .collection('messages')
+                      .snapshots()
+                      .map((snapshot) => snapshot.documents.last),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return Offstage();
+                    return Text(
+                      snapshot.data['M'] != null && snapshot.data['M'] != ''
+                          ? snapshot.data['M']
+                          : '[Photo]',
+                      style: FontHelper.regular12Black,
+                    );
+                  }),
             ),
             onTap: () {
-              _toChat(channel.orderUid.value, deliverer);
+              _toChat(channel.orderUid.value, channel.deliverer.value);
             },
           ),
           Divider(
@@ -150,8 +163,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   _toChat(String orderUid, String deliverer) {
-    Channel channel = Channel.fromUID(
-        orderUid + ConfigHelper.instance.currentUserProperty.value.uid);
+    Channel channel = Channel.fromUID(orderUid + deliverer);
     Firestore.instance
         .collection("channels")
         .document(channel.uid)
@@ -162,7 +174,7 @@ class _ChatPageState extends State<ChatPage> {
         MaterialPageRoute(
           builder: (BuildContext context) => Conversation(
                 channel: channel,
-                deliverer: deliverer,
+                otherUser: otherUser,
               ),
         ),
       );

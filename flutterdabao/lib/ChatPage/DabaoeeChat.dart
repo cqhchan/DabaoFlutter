@@ -27,9 +27,9 @@ import 'package:photo_view/photo_view.dart';
 class Conversation extends StatefulWidget {
   final Channel channel;
   final LatLng location;
-  final String deliverer;
+  final String otherUser;
 
-  const Conversation({Key key, this.channel, this.location, this.deliverer})
+  const Conversation({Key key, this.channel, this.location, this.otherUser})
       : super(key: key);
 
   _ConversationState createState() => _ConversationState();
@@ -175,7 +175,7 @@ class _ConversationState extends State<Conversation>
     return StreamBuilder(
       stream: Firestore.instance
           .collection('users')
-          .document(widget.deliverer)
+          .document(widget.otherUser)
           .snapshots(),
       builder: (context, user) {
         if (!user.hasData) return Offstage();
@@ -455,19 +455,6 @@ class _ConversationState extends State<Conversation>
                 ),
               );
             }
-          },
-        ),
-        StreamBuilder<DateTime>(
-          stream: order.value.endDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            return Text(
-              snap.hasData
-                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                  : '',
-              style: FontHelper.semiBoldgrey14TextStyle,
-              overflow: TextOverflow.ellipsis,
-            );
           },
         ),
       ],
@@ -783,23 +770,18 @@ class _ConversationState extends State<Conversation>
                     ConfigHelper.instance.currentUserProperty.value.uid
                 ? true
                 : false,
-            child: StreamBuilder<User>(
-              stream: order.value.creator.where((uid) => uid != null).map(
-                    (uid) => User.fromUID(uid),
-                  ),
+            child: StreamBuilder(
+              stream: Firestore.instance
+                  .collection('users')
+                  .document(widget.otherUser)
+                  .snapshots(),
               builder: (context, user) {
                 if (!user.hasData) return Offstage();
                 return Row(
                   children: <Widget>[
-                    StreamBuilder<String>(
-                      stream: user.data.thumbnailImage,
-                      builder: (context, user) {
-                        if (!user.hasData) return Offstage();
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(user.data),
-                          radius: 14.5,
-                        );
-                      },
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(user.data['TI']),
+                      radius: 14.5,
                     ),
                   ],
                 );
@@ -829,16 +811,8 @@ class _ConversationState extends State<Conversation>
                   ),
                   Container(
                     constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.7),
-                    padding: EdgeInsets.all(9),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                        color: data.sender.value ==
-                                ConfigHelper
-                                    .instance.currentUserProperty.value.uid
-                            ? ColorHelper.dabaoPaleOrange
-                            : ColorHelper.dabaoGreyE0,
-                        borderRadius: BorderRadius.circular(10)),
+                        maxWidth: MediaQuery.of(context).size.width * 0.5),
+                    margin: EdgeInsets.fromLTRB(5, 5, 12, 5),
                     child: Wrap(
                       alignment: data.sender.value ==
                               ConfigHelper
@@ -848,25 +822,22 @@ class _ConversationState extends State<Conversation>
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 4,
                       children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: GestureDetector(
-                            child: Image.network(
-                              data.imageUrl.value,
-                              filterQuality: FilterQuality.high,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => HeroPhotoViewWrapper(
-                                          tag: data.imageUrl.value,
-                                          imageProvider:
-                                              NetworkImage(data.imageUrl.value),
-                                        ),
-                                  ));
-                            },
+                        GestureDetector(
+                          child: Image.network(
+                            data.imageUrl.value,
+                            filterQuality: FilterQuality.high,
                           ),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HeroPhotoViewWrapper(
+                                        tag: data.imageUrl.value,
+                                        imageProvider:
+                                            NetworkImage(data.imageUrl.value),
+                                      ),
+                                ));
+                          },
                         ),
                         Text(
                           DateTimeHelper.convertDateTimeToTime(
@@ -915,7 +886,7 @@ class _ConversationState extends State<Conversation>
             child: StreamBuilder(
               stream: Firestore.instance
                   .collection('users')
-                  .document(widget.deliverer)
+                  .document(widget.otherUser)
                   .snapshots(),
               builder: (context, user) {
                 if (!user.hasData) return Offstage();
@@ -1156,17 +1127,22 @@ class HeroPhotoViewWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        constraints: BoxConstraints.expand(
-          height: MediaQuery.of(context).size.height,
-        ),
-        child: PhotoView(
-          imageProvider: imageProvider,
-          loadingChild: loadingChild,
-          backgroundDecoration: backgroundDecoration,
-          minScale: minScale,
-          maxScale: maxScale,
-          heroTag: tag,
-        ));
+    return GestureDetector(
+      onTap: (){
+        Navigator.pop(context);
+      },
+          child: Container(
+          constraints: BoxConstraints.expand(
+            height: MediaQuery.of(context).size.height,
+          ),
+          child: PhotoView(
+            imageProvider: imageProvider,
+            loadingChild: loadingChild,
+            backgroundDecoration: backgroundDecoration,
+            minScale: minScale,
+            maxScale: maxScale,
+            heroTag: tag,
+          )),
+    );
   }
 }
