@@ -182,14 +182,14 @@ class _ConversationState extends State<Conversation>
         return Row(
           children: <Widget>[
             CircleAvatar(
-              backgroundImage: NetworkImage(user.data['tn']),
+              backgroundImage: NetworkImage(user.data['TI']),
               radius: 14.5,
             ),
             SizedBox(
               width: 10,
             ),
             Text(
-              user.data['name'],
+              user.data['N'],
               style: FontHelper.semiBold16Black,
             ),
           ],
@@ -922,7 +922,7 @@ class _ConversationState extends State<Conversation>
                 return Row(
                   children: <Widget>[
                     CircleAvatar(
-                      backgroundImage: NetworkImage(user.data['tn']),
+                      backgroundImage: NetworkImage(user.data['TI']),
                       radius: 14.5,
                     ),
                   ],

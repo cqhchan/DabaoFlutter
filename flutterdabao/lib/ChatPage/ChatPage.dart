@@ -17,11 +17,11 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         title: Text('Your Inbox', style: FontHelper.header3TextStyle),
       ),
-      body: _buildBody(),
+      body: _buildChatPage(),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildChatPage() {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance
           .collection('channels')
@@ -32,32 +32,36 @@ class _ChatPageState extends State<ChatPage> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Offstage();
         if (snapshot.hasData)
-          return _buildList(context, snapshot.data.documents);
+          return _buildChatList(context, snapshot.data.documents);
       },
     );
   }
 
-  ListView _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
+  ListView _buildChatList(BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
-      children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+      children: snapshot.map((data) => _buildChat(context, data)).toList(),
     );
   }
 
-  Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
+  Widget _buildChat(BuildContext context, DocumentSnapshot data) {
     String deliverer;
-
     final channel = Channel.fromDocument(data);
-    //check for deliverer
+    //check for deliverer in the list of participants
     final List<String> participants = channel.participantsID.value;
     participants.forEach((result) {
       if (result != ConfigHelper.instance.currentUserProperty.value.uid) {
-        deliverer = result;
+        return deliverer = result;
       }
     });
 
-    if (channel.lastSent.value == null) {
+    print('----------------${channel.orderUid.value}');
+
+    print(deliverer);
+    //the user cannot converse with himself
+    //TODO: channel.lastMessage.value
+    if (channel.lastSent.value == null || deliverer == null) {
       return Offstage();
     } else {
       return Column(
@@ -73,8 +77,13 @@ class _ChatPageState extends State<ChatPage> {
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return Offstage();
                 if (snapshot.hasData) {
+                  if (snapshot.data['TI'] == null || snapshot.data['TI'] == '')
+                    return CircleAvatar(
+                      child: Icon(Icons.camera_alt),
+                      radius: 20,
+                    );
                   return CircleAvatar(
-                    backgroundImage: NetworkImage(snapshot.data['tn']),
+                    backgroundImage: NetworkImage(snapshot.data['TI']),
                     radius: 20,
                   );
                 }
@@ -94,7 +103,7 @@ class _ChatPageState extends State<ChatPage> {
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) return Offstage();
                           return Text(
-                            snapshot.data['name'],
+                            snapshot.data['N'] != null ? snapshot.data['N'] : '',
                             style: FontHelper.regular10Black,
                           );
                         }),
@@ -113,7 +122,7 @@ class _ChatPageState extends State<ChatPage> {
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) return Offstage();
                       return Text(
-                        snapshot.data['FT'],
+                        snapshot.data['FT'] != null? snapshot.data['FT'] : '',
                         style: FontHelper.semiBold16Black,
                       );
                     }),
