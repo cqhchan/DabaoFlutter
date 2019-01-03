@@ -283,9 +283,9 @@ class _ConversationState extends State<Conversation>
                       builder: (context, snap) {
                         if (!snap.hasData) return Offstage();
                         return ConfigurableExpansionTile(
+                          selectable: Order.fromUID(widget.channel.orderUid.value),
                           initiallyExpanded: false,
                           onExpansionChanged: (expanded) {
-                            widget.channel.toggle();
                             setState(() {
                               expansionFlag =
                                   widget.channel.isSelectedProperty.value;

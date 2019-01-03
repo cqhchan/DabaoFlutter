@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
+import 'package:flutterdabao/ExtraProperties/Selectable.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
+import 'package:flutterdabao/Model/Order.dart';
 
 /// A configurable Expansion Tile edited from the flutter material implementation
 /// that allows for customization of most of the behaviour. Includes providing colours,
@@ -33,7 +36,8 @@ class ConfigurableExpansionTile extends StatefulWidget {
       this.headerAnimationTween,
       this.borderAnimationTween,
       this.animatedWidgetTurnTween,
-      this.animatedWidgetTween})
+      this.animatedWidgetTween,
+      @required this.selectable})
       : assert(initiallyExpanded != null),
         super(key: key);
 
@@ -48,6 +52,8 @@ class ConfigurableExpansionTile extends StatefulWidget {
   ///
   /// Typically [ListTile] widgets.
   final List<Widget> children;
+
+  final Order selectable;
 
   /// The color of the header, useful to set if your animating widgets are
   /// larger than the header widget, or you want an animating color, in which
@@ -126,8 +132,6 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
   final ColorTween _borderColorTween = ColorTween();
   final ColorTween _headerColorTween = ColorTween();
 
-  bool _isExpanded = false;
-
   @override
   void initState() {
     super.initState();
@@ -147,29 +151,38 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
         widget.headerAnimationTween ?? ConfigurableExpansionTile._easeInTween));
     _headerColorTween.end =
         widget.headerBackgroundColorEnd ?? widget.headerBackgroundColorStart;
-    _isExpanded =
-        PageStorage.of(context)?.readState(context) ?? widget.initiallyExpanded;
-    if (_isExpanded) _controller.value = 1.0;
+
+    if (widget.selectable.isSelectedProperty.value != widget.initiallyExpanded)
+      widget.selectable.isSelectedProperty.value = widget.initiallyExpanded;
+
+    if (widget.selectable.isSelected) _controller.value = 1.0;
+    print("testing init " + widget.selectable.uid);
+
+    subscription.add(widget.selectable.isSelectedProperty.producer.listen((selected){
+      print("testing " + widget.selectable.uid);
+      if (selected) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+      if (widget.onExpansionChanged != null)
+        widget.onExpansionChanged(selected);
+    }));
   }
 
   @override
   void dispose() {
+    print("testing dispose "+ widget.selectable.uid);
+    subscription.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   void _handleTap() {
     setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
-      PageStorage.of(context)?.writeState(context, _isExpanded);
+      widget.selectable.toggle();
+
     });
-    if (widget.onExpansionChanged != null)
-      widget.onExpansionChanged(_isExpanded);
   }
 
   Widget _buildChildren(BuildContext context, Widget child) {
@@ -177,22 +190,22 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
     final Color headerColor =
         _headerColor?.value ?? widget.headerBackgroundColorStart;
     return Container(
-      decoration: BoxDecoration(
-          border: Border(
-        top: BorderSide(
-            color: widget.topBorderOn ? borderSideColor : Colors.transparent),
-        bottom: BorderSide(
-            color:
-                widget.bottomBorderOn ? borderSideColor : Colors.transparent),
-      )),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          GestureDetector(
-              onTap: () {
-                _handleTap();
-              },
-              child: Container(
+        decoration: BoxDecoration(
+            border: Border(
+          top: BorderSide(
+              color: widget.topBorderOn ? borderSideColor : Colors.transparent),
+          bottom: BorderSide(
+              color:
+                  widget.bottomBorderOn ? borderSideColor : Colors.transparent),
+        )),
+        child: GestureDetector(
+          onTap: () {
+            _handleTap();
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
                   color: headerColor,
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
@@ -210,21 +223,21 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
                             widget.animatedWidgetFollowingHeader ?? Container(),
                       )
                     ],
-                  ))),
-          ClipRect(
-            child: Align(
-              heightFactor: _heightFactor.value,
-              child: child,
-            ),
+                  )),
+              ClipRect(
+                child: Align(
+                  heightFactor: _heightFactor.value,
+                  child: child,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 
   /// Retrieves the header to display for the tile, derived from [_isExpanded] state
   Widget _getHeader() {
-    if (!_isExpanded) {
+    if (!widget.selectable.isSelected) {
       return widget.header;
     } else {
       return widget.headerExpanded ?? widget.header;
@@ -233,15 +246,14 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
 
   @override
   Widget build(BuildContext context) {
-    final bool closed = !_isExpanded && _controller.isDismissed;
+    final bool closed =
+        !widget.selectable.isSelected && _controller.isDismissed;
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: closed
-          ? null
-          : Container(
-              color: widget.expandedBackgroundColor ?? Colors.transparent,
-              child: Column(children: widget.children)),
+      child: Container(
+          color: widget.expandedBackgroundColor ?? Colors.transparent,
+          child: Column(children: widget.children)),
     );
   }
 }

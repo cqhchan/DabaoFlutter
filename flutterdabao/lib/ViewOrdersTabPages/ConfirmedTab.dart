@@ -37,7 +37,6 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView>
     return Container(
       color: ColorHelper.dabaoOffWhiteF5,
       child: AcceptedList(
-        context: context,
         input: Observable.combineLatest2<List<Order>, List<Order>, List<Order>>(
             userAcceptedOrders.producer, userCompletedOrders.producer, (x, y) {
           List<Order> temp = List();

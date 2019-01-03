@@ -19,30 +19,30 @@ import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
+import 'package:random_string/random_string.dart' as random;
 
 class AcceptedList extends StatefulWidget {
   final Observable<List<Order>> input;
   final LatLng location;
   final DabaoRoute.Route route;
-  final context;
 
   AcceptedList(
-      {Key key, this.context, @required this.input, this.location, this.route})
+      {Key key,@required this.input, this.location, this.route})
       : super(key: key);
 
   _AcceptedListState createState() => _AcceptedListState();
 }
 
 class _AcceptedListState extends State<AcceptedList> {
-  LatLng saveLocation;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildBody(widget.context),
+      body: _buildBody(),
     );
   }
 
-  StreamBuilder _buildBody(BuildContext context) {
+  StreamBuilder _buildBody() {
     return StreamBuilder<List<Order>>(
       stream: widget.input,
       builder: (context, snapshot) {
@@ -54,13 +54,39 @@ class _AcceptedListState extends State<AcceptedList> {
 
   ListView _buildList(BuildContext context, List<Order> snapshot) {
     return ListView(
+          key: new Key(random.randomString(20)),
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
-      children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+      children: snapshot.map((data) => _AcceptedOrderCell( location: widget.location, order: data, route: widget.route,)).toList(),
     );
   }
+}
 
-  Widget _buildListItem(BuildContext context, Order order) {
+class _AcceptedOrderCell extends StatefulWidget {
+
+    final LatLng location;
+  final DabaoRoute.Route route;
+  final Order order;
+
+  const _AcceptedOrderCell({Key key, @required this.location, @required this.route, @required this.order}) : super(key: key);
+  @override
+  State<StatefulWidget> createState() {
+    return _AcceptedOrderCellState();
+  }
+
+  
+}
+
+class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return _buildListItem();
+  }
+
+
+    Widget _buildListItem() {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       margin: EdgeInsets.all(11.0),
@@ -82,16 +108,15 @@ class _AcceptedListState extends State<AcceptedList> {
             child: Wrap(
               children: <Widget>[
                 ConfigurableExpansionTile(
-                  initiallyExpanded: order.isSelectedProperty.value,
+                  selectable: widget.order,
+                  initiallyExpanded: widget.order.isSelectedProperty.value,
                   onExpansionChanged: (expand) {
-                    setState(() {
-                      order.isSelectedProperty.value = expand;
-                    });
+                    
                   },
                   header: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      _buildHeader(order),
+                      _buildHeader(widget.order),
                       Container(
                         constraints: BoxConstraints(
                             maxWidth: MediaQuery.of(context).size.width - 50),
@@ -100,13 +125,13 @@ class _AcceptedListState extends State<AcceptedList> {
                           children: <Widget>[
                             Expanded(
                               flex: 5,
-                              child: _buildDeliveryPeriod(order),
+                              child: _buildDeliveryPeriod(widget.order),
                             ),
                             Expanded(
                               flex: 2,
                               child: Padding(
                                 padding: const EdgeInsets.only(right: 6.0),
-                                child: _buildQuantity(order),
+                                child: _buildQuantity(widget.order),
                               ),
                             ),
                           ],
@@ -134,13 +159,13 @@ class _AcceptedListState extends State<AcceptedList> {
                             ),
                             Expanded(
                               flex: 4,
-                              child: _buildLocationDescription(order),
+                              child: _buildLocationDescription(widget.order),
                             ),
                             Expanded(
                               flex: 1,
                               child: Padding(
                                 padding: const EdgeInsets.only(right: 8.0),
-                                child: _buildTapToLocation(order),
+                                child: _buildTapToLocation(widget.order),
                               ),
                             ),
                           ],
@@ -154,7 +179,7 @@ class _AcceptedListState extends State<AcceptedList> {
                   children: <Widget>[
                     Column(
                       children: <Widget>[
-                        _buildOrderItems(order),
+                        _buildOrderItems(widget.order),
                         SizedBox(
                           height: 8,
                         ),
@@ -163,7 +188,7 @@ class _AcceptedListState extends State<AcceptedList> {
                   ],
                 ),
                 StreamBuilder<bool>(
-                  stream: order.isSelectedProperty.producer,
+                  stream: widget.order.isSelectedProperty.producer,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return Offstage();
                     if (snapshot.data) {
@@ -174,15 +199,15 @@ class _AcceptedListState extends State<AcceptedList> {
                             children: <Widget>[
                               Expanded(
                                 flex: 4,
-                                child: _buildUser(order),
+                                child: _buildUser(widget.order),
                               ),
-                              Expanded(flex: 2, child: _buildChatButton(order)),
+                              Expanded(flex: 2, child: _buildChatButton(widget.order)),
                             ],
                           ),
                           SizedBox(
                             height: 8,
                           ),
-                          _buildPickUpButton(order)
+                          _buildPickUpButton(widget.order)
                         ],
                       );
                     } else {
@@ -198,10 +223,10 @@ class _AcceptedListState extends State<AcceptedList> {
                               children: <Widget>[
                                 Expanded(
                                   flex: 4,
-                                  child: _buildUser(order),
+                                  child: _buildUser(widget.order),
                                 ),
                                 Expanded(
-                                    flex: 2, child: _buildChatButton(order)),
+                                    flex: 2, child: _buildChatButton(widget.order)),
                               ],
                             ),
                           ),
@@ -215,7 +240,7 @@ class _AcceptedListState extends State<AcceptedList> {
           ),
           Positioned.fill(
             child: StreamBuilder<String>(
-              stream: order.status,
+              stream: widget.order.status,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
                 return Offstage(
@@ -233,7 +258,7 @@ class _AcceptedListState extends State<AcceptedList> {
                             'Completed',
                             style: FontHelper.bold50White,
                           ),
-                          _buildTapToViewButton(order)
+                          _buildTapToViewButton(widget.order)
                         ],
                       ),
                     ),
@@ -456,8 +481,7 @@ class _AcceptedListState extends State<AcceptedList> {
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
                 if (widget.location != null && snap.data != null) {
-                  saveLocation = LatLng(
-                      widget.location.latitude, widget.location.longitude);
+               
                   return Container(
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width - 180),
@@ -694,4 +718,6 @@ class _AcceptedListState extends State<AcceptedList> {
       );
     });
   }
+
+
 }

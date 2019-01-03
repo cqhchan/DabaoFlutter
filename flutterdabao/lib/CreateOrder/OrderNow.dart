@@ -22,7 +22,7 @@ class OrderNow extends StatefulWidget {
 }
 
 class _OrderNowState extends State<OrderNow>
-    with HavingSubscriptionMixin, SingleTickerProviderStateMixin {
+    with HavingSubscriptionMixin {
   // String _address = '20 Heng Mui Keng xTerrace';
 
   // handle the progress through the application
