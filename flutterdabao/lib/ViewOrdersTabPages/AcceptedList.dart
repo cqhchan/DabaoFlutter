@@ -34,10 +34,7 @@ class AcceptedList extends StatefulWidget {
 }
 
 class _AcceptedListState extends State<AcceptedList> {
-  bool expandedFlag = false;
-
   LatLng saveLocation;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,11 +82,10 @@ class _AcceptedListState extends State<AcceptedList> {
             child: Wrap(
               children: <Widget>[
                 ConfigurableExpansionTile(
-                  initiallyExpanded: false,
-                  onExpansionChanged: (expanded) {
-                    order.toggle();
+                  initiallyExpanded: order.isSelectedProperty.value,
+                  onExpansionChanged: (expand) {
                     setState(() {
-                      expandedFlag = order.isSelectedProperty.value;
+                      order.isSelectedProperty.value = expand;
                     });
                   },
                   header: Column(
@@ -305,18 +301,14 @@ class _AcceptedListState extends State<AcceptedList> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         StreamBuilder<DateTime>(
-          stream: order.startDeliveryTime,
+          stream: order.deliveryTime,
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
             if (snap.data.day == DateTime.now().day &&
                 snap.data.month == DateTime.now().month &&
                 snap.data.year == DateTime.now().year) {
               return Text(
-                'Today, ' +
-                    DateTimeHelper.convertDateTimeToAMPM(snap.data) +
-                    ' - ' +
-                    DateTimeHelper.convertDateTimeToAMPM(
-                        snap.data.add(Duration(hours: 2))),
+                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
                 style: FontHelper.semiBoldgrey14TextStyle,
                 overflow: TextOverflow.ellipsis,
               );
@@ -632,7 +624,7 @@ class _AcceptedListState extends State<AcceptedList> {
             ),
           ],
         ),
-        onPressed: () {
+        onPressed: () async {
           _toChat(order);
         },
       ),

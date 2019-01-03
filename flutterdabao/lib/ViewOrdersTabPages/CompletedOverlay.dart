@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
+import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
+import 'package:rxdart/rxdart.dart';
 
 class CompletedOverlay extends StatefulWidget {
   final Order order;
@@ -73,18 +76,16 @@ class _CompletedOverlayState extends State<CompletedOverlay> {
     return Row(
       children: <Widget>[
         StreamBuilder<DateTime>(
-          stream: order.startDeliveryTime,
+          stream: order.deliveryTime,
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
             if (snap.data.day == DateTime.now().day &&
                 snap.data.month == DateTime.now().month &&
                 snap.data.year == DateTime.now().year) {
-              return Container(
-                child: Text(
-                  snap.hasData ? 'Today' : "Error",
-                  style: FontHelper.semiBoldgrey14TextStyle,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              return Text(
+                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
+                style: FontHelper.semiBoldgrey14TextStyle,
+                overflow: TextOverflow.ellipsis,
               );
             } else {
               return Container(
@@ -100,21 +101,6 @@ class _CompletedOverlayState extends State<CompletedOverlay> {
                 ),
               );
             }
-          },
-        ),
-        StreamBuilder<DateTime>(
-          stream: order.endDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            return Material(
-              child: Text(
-                snap.hasData
-                    ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                    : '',
-                style: FontHelper.regular14Black,
-                overflow: TextOverflow.ellipsis,
-              ),
-            );
           },
         ),
       ],
@@ -245,12 +231,11 @@ class _CompletedOverlayState extends State<CompletedOverlay> {
         );
 
         if (isSuccessful) {
+          order.isSelectedProperty.value = false;
           Navigator.of(context).pop();
           Navigator.of(context).pop();
         } else {
           Navigator.of(context).pop();
-
-          //TODO fix Bug that it doesnt show
           final snackBar = SnackBar(
               content: Text(
                   'An Error has occured. Please check your network connectivity'));

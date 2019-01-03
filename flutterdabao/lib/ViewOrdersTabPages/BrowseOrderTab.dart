@@ -25,6 +25,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
         HavingGoogleMapPlaces,
         HavingSubscriptionMixin,
         AutomaticKeepAliveClientMixin<BrowseOrderTabView> {
+
   @override
   bool get wantKeepAlive => true;
 
@@ -70,7 +71,6 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     Selectable.deselectAll(searchOrders.value);
     super.dispose();
   }

@@ -45,8 +45,7 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
 
             temp.addAll(routes);
 
-            if (orders != null && orders.length != 0)
-              temp.add(orders);
+            if (orders != null && orders.length != 0) temp.add(orders);
 
             return temp;
           }),
@@ -77,7 +76,6 @@ class _RouteCell extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _RouteCellState();
   }
 }

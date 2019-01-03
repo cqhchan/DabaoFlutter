@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
+import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
@@ -36,6 +37,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
 
   DateTime isToday;
   DateTime selectedDate;
+  DateTime selectedTime;
   bool past24period;
 
   HourPicker integerScheduledHourPicker;
@@ -61,21 +63,10 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
-    assert(widget.order.deliveryFee != null);
-    assert(widget.order.deliveryLocationDescription != null);
-    assert(widget.order.foodTag != null);
-    assert(widget.order.mode != null);
-    assert(widget.order.startDeliveryTime != null);
-    assert(widget.order.endDeliveryTime != null);
-    assert(widget.order.orderItems != null);
-    assert(widget.order.createdDeliveryTime != null);
-    assert(widget.order.deliveryTime != null);
-    assert(widget.order.message != null);
-    assert(widget.order.deliveryLocation != null);
-
+    selectedDate = DateTime.now();
+    selectedTime = DateTime.now();
     isToday = DateTime.now();
     past24period = false;
 
@@ -92,7 +83,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
           _asapMinimumHour = DateTime.now().hour;
           _asapInitialHour = DateTime.now().hour;
           past24period = true;
-          selectedDate = DateTime.now();
         } else {
           _asapInitialMinute = DateTime.now().minute ~/ 10;
           _asapMaximumMinute = 5;
@@ -101,7 +91,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
           _asapMinimumHour = DateTime.now().hour;
           _asapInitialHour = DateTime.now().hour;
           past24period = false;
-          selectedDate = DateTime.now();
         }
         break;
       case OrderMode.scheduled:
@@ -268,40 +257,28 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
             if (snap.data.day == DateTime.now().day &&
                 snap.data.month == DateTime.now().month &&
                 snap.data.year == DateTime.now().year) {
-              return Container(
-                child: Text(
-                  snap.hasData ? 'For Today' : "Error",
-                  style: FontHelper.semiBold14Black,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              return Text(
+                'Today, ' +
+                    DateTimeHelper.convertDateTimeToAMPM(snap.data) +
+                    ' - ' +
+                    DateTimeHelper.convertDateTimeToAMPM(
+                        snap.data.add(Duration(hours: 2))),
+                style: FontHelper.semiBold14Black,
+                overflow: TextOverflow.ellipsis,
               );
             } else {
               return Container(
                 child: Text(
                   snap.hasData
-                      ? 'For ' +
-                          DateTimeHelper.convertDateTimeToDate(snap.data) +
+                      ? DateTimeHelper.convertDateTimeToDate(snap.data) +
                           ', ' +
                           DateTimeHelper.convertDateTimeToAMPM(snap.data)
                       : "Error",
-                  style: FontHelper.regular14Black,
+                  style: FontHelper.semiBold14Black,
                   overflow: TextOverflow.ellipsis,
                 ),
               );
             }
-          },
-        ),
-        StreamBuilder<DateTime>(
-          stream: order.endDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            return Text(
-              snap.hasData
-                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                  : '',
-              style: FontHelper.regular14Black,
-              overflow: TextOverflow.ellipsis,
-            );
           },
         ),
       ],
@@ -428,105 +405,58 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
   }
 
   Widget _buildPickUpButton(Order order) {
-    return StreamBuilder(
-      stream: order.mode,
-      builder: (context, snap) {
-        if (!snap.hasData) return Offstage();
-        switch (snap.data) {
+    return RaisedButton(
+      elevation: 12,
+      color: ColorHelper.dabaoOffPaleBlue,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      child: Center(
+        child: Text(
+          "Confirm",
+          style: FontHelper.semiBold14White,
+        ),
+      ),
+      onPressed: () async {
+        switch (order.mode.value) {
           case OrderMode.asap:
-            return RaisedButton(
-              elevation: 12,
-              color: ColorHelper.dabaoOffPaleBlue,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0)),
-              child: Center(
-                child: Text(
-                  "Confirm",
-                  style: FontHelper.semiBold14White,
-                ),
-              ),
-              onPressed: () async {
-                DateTime asapTime = DateTime(
-                  selectedDate.year,
-                  selectedDate.month,
-                  selectedDate.day,
-                  _asapInitialHour,
-                  _asapInitialMinute * 10,
-                );
-                showLoadingOverlay(context: context);
-                var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
-                  routeID: widget.route == null ? null : widget.route.uid,
-                  orderID: widget.order.uid,
-                  acceptorID:
-                      ConfigHelper.instance.currentUserProperty.value.uid,
-                  deliveryTime:
-                      DateTimeHelper.convertDateTimeToString(asapTime),
-                );
-
-                if (isSuccessful) {
-                  // Pop t
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                } else {
-                  Navigator.of(context).pop();
-                  // TODO bug it doessnt show
-
-                  final snackBar = SnackBar(
-                      content: Text(
-                          'An Error has occured. Please check your network connectivity'));
-                  Scaffold.of(context).showSnackBar(snackBar);
-                }
-              },
+            DateTime selectedTime = DateTime(
+              selectedDate.year,
+              selectedDate.month,
+              selectedDate.day,
+              _asapInitialHour,
+              _asapInitialMinute * 10,
             );
+            break;
           case OrderMode.scheduled:
-            return RaisedButton(
-              elevation: 12,
-              color: ColorHelper.dabaoOffPaleBlue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Center(
-                child: Text(
-                  "Confirm",
-                  style: FontHelper.semiBold14White,
-                ),
-              ),
-              onPressed: () async {
-                DateTime scheduledTime = DateTime(
-                  selectedDate.year,
-                  selectedDate.month,
-                  selectedDate.day,
-                  _scheduledInitialHour,
-                  _scheduledInitialMinute * 10,
-                );
-                showLoadingOverlay(context: context);
-                var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
-                  routeID: widget.route == null ? null : widget.route.uid,
-                  orderID: widget.order.uid,
-                  acceptorID:
-                      ConfigHelper.instance.currentUserProperty.value.uid,
-                  deliveryTime:
-                      DateTimeHelper.convertDateTimeToString(scheduledTime),
-                );
-
-                if (isSuccessful) {
-                  // Pop t
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                } else {
-                  Navigator.of(context).pop();
-                  // TODO bug it doessnt show
-
-                  final snackBar = SnackBar(
-                      content: Text(
-                          'An Error has occured. Please check your network connectivity'));
-                  Scaffold.of(context).showSnackBar(snackBar);
-                }
-              },
+            DateTime selectedTime = DateTime(
+              selectedDate.year,
+              selectedDate.month,
+              selectedDate.day,
+              _scheduledInitialHour,
+              _scheduledInitialMinute * 10,
             );
             break;
           default:
-            return Offstage();
+        }
+        order.isSelectedProperty.value = false;
+        showLoadingOverlay(context: context);
+        var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
+          routeID: widget.route == null ? null : widget.route.uid,
+          orderID: widget.order.uid,
+          acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
+          deliveryTime: DateTimeHelper.convertDateTimeToString(selectedTime),
+        );
+
+        if (isSuccessful) {
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
+
+          // order.isSelectedProperty.value = false;
+        } else {
+          Navigator.of(context).pop();
+          final snackBar = SnackBar(
+              content: Text(
+                  'An Error has occured. Please check your network connectivity'));
+          Scaffold.of(context).showSnackBar(snackBar);
         }
       },
     );

@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 
@@ -117,8 +115,7 @@ class ConfigurableExpansionTile extends StatefulWidget {
 }
 
 class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
-    with SingleTickerProviderStateMixin,HavingSubscriptionMixin {
-  
+    with SingleTickerProviderStateMixin, HavingSubscriptionMixin {
   AnimationController _controller;
   Animation<double> _iconTurns;
   Animation<double> _heightFactor;
@@ -153,8 +150,6 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
     _isExpanded =
         PageStorage.of(context)?.readState(context) ?? widget.initiallyExpanded;
     if (_isExpanded) _controller.value = 1.0;
-
-
   }
 
   @override
@@ -169,12 +164,7 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
       if (_isExpanded) {
         _controller.forward();
       } else {
-        _controller.reverse().then<void>((void value) {
-          if (!mounted) return;
-          setState(() {
-            // Rebuild without widget.children.
-          });
-        });
+        _controller.reverse();
       }
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
@@ -199,8 +189,8 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           GestureDetector(
-              onTap: ()
-              {_handleTap();
+              onTap: () {
+                _handleTap();
               },
               child: Container(
                   color: headerColor,
@@ -211,7 +201,7 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
                       // RotationTransition(
                       //   turns: _iconTurns,
                       //   child:
-                            widget.animatedWidgetPrecedingHeader ?? Container(),
+                      widget.animatedWidgetPrecedingHeader ?? Container(),
                       // ),
                       _getHeader(),
                       RotationTransition(

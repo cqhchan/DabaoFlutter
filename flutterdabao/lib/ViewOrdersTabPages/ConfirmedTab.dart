@@ -8,13 +8,16 @@ import 'package:flutterdabao/ViewOrdersTabPages/AcceptedList.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ConfirmedTabView extends StatefulWidget {
-
-    const ConfirmedTabView({Key key}): super(key: key);
+  const ConfirmedTabView({Key key}) : super(key: key);
 
   _ConfirmedTabViewState createState() => _ConfirmedTabViewState();
 }
 
-class _ConfirmedTabViewState extends State<ConfirmedTabView>   with AutomaticKeepAliveClientMixin<ConfirmedTabView>{
+class _ConfirmedTabViewState extends State<ConfirmedTabView>
+    with AutomaticKeepAliveClientMixin<ConfirmedTabView> {
+  @override
+  bool get wantKeepAlive => true;
+
   final MutableProperty<List<Order>> userAcceptedOrders =
       ConfigHelper.instance.currentUserDeliveringOrdersProperty;
 
@@ -29,27 +32,14 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView>   with AutomaticKee
   }
 
   @override
-    void initState() {
-      // TODO: implement initState
-      super.initState();
-      userAcceptedOrders.producer.listen((onData){
-      });
-    }
-  @override
   Widget build(BuildContext context) {
-
     super.build(context);
-    
     return Container(
       color: ColorHelper.dabaoOffWhiteF5,
       child: AcceptedList(
         context: context,
-        input:
-            Observable.combineLatest2<List<Order>, List<Order>, List<Order>>(
-                userAcceptedOrders.producer, userCompletedOrders.producer,
-                (x, y) {
-
-
+        input: Observable.combineLatest2<List<Order>, List<Order>, List<Order>>(
+            userAcceptedOrders.producer, userCompletedOrders.producer, (x, y) {
           List<Order> temp = List();
           if (x != null && x.length != 0) temp.addAll(x);
           if (y != null && y.length != 0) temp.addAll(y);
@@ -59,8 +49,4 @@ class _ConfirmedTabViewState extends State<ConfirmedTabView>   with AutomaticKee
       ),
     );
   }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }
