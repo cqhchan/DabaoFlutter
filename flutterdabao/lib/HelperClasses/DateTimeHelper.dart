@@ -20,11 +20,6 @@ class DateTimeHelper {
     return formatDate(date, [dd, '-', MM, '-', yyyy]);
   }
 
-  static String convertTimeToString(int time) {
-    return convertDateTimeToString(
-        DateTime.fromMillisecondsSinceEpoch(time * 1000));
-  }
-
   static String convertDateTimeToString(DateTime date) {
     return formatDate(
         date, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss, ' ', z]);
@@ -34,10 +29,10 @@ class DateTimeHelper {
     return formatDate(date, [date.hour == 12 ? "12" : hh, ':', nn, ' ', am]);
   }
 
-  //2018-12-17 18:03:26 +0800 input
-  static DateTime convertStringTimeToDateTime(String string) {
-    return DateTime.parse(string).toLocal();
-  }
+  // //2018-12-17 18:03:26 +0800 input
+  // static DateTime convertStringTimeToDateTime(String string) {
+  //   return DateTime.parse(string).toLocal();
+  // }
 
   static String convertTimeToDisplayString(DateTime date) {
     if (isToday(date))

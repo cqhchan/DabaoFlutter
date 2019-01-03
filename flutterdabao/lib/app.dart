@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
@@ -13,6 +14,9 @@ class DabaoApp extends StatelessWidget {
   DabaoApp() {
     // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
+
+    var db = Firestore.instance;
+    db.settings(timestampsInSnapshotsEnabled: true);
   }
 
   @override

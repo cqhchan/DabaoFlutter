@@ -96,6 +96,7 @@ class ConfigHelper with HavingSubscriptionMixin {
     // get Current open Routes
     subscription.add(
         currentUserOpenRoutesProperty.bindTo(currentUserOpenRoutesProducer()));
+
   }
 
   bool get isInDebugMode {
@@ -155,8 +156,7 @@ class ConfigHelper with HavingSubscriptionMixin {
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
                 .where(Order.completedTimeKey,
-                    isGreaterThanOrEqualTo: DateTimeHelper.convertDateTimeToString(
-                        DateTime.now().add(Duration(days: -2))))
+                    isGreaterThanOrEqualTo: DateTime.now().add(Duration(days: -2)))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
             .observable);
