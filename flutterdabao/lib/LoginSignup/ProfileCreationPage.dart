@@ -21,8 +21,7 @@ class ProfileCreationPage extends StatefulWidget {
 }
 
 class _ProfileCreationPageState extends State<ProfileCreationPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController();
   File _image;
   File _thumbnail;
@@ -222,7 +221,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     final snackBar = new SnackBar(
       content: new Text(message),
     );
-    _scaffoldKey.currentState.showSnackBar(snackBar);
+    Scaffold.of(context).showSnackBar(snackBar);
   }
 
   //to raise the bottom sheet
@@ -286,10 +285,8 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   //Not written in build so that it can be wrapped with modal_progress_HUD
   Widget buildWidget(BuildContext context) {
     return Scaffold(
-        key: _scaffoldKey,
         body: SafeArea(
           child: Form(
-            key: _formKey,
             autovalidate: _autoValidate,
             child: ListView(
               children: [
