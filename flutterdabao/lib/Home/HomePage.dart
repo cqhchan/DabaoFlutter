@@ -18,6 +18,7 @@ import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
+import 'package:rxdart/rxdart.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -50,18 +51,21 @@ class _Home extends State<Home> {
             controller: _controller,
             children: <Widget>[
               //First Widget consisting of Bg, and balance
-              balanceStack(context),
 
-              Container(
-                child: Text(
-                  "How can we serve you today?",
-                  style: FontHelper.semiBold18Black,
+              SafeArea(
+                child: Container(
+                  margin: EdgeInsets.only(top: 50.0),
+                  child: Text(
+                    "What would you like to do today?",
+                    style: FontHelper.regular(ColorHelper.dabaoOffGrey70, 22),
+                  ),
+                  padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
                 ),
-                padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
               ),
               Container(
-                padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+                padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
                 child: Wrap(
+                  alignment: WrapAlignment.center,
                   runSpacing: 25,
                   spacing: 25.0,
                   children: <Widget>[
@@ -83,26 +87,11 @@ class _Home extends State<Home> {
                         FadeRoute(widget: RouteOverview()),
                       );
                     }),
-                    //ChatBox
-                    squardCard(
-                        'assets/icons/chat.png', 'Chat', 'I want to Chat', () {
-                      Navigator.push(
-                        context,
-                        FadeRoute(widget: ChatPage()),
-                      );
-                    }),
-                    //Reward
-                    squardCard(
-                        'assets/icons/profile_icon.png', 'Rewards', 'I want to Chat',
-                        () {
-                      Navigator.push(
-                        context,
-                        FadeRoute(widget: RewardsTabBarPage()),
-                      );
-                    }),
                   ],
                 ),
               ),
+              balanceCardStream(context),
+
               Container(
                 child: Text(
                   "Notifications",
@@ -116,40 +105,71 @@ class _Home extends State<Home> {
           Material(
             type: MaterialType.transparency,
             child: FloatingHeader(
+              header: StreamBuilder<String>(stream: ConfigHelper
+                  .instance.currentUserProperty.producer
+                  .switchMap((user) {
+                if (user == null) return Observable.just(null);
+                return user.name;
+              }), builder: (context, snap) {
+                if (!snap.hasData) return Offstage();
+                return Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                        padding: EdgeInsets.only(top: 10.0, left: 10.0),
+                        child: Text(
+                          "Welcome back, ${snap.data}",
+                          overflow: TextOverflow.ellipsis,
+                          style: FontHelper.regular(
+                              ColorHelper.dabaoOffGrey70, 14),
+                        )));
+              }),
               backgroundColor: Colors.white,
               opacityProperty: _opacityProperty,
-              leftButton: GestureDetector(
+              rightButton: GestureDetector(
+                onTap: () {
+                  //TODO
+                  //ADD in navigate to chat
+                },
                 child: Container(
-                  height: 40.0,
-                  width: 40.0,
-                  child: GestureDetector(
-                    onTap: () {
-                      FirebaseAuth.instance.signOut();
-                    },
-                    child: StreamBuilder(
-                      stream: Firestore.instance
-                          .collection('users')
-                          .document(ConfigHelper
-                              .instance.currentUserProperty.value.uid)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Image.asset(
-                            'assets/icons/profile_icon.png',
-                            fit: BoxFit.fill,
-                          );
-                        }
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(snapshot.data['TI']),
-                          radius: 20,
+                    height: 40.0,
+                    width: 40.0,
+                    decoration: new BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: ColorHelper.dabaoOrange,
+                        image: new DecorationImage(
+                            fit: BoxFit.scaleDown,
+                            image: new AssetImage(
+                                'assets/icons/chat_white.png')))),
+              ),
+              leftButton: Container(
+                height: 40.0,
+                width: 40.0,
+                child: GestureDetector(
+                  onTap: () {},
+                  child: StreamBuilder(
+                    stream: Firestore.instance
+                        .collection('users')
+                        .document(
+                            ConfigHelper.instance.currentUserProperty.value.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Image.asset(
+                          'assets/icons/profile_icon.png',
+                          fit: BoxFit.fill,
                         );
-                      },
-                    ),
+                      }
+                      return CircleAvatar(
+                        backgroundImage: NetworkImage(snapshot.data['TI']),
+                        radius: 20,
+                      );
+                    },
                   ),
                 ),
               ),
             ),
           ),
+
           StreamBuilder<List>(
             stream:
                 ConfigHelper.instance.currentUserOpenRoutesProperty.producer,
@@ -224,16 +244,16 @@ class _Home extends State<Home> {
   ) {
     return Container(
       child: RaisedButton(
-        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+        padding: EdgeInsets.fromLTRB(10, 18, 10, 10),
         color: Colors.white,
         elevation: 4.0,
         disabledElevation: 4.0,
         highlightElevation: 4.0,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(18.0))),
+            borderRadius: BorderRadius.all(Radius.circular(8.0))),
         onPressed: onPressed,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Container(height: 40, width: 40, child: Image.asset(imagePath)),
@@ -242,6 +262,9 @@ class _Home extends State<Home> {
               title,
               style: FontHelper.bold14Black,
             ),
+            Expanded(
+              child: Container(),
+            ),
             Text(
               body,
               style: FontHelper.regular(Colors.black, 12.0),
@@ -249,31 +272,16 @@ class _Home extends State<Home> {
           ],
         ),
       ),
-      height: 95.0,
-      width: 95.0,
+      height: 120.0,
+      width: 120.0,
     );
   }
 
-  Stack balanceStack(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Container(
-          height: MediaQuery.of(context).size.width * 1.02,
-          decoration: BoxDecoration(
-              image: DecorationImage(
-                  colorFilter: ColorFilter.mode(
-                      ColorHelper.rgbo(0xD8, 0xD8, 0xD8, 20), BlendMode.darken),
-                  image: AssetImage("assets/images/splashbg.png"),
-                  fit: BoxFit.fitWidth)),
-        ),
-        Positioned(
-            bottom: 45.0,
-            child: StreamBuilder<User>(
-                stream: ConfigHelper.instance.currentUserProperty.producer,
-                builder: (BuildContext context, user) {
-                  return BalanceCard(user);
-                }))
-      ],
-    );
+  StreamBuilder balanceCardStream(BuildContext context) {
+    return StreamBuilder<User>(
+        stream: ConfigHelper.instance.currentUserProperty.producer,
+        builder: (BuildContext context, user) {
+          return BalanceCard(user,context);
+        });
   }
 }

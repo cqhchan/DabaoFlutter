@@ -12,6 +12,7 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
+import 'package:flutterdabao/Model/Wallet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -20,6 +21,9 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   MutableProperty<LatLng> currentLocationProperty =
       MutableProperty<LatLng>(null);
+
+  MutableProperty<Wallet> currentUserWalletProperty =
+      MutableProperty<Wallet>(null);
 
   MutableProperty<List<FoodTag>> currentUserFoodTagsProperty =
       MutableProperty<List<FoodTag>>(List());
@@ -93,10 +97,11 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription.add(currentUserDeliveredCompletedOrdersProperty
         .bindTo(currentUserDeliveredCompletedOrdersProducer()));
 
+    subscription.add(currentUserWalletProperty.bindTo(currentUserWalletProducer()));
+
     // get Current open Routes
     subscription.add(
         currentUserOpenRoutesProperty.bindTo(currentUserOpenRoutesProducer()));
-
   }
 
   bool get isInDebugMode {
@@ -108,6 +113,12 @@ class ConfigHelper with HavingSubscriptionMixin {
   Observable<List<FoodTag>> currentUserFoodTagProducer() {
     return currentUserProperty.producer.switchMap(
         (user) => user == null ? List<FoodTag>() : user.userFoodTags);
+  }
+
+  Observable<Wallet> currentUserWalletProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? null
+        : Observable.just(Wallet.fromUID(user.uid)).shareReplay(maxSize: 1));
   }
 
   Observable<List<Order>> currentUserRequestedOrdersProducer() {
@@ -156,12 +167,12 @@ class ConfigHelper with HavingSubscriptionMixin {
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
                 .where(Order.completedTimeKey,
-                    isGreaterThanOrEqualTo: DateTime.now().add(Duration(days: -2)))
+                    isGreaterThanOrEqualTo:
+                        DateTime.now().add(Duration(days: -2)))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
             .observable);
   }
-
 
   Observable<Map<String, dynamic>> globalConfigSettingsData() {
     return currentUserProperty.producer.switchMap((user) => user == null
