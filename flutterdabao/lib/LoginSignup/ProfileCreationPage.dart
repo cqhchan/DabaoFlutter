@@ -130,7 +130,6 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   ///////////////////////////////////////////////////////////////////////////////
   void createProfile() {
     //if-else statements prevent user from proceeding further if they have not filled up credentials properly yet'
-    print("it came here");
     if (_image == null) {
       _showSnackBar("Please upload a profile image");
       return;

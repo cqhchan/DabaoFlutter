@@ -91,13 +91,11 @@ class _OrderItemCellState extends State<_OrderItemCell>{
 
   @override
     void initState() {
-      print("testing cell state init " + widget.order.uid);
       super.initState();
     }
 
   @override
     void dispose() {
-            print("testing cell state dispose " + widget.order.uid);
 
       super.dispose();
     }

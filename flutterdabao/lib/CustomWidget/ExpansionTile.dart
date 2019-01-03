@@ -156,10 +156,8 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
       widget.selectable.isSelectedProperty.value = widget.initiallyExpanded;
 
     if (widget.selectable.isSelected) _controller.value = 1.0;
-    print("testing init " + widget.selectable.uid);
 
     subscription.add(widget.selectable.isSelectedProperty.producer.listen((selected){
-      print("testing " + widget.selectable.uid);
       if (selected) {
         _controller.forward();
       } else {
@@ -172,7 +170,6 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
 
   @override
   void dispose() {
-    print("testing dispose "+ widget.selectable.uid);
     subscription.dispose();
     _controller.dispose();
     super.dispose();
