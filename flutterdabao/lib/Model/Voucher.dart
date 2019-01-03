@@ -40,8 +40,9 @@ class Voucher extends FirebaseType {
   void map(Map<String, dynamic> data) {
 
     if (data.containsKey(expiryTimeKey)) {
+      Timestamp temp = data[expiryTimeKey];
       expiryDate
-          .add(DateTimeHelper.convertStringTimeToDateTime(data[expiryTimeKey]));
+          .add(temp.toDate());
     } else {
       expiryDate.add(null);
     }

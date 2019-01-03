@@ -85,22 +85,24 @@ class Order extends FirebaseType with Selectable {
   @override
   void map(Map<String, dynamic> data) {
     if (data.containsKey(createdTimeKey)) {
-      createdDeliveryTime.add(
-          DateTimeHelper.convertStringTimeToDateTime(data[createdTimeKey]));
+      Timestamp temp = data[createdTimeKey];
+
+      createdDeliveryTime.add(temp.toDate());
     } else {
       createdDeliveryTime.add(null);
     }
 
     if (data.containsKey(startTimeKey)) {
-      startDeliveryTime
-          .add(DateTimeHelper.convertStringTimeToDateTime(data[startTimeKey]));
+      Timestamp temp = data[startTimeKey];
+
+      startDeliveryTime.add(temp.toDate());
     } else {
       startDeliveryTime.add(null);
     }
 
     if (data.containsKey(deliveryTimeKey)) {
-      deliveryTime.add(
-          DateTimeHelper.convertStringTimeToDateTime(data[deliveryTimeKey]));
+      Timestamp temp = data[deliveryTimeKey];
+      deliveryTime.add(temp.toDate());
     } else {
       deliveryTime.add(null);
     }
@@ -137,8 +139,10 @@ class Order extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(endTimeKey)) {
-      endDeliveryTime
-          .add(DateTimeHelper.convertStringTimeToDateTime(data[endTimeKey]));
+      
+      Timestamp temp = data[endTimeKey];
+      endDeliveryTime.add(temp.toDate());
+
     } else {
       endDeliveryTime.add(null);
     }
@@ -219,11 +223,11 @@ class Order extends FirebaseType with Selectable {
 
     if (holder.mode.value == null) return false;
 
-    if (holder.voucherProperty.value != null && (holder.voucherDeliveryFeeDiscount.value == null || holder.voucherDeliveryFeeDiscount.value == 0.0)) {
-    return false;
+    if (holder.voucherProperty.value != null &&
+        (holder.voucherDeliveryFeeDiscount.value == null ||
+            holder.voucherDeliveryFeeDiscount.value == 0.0)) {
+      return false;
     }
-    
-
 
     switch (holder.mode.value) {
       case OrderMode.asap:
@@ -260,9 +264,9 @@ class Order extends FirebaseType with Selectable {
 
     data[creatorKey] = ConfigHelper.instance.currentUserProperty.value.uid;
 
-    if(holder.voucherProperty.value != null){
-    data[voucherKey] = holder.voucherProperty.value.uid;
-    data[deliveryFeeDiscountKey] = holder.voucherDeliveryFeeDiscount.value;
+    if (holder.voucherProperty.value != null) {
+      data[voucherKey] = holder.voucherProperty.value.uid;
+      data[deliveryFeeDiscountKey] = holder.voucherDeliveryFeeDiscount.value;
     }
 
     data[orderItemKey] = holder.orderItems.value.map((item) {

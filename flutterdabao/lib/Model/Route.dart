@@ -33,9 +33,9 @@ class Route extends FirebaseType {
   BehaviorSubject<String> creator;
   BehaviorSubject<List<String>> foodTags;
 
-  MutableProperty<List<Order>> listOfOrdersAccepted = MutableProperty(List<Order>());
+  MutableProperty<List<Order>> listOfOrdersAccepted =
+      MutableProperty(List<Order>());
   Observable<List<Order>> listOfPotentialOrders;
-
 
   Route.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   Route.fromUID(String uid) : super.fromUID(uid);
@@ -49,19 +49,20 @@ class Route extends FirebaseType {
     }
 
     if (data.containsKey(deliveryLocationKey)) {
-      List<GeoPoint> temp = List.castFrom<dynamic,GeoPoint>((data[deliveryLocationKey]));
+      List<GeoPoint> temp =
+          List.castFrom<dynamic, GeoPoint>((data[deliveryLocationKey]));
       deliveryLocation.add(temp);
     } else {
       deliveryLocation.add(null);
     }
 
     if (data.containsKey(deliveryLocationDescriptionKey)) {
-      List<String> temp = List.castFrom<dynamic,String>((data[deliveryLocationDescriptionKey]));
+      List<String> temp = List.castFrom<dynamic, String>(
+          (data[deliveryLocationDescriptionKey]));
       deliveryLocationDescription.add(temp);
     } else {
       deliveryLocationDescription.add(null);
-    }    
-
+    }
 
     if (data.containsKey(startLocationKey)) {
       startLocation.add(data[startLocationKey]);
@@ -76,19 +77,19 @@ class Route extends FirebaseType {
     }
 
     if (data.containsKey(deliveryTimeKey)) {
-      deliveryTime.add(
-          DateTimeHelper.convertStringTimeToDateTime(data[deliveryTimeKey]));
+      Timestamp temp = data[deliveryTimeKey];
+
+      deliveryTime.add(temp.toDate());
     } else {
       deliveryTime.add(null);
     }
 
     if (data.containsKey(foodTagKey)) {
-      List<String> temp = List.castFrom<dynamic,String>((data[foodTagKey]));
+      List<String> temp = List.castFrom<dynamic, String>((data[foodTagKey]));
       foodTags.add(temp);
     } else {
-    foodTags.add(data[List()]);
+      foodTags.add(data[List()]);
     }
-
   }
 
   @override
@@ -107,7 +108,8 @@ class Route extends FirebaseType {
             .where(Order.potentialDeliveryKey, arrayContains: this.uid))
         .observable;
 
-    listOfOrdersAccepted.bindTo(FirebaseCollectionReactive<Order>(Firestore.instance
+    listOfOrdersAccepted.bindTo(FirebaseCollectionReactive<Order>(Firestore
+            .instance
             .collection("orders")
             .where(Order.routeKey, isEqualTo: this.uid))
         .observable);

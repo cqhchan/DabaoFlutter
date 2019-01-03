@@ -36,8 +36,9 @@ class Message extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(timestampKey)) {
-      timestamp
-          .add(DateTimeHelper.convertStringTimeToDateTime(data[timestampKey]));
+      Timestamp temp = data[timestampKey];
+
+      timestamp.add(temp.toDate());
     } else {
       timestamp.add(null);
     }

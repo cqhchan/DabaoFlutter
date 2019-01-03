@@ -72,8 +72,10 @@ class Channel extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(lastSentKey)) {
-      lastSent
-          .add(DateTimeHelper.convertStringTimeToDateTime(data[lastSentKey]));
+
+      Timestamp timestamp = data[lastSentKey];
+      lastSent.add(timestamp.toDate());
+
     } else {
       lastSent.add(null);
     }
@@ -88,7 +90,7 @@ class Channel extends FirebaseType with Selectable {
       "I": image,
       "M": message,
       "S": sender,
-      "T": DateTimeHelper.convertDateTimeToString(DateTime.now()),
+      "T": DateTime.now(),
     });
   }
 }
