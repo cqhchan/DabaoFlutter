@@ -220,8 +220,8 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
           },
         ),
         onTap: () {
-          _handlePressButton(
-              focusOnStart, locationProperty, locationDescriptionProperty);
+          widget.focusOnStart.value = focusOnStart;
+          _handlePressButton(locationProperty, locationDescriptionProperty);
         },
       ),
     );
@@ -238,7 +238,6 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
   }
 
   Future<void> _handlePressButton(
-      bool focusOnStart,
       MutableProperty<LatLng> locationProperty,
       MutableProperty<String> locationDescriptionProperty) async {
     await handlePressButton(context, (location, description) {

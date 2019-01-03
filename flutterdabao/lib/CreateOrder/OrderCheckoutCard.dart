@@ -259,13 +259,9 @@ class _OrderCheckoutState extends State<OrderCheckout>
                     showLoadingOverlay(context: context);
                     var isSuccessful = await Order.createOrder(widget.holder);
 
+
                     if (isSuccessful) {
-                      // Pop to home
-                      final PageRouteBuilder _homeRoute = new PageRouteBuilder(
-                        pageBuilder: (BuildContext context, _, __) {
-                          return Home();
-                        },
-                      );
+
                       Navigator.popUntil(context,
                           ModalRoute.withName(Navigator.defaultRouteName));
                     } else {

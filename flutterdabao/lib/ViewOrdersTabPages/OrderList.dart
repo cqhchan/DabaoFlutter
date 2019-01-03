@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -18,6 +19,8 @@ import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
+import 'package:random_string/random_string.dart' as random;
+
 
 class OrderList extends StatefulWidget {
   final Observable<List<Order>> input;
@@ -32,36 +35,77 @@ class OrderList extends StatefulWidget {
   _OrderListState createState() => _OrderListState();
 }
 
-class _OrderListState extends State<OrderList> {
-  bool expandedFlag = false;
+class _OrderListState extends State<OrderList> with HavingSubscriptionMixin {
 
+  @override
+    void initState() {
+ 
+      super.initState();
+    }
+
+    @override
+      void dispose() {
+        disposeAndReset();
+        super.dispose();
+      }
   // Current User Location
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildBody(widget.context),
+      body: _buildList(),
     );
   }
-
-  StreamBuilder _buildBody(BuildContext context) {
-    return StreamBuilder<List<Order>>(
-      stream: widget.input,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return Offstage();
-        return _buildList(context, snapshot.data);
-      },
-    );
-  }
-
-  ListView _buildList(BuildContext context, List<Order> snapshot) {
-    return ListView(
+  Widget _buildList() {
+    return StreamBuilder<List<Order>>(stream:widget.input, builder: (BuildContext context,  snapshot) {
+      if (! snapshot.hasData) return Offstage();
+      return ListView(
+          key: new Key(random.randomString(20)),
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
-      children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+      children: snapshot.data.map((data) => _OrderItemCell(order: data,location: widget.location, route: widget.route,)).toList(),
     );
+      
+    } ,) ;
   }
 
-  Card _buildListItem(BuildContext context, Order order) {
+}
+
+class _OrderItemCell extends StatefulWidget {
+  
+  final DabaoRoute.Route route;
+  final Order order;
+  final LatLng location;
+
+  _OrderItemCell({this.route, @required this.order, this.location});
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _OrderItemCellState();
+  }
+
+} 
+
+class _OrderItemCellState extends State<_OrderItemCell>{
+
+
+  @override
+    void initState() {
+      super.initState();
+    }
+
+  @override
+    void dispose() {
+
+      super.dispose();
+    }
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return _buildListItem(widget.order);
+  }
+
+  Card _buildListItem(Order order) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       margin: EdgeInsets.all(11.0),
@@ -72,13 +116,8 @@ class _OrderListState extends State<OrderList> {
         child: Wrap(
           children: <Widget>[
             ConfigurableExpansionTile(
-              initiallyExpanded: false,
-              onExpansionChanged: (expanded) {
-                order.toggle();
-                setState(() {
-                  expandedFlag = order.isSelectedProperty.value;
-                });
-              },
+              selectable: order,
+              initiallyExpanded: order.isSelectedProperty.value,
               header: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -450,40 +489,46 @@ class _OrderListState extends State<OrderList> {
   }
 
   Widget _buildCollapsableLocationDescription(Order order) {
-    if (!order.isSelectedProperty.value) {
-      return StreamBuilder<String>(
-        stream: order.deliveryLocationDescription,
-        builder: (context, snap) {
-          if (!snap.hasData) return Offstage();
-          return Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width - 180,
-            ),
-            child: Text(
-              snap.hasData ? '''${snap.data}''' : "Error",
-              style: FontHelper.regular14Black,
-              overflow: TextOverflow.ellipsis,
-            ),
+    return StreamBuilder<bool>(
+      stream: order.isSelectedProperty.producer,
+      builder: (context, snap) {
+        if (!snap.hasData) return Offstage();
+        if (!snap.data) {
+          return StreamBuilder<String>(
+            stream: order.deliveryLocationDescription,
+            builder: (context, snap) {
+              if (!snap.hasData) return Offstage();
+              return Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width - 180,
+                ),
+                child: Text(
+                  snap.hasData ? '''${snap.data}''' : "Error",
+                  style: FontHelper.regular14Black,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            },
           );
-        },
-      );
-    } else {
-      return StreamBuilder<String>(
-        stream: order.deliveryLocationDescription,
-        builder: (context, snap) {
-          if (!snap.hasData) return Offstage();
-          return Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width - 180,
-            ),
-            child: Text(
-              snap.hasData ? '''${snap.data}''' : "Error",
-              style: FontHelper.regular14Black,
-            ),
+        } else {
+          return StreamBuilder<String>(
+            stream: order.deliveryLocationDescription,
+            builder: (context, snap) {
+              if (!snap.hasData) return Offstage();
+              return Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width - 180,
+                ),
+                child: Text(
+                  snap.hasData ? '''${snap.data}''' : "Error",
+                  style: FontHelper.regular14Black,
+                ),
+              );
+            },
           );
-        },
-      );
-    }
+        }
+      },
+    );
   }
 
   Widget _buildTapToLocation(Order order) {
@@ -628,4 +673,5 @@ class _OrderListState extends State<OrderList> {
       );
     });
   }
+
 }

@@ -95,7 +95,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
 
                   if (!widget.linkCredentials) {
                     signInWithPhone().then((FirebaseUser firebaseUser) {
-                      Navigator.of(context).pop();
+                      // Navigator.of(context).pop();
 
                       User.fromAuth(firebaseUser)
                           .setPhoneNumber(firebaseUser.phoneNumber);
@@ -152,7 +152,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
                           break;
 
                         case "ERROR_CREDENTIAL_ALREADY_IN_USE":
-                          _showSnackBar('Email already in use');
+                          _showSnackBar('Phone Number already in use');
 
                           break;
 
@@ -162,7 +162,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
                           break;
 
                         case "ERROR_PROVIDER_ALREADY_LINKED":
-                          _showSnackBar('Email already linked');
+                          _showSnackBar('Phone Number already linked');
 
                           break;
 
