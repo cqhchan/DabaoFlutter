@@ -55,6 +55,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+_tabController.dispose();
     _animationController.dispose();
     super.dispose();
   }

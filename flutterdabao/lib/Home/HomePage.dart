@@ -84,14 +84,22 @@ class _Home extends State<Home> {
                       );
                     }),
                     //ChatBox
-                        squardCard(
-                            'assets/icons/chat.png', 'Chat', 'I want to Chat',
-                            () {
-                          Navigator.push(
-                            context,
-                            FadeRoute(widget: RewardsTabBarPage()),
-                          );
-                        }),
+                    squardCard(
+                        'assets/icons/chat.png', 'Chat', 'I want to Chat', () {
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: ChatPage()),
+                      );
+                    }),
+                    //Reward
+                    squardCard(
+                        'assets/icons/profile_icon.png', 'Rewards', 'I want to Chat',
+                        () {
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: RewardsTabBarPage()),
+                      );
+                    }),
                   ],
                 ),
               ),

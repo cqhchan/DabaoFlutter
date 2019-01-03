@@ -9,26 +9,29 @@ class MessageInputPage extends StatefulWidget {
   final TextCallBack textCallBack;
   final String defaultText;
 
-  MessageInputPage({Key key, @required this.textCallBack, this.defaultText = null}) : super(key: key);
+  MessageInputPage({Key key, @required this.textCallBack, this.defaultText}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     return _MessageInputPageState();
   }
-  
 }
 
 class _MessageInputPageState extends State<MessageInputPage>{
-
   TextEditingController controller = TextEditingController();
 
 @override
   void initState() {
-    // TODO: implement initState
     super.initState();
       if (widget.defaultText != null)
     controller.text = widget.defaultText;
   }
+
+  @override
+    void dispose() {
+      controller.dispose();
+      super.dispose();
+    }
 
   @override
   Widget build(BuildContext context) {

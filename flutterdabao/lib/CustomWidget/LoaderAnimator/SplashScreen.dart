@@ -7,8 +7,7 @@ class SplashScreenPage extends StatefulWidget {
   _SplashScreenState createState() => new _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreenPage>
-    with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreenPage> {
 
 
   @override
@@ -20,5 +19,3 @@ class _SplashScreenState extends State<SplashScreenPage>
     );
   }
 }
-
-//ColorHelper.dabaoOrangeMaterial

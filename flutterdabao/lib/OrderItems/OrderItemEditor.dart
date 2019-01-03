@@ -92,9 +92,9 @@ class _OrderItemEditor extends StatefulWidget {
 }
 
 class _OrderItemEditorState extends State<_OrderItemEditor> {
-  var _titleTextController = new TextEditingController();
-  var _subTitleTextController = new TextEditingController();
-  var _priceController = new TextEditingController();
+  var _titleTextController = TextEditingController();
+  var _subTitleTextController = TextEditingController();
+  var _priceController = TextEditingController();
   String errorMessage = "";
   int qty;
   @override
@@ -122,6 +122,9 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
 
   @override
   void dispose() {
+    _titleTextController.dispose();
+    _priceController.dispose();
+    _subTitleTextController.dispose();
     super.dispose();
   }
 

@@ -48,7 +48,6 @@ class PinEntryTextFieldState extends State<PinEntryTextField> {
 
   @override
   void dispose() {
-//    _focusNodes.forEach((FocusNode f) => f.dispose());
     _textControllers.forEach((TextEditingController t) => t.dispose());
     super.dispose();
   }

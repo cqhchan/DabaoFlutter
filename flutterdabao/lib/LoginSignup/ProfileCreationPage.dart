@@ -31,6 +31,12 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   bool _autoValidate = false;
 
   @override
+  void dispose() { 
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
   }

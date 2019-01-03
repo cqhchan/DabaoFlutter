@@ -24,10 +24,10 @@ class _SearchPromoCodePageState extends State<SearchPromoCodePage> {
   List<Voucher> _results;
   TextEditingController _controller = TextEditingController();
   String _code = "";
+  Timer _resultsTimer;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controller.addListener(() {
       setState(() {
@@ -36,7 +36,12 @@ class _SearchPromoCodePageState extends State<SearchPromoCodePage> {
     });
   }
 
-  Timer _resultsTimer;
+  @override
+  void dispose() { 
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future _getResultsDebounced() async {
     if (_results == null || _results.length == 0) {
       setState(() {
@@ -73,12 +78,6 @@ class _SearchPromoCodePageState extends State<SearchPromoCodePage> {
         _results = results;
       });
     });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override

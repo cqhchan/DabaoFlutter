@@ -28,17 +28,21 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
     with AuthHandler {
   String countryCode = "+65";
   String phoneNumber = "";
-
   bool otpsent = false;
   final _phoneNumberController = TextEditingController();
+  FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _phoneNumberController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return buildSignUpPage();
   }
-
-  FocusNode _focusNode = FocusNode();
 
   //sign up page that shows up after signup button is pressed
   Widget buildSignUpPage() {
@@ -194,7 +198,6 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
             child: TextFormField(
               focusNode: _focusNode,
               controller: _phoneNumberController,
-              //autofocus: true,
               inputFormatters: [
                 LengthLimitingTextInputFormatter(8),
               ],
@@ -258,8 +261,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
             });
           },
           success: (sucess) async {
-          await FirebaseAuth.instance.currentUser().then((firebaseUser) {
-
+            await FirebaseAuth.instance.currentUser().then((firebaseUser) {
               User.fromAuth(firebaseUser)
                   .setPhoneNumber(firebaseUser.phoneNumber);
             });
@@ -293,9 +295,9 @@ class EmailLoginPage extends StatefulWidget {
   const EmailLoginPage(
       {Key key, this.linkCredentials = false, this.onCompleteCallback})
       : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return EmailLoginPageState();
   }
 }
@@ -303,14 +305,20 @@ class EmailLoginPage extends StatefulWidget {
 class EmailLoginPageState extends State<EmailLoginPage> with AuthHandler {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return buildEmailLoginPage();
   }
-
-  FocusNode _focusNode = FocusNode();
 
   Widget buildEmailLoginPage() {
     return GestureDetector(
@@ -328,7 +336,6 @@ class EmailLoginPageState extends State<EmailLoginPage> with AuthHandler {
                       borderRadius: BorderRadius.all(Radius.circular(8.0)),
                       color: Color(0xFF454F63)),
                   child: TextField(
-                    focusNode: _focusNode,
                     controller: _usernameController,
                     style: FontHelper.semiBold(Color(0xFFD0D0D0), 16),
                     decoration: InputDecoration(
@@ -350,7 +357,6 @@ class EmailLoginPageState extends State<EmailLoginPage> with AuthHandler {
                       borderRadius: BorderRadius.all(Radius.circular(8.0)),
                       color: Color(0xFF454F63)),
                   child: TextField(
-                    focusNode: _focusNode,
                     controller: _passwordController,
                     style: FontHelper.semiBoldgrey16TextStyle,
                     obscureText: true,
