@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -9,7 +8,6 @@ import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/TimePicker/TimePickerEditor.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_webservice/places.dart';
 
 class LocationCard extends StatefulWidget {
   final OrderHolder holder;
@@ -23,7 +21,6 @@ class LocationCard extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return LocationCardState();
   }
 }
@@ -40,7 +37,6 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
             alignment: Alignment(0.0, -1.0),
             padding: EdgeInsets.fromLTRB(23.0, 15.0, 23.0, 20.0),
             margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 35.0),
-            // height: 160.0,
             decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8.0),

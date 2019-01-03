@@ -97,7 +97,11 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   DateTime start;
   DateTime end;
 
+  DateTime _currentStartTime;
+
   void reset() {
+    _currentStartTime = DateTime.now().add(Duration(hours: 1));
+
     //Default selected hour to one hour from now
     _currentStartHour = _handleMoreThan24Hours(DateTime.now().hour + 1);
 
@@ -252,28 +256,24 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     if (value != null) {
       setState(() => _currentStartHour = value);
     }
-    print(_currentStartHour);
   }
 
   _handleStartMinuteChanged(num value) {
     if (value != null) {
       setState(() => _currentStartMinute = value);
     }
-    print(_currentStartMinute);
   }
 
   _handleEndHourChanged(num value) {
     if (value != null) {
       setState(() => _currentEndHour = value);
     }
-    print(_currentEndHour);
   }
 
   _handleEndMinuteChanged(num value) {
     if (value != null) {
       setState(() => _currentEndMinute = value);
     }
-    print(_currentEndMinute);
   }
 
   Widget buildStartDeliverSelector() {
@@ -434,32 +434,41 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
           ],
         ),
         onPressed: () {
-          if (selectedStartDate != null &&
+          start = DateTime(
+            selectedStartDate.year,
+            selectedStartDate.month,
+            selectedStartDate.day,
+            _currentStartHour,
+            _currentStartMinute,
+          );
+          end = DateTime(
+            selectedEndDate.year,
+            selectedEndDate.month,
+            selectedEndDate.day,
+            _currentEndHour,
+            _currentEndMinute,
+          );
+          // assert(selectedStartDate != null);
+          // assert(start != null);
+          // assert(end != null);
+          print(start);
+          print(end);
+          if (start != null &&
+              end != null &&
+              selectedStartDate != null &&
               _currentStartHour != null &&
               _currentStartMinute != null &&
               _currentEndHour != null &&
               _currentEndMinute != null &&
-              _currentStartHour != _currentEndHour &&
-              _currentStartHour > DateTime.now().hour) {
-            start = DateTime(
-              selectedStartDate.year,
-              selectedStartDate.month,
-              selectedStartDate.day,
-              _currentStartHour,
-              _currentStartMinute,
-            );
-            end = DateTime(
-              selectedEndDate.year,
-              selectedEndDate.month,
-              selectedEndDate.day,
-              _currentEndHour,
-              _currentEndMinute,
-            );
+              start.isAfter(DateTime.now().add(Duration(hours: 1))) &&
+              end.isAfter(start.add(Duration(hours: 1, minutes: 30)))) {
             Navigator.of(context).pop();
+            print('confirmed start: $start');
+            print('confirmed end: $end');
             widget.onCompleteCallBack(start, end);
           } else {
             setState(() {
-              errorMessage = "Please input the correct time period";
+              errorMessage = "Please pick the correct time period";
             });
           }
         },
@@ -494,15 +503,24 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   }
 
   _handleDateToString() {
-    if (selectedStartDate.day == DateTime.now().day) {
+    if (selectedStartDate.day != DateTime.now().day) {
       return Text(
-        'Today',
+        '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
         style: FontHelper.semiBold(Colors.black, 20),
         textAlign: TextAlign.center,
       );
-    } else {
+    } else if (_currentStartTime.day ==
+            DateTime.now().add(Duration(hours: 1)).day &&
+        DateTime.now().hour == 23) {
+      selectedStartDate = DateTime.now().add(Duration(days: 1));
       return Text(
-        '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
+        'Tomorrow',
+        style: FontHelper.semiBold(Colors.black, 20),
+        textAlign: TextAlign.center,
+      );
+    } else if (selectedStartDate.day == DateTime.now().day) {
+      return Text(
+        'Today',
         style: FontHelper.semiBold(Colors.black, 20),
         textAlign: TextAlign.center,
       );
@@ -529,19 +547,6 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
       return 50;
     } else {
       return value;
-    }
-  }
-
-  ///This method returns integer for minimum value for time picker.
-  ///If the [SelectedStartDate] is current date, it will returns a ((current hour) + 1).
-  ///Else it will return an integer 0.
-  _handleMinValue() {
-    if (selectedStartDate.day == DateTime.now().day &&
-        selectedStartDate.month == DateTime.now().month &&
-        selectedStartDate.year == DateTime.now().year) {
-      return _handleMoreThan24Hours(DateTime.now().hour + 1);
-    } else {
-      return 0;
     }
   }
 }
@@ -579,7 +584,11 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
 
   DateTime start;
 
+  DateTime _currentStartTime;
+
   void reset() {
+    _currentStartTime = DateTime.now().add(Duration(hours: 1));
+
     //Default selected hour to one hour from now
     _currentStartHour = _handleMoreThan24Hours(DateTime.now().hour + 1);
 
@@ -726,7 +735,6 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
   _handleStartHourChanged(num value) {
     if (value != null) {
       setState(() => _currentStartHour = value);
-      print(_currentStartHour);
     }
   }
 
@@ -734,7 +742,6 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
     if (value != null) {
       setState(() => _currentStartMinute = value);
     }
-    print(_currentStartMinute);
   }
 
   Widget buildStartDeliverSelector() {
@@ -807,22 +814,23 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
           ],
         ),
         onPressed: () {
+          start = DateTime(
+            selectedStartDate.year,
+            selectedStartDate.month,
+            selectedStartDate.day,
+            _currentStartHour,
+            _currentStartMinute,
+          );
           if (selectedStartDate != null &&
               _currentStartHour != null &&
               _currentStartMinute != null &&
-              _currentStartHour > DateTime.now().hour) {
-            start = DateTime(
-              selectedStartDate.year,
-              selectedStartDate.month,
-              selectedStartDate.day,
-              _currentStartHour,
-              _currentStartMinute,
-            );
+              start.isAfter(DateTime.now())) {
             Navigator.of(context).pop();
+            print(start);
             widget.onCompleteCallback(start);
           } else {
             setState(() {
-              errorMessage = "Please input the correct time period";
+              errorMessage = "Please pick the correct time";
             });
           }
         },
@@ -852,15 +860,24 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
   }
 
   _handleDateToString() {
-    if (selectedStartDate.day == DateTime.now().day) {
+    if (selectedStartDate.day != DateTime.now().day) {
       return Text(
-        'Today',
+        '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
         style: FontHelper.semiBold(Colors.black, 20),
         textAlign: TextAlign.center,
       );
-    } else {
+    } else if (_currentStartTime.day ==
+            DateTime.now().add(Duration(hours: 1)).day &&
+        DateTime.now().hour == 23) {
+      selectedStartDate = DateTime.now().add(Duration(days: 1));
       return Text(
-        '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
+        'Tomorrow',
+        style: FontHelper.semiBold(Colors.black, 20),
+        textAlign: TextAlign.center,
+      );
+    } else if (selectedStartDate.day == DateTime.now().day) {
+      return Text(
+        'Today',
         style: FontHelper.semiBold(Colors.black, 20),
         textAlign: TextAlign.center,
       );
@@ -887,19 +904,6 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
       return 50;
     } else {
       return value;
-    }
-  }
-
-  ///This method returns integer for minimum value for time picker.
-  ///If the [SelectedStartDate] is current date, it will returns a ((current hour) + 1).
-  ///Else it will return an integer 0.
-  _handleMinValue() {
-    if (selectedStartDate.day == DateTime.now().day &&
-        selectedStartDate.month == DateTime.now().month &&
-        selectedStartDate.year == DateTime.now().year) {
-      return _handleMoreThan24Hours(DateTime.now().hour + 1);
-    } else {
-      return 0;
     }
   }
 }
