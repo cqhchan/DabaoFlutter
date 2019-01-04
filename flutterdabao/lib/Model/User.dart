@@ -29,7 +29,7 @@ class User extends FirebaseType {
   // Only avaliable in from Auth
   Observable<List<Voucher>> listOfAvalibleVouchers;
   Observable<List<Voucher>> listOfInUsedVouchers;
-  Observable<int> currentDabaorRewardsNumber;
+  Observable<int> currentDabaoerRewardsNumber;
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   User.fromUID(String uid) : super.fromUID(uid);
@@ -53,7 +53,7 @@ class User extends FirebaseType {
             .where(Voucher.statusKey, isEqualTo: voucher_Status_InUse))
         .observable;
     
-    currentDabaorRewardsNumber = ConfigHelper
+    currentDabaoerRewardsNumber = ConfigHelper
         .instance.currentDabaoerRewards.producer
         .switchMap((reward) => reward == null
             ? Observable.just(0)
