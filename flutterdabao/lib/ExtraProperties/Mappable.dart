@@ -4,6 +4,7 @@ import 'package:flutterdabao/CustomWidget/Headers/Category.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/Model/Channels.dart';
+import 'package:flutterdabao/Model/DabaoerReward.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
@@ -59,7 +60,6 @@ abstract class Mappable extends Identifiable {
       return new Order.fromDocument(doc) as T;
     }
 
-
     if (T == Voucher) {
       return new Voucher.fromDocument(doc) as T;
     }
@@ -76,6 +76,14 @@ abstract class Mappable extends Identifiable {
       return new Message.fromDocument(doc) as T;
     }
 
+    if (T == DabaoerReward) {
+      return new DabaoerReward.fromDocument(doc) as T;
+    }
+
+    if (T == DabaoerRewardsMilestone) {
+      return new DabaoerRewardsMilestone.fromDocument(doc) as T;
+    }
+
     throw FatalError("Mappable Not Declared");
   }
 
@@ -90,7 +98,10 @@ abstract class Mappable extends Identifiable {
   }
 
   //standardization className.
-  String get className => this.runtimeType.toString().toLowerCase() + "s";
+  String get className {
+    String name = this.runtimeType.toString();
+    return '${name[0].toLowerCase()}${name.substring(1)}s';
+  }
 
   //To be implemented by Sub-class to take data from Map
   void map(Map<String, dynamic> data);

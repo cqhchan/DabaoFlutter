@@ -7,6 +7,7 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/Channels.dart';
+import 'package:flutterdabao/Model/DabaoerReward.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart';
@@ -47,6 +48,9 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   MutableProperty<List<Voucher>> currentUserOpenVouchersProperty =
       MutableProperty<List<Voucher>>(List());
+
+  MutableProperty<DabaoerReward>  currentDabaoerRewards =
+      MutableProperty<DabaoerReward>(null);
 
   MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
   MutableProperty<double> _globalFixedPrice = MutableProperty<double>(1.5);
@@ -97,11 +101,17 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription.add(currentUserDeliveredCompletedOrdersProperty
         .bindTo(currentUserDeliveredCompletedOrdersProducer()));
 
-    subscription.add(currentUserWalletProperty.bindTo(currentUserWalletProducer()));
+    subscription
+        .add(currentUserWalletProperty.bindTo(currentUserWalletProducer()));
 
     // get Current open Routes
     subscription.add(
         currentUserOpenRoutesProperty.bindTo(currentUserOpenRoutesProducer()));
+
+    subscription
+        .add(currentDabaoerRewards.bindTo(currentDabaoerRewardsProducer()));
+
+
   }
 
   bool get isInDebugMode {
@@ -110,18 +120,30 @@ class ConfigHelper with HavingSubscriptionMixin {
     return inDebugMode;
   }
 
-  Observable<List<FoodTag>> currentUserFoodTagProducer() {
+  Stream<List<FoodTag>> currentUserFoodTagProducer() {
     return currentUserProperty.producer.switchMap(
         (user) => user == null ? List<FoodTag>() : user.userFoodTags);
   }
 
-  Observable<Wallet> currentUserWalletProducer() {
+  Stream<DabaoerReward> currentDabaoerRewardsProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? null
+        : FirebaseCollectionReactive<DabaoerReward>(Firestore.instance
+                .collection("dabaoerRewards")
+                .where(DabaoerReward.validKey, isEqualTo: true)
+                .orderBy(DabaoerReward.startTimeKey, descending: true)
+                .limit(1))
+            .observable
+            .map((list) => list == null ? null : list.length == 0 ? null : list.first ));
+  }
+
+  Stream<Wallet> currentUserWalletProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? null
         : Observable.just(Wallet.fromUID(user.uid)).shareReplay(maxSize: 1));
   }
 
-  Observable<List<Order>> currentUserRequestedOrdersProducer() {
+  Stream<List<Order>> currentUserRequestedOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
@@ -131,7 +153,7 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-  Observable<List<Route>> currentUserOpenRoutesProducer() {
+  Stream<List<Route>> currentUserOpenRoutesProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Route>()
         : FirebaseCollectionReactive<Route>(Firestore.instance
@@ -141,7 +163,7 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-  Observable<List<Order>> currentUserAcceptedOrdersProducer() {
+  Stream<List<Order>> currentUserAcceptedOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
@@ -151,7 +173,7 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-  Observable<List<Order>> currentUserDeliveryingOrdersProducer() {
+  Stream<List<Order>> currentUserDeliveryingOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
@@ -161,7 +183,7 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-  Observable<List<Order>> currentUserDeliveredCompletedOrdersProducer() {
+  Stream<List<Order>> currentUserDeliveredCompletedOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Order>()
         : FirebaseCollectionReactive<Order>(Firestore.instance
