@@ -157,13 +157,9 @@ class _Home extends State<Home> with HavingSubscriptionMixin {
                 child: GestureDetector(
                   onTap: () {},
                   child: StreamBuilder(
-                    stream: Firestore.instance
-                        .collection('users')
-                        .document(
-                            ConfigHelper.instance.currentUserProperty.value.uid)
-                        .snapshots(),
+                    stream: ConfigHelper.instance.currentUserProperty.value.thumbnailImage,
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
+                      if (!snapshot.hasData || snapshot.data == null) {
                         return Image.asset(
                           'assets/icons/profile_icon.png',
                           fit: BoxFit.fill,
