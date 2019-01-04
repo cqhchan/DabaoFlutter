@@ -127,9 +127,9 @@ class _Home extends State<Home> {
               opacityProperty: _opacityProperty,
               rightButton: GestureDetector(
                 onTap: () {
-                   Navigator.of(context).push(
-                      FadeRoute(widget: ChatPage()),
-                    );
+                  Navigator.of(context).push(
+                    FadeRoute(widget: ChatPage()),
+                  );
                 },
                 child: Container(
                     height: 40.0,
@@ -160,9 +160,14 @@ class _Home extends State<Home> {
                           fit: BoxFit.fill,
                         );
                       }
-                      return CircleAvatar(
-                        backgroundImage: NetworkImage(snapshot.data['TI']),
-                        radius: 20,
+                      return GestureDetector(
+                        onLongPress: () async {
+                          FirebaseAuth.instance.signOut();
+                        },
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(snapshot.data['TI']),
+                          radius: 20,
+                        ),
                       );
                     },
                   ),
@@ -282,7 +287,7 @@ class _Home extends State<Home> {
     return StreamBuilder<User>(
         stream: ConfigHelper.instance.currentUserProperty.producer,
         builder: (BuildContext context, user) {
-          return BalanceCard(user,context);
+          return BalanceCard(user, context);
         });
   }
 }
