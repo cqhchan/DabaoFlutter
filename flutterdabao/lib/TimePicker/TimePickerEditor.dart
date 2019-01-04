@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Route/OverlayRoute.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
 import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
+import 'package:rxdart/rxdart.dart';
 
 typedef DoubleDateSelectedCallback = Function(DateTime, DateTime);
 typedef DateSelectedCallback = Function(DateTime);
@@ -12,6 +16,8 @@ Future<T> showTimeCreator<T>({
   @required BuildContext context,
   bool barrierDismissible = false,
   @required DoubleDateSelectedCallback onCompleteCallBack,
+  int startTimeBeforeLimitInMins = 60,
+  int minsGapBetweenStartAndEndTime = 30,
   DateTime startTime,
   DateTime endTime,
 }) {
@@ -21,6 +27,8 @@ Future<T> showTimeCreator<T>({
       .push<T>(CustomOverlayRoute<T>(
     builder: (context) {
       return _TimePickerEditor(
+        startTimeBeforeLimitInMins: startTimeBeforeLimitInMins,
+        minsGapBetweenStartAndEndTime: minsGapBetweenStartAndEndTime,
         startTime: startTime,
         endTime: endTime,
         onCompleteCallBack: onCompleteCallBack,
@@ -60,60 +68,84 @@ Future<T> showOneTimeCreator<T>({
 
 class _TimePickerEditor extends StatefulWidget {
   final DoubleDateSelectedCallback onCompleteCallBack;
-  final startTime;
-  final endTime;
+  final DateTime startTime;
+  final DateTime endTime;
+  final int minsGapBetweenStartAndEndTime;
+  final int startTimeBeforeLimitInMins;
 
-  const _TimePickerEditor({
+  _TimePickerEditor({
     Key key,
     @required this.onCompleteCallBack,
     this.startTime,
     this.endTime,
+    this.minsGapBetweenStartAndEndTime = 0,
+    this.startTimeBeforeLimitInMins = 0,
   }) : super(key: key);
   __TimePickerEditorState createState() => __TimePickerEditorState();
 }
 
-class __TimePickerEditorState extends State<_TimePickerEditor> {
-  DateTime selectedStartDate = DateTime.now();
-  DateTime selectedEndDate = DateTime.now();
-  DateTime start = DateTime.now();
-  DateTime end = DateTime.now();
-  DateTime _currentStartTime = DateTime.now();
-
-  int selectedStartHour;
-  int selectedStartMinute;
-  int selectedEndHour;
-  int selectedEndMinute;
+class __TimePickerEditorState extends State<_TimePickerEditor>
+    with HavingSubscriptionMixin {
+  MutableProperty<DateTime> selectedStartDate;
+  MutableProperty<DateTime> selectedEndDate;
+  DateTime currentTime;
 
   HourPicker integerStartHourPicker;
   MinutePicker integerStartMinutePicker;
   HourPicker integerEndHourPicker;
   MinutePicker integerEndMinutePicker;
 
-  int _currentStartHour;
-  int _currentStartMinute;
-  int _currentEndHour;
-  int _currentEndMinute;
-
   String errorMessage = "";
 
   void initState() {
     super.initState();
 
-    _currentStartTime = DateTime.now().add(Duration(hours: 1));
-    _currentStartHour = DateTime.now().add(Duration(hours: 1)).hour;
-    _currentStartMinute = _handleMinute(DateTime.now().minute);
-    _currentEndHour = DateTime.now().add(Duration(hours: 3)).hour;
-    _currentEndMinute =
-        _handleMinute(DateTime.now().add(Duration(minutes: 30)).minute);
+    // Copy Start time to prevent unwanted editting
+    selectedStartDate = MutableProperty<DateTime>(widget.startTime != null
+        ? DateTime.fromMillisecondsSinceEpoch(
+            widget.startTime.millisecondsSinceEpoch)
+        : DateTime.now().add(Duration(hours: 1)));
 
-    if (widget.startTime != null && widget.endTime != null) {
-      _currentStartHour = widget.startTime.hour;
-      _currentEndHour = widget.endTime.hour;
-      _currentStartMinute = widget.startTime.minute;
-      _currentEndMinute = widget.endTime.minute;
-      selectedStartDate = widget.startTime;
-      selectedEndDate = widget.endTime;
-    }
+    currentTime = DateTime.now();
+
+    // Copy end time to prevent unwanted editting
+    selectedEndDate = MutableProperty<DateTime>(widget.endTime != null
+        ? DateTime.fromMillisecondsSinceEpoch(
+            widget.endTime.millisecondsSinceEpoch)
+        : selectedStartDate.value.add(Duration(hours: 1)));
+
+    // if selected StartDate is earlier than end Date, set endDate to StartDate + 1 hr
+    subscription.add(selectedStartDate.producer
+        .debounce(Duration(milliseconds: 10))
+        .listen((startDate) {
+      if (startDate.isAfter(selectedEndDate.value)) {
+        selectedEndDate.value = selectedEndDate.value.add(Duration(days: 1));
+      }
+
+      if (selectedEndDate.value.isAfter(startDate) &&
+          selectedEndDate.value.difference(startDate).inHours > 23) {
+        selectedEndDate.value = startDate.add(Duration(days: -1));
+      }
+    }));
+
+    subscription.add(selectedEndDate.producer
+        .debounce(Duration(milliseconds: 10))
+        .listen((endDate) {
+      if (endDate.isBefore(selectedStartDate.value)) {
+        selectedEndDate.value = endDate.add(Duration(days: 1));
+      }
+
+      if (endDate.isAfter(selectedStartDate.value) &&
+          endDate.difference(selectedStartDate.value).inHours > 23) {
+        selectedEndDate.value = endDate.add(Duration(days: -1));
+      }
+    }));
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
   }
 
   @override
@@ -231,27 +263,21 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   }
 
   _handleDateToString() {
-    if (selectedStartDate.day != DateTime.now().day) {
-      return Text(
-        '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
-        style: FontHelper.semiBold(Colors.black, 20),
-        textAlign: TextAlign.center,
-      );
-    } else if (_currentStartTime.day ==
-            DateTime.now().add(Duration(hours: 1)).day &&
-        DateTime.now().hour == 23) {
-      selectedStartDate = DateTime.now().add(Duration(days: 1));
-      return Text(
-        '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
-        style: FontHelper.semiBold(Colors.black, 20),
-        textAlign: TextAlign.center,
-      );
-    } else if (selectedStartDate.day == DateTime.now().day) {
-      return Text(
-        'Today',
-        style: FontHelper.semiBold(Colors.black, 20),
-        textAlign: TextAlign.center,
-      );
+    return Text(
+      _getDateFormat(selectedStartDate.value),
+      style: FontHelper.semiBold(Colors.black, 20),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  String _getDateFormat(DateTime time) {
+    if (DateTimeHelper.isToday(time)) {
+      return "Today";
+      // if tomorrow
+    } else if (DateTimeHelper.isTomorrow(time)) {
+      return 'Tomorrow';
+    } else {
+      return '${time.day}-${time.month}-${time.year}';
     }
   }
 
@@ -259,7 +285,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     integerStartHourPicker = new HourPicker.hour(
       maxValue: 23,
       minValue: 0,
-      initialValue: _currentStartHour,
+      initialValue: selectedStartDate.value.hour,
       step: 1,
       onChanged: (value) {
         _handleStartHourChanged(value);
@@ -269,7 +295,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     integerStartMinutePicker = new MinutePicker.minute(
       maxValue: 5,
       minValue: 0,
-      initialValue: _currentStartMinute ~/ 10,
+      initialValue: selectedStartDate.value.minute ~/ 10,
       step: 1,
       onChanged: (value) {
         _handleStartMinuteChanged(value * 10);
@@ -292,72 +318,67 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     );
   }
 
-  _handleStartHourChanged(num value) {
-    if (value != null) {
-      setState(() => _currentStartHour = value);
-    }
+  _handleStartHourChanged(num hour) {
+    selectedStartDate.value = new DateTime(
+        selectedStartDate.value.year,
+        selectedStartDate.value.month,
+        selectedStartDate.value.day,
+        hour,
+        selectedStartDate.value.minute,
+        selectedStartDate.value.second,
+        selectedStartDate.value.millisecond);
   }
 
-  _handleStartMinuteChanged(num value) {
-    if (value != null) {
-      setState(() => _currentStartMinute = value);
-    }
+  _handleStartMinuteChanged(num minute) {
+    selectedStartDate.value = new DateTime(
+        selectedStartDate.value.year,
+        selectedStartDate.value.month,
+        selectedStartDate.value.day,
+        selectedStartDate.value.hour,
+        minute,
+        selectedStartDate.value.second,
+        selectedStartDate.value.millisecond);
   }
 
   Widget buildTomorrow() {
-    if (_currentEndHour < _currentStartHour &&
-        selectedStartDate.day == DateTime.now().day &&
-        selectedStartDate.month == DateTime.now().month &&
-        selectedStartDate.year == DateTime.now().year) {
-      selectedEndDate = selectedStartDate.add(Duration(days: 1));
-      return Row(
-        children: <Widget>[
-          Container(
-            constraints: BoxConstraints(minHeight: 20, minWidth: 40),
-            child: Text(
-              'Date:',
-              style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
+    return StreamBuilder<bool>(
+      stream: Observable.combineLatest2(
+          selectedStartDate.producer, selectedEndDate.producer,
+          (startDate, endDate) {
+        if (DateTimeHelper.sameDay(startDate, endDate)) {
+          return true;
+        }
+
+        return false;
+      }),
+      builder: (BuildContext context, snapshot) {
+        if (!snapshot.hasData || snapshot.data) return Offstage();
+
+        return Row(
+          children: <Widget>[
+            Container(
+              constraints: BoxConstraints(minHeight: 20, minWidth: 40),
+              child: Text(
+                'Date:',
+                style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
+              ),
             ),
-          ),
-          Text(
-            'Tomorrow',
-            style: FontHelper.semiBold(Colors.black, 20),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      );
-    } else if (_currentEndHour < _currentStartHour &&
-        selectedStartDate.day >= DateTime.now().day &&
-        selectedStartDate.month >= DateTime.now().month &&
-        selectedStartDate.year >= DateTime.now().year) {
-      selectedEndDate = selectedStartDate.add(Duration(days: 1));
-      return Row(
-        children: <Widget>[
-          Container(
-            constraints: BoxConstraints(minHeight: 20, minWidth: 40),
-            child: Text(
-              'Date:',
-              style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
+            Text(
+              _getDateFormat(selectedEndDate.value),
+              style: FontHelper.semiBold(Colors.black, 20),
+              textAlign: TextAlign.center,
             ),
-          ),
-          Text(
-            '${selectedEndDate.day}-${selectedEndDate.month}-${selectedEndDate.year}',
-            style: FontHelper.semiBold(Colors.black, 20),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      );
-    } else {
-      selectedEndDate = selectedStartDate;
-      return Offstage();
-    }
+          ],
+        );
+      },
+    );
   }
 
   Widget buildEndDeliverSelector() {
     integerEndHourPicker = new HourPicker.hour(
       maxValue: 23,
       minValue: 0,
-      initialValue: _currentEndHour,
+      initialValue: selectedEndDate.value.hour,
       step: 1,
       onChanged: (value) {
         _handleEndHourChanged(value);
@@ -367,7 +388,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     integerEndMinutePicker = new MinutePicker.minute(
       maxValue: 5,
       minValue: 0,
-      initialValue: _currentEndMinute ~/ 10,
+      initialValue: selectedEndDate.value.minute ~/ 10,
       step: 1,
       onChanged: (value) {
         _handleEndMinuteChanged(value * 10);
@@ -390,16 +411,26 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
     );
   }
 
-  _handleEndHourChanged(num value) {
-    if (value != null) {
-      setState(() => _currentEndHour = value);
-    }
+  _handleEndHourChanged(num hour) {
+    selectedEndDate.value = new DateTime(
+        selectedEndDate.value.year,
+        selectedEndDate.value.month,
+        selectedEndDate.value.day,
+        hour,
+        selectedEndDate.value.minute,
+        selectedEndDate.value.second,
+        selectedEndDate.value.millisecond);
   }
 
-  _handleEndMinuteChanged(num value) {
-    if (value != null) {
-      setState(() => _currentEndMinute = value);
-    }
+  _handleEndMinuteChanged(num minute) {
+    selectedEndDate.value = new DateTime(
+        selectedEndDate.value.year,
+        selectedEndDate.value.month,
+        selectedEndDate.value.day,
+        selectedEndDate.value.hour,
+        minute,
+        selectedEndDate.value.second,
+        selectedEndDate.value.millisecond);
   }
 
   Widget buildErrorMessage() {
@@ -436,29 +467,18 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
           ],
         ),
         onPressed: () {
-          start = DateTime(
-            selectedStartDate.year,
-            selectedStartDate.month,
-            selectedStartDate.day,
-            _currentStartHour,
-            _currentStartMinute,
-          );
-          end = DateTime(
-            selectedEndDate.year,
-            selectedEndDate.month,
-            selectedEndDate.day,
-            _currentEndHour,
-            _currentEndMinute,
-          );
-          if (start.isAfter(DateTime.now().add(Duration(minutes: 50))) &&
-              end.isAfter(start.add(Duration(minutes: 20)))) {
-            print('confirmed start: $start');
-            print('confirmed end: $end');
+          if (selectedStartDate.value.isAfter(DateTime.now()
+                  .add(Duration(minutes: widget.startTimeBeforeLimitInMins))) &&
+              selectedEndDate.value.isAfter(selectedStartDate.value.add(
+                  Duration(minutes: widget.minsGapBetweenStartAndEndTime)))) {
+            print('confirmed start: ${selectedStartDate.value}');
+            print('confirmed end: ${selectedEndDate.value}');
             Navigator.of(context).pop();
-            widget.onCompleteCallBack(start, end);
+            widget.onCompleteCallBack(
+                selectedStartDate.value, selectedEndDate.value);
           } else {
-            print('wrong start: $start');
-            print('wrong end: $end');
+            print('wrong start: ${selectedStartDate.value}');
+            print('wrong end: ${selectedEndDate.value}');
             setState(() {
               errorMessage =
                   "Minimim time period is 30 minutes and at least 1 hour from now.";
@@ -472,25 +492,13 @@ class __TimePickerEditorState extends State<_TimePickerEditor> {
   Future _selectDate() async {
     await showDatePicker(
       context: context,
-      initialDate: selectedStartDate,
+      initialDate: selectedStartDate.value,
       firstDate: DateTime(
           DateTime.now().year, DateTime.now().month, DateTime.now().day),
-      lastDate: DateTime(2100),
+      lastDate: DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day + 7),
     ).then((date) {
-      if (date != null) {
-        setState(() {
-          selectedStartDate = DateTime(
-            date.year,
-            date.month,
-            date.day,
-          );
-          selectedEndDate = DateTime(
-            date.year,
-            date.month,
-            date.day,
-          );
-        });
-      }
+      selectedStartDate.value = date;
     });
   }
 
@@ -551,8 +559,7 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
     super.initState();
     _currentStartTime = DateTime.now().add(Duration(hours: 1));
     _currentStartHour = DateTime.now().hour;
-    _currentStartMinute =
-        _handleMinute(DateTime.now().minute);
+    _currentStartMinute = _handleMinute(DateTime.now().minute);
     if (widget.startTime != null) {
       _currentStartHour = widget.startTime.hour;
       _currentStartMinute = widget.startTime.minute;

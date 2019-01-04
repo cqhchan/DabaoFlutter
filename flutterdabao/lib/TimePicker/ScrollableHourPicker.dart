@@ -36,7 +36,7 @@ class HourPicker extends StatelessWidget {
         decimalPlaces = 0,
         intScrollController = new ScrollController(
           initialScrollOffset:
-              (initialValue - minValue + 1) ~/ step * itemExtent,
+              (initialValue - minValue) ~/ step * itemExtent,
         ),
         decimalScrollController = null,
         _listViewHeight = 3 * itemExtent,
@@ -71,7 +71,7 @@ class HourPicker extends StatelessWidget {
   final ScrollController decimalScrollController;
 
   ///Currently selected integer value
-  final int selectedIntValue;
+  int selectedIntValue;
 
   ///Currently selected decimal value
   final int selectedDecimalValue;
@@ -87,9 +87,7 @@ class HourPicker extends StatelessWidget {
   //----------------------------- PUBLIC ------------------------------
   //
 
-  animateInt(int valueToSelect) {
-    int diff = valueToSelect - minValue;
-    int index = diff ~/ step;
+  animateInt(int index) {
     _animate(intScrollController, index * itemExtent);
   }
 
@@ -107,33 +105,33 @@ class HourPicker extends StatelessWidget {
     return _intListView();
   }
 
+  ListWheelChildLoopingListDelegate delegate;
   Widget _intListView() {
     TextStyle selectedStyle = FontHelper.robotoRegular50Black;
-    int itemCount = (maxValue - minValue) ~/ step + 3;
+    int itemCount = (maxValue - minValue) ~/ step + 1 ;
+    delegate = ListWheelChildLoopingListDelegate(
+      children: List<Widget>.generate(itemCount, (index) {
+        final int value = _intValueFromIndex(index);
+
+        //define special style for selected (middle) element
+        final TextStyle itemStyle = selectedStyle;
+
+
+        return Center(
+                child: new Text(_handleZeroPadding(value), style: itemStyle),
+              );
+      }),
+    );
     return new NotificationListener(
       child: new Container(
         height: itemExtent,
         width: listViewWidth,
-        child: new ListView.builder(
+        child: new ListWheelScrollView.useDelegate(
           controller: intScrollController,
           itemExtent: itemExtent,
-          itemCount: itemCount,
-          cacheExtent: _calculateCacheExtent(itemCount),
-          itemBuilder: (BuildContext context, int index) {
-            final int value = _intValueFromIndex(index);
-
-            //define special style for selected (middle) element
-            final TextStyle itemStyle = selectedStyle;
-
-            bool isExtra = index == 0 || index == itemCount - 1;
-
-            return isExtra
-                ? new Container() //empty first and last element
-                : new Center(
-                    child:
-                        new Text(_handleZeroPadding(value), style: itemStyle),
-                  );
-          },
+          // itemCount: itemCount,
+          // cacheExtent: _calculateCacheExtent(itemCount),
+          childDelegate: delegate,
         ),
       ),
       onNotification: _onIntegerNotification,
@@ -152,38 +150,46 @@ class HourPicker extends StatelessWidget {
     }
   }
 
-  int _intValueFromIndex(int index) => minValue + (index - 1) * step;
+  int _intValueFromIndex(int index) => (minValue + (index % ((maxValue - minValue) ~/ step + 1))) * step ;
 
   bool _onIntegerNotification(Notification notification) {
     if (notification is ScrollNotification) {
       //calculate
+
       int intIndexOfMiddleElement =
           (notification.metrics.pixels + (itemExtent / 2)) ~/ itemExtent;
+
+
+      // intIndexOfMiddleElement = delegate.trueIndexOf(intIndexOfMiddleElement);
+
       int intValueInTheMiddle = _intValueFromIndex(intIndexOfMiddleElement);
-      intValueInTheMiddle = _normalizeIntegerMiddleValue(intValueInTheMiddle);
+
+      // intValueInTheMiddle = _normalizeIntegerMiddleValue(intValueInTheMiddle);
 
       if (_userStoppedScrolling(notification, intScrollController)) {
         //center selected value
-        animateInt(intValueInTheMiddle + 1);
+        animateInt(intIndexOfMiddleElement );
       }
 
       //update selection
       if (intValueInTheMiddle != selectedIntValue) {
+        selectedIntValue = intValueInTheMiddle;
         num newValue;
         if (decimalPlaces == 0) {
           //return integer value
-          newValue = (intValueInTheMiddle);
+          newValue = (selectedIntValue);
         } else {
-          if (intValueInTheMiddle == maxValue) {
+          if (selectedIntValue == maxValue ) {
             //if new value is maxValue, then return that value and ignore decimal
-            newValue = (intValueInTheMiddle.toDouble());
+            newValue = ((selectedIntValue ).toDouble()) ;
             animateDecimal(0);
           } else {
             //return integer+decimal
             double decimalPart = _toDecimal(selectedDecimalValue);
-            newValue = ((intValueInTheMiddle + decimalPart).toDouble());
+            newValue = (((selectedIntValue) + decimalPart).toDouble());
           }
         }
+
         onChanged(newValue);
       }
     }
@@ -204,15 +210,15 @@ class HourPicker extends StatelessWidget {
   ///When overscroll occurs on iOS,
   ///we can end up with value not in the range between [minValue] and [maxValue]
   ///To avoid going out of range, we change values out of range to border values.
-  int _normalizeMiddleValue(int valueInTheMiddle, int min, int max) {
-    return math.max(math.min(valueInTheMiddle, max), min);
-  }
+  // int _normalizeMiddleValue(int valueInTheMiddle, int min, int max) {
+  //   return math.max(math.min(valueInTheMiddle, max), min);
+  // }
 
-  int _normalizeIntegerMiddleValue(int integerValueInTheMiddle) {
-    //make sure that max is a multiple of step
-    int max = (maxValue ~/ step) * step;
-    return _normalizeMiddleValue(integerValueInTheMiddle, minValue, max);
-  }
+  // int _normalizeIntegerMiddleValue(int integerValueInTheMiddle) {
+  //   //make sure that max is a multiple of step
+  //   int max = (maxValue ~/ step) * step;
+  //   return _normalizeMiddleValue(integerValueInTheMiddle, minValue, max);
+  // }
 
   ///indicates if user has stopped scrolling so we can center value in the middle
   bool _userStoppedScrolling(
