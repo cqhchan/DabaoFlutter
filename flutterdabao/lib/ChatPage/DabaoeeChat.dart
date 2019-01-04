@@ -23,6 +23,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 
 class Conversation extends StatefulWidget {
   final Channel channel;
@@ -189,8 +190,13 @@ class _ConversationState extends State<Conversation>
                   width: 30,
                   child: CachedNetworkImage(
                     imageUrl: user.data['TI'],
-                    placeholder: new CircularProgressIndicator(),
-                    errorWidget: new Icon(Icons.error),
+                    placeholder: GlowingProgressIndicator(
+                      child: Icon(
+                        Icons.account_circle,
+                        size: 30,
+                      ),
+                    ),
+                    errorWidget: Icon(Icons.error),
                   ),
                 ),
               ),
@@ -797,8 +803,13 @@ class _ConversationState extends State<Conversation>
                           width: 30,
                           child: CachedNetworkImage(
                             imageUrl: user.data['TI'],
-                            placeholder: new CircularProgressIndicator(),
-                            errorWidget: new Icon(Icons.error),
+                            placeholder: GlowingProgressIndicator(
+                              child: Icon(
+                                Icons.image,
+                                size: 50,
+                              ),
+                            ),
+                            errorWidget: Icon(Icons.error),
                           ),
                         ),
                       ),
@@ -845,11 +856,12 @@ class _ConversationState extends State<Conversation>
                         GestureDetector(
                           child: CachedNetworkImage(
                             imageUrl: data.imageUrl.value,
-                            placeholder: SizedBox(
-                                height: 20,
-                                width: 20,
-                                child:
-                                    Center(child: CircularProgressIndicator())),
+                            placeholder: GlowingProgressIndicator(
+                              child: Icon(
+                                Icons.account_circle,
+                                size: 30,
+                              ),
+                            ),
                             errorWidget: Icon(Icons.error),
                           ),
                           onTap: () {
@@ -925,8 +937,13 @@ class _ConversationState extends State<Conversation>
                           width: 30,
                           child: CachedNetworkImage(
                             imageUrl: user.data['TI'],
-                            placeholder: new CircularProgressIndicator(),
-                            errorWidget: new Icon(Icons.error),
+                            placeholder: GlowingProgressIndicator(
+                              child: Icon(
+                                Icons.account_circle,
+                                size: 30,
+                              ),
+                            ),
+                            errorWidget: Icon(Icons.error),
                           ),
                         ),
                       ),

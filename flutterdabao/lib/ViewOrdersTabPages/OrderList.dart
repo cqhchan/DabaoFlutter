@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
@@ -17,10 +18,10 @@ import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/DabaoerChat.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:random_string/random_string.dart' as random;
-
 
 class OrderList extends StatefulWidget {
   final Observable<List<Order>> input;
@@ -36,18 +37,17 @@ class OrderList extends StatefulWidget {
 }
 
 class _OrderListState extends State<OrderList> with HavingSubscriptionMixin {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
-    void initState() {
- 
-      super.initState();
-    }
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
+  }
 
-    @override
-      void dispose() {
-        disposeAndReset();
-        super.dispose();
-      }
   // Current User Location
   @override
   Widget build(BuildContext context) {
@@ -55,23 +55,30 @@ class _OrderListState extends State<OrderList> with HavingSubscriptionMixin {
       body: _buildList(),
     );
   }
-  Widget _buildList() {
-    return StreamBuilder<List<Order>>(stream:widget.input, builder: (BuildContext context,  snapshot) {
-      if (! snapshot.hasData) return Offstage();
-      return ListView(
-          key: new Key(random.randomString(20)),
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 30.0),
-      children: snapshot.data.map((data) => _OrderItemCell(order: data,location: widget.location, route: widget.route,)).toList(),
-    );
-      
-    } ,) ;
-  }
 
+  Widget _buildList() {
+    return StreamBuilder<List<Order>>(
+      stream: widget.input,
+      builder: (BuildContext context, snapshot) {
+        if (!snapshot.hasData) return Offstage();
+        return ListView(
+          key: new Key(random.randomString(20)),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 30.0),
+          children: snapshot.data
+              .map((data) => _OrderItemCell(
+                    order: data,
+                    location: widget.location,
+                    route: widget.route,
+                  ))
+              .toList(),
+        );
+      },
+    );
+  }
 }
 
 class _OrderItemCell extends StatefulWidget {
-  
   final DabaoRoute.Route route;
   final Order order;
   final LatLng location;
@@ -83,22 +90,19 @@ class _OrderItemCell extends StatefulWidget {
     // TODO: implement createState
     return _OrderItemCellState();
   }
+}
 
-} 
-
-class _OrderItemCellState extends State<_OrderItemCell>{
-
+class _OrderItemCellState extends State<_OrderItemCell> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
-    void initState() {
-      super.initState();
-    }
+  void dispose() {
+    super.dispose();
+  }
 
-  @override
-    void dispose() {
-
-      super.dispose();
-    }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -306,8 +310,7 @@ class _OrderItemCellState extends State<_OrderItemCell>{
                 snap.data.month == DateTime.now().month &&
                 snap.data.year == DateTime.now().year) {
               return Text(
-                'Today, ' +
-                    DateTimeHelper.convertDateTimeToAMPM(snap.data),
+                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
                 style: FontHelper.semiBoldgrey14TextStyle,
                 overflow: TextOverflow.ellipsis,
               );
@@ -572,9 +575,24 @@ class _OrderItemCellState extends State<_OrderItemCell>{
               stream: user.data.thumbnailImage,
               builder: (context, user) {
                 if (!user.hasData) return Offstage();
-                return CircleAvatar(
-                  backgroundImage: NetworkImage(user.data),
-                  radius: 14.5,
+                return FittedBox(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30.0),
+                    child: SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: CachedNetworkImage(
+                        imageUrl: user.data,
+                        placeholder: GlowingProgressIndicator(
+                          child: Icon(
+                            Icons.account_circle,
+                            size: 30,
+                          ),
+                        ),
+                        errorWidget: Icon(Icons.error),
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
@@ -683,5 +701,4 @@ class _OrderItemCellState extends State<_OrderItemCell>{
       );
     });
   }
-
 }

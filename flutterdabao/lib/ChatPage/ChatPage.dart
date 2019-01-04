@@ -6,6 +6,7 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 
 class ChatPage extends StatefulWidget {
   _ChatPageState createState() => _ChatPageState();
@@ -92,8 +93,13 @@ class _ChatPageState extends State<ChatPage>
                         width: 50,
                         child: CachedNetworkImage(
                           imageUrl: snapshot.data['TI'],
-                          placeholder: new CircularProgressIndicator(),
-                          errorWidget: new Icon(Icons.error),
+                          placeholder: GlowingProgressIndicator(
+                            child: Icon(
+                              Icons.image,
+                              size: 50,
+                            ),
+                          ),
+                          errorWidget: Icon(Icons.error),
                         ),
                       ),
                     ),
