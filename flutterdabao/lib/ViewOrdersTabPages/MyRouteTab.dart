@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -9,6 +10,7 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/Matches.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyRouteTabView extends StatefulWidget {
@@ -148,15 +150,25 @@ class _RouteCellState extends State<_RouteCell> {
                           if (!snap.hasData)
                             return Image.asset(
                                 "assets/icons/filler_image_girl.png");
-
-                          return Container(
-                              height: 30.0,
-                              width: 30.0,
-                              decoration: new BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: new DecorationImage(
-                                      fit: BoxFit.fill,
-                                      image: new NetworkImage(snap.data))));
+                          return FittedBox(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30.0),
+                              child: SizedBox(
+                                height: 30,
+                                width: 30,
+                                child: CachedNetworkImage(
+                                  imageUrl: snap.data,
+                                  placeholder: GlowingProgressIndicator(
+                                    child: Icon(
+                                      Icons.account_circle,
+                                      size: 30,
+                                    ),
+                                  ),
+                                  errorWidget: Icon(Icons.error),
+                                ),
+                              ),
+                            ),
+                          );
                         },
                       ),
                 Container(
@@ -169,15 +181,25 @@ class _RouteCellState extends State<_RouteCell> {
                               if (!snap.hasData)
                                 return Image.asset(
                                     "assets/icons/filler_image_food.png");
-
-                              return Container(
-                                  height: 30.0,
-                                  width: 30.0,
-                                  decoration: new BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: new DecorationImage(
-                                          fit: BoxFit.fill,
-                                          image: new NetworkImage(snap.data))));
+                              return FittedBox(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                  child: SizedBox(
+                                    height: 30,
+                                    width: 30,
+                                    child: CachedNetworkImage(
+                                      imageUrl: snap.data,
+                                      placeholder: GlowingProgressIndicator(
+                                        child: Icon(
+                                          Icons.account_circle,
+                                          size: 30,
+                                        ),
+                                      ),
+                                      errorWidget: Icon(Icons.error),
+                                    ),
+                                  ),
+                                ),
+                              );
                             },
                           )),
                 Container(
@@ -190,15 +212,25 @@ class _RouteCellState extends State<_RouteCell> {
                               if (!snap.hasData)
                                 return Image.asset(
                                     "assets/icons/filler_image_girl.png");
-
-                              return Container(
-                                  height: 30.0,
-                                  width: 30.0,
-                                  decoration: new BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: new DecorationImage(
-                                          fit: BoxFit.fill,
-                                          image: new NetworkImage(snap.data))));
+                              return FittedBox(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                  child: SizedBox(
+                                    height: 30,
+                                    width: 30,
+                                    child: CachedNetworkImage(
+                                      imageUrl: snap.data,
+                                      placeholder: GlowingProgressIndicator(
+                                        child: Icon(
+                                          Icons.account_circle,
+                                          size: 30,
+                                        ),
+                                      ),
+                                      errorWidget: Icon(Icons.error),
+                                    ),
+                                  ),
+                                ),
+                              );
                             },
                           )),
               ],
