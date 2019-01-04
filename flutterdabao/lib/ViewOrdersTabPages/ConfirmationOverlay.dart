@@ -90,52 +90,59 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              _buildDeliveryPeriod(widget.order),
-              _buildArrivalTime(widget.order),
-              _buildHeader(widget.order),
-              SizedBox(
-                height: 15,
-              ),
-              _buildLocationDescription(widget.order),
-              SizedBox(
-                height: 15,
-              ),
-              Flex(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                verticalDirection: VerticalDirection.up,
-                direction: Axis.horizontal,
-                children: <Widget>[
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: _buildBackButton(),
+
+     
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body:Builder(builder: (context) =>Align(
+        alignment: Alignment.bottomCenter,
+              child: Container(
+        color: Colors.white,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                _buildDeliveryPeriod(widget.order),
+                _buildArrivalTime(widget.order),
+                _buildHeader(widget.order),
+                SizedBox(
+                  height: 15,
+                ),
+                _buildLocationDescription(widget.order),
+                SizedBox(
+                  height: 15,
+                ),
+                Flex(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  verticalDirection: VerticalDirection.up,
+                  direction: Axis.horizontal,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: _buildBackButton(),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: _buildPickUpButton(widget.order),
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: _buildPickUpButton(widget.order, context),
+                      ),
                     ),
-                  ),
-                ],
-              )
-            ],
+                  ],
+                )
+              ],
+            ),
           ),
-        ),
-      ),
+        ),),
+      ),) 
     );
   }
 
@@ -307,7 +314,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     );
   }
 
-  Widget _buildPickUpButton(Order order) {
+  Widget _buildPickUpButton(Order order, BuildContext context) {
     return RaisedButton(
       elevation: 12,
       color: ColorHelper.dabaoOffPaleBlue,
@@ -319,9 +326,13 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
         ),
       ),
       onPressed: () async {
+   
+        print(selectedDate.value);
+
+        if (selectedDate.value.isAfter(startTime.subtract(Duration(minutes: 9))) && selectedDate.value.isBefore(endTime.add(Duration(minutes: 9)))){
+        
         order.isSelectedProperty.value = false;
         showLoadingOverlay(context: context);
-        print(selectedDate.value);
         var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
           routeID: widget.route == null ? null : widget.route.uid,
           orderID: widget.order.uid,
@@ -339,6 +350,15 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                   'An Error has occured. Please check your network connectivity'));
           Scaffold.of(context).showSnackBar(snackBar);
         }
+
+        } else {
+                    final snackBar = SnackBar(
+              content: Text(
+                  'Delivery Time must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(startTime, endTime)}'));
+          Scaffold.of(context).showSnackBar(snackBar);
+        }
+
+
       },
     );
   }
