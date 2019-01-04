@@ -12,75 +12,62 @@ import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:flutterdabao/Rewards/SearchPromoCodePage.dart';
 import 'package:flutterdabao/Rewards/VoucherCell.dart';
 
-
 class VoucherApplicationPage extends StatelessWidget {
-
   final MutableProperty<Voucher> voucherProperty;
 
   VoucherApplicationPage({
-    Key key, @required this.voucherProperty,
+    Key key,
+    @required this.voucherProperty,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            actions: <Widget>[
-              Container(
-                child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) =>
-                              SearchPromoCodePage()));
-                    },
-                    child: Image.asset(
-                      "assets/icons/search_icon.png",
-                      color: Colors.black,
-                    )),
-              ),
-            ],
-            leading: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Icon(
-                Icons.arrow_back,
-                size: 26,
-                color: Colors.black,
-              ),
-            ),
-            elevation: 0.0,
-            title: Text(
-              'My Vouchers',
-              style: FontHelper.header3TextStyle,
-            ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(
+            Icons.arrow_back,
+            size: 26,
+            color: Colors.black,
           ),
-          body: MyVoucherPage(
-            onCompletionCallback: (Voucher voucher) {
-              voucherProperty.value = voucher;
-              Navigator.of(context).pop();
-            },
-          ),
-        );
+        ),
+        elevation: 0.0,
+        title: Text(
+          'My Vouchers',
+          style: FontHelper.header3TextStyle,
+        ),
+      ),
+      body: MyVoucherPage(
+        onCompletionCallback: (Voucher voucher) {
+          voucherProperty.value = voucher;
+          Navigator.of(context).pop();
+        },
+      ),
+    );
   }
 }
 
-
 class MyVoucherPage extends StatefulWidget {
-
   final Function(Voucher) onCompletionCallback;
 
-  MyVoucherPage({Key key, @required this.onCompletionCallback, }) : super(key: key);
+  MyVoucherPage({
+    Key key,
+    @required this.onCompletionCallback,
+  }) : super(key: key);
 
   _MyVoucherPageState createState() => _MyVoucherPageState();
 }
 
 class _MyVoucherPageState extends State<MyVoucherPage>
     with AutomaticKeepAliveClientMixin<MyVoucherPage> {
+  String searchText = 'Enter promo code to search voucher';
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -93,8 +80,48 @@ class _MyVoucherPageState extends State<MyVoucherPage>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Container(
-        child: _buildBody(context), color: ColorHelper.dabaoOffWhiteF5);
+    return Column(
+      children: <Widget>[
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => SearchPromoCodePage()));
+          },
+          child: Container(
+            margin: EdgeInsets.all(8.0),
+            height: 30.0,
+            decoration: BoxDecoration(
+                color: ColorHelper.rgbo(0xD0, 0xD0, 0xD0),
+                borderRadius: BorderRadius.circular(5.0)),
+            child: Row(
+              children: <Widget>[
+                Container(
+                    padding: EdgeInsets.only(left: 7, right: 4),
+                    child: Image.asset(
+                      "assets/icons/search_icon.png",
+                      color: ColorHelper.dabaoOffBlack9B,
+                    )),
+                Container(
+                  padding: EdgeInsets.only(left: 4, right: 7),
+                    child: Image.asset(
+                      "assets/icons/Line 41.png",
+                      color: ColorHelper.dabaoOffBlack9B,
+                    )),
+                Expanded(
+                  child: Text(
+                    searchText,
+                    style: FontHelper.regular(Colors.black, 12.0),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+        Container(
+            child: _buildBody(context), color: ColorHelper.dabaoOffWhiteF5),
+      ],
+    );
   }
 
   StreamBuilder _buildBody(BuildContext context) {
@@ -115,6 +142,7 @@ class _MyVoucherPageState extends State<MyVoucherPage>
     listObject.add(ConfigHelper.instance.currentUserProperty.value);
 
     return ListView.builder(
+      shrinkWrap: true,
       itemCount: listObject.length,
       itemBuilder: (BuildContext context, int index) {
         if (listObject[index] is User) {
@@ -156,6 +184,5 @@ class _MyVoucherPageState extends State<MyVoucherPage>
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }

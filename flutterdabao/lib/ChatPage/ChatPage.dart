@@ -4,6 +4,7 @@ import 'package:flutterdabao/ChatPage/DabaoeeChat.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -87,7 +88,7 @@ class _ChatPageState extends State<ChatPage>
                     );
                   return FittedBox(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(50.0),
                       child: SizedBox(
                         height: 50,
                         width: 50,
@@ -142,7 +143,7 @@ class _ChatPageState extends State<ChatPage>
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) return Offstage();
                       return Text(
-                        snapshot.data['FT'] != null ? snapshot.data['FT'] : '',
+                        snapshot.data['FT'] != null ? StringHelper.upperCaseWords(snapshot.data['FT']) : '',
                         style: FontHelper.semiBold16Black,
                       );
                     }),

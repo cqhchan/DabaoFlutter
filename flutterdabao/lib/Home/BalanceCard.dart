@@ -69,7 +69,7 @@ class BalanceCard extends StatelessWidget {
           context,
           FadeRoute(
               widget: RewardsTabBarPage(
-            initalIndex: 2,
+            initalIndex: 1,
           )),
         );
       },
@@ -98,7 +98,7 @@ class BalanceCard extends StatelessWidget {
           context,
           FadeRoute(
               widget: RewardsTabBarPage(
-            initalIndex: 1,
+            initalIndex: 0,
           )),
         );
       },

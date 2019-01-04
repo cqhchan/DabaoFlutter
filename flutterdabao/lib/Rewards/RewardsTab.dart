@@ -15,7 +15,6 @@ class RewardsTabBarPage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return RewardsTabBarPageState();
   }
 }
@@ -26,19 +25,6 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        actions: <Widget>[
-          Container(
-            child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => SearchPromoCodePage()));
-                },
-                child: Image.asset(
-                  "assets/icons/search_icon.png",
-                  color: Colors.black,
-                )),
-          ),
-        ],
         leading: GestureDetector(
           onTap: () {
             Navigator.pop(context);
@@ -56,7 +42,7 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
         ),
       ),
       body: DefaultTabController(
-        length: 3,
+        length: 2,
         initialIndex: widget.initalIndex,
         child: Column(
           children: <Widget>[
@@ -72,13 +58,6 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
                   labelColor: ColorHelper.dabaoOrange,
                   unselectedLabelColor: ColorHelper.dabaoOffGrey70,
                   tabs: [
-                    Tab(
-                      child: Text(
-                        "Browse",
-                        style: FontHelper.semiBold(null, 12.0),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
                     Tab(
                       child: Text(
                         "My Vouchers",
@@ -100,17 +79,6 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
             Expanded(
               child: TabBarView(
                 children: [
-                  MyVoucherPage(
-                    onCompletionCallback: (Voucher voucher) {
-                      Navigator.popUntil(context,
-                          ModalRoute.withName(Navigator.defaultRouteName));
-
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => OrderNow(
-                                voucher: voucher,
-                              )));
-                    },
-                  ),
                   MyVoucherPage(
                     onCompletionCallback: (Voucher voucher) {
                       Navigator.popUntil(context,
