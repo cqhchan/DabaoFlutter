@@ -25,14 +25,18 @@ class User extends FirebaseType {
   BehaviorSubject<String> handPhone;
   BehaviorSubject<String> thumbnailImage;
   BehaviorSubject<List<FoodTag>> userFoodTags;
+
+  // Only avaliable in from Auth
   Observable<List<Voucher>> listOfAvalibleVouchers;
   Observable<List<Voucher>> listOfInUsedVouchers;
+  Observable<int> currentDabaorRewardsNumber;
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   User.fromUID(String uid) : super.fromUID(uid);
 
   User.fromAuth(FirebaseUser user) : super.fromUID(user.uid) {
     ConfigHelper.instance.currentUserProperty.value = this;
+
     listOfAvalibleVouchers = FirebaseCollectionReactive<Voucher>(Firestore
             .instance
             .collection(this.className)
@@ -48,6 +52,20 @@ class User extends FirebaseType {
             .collection("vouchers")
             .where(Voucher.statusKey, isEqualTo: voucher_Status_InUse))
         .observable;
+    
+    currentDabaorRewardsNumber = ConfigHelper
+        .instance.currentDabaoerRewards.producer
+        .switchMap((reward) => reward == null
+            ? Observable.just(0)
+            : Observable(Firestore.instance
+                .collection(this.className)
+                .document(this.uid)
+                .collection(reward.className)
+                .document(reward.uid)
+                .snapshots()
+                .map((doc) => !doc.exists
+                    ? 0
+                    : !doc.data.containsKey("QTY") ? 0 : doc.data["QTY"])));
   }
 
   @override
@@ -62,7 +80,7 @@ class User extends FirebaseType {
 
   @override
   void map(Map<String, dynamic> data) {
-    if (data.containsKey(foodTagKey)){
+    if (data.containsKey(foodTagKey)) {
       var mapOfFoodTag = data[foodTagKey] as Map;
       List<FoodTag> fT = List();
 
@@ -129,8 +147,8 @@ class User extends FirebaseType {
 
   //last login date
   //creation date
-  void setUser(
-      String pi, String name, DateTime creationTime, DateTime lastLoginTime, String tn) {
+  void setUser(String pi, String name, DateTime creationTime,
+      DateTime lastLoginTime, String tn) {
     Firestore.instance.collection('/users').document(uid).setData({
       profileImageKey: pi,
       thumbnailImageKey: tn,

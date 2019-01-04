@@ -8,12 +8,14 @@ import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CreateRoute/RouteOverview.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
+import 'package:flutterdabao/Model/DabaoerReward.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
@@ -25,7 +27,7 @@ class Home extends StatefulWidget {
   _Home createState() => _Home();
 }
 
-class _Home extends State<Home> {
+class _Home extends State<Home> with HavingSubscriptionMixin {
   ScrollController _controller = ScrollController();
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
   _Home() {
@@ -41,6 +43,13 @@ class _Home extends State<Home> {
 
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
+
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
   }
 
   @override
