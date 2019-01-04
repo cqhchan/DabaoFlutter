@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
-import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
@@ -23,6 +22,8 @@ class ConfirmationOverlay extends StatefulWidget {
 }
 
 class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
+  String selectedDay = 'Today';
+
   static const _dayMenu = <String>[
     'Today',
     'Tomorrow',
@@ -31,14 +32,18 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
   final List<DropdownMenuItem<String>> _dropdownDayMenu = _dayMenu
       .map((String value) => DropdownMenuItem<String>(
             value: value,
-            child: Text(value),
+            child: Text(value, style: FontHelper.semiBold14Black),
           ))
       .toList();
 
-  DateTime isToday;
-  DateTime selectedDate;
-  DateTime selectedTime;
-  bool past24period;
+  //If the period exceeds the 24 hour mark, a dropdownbutton will be displayed.
+  bool past24period = false;
+
+  //selected date on press
+  DateTime selectedDate = DateTime.now();
+
+  //selected time on press
+  DateTime selectedTime = DateTime.now();
 
   HourPicker integerScheduledHourPicker;
   MinutePicker integerScheduledMinutePicker;
@@ -59,44 +64,43 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
   int _asapMaximumHour;
   int _asapMinimumHour;
 
-  String selectedDay = 'Today';
-
   @override
   void initState() {
     super.initState();
-
-    selectedDate = DateTime.now();
-    selectedTime = DateTime.now();
-    isToday = DateTime.now();
-    past24period = false;
-
     switch (widget.order.mode.value) {
-      //Initialise parameters for asap and scheduled.
-      //If the period exceeds the 24 hour mark, a dropdownbutton will be displayed.
       case OrderMode.asap:
-        _asapMaximumHour = DateTime.now().hour + 1;
-        if (_asapMaximumHour > 23) {
-          _asapInitialMinute = DateTime.now().minute ~/ 10;
+        //If endDeliveryTime(Optional) is not stated, it will be equate to startDeliveryTime + 1.5 hours.
+        if (widget.order.endDeliveryTime.value == null)
+          widget.order.endDeliveryTime.value = widget
+              .order.startDeliveryTime.value
+              .add(Duration(hours: 1, minutes: 30));
+        //If endDeliveryTime(Optional) is stated.........................................................
+        if (widget.order.endDeliveryTime.value.day ==
+            widget.order.startDeliveryTime.value.add(Duration(days: 1)).day) {
+          _asapInitialMinute =
+              widget.order.startDeliveryTime.value.minute ~/ 10;
           _asapMaximumMinute = 5;
-          _asapMinimumMinute = DateTime.now().minute ~/ 10;
+          _asapMinimumMinute =
+              widget.order.startDeliveryTime.value.minute ~/ 10;
           _asapMaximumHour = 23;
-          _asapMinimumHour = DateTime.now().hour;
-          _asapInitialHour = DateTime.now().hour;
+          _asapMinimumHour = widget.order.startDeliveryTime.value.hour;
+          _asapInitialHour = widget.order.startDeliveryTime.value.hour;
           past24period = true;
         } else {
-          _asapInitialMinute = DateTime.now().minute ~/ 10;
+          _asapInitialMinute =
+              widget.order.startDeliveryTime.value.minute ~/ 10;
           _asapMaximumMinute = 5;
-          _asapMinimumMinute = DateTime.now().minute ~/ 10;
-          _asapMaximumHour = DateTime.now().hour + 1;
-          _asapMinimumHour = DateTime.now().hour;
-          _asapInitialHour = DateTime.now().hour;
+          _asapMinimumMinute =
+              widget.order.startDeliveryTime.value.minute ~/ 10;
+          _asapMaximumHour = widget.order.endDeliveryTime.value.hour;
+          _asapMinimumHour = widget.order.startDeliveryTime.value.hour;
+          _asapInitialHour = widget.order.startDeliveryTime.value.hour;
           past24period = false;
         }
         break;
       case OrderMode.scheduled:
-        if (widget.order.startDeliveryTime.value.day !=
-            widget.order.endDeliveryTime.value.day) {
-          _scheduledInitialHour = widget.order.startDeliveryTime.value.hour;
+        if (widget.order.endDeliveryTime.value.day ==
+            widget.order.startDeliveryTime.value.add(Duration(days: 1)).day) {
           _scheduledInitialHour = widget.order.startDeliveryTime.value.hour;
           _scheduledInitialMinute =
               widget.order.startDeliveryTime.value.minute ~/ 10;
@@ -131,17 +135,28 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
 
   //Minute change is dependant on the hour change.
   _handleASAP(num value) {
-    if (value != null && value == DateTime.now().hour) {
+    //When hour is at max
+    if (value != null && value == widget.order.startDeliveryTime.value.hour) {
       setState(() {
         _asapInitialHour = value;
         _asapMaximumMinute = 5;
-        _asapMinimumMinute = DateTime.now().minute ~/ 10;
-        _asapInitialMinute = DateTime.now().minute ~/ 10;
+        _asapMinimumMinute = widget.order.startDeliveryTime.value.minute ~/ 10;
+        _asapInitialMinute = widget.order.startDeliveryTime.value.minute ~/ 10;
       });
-    } else if (value != null && value == DateTime.now().hour + 1) {
+    } else
+    //When hour is at min
+    if (value != null && value == widget.order.endDeliveryTime.value.hour) {
       setState(() {
         _asapInitialHour = value;
-        _asapMaximumMinute = DateTime.now().minute ~/ 10;
+        _asapMaximumMinute = widget.order.endDeliveryTime.value.minute ~/ 10;
+        _asapMinimumMinute = 0;
+        _asapInitialMinute = 0;
+      });
+    } else {
+      //When hour is between min and max
+      setState(() {
+        _asapInitialHour = value;
+        _asapMaximumMinute = 5;
         _asapMinimumMinute = 0;
         _asapInitialMinute = 0;
       });
@@ -150,6 +165,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
 
   //Minute change is dependant on the hour change.
   _handleSchedule(num value) {
+    //When hour is at max
     if (value != null && value == widget.order.startDeliveryTime.value.hour) {
       setState(() {
         _scheduledInitialHour = value;
@@ -159,8 +175,9 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
         _scheduledInitialMinute =
             widget.order.startDeliveryTime.value.minute ~/ 10;
       });
-    } else if (value != null &&
-        value == widget.order.endDeliveryTime.value.hour) {
+    } else
+    //When hour is at min
+    if (value != null && value == widget.order.endDeliveryTime.value.hour) {
       setState(() {
         _scheduledInitialHour = value;
         _scheduledMaximumMinute =
@@ -169,6 +186,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
         _scheduledInitialMinute = 0;
       });
     } else {
+      //When hour is between min and max
       setState(() {
         _scheduledInitialHour = value;
         _scheduledMaximumMinute = 5;
@@ -205,7 +223,13 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _buildDeliveryPeriod(widget.order),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _buildDeliveryPeriod(widget.order),
+                  _handleDropdownMenu(widget.order)
+                ],
+              ),
               _buildArrivalTime(widget.order),
               _buildHeader(widget.order),
               SizedBox(
@@ -245,6 +269,15 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
     );
   }
 
+  _handleDropdownMenu(Order order) {
+    switch (order.mode.value) {
+      case OrderMode.asap:
+        return _buildASAPMoreThan24Hour();
+      case OrderMode.scheduled:
+        return _buildScheduledMoreThan24Hour();
+    }
+  }
+
   Row _buildDeliveryPeriod(Order order) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -258,11 +291,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 snap.data.month == DateTime.now().month &&
                 snap.data.year == DateTime.now().year) {
               return Text(
-                'Today, ' +
-                    DateTimeHelper.convertDateTimeToAMPM(snap.data) +
-                    ' - ' +
-                    DateTimeHelper.convertDateTimeToAMPM(
-                        snap.data.add(Duration(hours: 2))),
+                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
                 style: FontHelper.semiBold14Black,
                 overflow: TextOverflow.ellipsis,
               );
@@ -279,6 +308,19 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 ),
               );
             }
+          },
+        ),
+        StreamBuilder<DateTime>(
+          stream: order.endDeliveryTime,
+          builder: (context, snap) {
+            if (!snap.hasData) return Offstage();
+            return Text(
+              snap.hasData
+                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                  : '',
+              style: FontHelper.semiBold14Black,
+              overflow: TextOverflow.ellipsis,
+            );
           },
         ),
       ],
@@ -418,7 +460,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
       onPressed: () async {
         switch (order.mode.value) {
           case OrderMode.asap:
-            DateTime selectedTime = DateTime(
+            selectedTime = DateTime(
               selectedDate.year,
               selectedDate.month,
               selectedDate.day,
@@ -427,7 +469,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
             );
             break;
           case OrderMode.scheduled:
-            DateTime selectedTime = DateTime(
+            selectedTime = DateTime(
               selectedDate.year,
               selectedDate.month,
               selectedDate.day,
@@ -439,18 +481,16 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
         }
         order.isSelectedProperty.value = false;
         showLoadingOverlay(context: context);
+        print(selectedTime);
         var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
           routeID: widget.route == null ? null : widget.route.uid,
           orderID: widget.order.uid,
           acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
           deliveryTime: DateTimeHelper.convertDateTimeToString(selectedTime),
         );
-
         if (isSuccessful) {
           Navigator.of(context).pop();
           Navigator.of(context).pop();
-
-          // order.isSelectedProperty.value = false;
         } else {
           Navigator.of(context).pop();
           final snackBar = SnackBar(
@@ -520,7 +560,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 integerASAPHourPicker,
                 Text(':', style: FontHelper.robotoRegular50Black),
                 integerASAPMinutePicker,
-                _buildASAPMoreThan24Hour(),
               ],
             );
 
@@ -556,7 +595,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
                 integerScheduledHourPicker,
                 Text(':', style: FontHelper.semiBold(Colors.black, 45)),
                 integerScheduledMinutePicker,
-                _buildScheduledMoreThan24Hour(),
               ],
             );
         }
@@ -601,29 +639,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
     }
   }
 
-  Widget _buildScheduledMoreThan24Hour() {
-    if (past24period == true) {
-      return SizedOverflowBox(
-        size: Size(85, 50),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              style: FontHelper.regular14Black,
-              value: selectedDay,
-              onChanged: (value) {
-                _handleScheduledMoreThan24Hour(value);
-              },
-              items: this._dropdownDayMenu,
-            ),
-          ),
-        ),
-      );
-    } else {
-      return Offstage();
-    }
-  }
-
   _handleASAPMoreThan24Hour(String value) {
     _asapMaximumHour = DateTime.now().hour + 1;
     if (value == 'Today') {
@@ -651,22 +666,31 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay> {
     }
   }
 
+  Widget _buildScheduledMoreThan24Hour() {
+    if (past24period == true) {
+      return DropdownButtonHideUnderline(
+        child: DropdownButton(
+          value: selectedDay,
+          onChanged: (value) {
+            _handleScheduledMoreThan24Hour(value);
+          },
+          items: this._dropdownDayMenu,
+        ),
+      );
+    } else {
+      return Offstage();
+    }
+  }
+
   Widget _buildASAPMoreThan24Hour() {
     if (past24period == true) {
-      return SizedOverflowBox(
-        size: Size(85, 50),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              style: FontHelper.regular14Black,
-              value: selectedDay,
-              onChanged: (value) {
-                _handleASAPMoreThan24Hour(value);
-              },
-              items: this._dropdownDayMenu,
-            ),
-          ),
+      return DropdownButtonHideUnderline(
+        child: DropdownButton(
+          value: selectedDay,
+          onChanged: (value) {
+            _handleASAPMoreThan24Hour(value);
+          },
+          items: this._dropdownDayMenu,
         ),
       );
     } else {

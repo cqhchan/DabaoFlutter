@@ -307,10 +307,7 @@ class _OrderItemCellState extends State<_OrderItemCell>{
                 snap.data.year == DateTime.now().year) {
               return Text(
                 'Today, ' +
-                    DateTimeHelper.convertDateTimeToAMPM(snap.data) +
-                    ' - ' +
-                    DateTimeHelper.convertDateTimeToAMPM(
-                        snap.data.add(Duration(hours: 2))),
+                    DateTimeHelper.convertDateTimeToAMPM(snap.data),
                 style: FontHelper.semiBoldgrey14TextStyle,
                 overflow: TextOverflow.ellipsis,
               );
@@ -327,6 +324,19 @@ class _OrderItemCellState extends State<_OrderItemCell>{
                 ),
               );
             }
+          },
+        ),
+        StreamBuilder<DateTime>(
+          stream: order.endDeliveryTime,
+          builder: (context, snap) {
+            if (!snap.hasData) return Offstage();
+            return Text(
+              snap.hasData
+                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                  : '',
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
+            );
           },
         ),
       ],
