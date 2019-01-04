@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class Conversation extends StatefulWidget {
 }
 
 class _ConversationState extends State<Conversation>
-    with HavingSubscriptionMixin {
+    with HavingSubscriptionMixin, AutomaticKeepAliveClientMixin {
   MutableProperty<Order> order = MutableProperty(null);
 
   //text input properties in textfield
@@ -180,9 +181,19 @@ class _ConversationState extends State<Conversation>
         if (!user.hasData) return Offstage();
         return Row(
           children: <Widget>[
-            CircleAvatar(
-              backgroundImage: NetworkImage(user.data['TI']),
-              radius: 14.5,
+            FittedBox(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30.0),
+                child: SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: CachedNetworkImage(
+                    imageUrl: user.data['TI'],
+                    placeholder: new CircularProgressIndicator(),
+                    errorWidget: new Icon(Icons.error),
+                  ),
+                ),
+              ),
             ),
             SizedBox(
               width: 10,
@@ -277,7 +288,7 @@ class _ConversationState extends State<Conversation>
                           initiallyExpanded: false,
                           onExpansionChanged: (expand) {
                             setState(() {
-                                  widget.channel.isSelectedProperty.value = expand;
+                              widget.channel.isSelectedProperty.value = expand;
                             });
                           },
                           header: Column(
@@ -739,6 +750,7 @@ class _ConversationState extends State<Conversation>
               initial = _scrollController.position.pixels;
             },
             child: ListView.builder(
+              cacheExtent: 500.0 * snapshot.data.length,
               physics: const AlwaysScrollableScrollPhysics(),
               controller: _scrollController,
               reverse: true,
@@ -777,9 +789,19 @@ class _ConversationState extends State<Conversation>
                 if (!user.hasData) return Offstage();
                 return Row(
                   children: <Widget>[
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(user.data['TI']),
-                      radius: 14.5,
+                    FittedBox(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30.0),
+                        child: SizedBox(
+                          height: 30,
+                          width: 30,
+                          child: CachedNetworkImage(
+                            imageUrl: user.data['TI'],
+                            placeholder: new CircularProgressIndicator(),
+                            errorWidget: new Icon(Icons.error),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 );
@@ -821,9 +843,14 @@ class _ConversationState extends State<Conversation>
                       spacing: 4,
                       children: <Widget>[
                         GestureDetector(
-                          child: Image.network(
-                            data.imageUrl.value,
-                            filterQuality: FilterQuality.high,
+                          child: CachedNetworkImage(
+                            imageUrl: data.imageUrl.value,
+                            placeholder: SizedBox(
+                                height: 20,
+                                width: 20,
+                                child:
+                                    Center(child: CircularProgressIndicator())),
+                            errorWidget: Icon(Icons.error),
                           ),
                           onTap: () {
                             Navigator.push(
@@ -890,9 +917,19 @@ class _ConversationState extends State<Conversation>
                 if (!user.hasData) return Offstage();
                 return Row(
                   children: <Widget>[
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(user.data['TI']),
-                      radius: 14.5,
+                    FittedBox(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30.0),
+                        child: SizedBox(
+                          height: 30,
+                          width: 30,
+                          child: CachedNetworkImage(
+                            imageUrl: user.data['TI'],
+                            placeholder: new CircularProgressIndicator(),
+                            errorWidget: new Icon(Icons.error),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 );
@@ -1052,7 +1089,7 @@ class _ConversationState extends State<Conversation>
       if (image != null) {
         _image = await _cropImage(image);
         final StorageReference profileRef = FirebaseStorage.instance.ref().child(
-            'user/${ConfigHelper.instance.currentUserProperty.value.uid}/${_image.hashCode}.jpg');
+            'channels/${widget.channel.uid}/IMG-${DateTimeHelper.convertDateTimeToStorageString(DateTime.now())}-${_image.hashCode}.jpg');
 
         final StorageUploadTask imageTask = profileRef.putFile(_image);
 
@@ -1070,13 +1107,13 @@ class _ConversationState extends State<Conversation>
     File croppedFile = await ImageCropper.cropImage(
       toolbarColor: ColorHelper.dabaoOrange,
       sourcePath: imageFile.path,
-      ratioX: 1.0,
-      ratioY: 1.0,
-      maxWidth: 300,
-      maxHeight: 300,
     );
     return croppedFile;
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class PhotoHero extends StatelessWidget {
@@ -1126,10 +1163,10 @@ class HeroPhotoViewWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         Navigator.pop(context);
       },
-          child: Container(
+      child: Container(
           constraints: BoxConstraints.expand(
             height: MediaQuery.of(context).size.height,
           ),

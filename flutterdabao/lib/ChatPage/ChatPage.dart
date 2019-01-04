@@ -5,12 +5,14 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ChatPage extends StatefulWidget {
   _ChatPageState createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage>
+    with AutomaticKeepAliveClientMixin {
   String otherUser;
 
   @override
@@ -42,6 +44,7 @@ class _ChatPageState extends State<ChatPage> {
   ListView _buildChatList(
       BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
+      cacheExtent: 500.0 * snapshot.length,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
       children: snapshot.map((data) => _buildChat(context, data)).toList(),
@@ -81,9 +84,19 @@ class _ChatPageState extends State<ChatPage> {
                       child: Icon(Icons.camera_alt),
                       radius: 20,
                     );
-                  return CircleAvatar(
-                    backgroundImage: NetworkImage(snapshot.data['TI']),
-                    radius: 20,
+                  return FittedBox(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: CachedNetworkImage(
+                          imageUrl: snapshot.data['TI'],
+                          placeholder: new CircularProgressIndicator(),
+                          errorWidget: new Icon(Icons.error),
+                        ),
+                      ),
+                    ),
                   );
                 }
               },
@@ -179,4 +192,8 @@ class _ChatPageState extends State<ChatPage> {
       );
     });
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

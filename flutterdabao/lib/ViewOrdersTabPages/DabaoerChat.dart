@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class Conversation extends StatefulWidget {
 }
 
 class _ConversationState extends State<Conversation>
-    with HavingSubscriptionMixin {
+    with HavingSubscriptionMixin, AutomaticKeepAliveClientMixin {
   MutableProperty<Order> order = MutableProperty(null);
 
   //text input properties in textfield
@@ -182,9 +183,19 @@ class _ConversationState extends State<Conversation>
               stream: user.data.thumbnailImage,
               builder: (context, user) {
                 if (!user.hasData) return Offstage();
-                return CircleAvatar(
-                  backgroundImage: NetworkImage(user.data),
-                  radius: 14.5,
+                return FittedBox(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30.0),
+                    child: SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: CachedNetworkImage(
+                        imageUrl: user.data,
+                        placeholder: new CircularProgressIndicator(),
+                        errorWidget: new Icon(Icons.error),
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
@@ -283,7 +294,8 @@ class _ConversationState extends State<Conversation>
                       builder: (context, snap) {
                         if (!snap.hasData) return Offstage();
                         return ConfigurableExpansionTile(
-                          selectable: Order.fromUID(widget.channel.orderUid.value),
+                          selectable:
+                              Order.fromUID(widget.channel.orderUid.value),
                           initiallyExpanded: false,
                           onExpansionChanged: (expanded) {
                             setState(() {
@@ -791,9 +803,19 @@ class _ConversationState extends State<Conversation>
                       stream: user.data.thumbnailImage,
                       builder: (context, user) {
                         if (!user.hasData) return Offstage();
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(user.data),
-                          radius: 14.5,
+                        return FittedBox(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30.0),
+                            child: SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: CachedNetworkImage(
+                                imageUrl: user.data,
+                                placeholder: new CircularProgressIndicator(),
+                                errorWidget: new Icon(Icons.error),
+                              ),
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -837,9 +859,14 @@ class _ConversationState extends State<Conversation>
                       spacing: 4,
                       children: <Widget>[
                         GestureDetector(
-                          child: Image.network(
-                            data.imageUrl.value,
-                            filterQuality: FilterQuality.high,
+                          child: CachedNetworkImage(
+                            imageUrl: data.imageUrl.value,
+                            placeholder: SizedBox(
+                                height: 20,
+                                width: 20,
+                                child:
+                                    Center(child: CircularProgressIndicator())),
+                            errorWidget: Icon(Icons.error),
                           ),
                           onTap: () {
                             Navigator.push(
@@ -909,9 +936,19 @@ class _ConversationState extends State<Conversation>
                       stream: user.data.thumbnailImage,
                       builder: (context, user) {
                         if (!user.hasData) return Offstage();
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(user.data),
-                          radius: 14.5,
+                        return FittedBox(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30.0),
+                            child: SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: CachedNetworkImage(
+                                imageUrl: user.data,
+                                placeholder: new CircularProgressIndicator(),
+                                errorWidget: new Icon(Icons.error),
+                              ),
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -1098,6 +1135,10 @@ class _ConversationState extends State<Conversation>
     );
     return croppedFile;
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class PhotoHero extends StatelessWidget {

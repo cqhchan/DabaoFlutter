@@ -10,13 +10,18 @@ class DateTimeHelper {
     return DateFormat.jm().format(date);
   }
 
+  static String convertDateTimeToStorageString(DateTime date) {
+    return formatDate(date, [yyyy, mm, dd]);
+  }
+
   static String convertDateTimeToDate(DateTime date) {
     if (isToday(date))
       return formatDate(date, ['Today,\n', dd, '-', mm]);
     else
       return formatDate(date, [D, ',\n', dd, '-', mm]);
   }
-    static String convertDateTimeToDateAndYear(DateTime date) {
+
+  static String convertDateTimeToDateAndYear(DateTime date) {
     return formatDate(date, [dd, '-', MM, '-', yyyy]);
   }
 

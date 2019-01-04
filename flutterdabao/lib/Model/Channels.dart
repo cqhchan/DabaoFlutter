@@ -36,7 +36,9 @@ class Channel extends FirebaseType with Selectable {
     listOfMessages = FirebaseCollectionReactive<Message>(Firestore.instance
             .collection(className)
             .document(this.uid)
-            .collection("messages"))
+            .collection("messages")
+            .orderBy('T', descending: true)
+            .limit(20))
         .observable
         .map((data) {
       List<Message> temp = List<Message>();
@@ -72,10 +74,8 @@ class Channel extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(lastSentKey)) {
-
       Timestamp timestamp = data[lastSentKey];
       lastSent.add(timestamp.toDate());
-
     } else {
       lastSent.add(null);
     }
