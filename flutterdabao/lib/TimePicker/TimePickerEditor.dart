@@ -72,6 +72,7 @@ class _TimePickerEditor extends StatefulWidget {
   final DateTime endTime;
   final int minsGapBetweenStartAndEndTime;
   final int startTimeBeforeLimitInMins;
+  int lastHour;
 
   _TimePickerEditor({
     Key key,
@@ -88,25 +89,28 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
     with HavingSubscriptionMixin {
   MutableProperty<DateTime> selectedStartDate;
   MutableProperty<DateTime> selectedEndDate;
+
+  DateTime selectedStartDateByCalander;
   DateTime currentTime;
+  DateTime startTime;
 
   HourPicker integerStartHourPicker;
   MinutePicker integerStartMinutePicker;
-  HourPicker integerEndHourPicker;
+  LoopingHourPicker integerEndHourPicker;
   MinutePicker integerEndMinutePicker;
 
   String errorMessage = "";
 
   void initState() {
     super.initState();
-
+    currentTime = DateTime.now();
+    startTime = currentTime.add(Duration(hours: 1));
+    selectedStartDateByCalander = currentTime.add(Duration(hours: 1));
     // Copy Start time to prevent unwanted editting
     selectedStartDate = MutableProperty<DateTime>(widget.startTime != null
         ? DateTime.fromMillisecondsSinceEpoch(
             widget.startTime.millisecondsSinceEpoch)
-        : DateTime.now().add(Duration(hours: 1)));
-
-    currentTime = DateTime.now();
+        : startTime);
 
     // Copy end time to prevent unwanted editting
     selectedEndDate = MutableProperty<DateTime>(widget.endTime != null
@@ -263,10 +267,17 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
   }
 
   _handleDateToString() {
-    return Text(
-      _getDateFormat(selectedStartDate.value),
-      style: FontHelper.semiBold(Colors.black, 20),
-      textAlign: TextAlign.center,
+    return StreamBuilder<DateTime>(
+      stream: selectedStartDate.producer,
+      builder: (context, snap) {
+        if (!snap.hasData || snap.data == null) return Offstage();
+
+        return Text(
+          _getDateFormat(snap.data),
+          style: FontHelper.semiBold(Colors.black, 20),
+          textAlign: TextAlign.center,
+        );
+      },
     );
   }
 
@@ -283,10 +294,14 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
 
   Widget buildStartDeliverSelector() {
     integerStartHourPicker = new HourPicker.hour(
-      maxValue: 23,
-      minValue: 0,
-      initialValue: selectedStartDate.value.hour,
-      step: 1,
+      maxValue: 7 * 24 - 1,
+      minValue: selectedStartDateByCalander.hour,
+      initialValue: selectedStartDateByCalander.hour +
+          (selectedStartDate.value
+                      .difference(selectedStartDateByCalander)
+                      .inMinutes /
+                  60)
+              .ceil(),
       onChanged: (value) {
         _handleStartHourChanged(value);
       },
@@ -320,13 +335,14 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
 
   _handleStartHourChanged(num hour) {
     selectedStartDate.value = new DateTime(
-        selectedStartDate.value.year,
-        selectedStartDate.value.month,
-        selectedStartDate.value.day,
-        hour,
+        selectedStartDateByCalander.year,
+        selectedStartDateByCalander.month,
+        selectedStartDateByCalander.day,
+        selectedStartDateByCalander.hour + hour,
         selectedStartDate.value.minute,
         selectedStartDate.value.second,
         selectedStartDate.value.millisecond);
+    print("start" + selectedStartDate.value.toString());
   }
 
   _handleStartMinuteChanged(num minute) {
@@ -338,6 +354,28 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
         minute,
         selectedStartDate.value.second,
         selectedStartDate.value.millisecond);
+  }
+
+  _handleEndHourChanged(num hour) {
+    selectedEndDate.value = new DateTime(
+        selectedEndDate.value.year,
+        selectedEndDate.value.month,
+        selectedEndDate.value.day,
+        hour,
+        selectedEndDate.value.minute,
+        selectedEndDate.value.second,
+        selectedEndDate.value.millisecond);
+  }
+
+  _handleEndMinuteChanged(num minute) {
+    selectedEndDate.value = new DateTime(
+        selectedEndDate.value.year,
+        selectedEndDate.value.month,
+        selectedEndDate.value.day,
+        selectedEndDate.value.hour,
+        minute,
+        selectedEndDate.value.second,
+        selectedEndDate.value.millisecond);
   }
 
   Widget buildTomorrow() {
@@ -375,11 +413,11 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
   }
 
   Widget buildEndDeliverSelector() {
-    integerEndHourPicker = new HourPicker.hour(
+    print("end" + selectedEndDate.value.hour.toString());
+    integerEndHourPicker = new LoopingHourPicker.hour(
       maxValue: 23,
       minValue: 0,
       initialValue: selectedEndDate.value.hour,
-      step: 1,
       onChanged: (value) {
         _handleEndHourChanged(value);
       },
@@ -409,28 +447,6 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
         integerEndMinutePicker
       ],
     );
-  }
-
-  _handleEndHourChanged(num hour) {
-    selectedEndDate.value = new DateTime(
-        selectedEndDate.value.year,
-        selectedEndDate.value.month,
-        selectedEndDate.value.day,
-        hour,
-        selectedEndDate.value.minute,
-        selectedEndDate.value.second,
-        selectedEndDate.value.millisecond);
-  }
-
-  _handleEndMinuteChanged(num minute) {
-    selectedEndDate.value = new DateTime(
-        selectedEndDate.value.year,
-        selectedEndDate.value.month,
-        selectedEndDate.value.day,
-        selectedEndDate.value.hour,
-        minute,
-        selectedEndDate.value.second,
-        selectedEndDate.value.millisecond);
   }
 
   Widget buildErrorMessage() {
@@ -495,10 +511,18 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
       initialDate: selectedStartDate.value,
       firstDate: DateTime(
           DateTime.now().year, DateTime.now().month, DateTime.now().day),
-      lastDate: DateTime(
-          DateTime.now().year, DateTime.now().month, DateTime.now().day + 7),
+      lastDate: DateTime(9999),
     ).then((date) {
-      selectedStartDate.value = date;
+      if (date != null) {
+        selectedStartDateByCalander = date;
+        selectedStartDate.value = DateTime(
+            selectedStartDateByCalander.year,
+            selectedStartDateByCalander.month,
+            selectedStartDateByCalander.day,
+            selectedStartDate.value.hour,
+            selectedStartDate.value.minute,
+            selectedStartDate.value.second);
+      }
     });
   }
 
@@ -540,31 +564,19 @@ class _OnetimePickerEditor extends StatefulWidget {
 }
 
 class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
-  DateTime selectedStartDate = DateTime.now();
-  DateTime start = DateTime.now();
-  DateTime _currentStartTime = DateTime.now();
-
-  int selectedStartHour;
-  int selectedStartMinute;
+  MutableProperty<DateTime> selectedStartDate;
+  DateTime _currentStartTime;
 
   HourPicker integerStartHourPicker;
   MinutePicker integerStartMinutePicker;
-
-  int _currentStartHour;
-  int _currentStartMinute;
 
   String errorMessage = "";
 
   void initState() {
     super.initState();
+
     _currentStartTime = DateTime.now().add(Duration(hours: 1));
-    _currentStartHour = DateTime.now().hour;
-    _currentStartMinute = _handleMinute(DateTime.now().minute);
-    if (widget.startTime != null) {
-      _currentStartHour = widget.startTime.hour;
-      _currentStartMinute = widget.startTime.minute;
-      selectedStartDate = widget.startTime;
-    }
+    selectedStartDate = MutableProperty(_currentStartTime);
   }
 
   @override
@@ -677,7 +689,7 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
           ),
         ),
         GestureDetector(
-          onTap: _selectDate,
+          // onTap: _selectDate,
           child: _handleDateToString(),
         ),
       ],
@@ -685,64 +697,48 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
   }
 
   _handleDateToString() {
-    if (selectedStartDate.day != DateTime.now().day) {
-      return Text(
-        '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
-        style: FontHelper.semiBold(Colors.black, 20),
-        textAlign: TextAlign.center,
-      );
-    } else if (selectedStartDate.day == DateTime.now().day) {
-      return Text(
-        'Today',
-        style: FontHelper.semiBold(Colors.black, 20),
-        textAlign: TextAlign.center,
-      );
+    return StreamBuilder<DateTime>(
+      stream: selectedStartDate.producer,
+      builder: (context, snap) {
+        if (!snap.hasData || snap.data == null) return Offstage();
+
+        return Text(
+          _getDateFormat(snap.data),
+          style: FontHelper.semiBold(Colors.black, 20),
+          textAlign: TextAlign.center,
+        );
+      },
+    );
+  }
+
+  String _getDateFormat(DateTime time) {
+    if (DateTimeHelper.isToday(time)) {
+      return "Today";
+      // if tomorrow
+    } else if (DateTimeHelper.isTomorrow(time)) {
+      return 'Tomorrow';
+    } else {
+      return '${time.day}-${time.month}-${time.year}';
     }
   }
 
-  // _handleDateToString() {
-  //   if (selectedStartDate.day != DateTime.now().day) {
-  //     return Text(
-  //       '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
-  //       style: FontHelper.semiBold(Colors.black, 20),
-  //       textAlign: TextAlign.center,
-  //     );
-  //   } else if (_currentStartTime.day ==
-  //           DateTime.now().add(Duration(hours: 1)).day &&
-  //       DateTime.now().hour == 23) {
-  //     selectedStartDate = DateTime.now().add(Duration(days: 1));
-  //     return Text(
-  //       '${selectedStartDate.day}-${selectedStartDate.month}-${selectedStartDate.year}',
-  //       style: FontHelper.semiBold(Colors.black, 20),
-  //       textAlign: TextAlign.center,
-  //     );
-  //   } else if (selectedStartDate.day == DateTime.now().day) {
-  //     return Text(
-  //       'Today',
-  //       style: FontHelper.semiBold(Colors.black, 20),
-  //       textAlign: TextAlign.center,
-  //     );
-  //   }
-  // }
-
   Widget buildStartDeliverSelector() {
     integerStartHourPicker = new HourPicker.hour(
-      maxValue: 23,
-      minValue: 0,
-      initialValue: _currentStartHour,
-      step: 1,
+      maxValue: _currentStartTime.hour + 72,
+      minValue: _currentStartTime.hour,
+      initialValue: selectedStartDate.value.hour,
       onChanged: (value) {
-        _handleStartHourChanged(value);
+        _handleHour(value);
       },
     );
 
     integerStartMinutePicker = new MinutePicker.minute(
       maxValue: 5,
       minValue: 0,
-      initialValue: _currentStartMinute ~/ 10,
+      initialValue: selectedStartDate.value.minute ~/ 10,
       step: 1,
       onChanged: (value) {
-        _handleStartMinuteChanged(value * 10);
+        _handleMinuteChanged(value * 10);
       },
     );
 
@@ -762,16 +758,29 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
     );
   }
 
-  _handleStartHourChanged(num value) {
-    if (value != null) {
-      setState(() => _currentStartHour = value);
-    }
+  //Minute change is dependant on the hour change.
+  _handleHour(num hour) {
+    DateTime newDate = new DateTime(
+        _currentStartTime.year,
+        _currentStartTime.month,
+        _currentStartTime.day,
+        _currentStartTime.hour + hour,
+        selectedStartDate.value.minute,
+        selectedStartDate.value.second,
+        selectedStartDate.value.millisecond);
+
+    selectedStartDate.value = newDate;
   }
 
-  _handleStartMinuteChanged(num value) {
-    if (value != null) {
-      setState(() => _currentStartMinute = value);
-    }
+  _handleMinuteChanged(num minute) {
+    selectedStartDate.value = new DateTime(
+        selectedStartDate.value.year,
+        selectedStartDate.value.month,
+        selectedStartDate.value.day,
+        selectedStartDate.value.hour,
+        minute,
+        selectedStartDate.value.second,
+        selectedStartDate.value.millisecond);
   }
 
   Widget buildErrorMessage() {
@@ -808,19 +817,13 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
           ],
         ),
         onPressed: () {
-          start = DateTime(
-            selectedStartDate.year,
-            selectedStartDate.month,
-            selectedStartDate.day,
-            _currentStartHour,
-            _currentStartMinute,
-          );
-          if (start.isAfter(DateTime.now().subtract(Duration(minutes: 10)))) {
-            print('confirmed start: $start');
+          if (selectedStartDate.value
+              .isAfter(DateTime.now().subtract(Duration(minutes: 10)))) {
+            print('confirmed start: $selectedStartDate.value');
             Navigator.of(context).pop();
-            widget.onCompleteCallback(start);
+            widget.onCompleteCallback(selectedStartDate.value);
           } else {
-            print('wrong start: $start');
+            print('wrong start: $selectedStartDate.value');
             setState(() {
               errorMessage = "At least from time now";
             });
@@ -830,42 +833,31 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
     );
   }
 
-  Future _selectDate() async {
-    await showDatePicker(
-      context: context,
-      initialDate: selectedStartDate,
-      firstDate: DateTime(
-          DateTime.now().year, DateTime.now().month, DateTime.now().day),
-      lastDate: DateTime(2100),
-    ).then((date) {
-      if (date != null) {
-        setState(() {
-          selectedStartDate = DateTime(
-            date.year,
-            date.month,
-            date.day,
-          );
-        });
-      }
-    });
-  }
+  // Future _selectDate() async {
+  //   await showDatePicker(
+  //     context: context,
+  //     initialDate: selectedStartDate.value,
+  //     firstDate: DateTime(
+  //         DateTime.now().year, DateTime.now().month, DateTime.now().day),
+  //     lastDate: DateTime(2100),
+  //   ).then((date) {
+  //     if (date != null) {
+  //       setState(() {
+  //         _currentStartTime = DateTime(
+  //           date.year,
+  //           date.month,
+  //           date.day,
+  //         );
 
-  ///Round down minute to the nearest ten
-  _handleMinute(int value) {
-    if (value < 10 || value == null) {
-      return 0;
-    } else if (value < 20 && value >= 10) {
-      return 10;
-    } else if (value < 30 && value >= 20) {
-      return 20;
-    } else if (value < 40 && value >= 30) {
-      return 30;
-    } else if (value < 50 && value >= 40) {
-      return 40;
-    } else if (value < 60 && value >= 50) {
-      return 50;
-    } else {
-      return value;
-    }
-  }
+  //         selectedStartDate.value = DateTime(
+  //             _currentStartTime.year,
+  //             _currentStartTime.month,
+  //             _currentStartTime.day,
+  //             selectedStartDate.value.hour +1,
+  //             selectedStartDate.value.minute,
+  //             selectedStartDate.value.second);
+  //       });
+  //     }
+  //   });
+  // }
 }

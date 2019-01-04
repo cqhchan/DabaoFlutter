@@ -8,7 +8,7 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 /// Created by Marcin Szałek
 
 ///NumberPicker is a widget designed to pick a number between #minValue and #maxValue
-class HourPicker extends StatelessWidget {
+class LoopingHourPicker extends StatelessWidget {
   ///height of every list element
   static const double DEFAULT_ITEM_EXTENT = 60.0;
 
@@ -16,7 +16,7 @@ class HourPicker extends StatelessWidget {
   static const double DEFAULT_LISTVIEW_WIDTH = 70.0;
 
   ///constructor for integer number picker
-  HourPicker.hour({
+  LoopingHourPicker.hour({
     Key key,
     @required int initialValue,
     @required this.minValue,
@@ -24,19 +24,16 @@ class HourPicker extends StatelessWidget {
     @required this.onChanged,
     this.itemExtent = DEFAULT_ITEM_EXTENT,
     this.listViewWidth = DEFAULT_LISTVIEW_WIDTH,
-    this.step = 1,
   })  : assert(initialValue != null),
         assert(minValue != null),
         assert(maxValue != null),
         assert(maxValue >= minValue),
         assert(initialValue >= minValue && initialValue <= maxValue),
-        assert(step > 0),
         selectedIntValue = initialValue,
         selectedDecimalValue = -1,
         decimalPlaces = 0,
         intScrollController = new ScrollController(
-          initialScrollOffset:
-              (initialValue - minValue) ~/ step * itemExtent,
+          initialScrollOffset: (initialValue - minValue) * itemExtent,
         ),
         decimalScrollController = null,
         _listViewHeight = 3 * itemExtent,
@@ -76,13 +73,6 @@ class HourPicker extends StatelessWidget {
   ///Currently selected decimal value
   final int selectedDecimalValue;
 
-  ///Step between elements. Only for integer datePicker
-  ///Examples:
-  /// if step is 100 the following elements may be 100, 200, 300...
-  /// if min=0, max=6, step=3, then items will be 0, 3 and 6
-  /// if min=0, max=5, step=3, then items will be 0 and 3.
-  final int step;
-
   //
   //----------------------------- PUBLIC ------------------------------
   //
@@ -108,7 +98,7 @@ class HourPicker extends StatelessWidget {
   ListWheelChildLoopingListDelegate delegate;
   Widget _intListView() {
     TextStyle selectedStyle = FontHelper.robotoRegular50Black;
-    int itemCount = (maxValue - minValue) ~/ step + 1 ;
+    int itemCount = (maxValue - minValue) + 1;
     delegate = ListWheelChildLoopingListDelegate(
       children: List<Widget>.generate(itemCount, (index) {
         final int value = _intValueFromIndex(index);
@@ -116,10 +106,9 @@ class HourPicker extends StatelessWidget {
         //define special style for selected (middle) element
         final TextStyle itemStyle = selectedStyle;
 
-
         return Center(
-                child: new Text(_handleZeroPadding(value), style: itemStyle),
-              );
+          child: new Text(_handleZeroPadding(value), style: itemStyle),
+        );
       }),
     );
     return new NotificationListener(
@@ -150,7 +139,10 @@ class HourPicker extends StatelessWidget {
     }
   }
 
-  int _intValueFromIndex(int index) => (minValue + (index % ((maxValue - minValue) ~/ step + 1))) * step ;
+  // CONVERT IT TO 00-24HOURS
+  int _intValueFromIndex(int index) {
+    return ((minValue + (index % ((maxValue - minValue) + 1)))) % 24;
+  }
 
   bool _onIntegerNotification(Notification notification) {
     if (notification is ScrollNotification) {
@@ -159,16 +151,11 @@ class HourPicker extends StatelessWidget {
       int intIndexOfMiddleElement =
           (notification.metrics.pixels + (itemExtent / 2)) ~/ itemExtent;
 
-
-      // intIndexOfMiddleElement = delegate.trueIndexOf(intIndexOfMiddleElement);
-
       int intValueInTheMiddle = _intValueFromIndex(intIndexOfMiddleElement);
-
-      // intValueInTheMiddle = _normalizeIntegerMiddleValue(intValueInTheMiddle);
 
       if (_userStoppedScrolling(notification, intScrollController)) {
         //center selected value
-        animateInt(intIndexOfMiddleElement );
+        animateInt(intIndexOfMiddleElement);
       }
 
       //update selection
@@ -179,9 +166,227 @@ class HourPicker extends StatelessWidget {
           //return integer value
           newValue = (selectedIntValue);
         } else {
-          if (selectedIntValue == maxValue ) {
+          if (selectedIntValue == maxValue) {
             //if new value is maxValue, then return that value and ignore decimal
-            newValue = ((selectedIntValue ).toDouble()) ;
+            newValue = ((selectedIntValue).toDouble());
+            animateDecimal(0);
+          } else {
+            //return integer+decimal
+            double decimalPart = _toDecimal(selectedDecimalValue);
+            newValue = (((selectedIntValue) + decimalPart).toDouble());
+          }
+        }
+
+        onChanged(newValue);
+      }
+    }
+    return true;
+  }
+
+  ///There was a bug, when if there was small integer range, e.g. from 1 to 5,
+  ///When user scrolled to the top, whole listview got displayed.
+  ///To prevent this we are calculating cacheExtent by our own so it gets smaller if number of items is smaller
+  double _calculateCacheExtent(int itemCount) {
+    double cacheExtent = 250.0; //default cache extent
+    if ((itemCount - 2) * DEFAULT_ITEM_EXTENT <= cacheExtent) {
+      cacheExtent = ((itemCount - 3) * DEFAULT_ITEM_EXTENT);
+    }
+    return cacheExtent;
+  }
+
+  ///When overscroll occurs on iOS,
+  ///we can end up with value not in the range between [minValue] and [maxValue]
+  ///To avoid going out of range, we change values out of range to border values.
+  // int _normalizeMiddleValue(int valueInTheMiddle, int min, int max) {
+  //   return math.max(math.min(valueInTheMiddle, max), min);
+  // }
+
+  // int _normalizeIntegerMiddleValue(int integerValueInTheMiddle) {
+  //   //make sure that max is a multiple of step
+  //   int max = (maxValue ~/ step) * step;
+  //   return _normalizeMiddleValue(integerValueInTheMiddle, minValue, max);
+  // }
+
+  ///indicates if user has stopped scrolling so we can center value in the middle
+  bool _userStoppedScrolling(
+      Notification notification, ScrollController scrollController) {
+    return notification is UserScrollNotification &&
+        notification.direction == ScrollDirection.idle &&
+        scrollController.position.activity is! HoldScrollActivity;
+  }
+
+  ///converts integer indicator of decimal value to double
+  ///e.g. decimalPlaces = 1, value = 4  >>> result = 0.4
+  ///     decimalPlaces = 2, value = 12 >>> result = 0.12
+  double _toDecimal(int decimalValueAsInteger) {
+    return double.parse((decimalValueAsInteger * math.pow(10, -decimalPlaces))
+        .toStringAsFixed(decimalPlaces));
+  }
+
+  ///scroll to selected value
+  _animate(ScrollController scrollController, double value) {
+    scrollController.animateTo(value,
+        duration: new Duration(seconds: 1), curve: new ElasticOutCurve());
+  }
+}
+
+///NumberPicker is a widget designed to pick a number between #minValue and #maxValue
+class HourPicker extends StatelessWidget {
+  ///height of every list element
+  static const double DEFAULT_ITEM_EXTENT = 60.0;
+
+  ///width of list view
+  static const double DEFAULT_LISTVIEW_WIDTH = 70.0;
+
+  ///constructor for integer number picker
+  HourPicker.hour({
+    Key key,
+    @required int initialValue,
+    @required this.minValue,
+    @required this.maxValue,
+    @required this.onChanged,
+    this.itemExtent = DEFAULT_ITEM_EXTENT,
+    this.listViewWidth = DEFAULT_LISTVIEW_WIDTH,
+  })  : assert(initialValue != null),
+        assert(minValue != null),
+        assert(maxValue != null),
+        assert(maxValue >= minValue),
+        assert(initialValue >= minValue && initialValue <= maxValue),
+        selectedIntValue = initialValue,
+        selectedDecimalValue = -1,
+        decimalPlaces = 0,
+        intScrollController = new ScrollController(
+          initialScrollOffset: (initialValue - minValue) * itemExtent,
+        ),
+        decimalScrollController = null,
+        _listViewHeight = 3 * itemExtent,
+        super(key: key);
+
+  ///called when selected value changes
+  final ValueChanged<num> onChanged;
+
+  ///min value user can pick
+  final int minValue;
+
+  ///max value user can pick
+  final int maxValue;
+
+  ///inidcates how many decimal places to show
+  /// e.g. 0=>[1,2,3...], 1=>[1.0, 1.1, 1.2...]  2=>[1.00, 1.01, 1.02...]
+  final int decimalPlaces;
+
+  ///height of every list element in pixels
+  final double itemExtent;
+
+  ///view will always contain only 3 elements of list in pixels
+  final double _listViewHeight;
+
+  ///width of list view in pixels
+  final double listViewWidth;
+
+  ///ScrollController used for integer list
+  final ScrollController intScrollController;
+
+  ///ScrollController used for decimal list
+  final ScrollController decimalScrollController;
+
+  ///Currently selected integer value
+  int selectedIntValue;
+
+  ///Currently selected decimal value
+  final int selectedDecimalValue;
+
+  //
+  //----------------------------- PUBLIC ------------------------------
+  //
+
+  animateInt(int index) {
+    _animate(intScrollController, index * itemExtent);
+  }
+
+  animateDecimal(int decimalValue) {
+    _animate(decimalScrollController, decimalValue * itemExtent);
+  }
+
+  //
+  //----------------------------- VIEWS -----------------------------
+  //
+
+  ///main widget
+  @override
+  Widget build(BuildContext context) {
+    return _intListView();
+  }
+
+  Widget _intListView() {
+    TextStyle selectedStyle = FontHelper.robotoRegular50Black;
+    int itemCount = (maxValue - minValue) + 1;
+
+    return new NotificationListener(
+      child: new Container(
+        height: itemExtent,
+        width: listViewWidth,
+        child: new ListView.builder(
+          controller: intScrollController,
+          itemExtent: itemExtent,
+          itemCount: itemCount,
+          itemBuilder: (BuildContext context, int index) {
+            final int value = _intValueFromIndex(index);
+
+            //define special style for selected (middle) element
+            final TextStyle itemStyle = selectedStyle;
+            return new Center(
+              child: new Text(_handleZeroPadding(value), style: itemStyle),
+            );
+          },
+        ),
+      ),
+      onNotification: _onIntegerNotification,
+    );
+  }
+
+  //
+  // ----------------------------- LOGIC -----------------------------
+  //
+
+  _handleZeroPadding(value) {
+    if (value < 10) {
+      return (value.toString().padLeft(2, '0'));
+    } else {
+      return value.toString();
+    }
+  }
+
+  // CONVERT IT TO 00-24HOURS
+  int _intValueFromIndex(int index) {
+    return ((minValue + (index % ((maxValue - minValue) + 1)))) % 24;
+  }
+
+  bool _onIntegerNotification(Notification notification) {
+    if (notification is ScrollNotification) {
+      //calculate
+
+      int intIndexOfMiddleElement =
+          (notification.metrics.pixels + (itemExtent / 2)) ~/ itemExtent;
+
+      // int intValueInTheMiddle = _intValueFromIndex(intIndexOfMiddleElement);
+
+      if (_userStoppedScrolling(notification, intScrollController)) {
+        //center selected value
+        animateInt(intIndexOfMiddleElement);
+      }
+
+      //update selection
+      if (intIndexOfMiddleElement != selectedIntValue) {
+        selectedIntValue = intIndexOfMiddleElement;
+        num newValue;
+        if (decimalPlaces == 0) {
+          //return integer value
+          newValue = (selectedIntValue);
+        } else {
+          if (selectedIntValue == maxValue) {
+            //if new value is maxValue, then return that value and ignore decimal
+            newValue = ((selectedIntValue).toDouble());
             animateDecimal(0);
           } else {
             //return integer+decimal

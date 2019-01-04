@@ -35,6 +35,7 @@ class MinutePicker extends StatelessWidget {
         selectedDecimalValue = -1,
         decimalPlaces = 0,
         intScrollController = new ScrollController(
+          keepScrollOffset: false,
           initialScrollOffset:
               (initialValue - minValue + 1) ~/ step * itemExtent,
         ),
@@ -151,6 +152,7 @@ class MinutePicker extends StatelessWidget {
 
   bool _onIntegerNotification(Notification notification) {
     if (notification is ScrollNotification) {
+      
       //calculate
       int intIndexOfMiddleElement =
           (notification.metrics.pixels + (itemExtent / 2)) ~/ itemExtent;
