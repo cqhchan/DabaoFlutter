@@ -5,21 +5,18 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 
 class FloatingHeader extends StatefulWidget {
-  final String title;
-  final GestureDetector leftButton;
-  final GestureDetector rightButton;
-  final TextStyle textStyle;
+  final Widget header;
+  final Widget leftButton;
+  final Widget rightButton;
   final Color backgroundColor;
   final MutableProperty<double> opacityProperty;
 
   FloatingHeader(
       {Key key,
       this.backgroundColor = Colors.white,
-      this.title,
-      this.textStyle = FontHelper.headerTextStyle,
       this.leftButton,
       this.rightButton,
-      @required this.opacityProperty})
+      @required this.opacityProperty, this.header})
       : super(key: key);
 
   @override
@@ -89,13 +86,9 @@ class FloatingHeaderState extends State<FloatingHeader> with HavingSubscriptionM
                         : widget.leftButton,
                   ),
                   Expanded(
-                    child: widget.title == null
-                        ? Container()
-                        : Text(
-                            widget.title,
-                            textAlign: TextAlign.center,
-                            style: widget.textStyle,
-                          ),
+                    child: widget.header == null
+                        ? Offstage()
+                        : widget.header
                   ),
                   Container(
                     child: widget.rightButton == null

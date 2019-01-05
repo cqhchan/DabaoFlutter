@@ -9,6 +9,10 @@ import 'package:flutterdabao/Rewards/SearchPromoCodePage.dart';
 
 class RewardsTabBarPage extends StatefulWidget {
 
+  final int initalIndex;
+
+  RewardsTabBarPage({Key key, this.initalIndex = 2}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -53,7 +57,7 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
       ),
       body: DefaultTabController(
         length: 3,
-        initialIndex: 2,
+        initialIndex: widget.initalIndex,
         child: Column(
           children: <Widget>[
             Container(
