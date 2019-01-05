@@ -183,11 +183,6 @@ class _ChatPageState extends State<ChatPage>
 
   _toChat(String orderUid, String deliverer) {
     Channel channel = Channel.fromUID(orderUid + deliverer);
-    Firestore.instance
-        .collection("channels")
-        .document(channel.uid)
-        .get()
-        .then((_) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -197,10 +192,8 @@ class _ChatPageState extends State<ChatPage>
               ),
         ),
       );
-    });
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }

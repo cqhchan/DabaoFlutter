@@ -127,6 +127,18 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
+      static const TextStyle semiBold12Grey = TextStyle(
+      color: Color(0xFF9B9B9B),
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
+      static const TextStyle semiBold12Black = TextStyle(
+      color: Colors.black,
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
       static const TextStyle semiBold10Grey = TextStyle(
       color: Color(0xFF9B9B9B),
       fontSize: 10.0,

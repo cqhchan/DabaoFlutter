@@ -4,6 +4,7 @@ import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
+import 'package:flutterdabao/Rewards/BrowseRewardPage.dart';
 import 'package:flutterdabao/Rewards/MyVoucherPage.dart';
 import 'package:flutterdabao/Rewards/SearchPromoCodePage.dart';
 
@@ -67,7 +68,7 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
                     ),
                     Tab(
                       child: Text(
-                        "My Dabaoer",
+                        "My Rewards",
                         style: FontHelper.semiBold(null, 12.0),
                         textAlign: TextAlign.center,
                       ),
@@ -90,17 +91,7 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
                               )));
                     },
                   ),
-                  MyVoucherPage(
-                    onCompletionCallback: (Voucher voucher) {
-                      Navigator.popUntil(context,
-                          ModalRoute.withName(Navigator.defaultRouteName));
-
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => OrderNow(
-                                voucher: voucher,
-                              )));
-                    },
-                  ),
+                  BrowseRewardPage()
                 ],
               ),
             ),
