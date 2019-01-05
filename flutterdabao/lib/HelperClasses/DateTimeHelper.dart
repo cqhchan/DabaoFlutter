@@ -29,6 +29,14 @@ class DateTimeHelper {
     return formatDate(date, [date.hour == 12 ? "12" : hh, ':', nn, ' ', am]);
   }
 
+  static String convertDateTimeTo24Hour(DateTime date) {
+    return formatDate(date, [HH]);
+  }
+
+  static String convertDateTimeToMinute(DateTime date) {
+    return formatDate(date, [nn]);
+  }
+
   // //2018-12-17 18:03:26 +0800 input
   // static DateTime convertStringTimeToDateTime(String string) {
   //   return DateTime.parse(string).toLocal();

@@ -16,7 +16,7 @@ class DabaoerRewards extends FirebaseType {
   @override
   void map(Map<String, dynamic> data) {
 
-    if (data.containsKey(startTimeKey))
+    if (data.containsKey(startTimeKey));
 
   }
 
