@@ -117,7 +117,7 @@ class _Home extends State<Home> with HavingSubscriptionMixin {
               header: StreamBuilder<String>(stream: ConfigHelper
                   .instance.currentUserProperty.producer
                   .switchMap((user) {
-                if (user == null) return Observable.just(null);
+                if (user == null) return Observable.just("");
                 return user.name;
               }), builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
@@ -156,14 +156,10 @@ class _Home extends State<Home> with HavingSubscriptionMixin {
                 width: 40.0,
                 child: GestureDetector(
                   onTap: () {},
-                  child: StreamBuilder(
-                    stream: Firestore.instance
-                        .collection('users')
-                        .document(
-                            ConfigHelper.instance.currentUserProperty.value.uid)
-                        .snapshots(),
+                  child: StreamBuilder<String>(
+                    stream: ConfigHelper.instance.currentUserProperty.value.thumbnailImage,
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
+                      if (!snapshot.hasData || snapshot.data == null) {
                         return Image.asset(
                           'assets/icons/profile_icon.png',
                           fit: BoxFit.fill,
@@ -174,7 +170,7 @@ class _Home extends State<Home> with HavingSubscriptionMixin {
                           FirebaseAuth.instance.signOut();
                         },
                         child: CircleAvatar(
-                          backgroundImage: NetworkImage(snapshot.data['TI']),
+                          backgroundImage: NetworkImage(snapshot.data),
                           radius: 20,
                         ),
                       );

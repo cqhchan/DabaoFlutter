@@ -127,4 +127,18 @@ class DateTimeHelper {
         time.month == today.month &&
         time.year == today.year);
   }
+
+    static bool sameDay(DateTime time, DateTime other) {
+  
+    return (time.day == other.day &&
+        time.month == other.month &&
+        time.year == other.year);
+  }
+
+    static bool isTomorrow(DateTime time) {
+    DateTime today = DateTime.now().add(Duration(days: 1));
+    return (time.day == today.day &&
+        time.month == today.month &&
+        time.year == today.year);
+  }
 }

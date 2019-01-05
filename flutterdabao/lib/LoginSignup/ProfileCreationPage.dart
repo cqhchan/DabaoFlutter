@@ -170,8 +170,8 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                 ConfigHelper.instance.currentUserProperty.value.setUser(
                   profileLink,
                   _nameController.text,
-                   DateTime.fromMillisecondsSinceEpoch(user.metadata.creationTimestamp * 1000),
-                   DateTime.fromMillisecondsSinceEpoch(user.metadata.lastSignInTimestamp * 1000),
+                   DateTime.fromMillisecondsSinceEpoch(user.metadata.creationTimestamp ),
+                   DateTime.fromMillisecondsSinceEpoch(user.metadata.lastSignInTimestamp ),
                   thumbnailLink,
                 );
                 widget.onCompleteCallback();

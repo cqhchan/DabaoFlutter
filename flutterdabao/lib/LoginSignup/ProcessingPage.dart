@@ -51,8 +51,8 @@ class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
   Widget build(BuildContext context) {
     // There are 3 things that you check to see of it should go to ProfileCreation/Verification or Home
     // return true to go to home/ false to go to ProfileCreation
-    return FutureBuilder<List<Widget>>(
-        future: Observable.combineLatest3<String, String, FirebaseUser,
+    return StreamBuilder<List<Widget>>(
+        stream: Observable.combineLatest3<String, String, FirebaseUser,
                 List<Widget>>(widget.user.email, widget.user.profileImage,
             FirebaseAuth.instance.currentUser().asStream(),
             (email, profileImage, firebaseUser) {
@@ -81,11 +81,10 @@ class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
                 ],
               ),
             )));
-
           if (profileImage == null) list.add(ProfileCreationPage(onCompleteCallback: (){nextPage();},));
 
           return list;
-        }).first,
+        }),
         builder: (BuildContext context, snap) {
           // GO STRAIGHT TO HOME IN DEBUG
           // if (ConfigHelper.instance.isInDebugMode)
