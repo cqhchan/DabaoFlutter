@@ -117,10 +117,8 @@ class _DoubleLocationCustomizedMapState
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Center(
+    return Center(
         child: createMap,
-      ),
     );
   }
 

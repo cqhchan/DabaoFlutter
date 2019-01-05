@@ -7,7 +7,6 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geohash/geohash.dart';
 
 class FirebaseCloudFunctions {
   ///[location] Location to search

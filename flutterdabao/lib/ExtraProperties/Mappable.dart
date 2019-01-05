@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/CustomError/FatalError.dart';
-import 'package:flutterdabao/CustomWidget/Headers/Category.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/Model/Channels.dart';
@@ -42,10 +41,6 @@ abstract class Mappable extends Identifiable {
   static T mapping<T extends Mappable>(DocumentSnapshot doc) {
     if (T == User) {
       return new User.fromDocument(doc) as T;
-    }
-
-    if (T == Category) {
-      return new Category.fromDocument(doc) as T;
     }
 
     if (T == FoodTag) {

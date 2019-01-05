@@ -96,10 +96,8 @@ class _CustomizedMapState extends State<CustomizedMap>
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Center(
+    return Center(
         child: createMap,
-      ),
     );
   }
 

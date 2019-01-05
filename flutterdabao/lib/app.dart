@@ -22,6 +22,7 @@ class DabaoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: ConfigHelper.instance.navigatorKey,
       title: 'DABAO',
       theme: ThemeData(fontFamily: "SF_UI_Display", primarySwatch: ColorHelper.dabaoOrangeMaterial,brightness: Brightness.light,),
       home: _handleCurrentScreen(),

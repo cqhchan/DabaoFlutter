@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,13 +22,16 @@ import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Home extends StatefulWidget {
   @override
   _Home createState() => _Home();
 }
 
-class _Home extends State<Home> with HavingSubscriptionMixin {
+class _Home extends State<Home> {
+  FirebaseMessaging _firebaseMessaging;
+
   ScrollController _controller = ScrollController();
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
   _Home() {
@@ -44,11 +48,48 @@ class _Home extends State<Home> with HavingSubscriptionMixin {
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
 
+    //Firebase Push  Notifications
+    _firebaseMessaging = FirebaseMessaging();
+    firebaseCloudMessaging_Listeners();
+  }
+
+  void firebaseCloudMessaging_Listeners() {
+    if (Platform.isIOS) iOS_Permission();
+
+    _firebaseMessaging.getToken().then((token) {
+      print("testing Token ");
+      print(token);
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        ConfigHelper.instance.navigatorKey.currentState
+            .push(FadeRoute(widget: TabBarPage()));
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume " + message.toString());
+        ConfigHelper.instance.navigatorKey.currentState
+            .push(FadeRoute(widget: TabBarPage()));
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch " + message.toString());
+        ConfigHelper.instance.navigatorKey.currentState
+            .push(FadeRoute(widget: TabBarPage()));
+      },
+    );
+  }
+
+  void iOS_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
   }
 
   @override
   void dispose() {
-    disposeAndReset();
     super.dispose();
   }
 
@@ -157,7 +198,8 @@ class _Home extends State<Home> with HavingSubscriptionMixin {
                 child: GestureDetector(
                   onTap: () {},
                   child: StreamBuilder<String>(
-                    stream: ConfigHelper.instance.currentUserProperty.value.thumbnailImage,
+                    stream: ConfigHelper
+                        .instance.currentUserProperty.value.thumbnailImage,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData || snapshot.data == null) {
                         return Image.asset(
