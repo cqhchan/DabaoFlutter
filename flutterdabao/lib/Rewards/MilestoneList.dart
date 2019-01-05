@@ -20,10 +20,20 @@ class MilestonesList extends StatefulWidget {
 }
 
 class _MilestonesListState extends State<MilestonesList> {
-  int _totalPoints = 0;
-  int temp = 0;
-  int lastTemp = 0;
-  bool flag = true;
+
+  int _totalPoints;
+  int temp;
+  int lastTemp;
+  bool flag;
+
+
+  void initState() { 
+    super.initState();
+    _totalPoints = 0;
+    temp = 0;
+    lastTemp = 0;
+    flag = true;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
