@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutterdabao/ChatPage/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
@@ -55,6 +56,9 @@ class _ConversationState extends State<Conversation>
   //expansion of location description only
   bool expansionFlag;
 
+  //expansion of location description only
+  bool isTouchDown;
+
   //initial position of vertical scroll
   double initial;
 
@@ -68,12 +72,12 @@ class _ConversationState extends State<Conversation>
   void initState() {
     super.initState();
     expandFlag = false;
+    isTouchDown = false;
     sendButtonFlag = false;
     _myFocusNode = FocusNode();
     _myFocusNode.addListener(_keyboardListener);
     _textController = TextEditingController();
     _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
     subscription.add(order.bindTo(widget.channel.orderUid
         .where((uid) => uid != null)
         .map((uid) => Order.fromUID(uid))));
@@ -100,34 +104,58 @@ class _ConversationState extends State<Conversation>
     }
   }
 
-  _scrollListener() {
+  bool _userStoppedScrolling(
+      Notification notification, ScrollController scrollController) {
+    return notification is UserScrollNotification &&
+        notification.direction == ScrollDirection.idle &&
+        scrollController.position.activity is! HoldScrollActivity;
+  }
+
+  bool _scrollListener(Notification notification) {
+
+    // if (notification is ScrollNotification) {
+    // ScrollNotification scrollNotification = notification;
+
+    if(!_userStoppedScrolling(notification, _scrollController)){
+      print("test 1");
     if (_scrollController.offset > initial) {
+            print("test 2");
+
       setState(() {
         expandFlag = false;
       });
     }
 
     if (_scrollController.offset < initial) {
+            print("test 3");
+
       setState(() {
         expandFlag = true;
       });
     }
 
-    if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
-      setState(() {
-        expandFlag = false;
-      });
-    }
+    // if (_scrollController.offset >=
+    //         _scrollController.position.maxScrollExtent &&
+    //     !_scrollController.position.outOfRange) {
+    //             print("test 4");
 
-    if (_scrollController.offset <=
-            _scrollController.position.minScrollExtent &&
-        !_scrollController.position.outOfRange) {
-      setState(() {
-        expandFlag = true;
-      });
+    //   setState(() {
+    //     expandFlag = false;
+    //   });
+    // }
+
+    // if (_scrollController.offset <=
+    //         _scrollController.position.minScrollExtent &&
+    //     !_scrollController.position.outOfRange) {
+    //   setState(() {
+    //                     print("test 5");
+
+    //     expandFlag = true;
+    //   });
+    // }
     }
+    return true;
+    // }
   }
 
   @override
@@ -755,17 +783,21 @@ class _ConversationState extends State<Conversation>
             onPanDown: (_) {
               initial = _scrollController.position.pixels;
             },
-            child: ListView.builder(
-              cacheExtent: 500.0 * snapshot.data.length,
-              physics: const AlwaysScrollableScrollPhysics(),
-              controller: _scrollController,
-              reverse: true,
-              padding: EdgeInsets.all(10.0),
-              itemBuilder: (context, index) {
-                return _buildChatBox(index, snapshot.data[index]);
-              },
-              itemCount: snapshot.data.length,
+            child: NotificationListener(
+                          child: ListView.builder(
+                cacheExtent: 500.0 * snapshot.data.length,
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: _scrollController,
+                reverse: true,
+                padding: EdgeInsets.all(10.0),
+                itemBuilder: (context, index) {
+                  return _buildChatBox(index, snapshot.data[index]);
+                },
+                itemCount: snapshot.data.length,
+              ),
+              onNotification: _scrollListener,
             ),
+            
           );
         },
       ),
