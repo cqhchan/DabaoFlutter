@@ -20,20 +20,19 @@ class MilestonesList extends StatefulWidget {
 }
 
 class _MilestonesListState extends State<MilestonesList> {
-
   int _totalPoints;
   int temp;
   int lastTemp;
   bool flag;
 
-
-  void initState() { 
+  void initState() {
     super.initState();
     _totalPoints = 0;
     temp = 0;
     lastTemp = 0;
     flag = true;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,8 +45,7 @@ class _MilestonesListState extends State<MilestonesList> {
                 stream: widget.points,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return Offstage();
-                  _totalPoints = snapshot.data;
-                  return _buildMileStones();
+                  return _buildMileStones(snapshot.data);
                 },
               )),
         ],
@@ -55,11 +53,12 @@ class _MilestonesListState extends State<MilestonesList> {
     );
   }
 
-  Widget _buildMileStones() {
+  Widget _buildMileStones(data) {
     return StreamBuilder<List<DabaoerRewardsMilestone>>(
         stream: Observable(widget.milestones),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return JumpingDotsProgressIndicator();
+          _totalPoints = data;
           return ListView(
             shrinkWrap: true,
             children: snapshot.data
@@ -142,7 +141,11 @@ class _MilestonesListState extends State<MilestonesList> {
       alignment: Alignment.center,
       children: <Widget>[
         Image.asset('assets/icons/shield.png'),
-        Align(child: Text('10',style: FontHelper.semiBold12Black,))
+        Align(
+            child: Text(
+          '10',
+          style: FontHelper.semiBold12Black,
+        ))
       ],
     );
   }
