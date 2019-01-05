@@ -24,6 +24,7 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorHelper.dabaoOffWhiteF5,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: GestureDetector(

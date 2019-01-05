@@ -39,15 +39,17 @@ class _MilestonesListState extends State<MilestonesList> {
       body: Column(
         children: <Widget>[
           //Retriving the total reward number
-          Offstage(
-              offstage: false,
-              child: StreamBuilder<int>(
-                stream: widget.points,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return Offstage();
-                  return _buildMileStones(snapshot.data);
-                },
-              )),
+          Expanded(
+            child: Offstage(
+                offstage: false,
+                child: StreamBuilder<int>(
+                  stream: widget.points,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return Offstage();
+                    return _buildMileStones(snapshot.data);
+                  },
+                )),
+          ),
         ],
       ),
     );

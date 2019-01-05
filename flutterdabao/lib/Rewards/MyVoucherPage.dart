@@ -118,8 +118,8 @@ class _MyVoucherPageState extends State<MyVoucherPage>
             ),
           ),
         ),
-        Container(
-            child: _buildBody(context), color: ColorHelper.dabaoOffWhiteF5),
+        Expanded(
+            child: _buildBody(context),),
       ],
     );
   }

@@ -28,8 +28,7 @@ class _BrowseRewardPageState extends State<BrowseRewardPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: DefaultTabController(
+    return DefaultTabController(
         length: 2,
         child: Column(
           children: <Widget>[
@@ -102,7 +101,6 @@ class _BrowseRewardPageState extends State<BrowseRewardPage>
             ),
           ],
         ),
-      ),
     );
   }
 
