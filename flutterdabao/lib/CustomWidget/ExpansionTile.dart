@@ -37,7 +37,7 @@ class ConfigurableExpansionTile extends StatefulWidget {
       this.borderAnimationTween,
       this.animatedWidgetTurnTween,
       this.animatedWidgetTween,
-      @required this.selectable})
+      this.selectable})
       : assert(initiallyExpanded != null),
         super(key: key);
 

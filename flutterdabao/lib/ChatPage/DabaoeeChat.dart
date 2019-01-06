@@ -273,12 +273,11 @@ class _ConversationState extends State<Conversation>
                       builder: (context, snap) {
                         if (!snap.hasData) return Offstage();
                         return ConfigurableExpansionTile(
+                          selectable: order.producer.value,
                           initiallyExpanded: false,
-                          onExpansionChanged: (expanded) {
-                            widget.channel.toggle();
+                          onExpansionChanged: (expand) {
                             setState(() {
-                              expansionFlag =
-                                  widget.channel.isSelectedProperty.value;
+                                  widget.channel.isSelectedProperty.value = expand;
                             });
                           },
                           header: Column(
@@ -488,13 +487,13 @@ class _ConversationState extends State<Conversation>
                                       snap.data.longitude)
                                   .toStringAsFixed(1) +
                               'km away'
-                          : "?.??km",
+                          : '?.??km away',
                       style: FontHelper.medium12TextStyle,
                     ),
                   );
                 } else {
                   return Text(
-                    "?.??km",
+                    "My Location",
                     style: FontHelper.medium12TextStyle,
                   );
                 }
