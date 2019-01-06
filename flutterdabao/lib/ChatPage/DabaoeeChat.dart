@@ -33,8 +33,10 @@ class Conversation extends StatefulWidget {
 
   const Conversation({Key key, this.channel, this.location, this.otherUser})
       : super(key: key);
+      
 
   _ConversationState createState() => _ConversationState();
+
 }
 
 class _ConversationState extends State<Conversation>

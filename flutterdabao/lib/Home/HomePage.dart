@@ -50,51 +50,13 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin{
         LocationHelper.instance.softAskForPermission());
 
     //Firebase Push  Notifications
-    _firebaseMessaging = FirebaseMessaging();
+    // _firebaseMessaging = FirebaseMessaging();
 
-    if (Platform.isIOS) iOS_Permission();
 
-    firebaseCloudMessaging_Listeners();
   }
 
-  void firebaseCloudMessaging_Listeners() async {
-    await _firebaseMessaging.getToken().then((token) {
-      if (ConfigHelper.instance.currentUserProperty.value != null)
-        ConfigHelper.instance.currentUserProperty.value.setToken(token);
-    });
 
-        print("firebaseCloudMessaging_Listeners 0");
 
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print("Notification came here 1");
-        print("onMessage " + message.toString());
-      },
-      onResume: (Map<String, dynamic> message) async {
-                print("Notification came here 2");
-        await ConfigHelper.instance.navigatorKey.currentState.push(FadeRoute(widget: TabBarPage()));
-
-        // print("onResume " + message.toString());
-        // await handleNotificationForResumeAndLaunch(message);
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("Notification came here 3");
-        // print("onLaunch " + message.toString());
-        ConfigHelper.instance.navigatorKey.currentState.push(FadeRoute(widget: TabBarPage()));
-
-        // await handleNotificationForResumeAndLaunch(message);
-      },
-    );
-  }
-
-  void iOS_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-  }
 
   @override
   void dispose() {

@@ -44,8 +44,12 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
             return tempOrders;
           }), (routes, orders) {
             List<Object> temp = List();
+            List<DabaoRoute.Route> tempRoutes = List.from(routes);
 
-            temp.addAll(routes);
+            tempRoutes.sort((lhs, rhs) =>
+                rhs.deliveryTime.value.compareTo(lhs.deliveryTime.value));
+
+            temp.addAll(tempRoutes);
 
             if (orders != null && orders.length != 0) temp.add(orders);
 

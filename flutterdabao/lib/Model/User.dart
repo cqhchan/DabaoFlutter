@@ -36,6 +36,8 @@ class User extends FirebaseType {
   User.fromUID(String uid) : super.fromUID(uid);
 
   User.fromAuth(FirebaseUser user) : super.fromUID(user.uid) {
+
+    if (ConfigHelper.instance.currentUserProperty.value != this)
     ConfigHelper.instance.currentUserProperty.value = this;
 
     listOfAvalibleVouchers = FirebaseCollectionReactive<Voucher>(Firestore

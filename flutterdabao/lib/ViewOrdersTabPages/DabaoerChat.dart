@@ -27,16 +27,26 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
+GlobalKey<ConversationState> currentKey;
+
+getCurrentKey(){
+  return currentKey;
+}
+
+
 class Conversation extends StatefulWidget {
   final Channel channel;
   final LatLng location;
 
-  const Conversation({Key key, this.channel, this.location}) : super(key: key);
+Conversation({@required Key key, @required this.channel, this.location}) : super(key: key){
+  currentKey = key;
+} 
 
-  _ConversationState createState() => _ConversationState();
+
+  ConversationState createState() => ConversationState();
 }
 
-class _ConversationState extends State<Conversation>
+class ConversationState extends State<Conversation>
     with HavingSubscriptionMixin, AutomaticKeepAliveClientMixin {
   MutableProperty<Order> order = MutableProperty(null);
 
@@ -67,6 +77,8 @@ class _ConversationState extends State<Conversation>
   //control color of send button
   bool sendButtonFlag;
 
+
+
   @override
   void initState() {
     super.initState();
@@ -84,6 +96,10 @@ class _ConversationState extends State<Conversation>
 
   @override
   void dispose() {
+    if (currentKey.currentState == this){
+      print("current key disposed");
+      currentKey = null;
+    }
     _myFocusNode.dispose();
     _textController.dispose();
     _scrollController.dispose();
