@@ -19,6 +19,7 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Your Inbox', style: FontHelper.header3TextStyle),

@@ -22,6 +22,10 @@
         android:icon="@mipmap/ic_launcher">
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAHPSELCnztmCUR-KTlMshk_l69R5kWojM"/>
+        <!-- <meta-data 
+        android:name="com.google.firebase.messaging.default_notification_channel_id" 
+        android:value="@strings/default_notification_channel_id"/> -->
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

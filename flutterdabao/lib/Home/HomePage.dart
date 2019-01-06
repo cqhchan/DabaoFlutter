@@ -22,15 +22,13 @@ import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Home extends StatefulWidget {
   @override
   _Home createState() => _Home();
 }
 
-class _Home extends State<Home> {
-  FirebaseMessaging _firebaseMessaging;
+class _Home extends State<Home> with AutomaticKeepAliveClientMixin{
 
   ScrollController _controller = ScrollController();
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
@@ -47,46 +45,10 @@ class _Home extends State<Home> {
 
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
-
-    //Firebase Push  Notifications
-    _firebaseMessaging = FirebaseMessaging();
-    firebaseCloudMessaging_Listeners();
   }
 
-  void firebaseCloudMessaging_Listeners() {
-    if (Platform.isIOS) iOS_Permission();
 
-    _firebaseMessaging.getToken().then((token) {
-      print("testing Token ");
-      print(token);
-    });
 
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume " + message.toString());
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch " + message.toString());
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
-      },
-    );
-  }
-
-  void iOS_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-  }
 
   @override
   void dispose() {
@@ -94,7 +56,11 @@ class _Home extends State<Home> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) { 
+    
+    super.build(context);
+    
+    return Scaffold(
         backgroundColor: ColorHelper.dabaoOffWhiteF5,
         drawer: SizedBox(
           width: MediaQuery.of(context).size.width * 0.8,
@@ -461,6 +427,7 @@ class _Home extends State<Home> {
           )
         ]),
       );
+  }
 
   Container squardCard(
     String imagePath,
@@ -510,4 +477,8 @@ class _Home extends State<Home> {
           return BalanceCard(user, context);
         });
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

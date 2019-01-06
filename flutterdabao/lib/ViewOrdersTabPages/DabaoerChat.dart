@@ -26,17 +26,27 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:rxdart/rxdart.dart' as Rxdart;
+
+GlobalKey<ConversationState> currentKey;
+
+getCurrentKey() {
+  return currentKey;
+}
 
 class Conversation extends StatefulWidget {
   final Channel channel;
   final LatLng location;
 
-  const Conversation({Key key, this.channel, this.location}) : super(key: key);
+  Conversation({@required Key key, @required this.channel, this.location})
+      : super(key: key) {
+    currentKey = key;
+  }
 
-  _ConversationState createState() => _ConversationState();
+  ConversationState createState() => ConversationState();
 }
 
-class _ConversationState extends State<Conversation>
+class ConversationState extends State<Conversation>
     with HavingSubscriptionMixin, AutomaticKeepAliveClientMixin {
   MutableProperty<Order> order = MutableProperty(null);
 
@@ -50,7 +60,7 @@ class _ConversationState extends State<Conversation>
   ScrollController _scrollController;
 
   //expansion of whole card
-  bool expandFlag;
+  bool expandFlag = false;
 
   //expansion of location description only
   bool expansionFlag;
@@ -67,12 +77,15 @@ class _ConversationState extends State<Conversation>
   //control color of send button
   bool sendButtonFlag;
 
+  ConversationState() {
+    print("testing 123");
+    isTouchDown = false;
+    sendButtonFlag = false;
+  }
+
   @override
   void initState() {
     super.initState();
-    expandFlag = false;
-    isTouchDown = false;
-    sendButtonFlag = false;
     _myFocusNode = FocusNode();
     _myFocusNode.addListener(_keyboardListener);
     _textController = TextEditingController();
@@ -84,6 +97,12 @@ class _ConversationState extends State<Conversation>
 
   @override
   void dispose() {
+    if (currentKey.currentState == this) {
+      print("current key disposed");
+      currentKey = null;
+    }
+
+    print("disposed");
     _myFocusNode.dispose();
     _textController.dispose();
     _scrollController.dispose();
@@ -92,6 +111,7 @@ class _ConversationState extends State<Conversation>
   }
 
   _keyboardListener() {
+    print("testing it came 2");
     if (_myFocusNode.hasFocus) {
       setState(() {
         expandFlag = true;
@@ -102,6 +122,7 @@ class _ConversationState extends State<Conversation>
       });
     }
   }
+
   bool _userStoppedScrolling(
       Notification notification, ScrollController scrollController) {
     return notification is UserScrollNotification &&
@@ -110,47 +131,46 @@ class _ConversationState extends State<Conversation>
   }
 
   bool _scrollListener(Notification notification) {
-
     // if (notification is ScrollNotification) {
     // ScrollNotification scrollNotification = notification;
 
-    if(!_userStoppedScrolling(notification, _scrollController)){
+    if (!_userStoppedScrolling(notification, _scrollController)) {
       print("test 1");
-    if (_scrollController.offset > initial) {
-            print("test 2");
+      if (_scrollController.offset > initial) {
+        print("test 2");
 
-      setState(() {
-        expandFlag = false;
-      });
-    }
+        setState(() {
+          expandFlag = false;
+        });
+      }
 
-    if (_scrollController.offset < initial) {
-            print("test 3");
+      if (_scrollController.offset < initial) {
+        print("test 3");
 
-      setState(() {
-        expandFlag = true;
-      });
-    }
+        setState(() {
+          expandFlag = true;
+        });
+      }
 
-    // if (_scrollController.offset >=
-    //         _scrollController.position.maxScrollExtent &&
-    //     !_scrollController.position.outOfRange) {
-    //             print("test 4");
+      // if (_scrollController.offset >=
+      //         _scrollController.position.maxScrollExtent &&
+      //     !_scrollController.position.outOfRange) {
+      //             print("test 4");
 
-    //   setState(() {
-    //     expandFlag = false;
-    //   });
-    // }
+      //   setState(() {
+      //     expandFlag = false;
+      //   });
+      // }
 
-    // if (_scrollController.offset <=
-    //         _scrollController.position.minScrollExtent &&
-    //     !_scrollController.position.outOfRange) {
-    //   setState(() {
-    //                     print("test 5");
+      // if (_scrollController.offset <=
+      //         _scrollController.position.minScrollExtent &&
+      //     !_scrollController.position.outOfRange) {
+      //   setState(() {
+      //                     print("test 5");
 
-    //     expandFlag = true;
-    //   });
-    // }
+      //     expandFlag = true;
+      //   });
+      // }
     }
     return true;
     // }
@@ -158,6 +178,7 @@ class _ConversationState extends State<Conversation>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
@@ -252,13 +273,7 @@ class _ConversationState extends State<Conversation>
   }
 
   Widget _buildB() {
-    return StreamBuilder(
-        stream: order.producer,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-          if (!snapshot.hasData) return Offstage();
-          return _buildBody();
-        });
+    return _buildBody();
   }
 
   Widget _buildBody() {
@@ -323,17 +338,18 @@ class _ConversationState extends State<Conversation>
                 child: Wrap(
                   children: <Widget>[
                     StreamBuilder(
-                      stream: order.value.deliveryLocationDescription,
+                      stream: order.producer.switchMap((order) => order != null
+                          ? order.deliveryLocationDescription
+                          : Rxdart.Observable.just(null)),
                       builder: (context, snap) {
-                        if (!snap.hasData) return Offstage();
+                        if (!snap.hasData || snap.data == null)
+                          return Offstage();
                         return ConfigurableExpansionTile(
-                          selectable:
-                              Order.fromUID(widget.channel.orderUid.value),
+                          selectable: order.value,
                           initiallyExpanded: false,
                           onExpansionChanged: (expanded) {
                             setState(() {
-                              expansionFlag =
-                                  widget.channel.isSelectedProperty.value;
+                              expansionFlag = order.value.isSelected;
                             });
                           },
                           header: Column(
@@ -783,30 +799,32 @@ class _ConversationState extends State<Conversation>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return CircularProgressIndicator();
           return GestureDetector(
-            onTap: () {
-              if (_myFocusNode.hasFocus) {
-                _myFocusNode.unfocus();
-                setState(() {
-                  expandFlag = false;
-                });
-              }
-            },
-            onPanDown: (_) {
-              initial = _scrollController.position.pixels;
-            },
-            child: new NotificationListener(
-      child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              controller: _scrollController,
-              reverse: true,
-              padding: EdgeInsets.all(10.0),
-              itemBuilder: (context, index) {
-                return _buildChatBox(index, snapshot.data[index]);
+              onTap: () {
+                if (_myFocusNode.hasFocus) {
+                  _myFocusNode.unfocus();
+                  print("testing it came 3");
+
+                  setState(() {
+                    expandFlag = false;
+                  });
+                }
               },
-              itemCount: snapshot.data.length,
-            ),
-          onNotification: _scrollListener ,)
-          );
+              onPanDown: (_) {
+                initial = _scrollController.position.pixels;
+              },
+              child: new NotificationListener(
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: EdgeInsets.all(10.0),
+                  itemBuilder: (context, index) {
+                    return _buildChatBox(index, snapshot.data[index]);
+                  },
+                  itemCount: snapshot.data.length,
+                ),
+                onNotification: _scrollListener,
+              ));
         },
       ),
     );
@@ -1103,11 +1121,15 @@ class _ConversationState extends State<Conversation>
                   },
                   focusNode: _myFocusNode,
                   onTap: () {
+                    print("testing it came 4");
+
                     setState(() {
                       expandFlag = true;
                     });
                   },
                   onSubmitted: (_) {
+                    print("testing it came 5");
+
                     setState(() {
                       expandFlag = false;
                     });

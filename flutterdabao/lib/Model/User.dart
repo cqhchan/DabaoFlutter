@@ -15,6 +15,7 @@ class User extends FirebaseType {
   static String nameKey = "N";
   static String handPhoneKey = 'HP';
   static String emailKey = 'E';
+  static String tokenKey = 'T';
   static String thumbnailImageKey = 'TI';
   static String creationTime = 'CT';
   static String lastLoginTime = 'LLT';
@@ -36,6 +37,8 @@ class User extends FirebaseType {
   User.fromUID(String uid) : super.fromUID(uid);
 
   User.fromAuth(FirebaseUser user) : super.fromUID(user.uid) {
+
+    if (ConfigHelper.instance.currentUserProperty.value != this)
     ConfigHelper.instance.currentUserProperty.value = this;
 
     listOfAvalibleVouchers = FirebaseCollectionReactive<Voucher>(Firestore
@@ -158,6 +161,13 @@ class User extends FirebaseType {
         .collection(className)
         .document(uid)
         .setData({emailKey: email}, merge: true);
+  }
+
+  void setToken(String token) {
+    Firestore.instance
+        .collection(className)
+        .document(uid)
+        .setData({tokenKey: token}, merge: true);
   }
 
   //last login date
