@@ -23,13 +23,14 @@ import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutterdabao/HelperClasses/NotificationHandler.dart';
 
 class Home extends StatefulWidget {
   @override
   _Home createState() => _Home();
 }
 
-class _Home extends State<Home> {
+class _Home extends State<Home> with AutomaticKeepAliveClientMixin{
   FirebaseMessaging _firebaseMessaging;
 
   ScrollController _controller = ScrollController();
@@ -50,31 +51,38 @@ class _Home extends State<Home> {
 
     //Firebase Push  Notifications
     _firebaseMessaging = FirebaseMessaging();
+
+    if (Platform.isIOS) iOS_Permission();
+
     firebaseCloudMessaging_Listeners();
   }
 
-  void firebaseCloudMessaging_Listeners() {
-    if (Platform.isIOS) iOS_Permission();
-
-    _firebaseMessaging.getToken().then((token) {
-      print("testing Token ");
-      print(token);
+  void firebaseCloudMessaging_Listeners() async {
+    await _firebaseMessaging.getToken().then((token) {
+      if (ConfigHelper.instance.currentUserProperty.value != null)
+        ConfigHelper.instance.currentUserProperty.value.setToken(token);
     });
+
+        print("firebaseCloudMessaging_Listeners 0");
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
+        print("Notification came here 1");
+        print("onMessage " + message.toString());
       },
       onResume: (Map<String, dynamic> message) async {
-        print("onResume " + message.toString());
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
+                print("Notification came here 2");
+        await ConfigHelper.instance.navigatorKey.currentState.push(FadeRoute(widget: TabBarPage()));
+
+        // print("onResume " + message.toString());
+        // await handleNotificationForResumeAndLaunch(message);
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch " + message.toString());
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
+        print("Notification came here 3");
+        // print("onLaunch " + message.toString());
+        ConfigHelper.instance.navigatorKey.currentState.push(FadeRoute(widget: TabBarPage()));
+
+        // await handleNotificationForResumeAndLaunch(message);
       },
     );
   }
@@ -94,7 +102,11 @@ class _Home extends State<Home> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) { 
+    
+    super.build(context);
+    
+    return Scaffold(
         backgroundColor: ColorHelper.dabaoOffWhiteF5,
         body: Stack(children: <Widget>[
           ListView(
@@ -288,6 +300,7 @@ class _Home extends State<Home> {
           )
         ]),
       );
+  }
 
   Container squardCard(
     String imagePath,
@@ -337,4 +350,8 @@ class _Home extends State<Home> {
           return BalanceCard(user, context);
         });
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

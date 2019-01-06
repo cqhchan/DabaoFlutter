@@ -18,16 +18,28 @@ class _ChatPageState extends State<ChatPage>
   String otherUser;
 
   @override
+    void initState() {
+      // TODO: implement initState
+      super.initState();
+              print("testing init called ");
+
+    }
+  @override
   Widget build(BuildContext context) {
+
+        print("testing build called ");
+
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Your Inbox', style: FontHelper.header3TextStyle),
       ),
-      body: _buildChatPage(),
+      body: Container(),
     );
   }
 
   Widget _buildChatPage() {
+    print("testing ");
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance
           .collection('channels')
@@ -36,9 +48,10 @@ class _ChatPageState extends State<ChatPage>
                   ConfigHelper.instance.currentUserProperty.value.uid)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return Offstage();
-        if (snapshot.hasData)
-          return _buildChatList(context, snapshot.data.documents);
+        // if (!snapshot.hasData) 
+        return Offstage();
+        // if (snapshot.hasData)
+        //   return _buildChatList(context, snapshot.data.documents);
       },
     );
   }
