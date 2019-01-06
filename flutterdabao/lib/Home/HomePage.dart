@@ -31,7 +31,6 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home> with AutomaticKeepAliveClientMixin{
-  FirebaseMessaging _firebaseMessaging;
 
   ScrollController _controller = ScrollController();
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);

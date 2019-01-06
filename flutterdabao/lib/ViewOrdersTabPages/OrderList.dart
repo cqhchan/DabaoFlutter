@@ -695,7 +695,7 @@ class _OrderItemCellState extends State<_OrderItemCell> {
         MaterialPageRoute(
           builder: (BuildContext context) => Conversation(
                 channel: channel,
-                location: widget.location,
+                location: widget.location, key: GlobalKey<ConversationState>(debugLabel: channel.uid),
               ),
         ),
       );

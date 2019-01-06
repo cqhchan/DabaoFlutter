@@ -53,27 +53,27 @@ class DabaoApp extends StatelessWidget with HavingSubscriptionMixin {
     }));
 
     _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message)  {
+      onMessage: (Map<String, dynamic> message) {
         print("testing onMessage");
-         FirebaseAuth.instance.currentUser().then((user) {
+        FirebaseAuth.instance.currentUser().then((user) {
           if (user != null) {
             handleNotificationForOnMessage(message);
           }
         });
       },
-      onResume: (Map<String, dynamic> message)  {
+      onResume: (Map<String, dynamic> message) {
         print("testing onResume");
 
-         FirebaseAuth.instance.currentUser().then((user) {
+        FirebaseAuth.instance.currentUser().then((user) {
           if (user != null) {
             handleNotificationForResumeAndLaunch(message);
           }
         });
       },
-      onLaunch: (Map<String, dynamic> message)  {
+      onLaunch: (Map<String, dynamic> message) {
         print("testing onLaunch");
 
-         FirebaseAuth.instance.currentUser().then((user) {
+        FirebaseAuth.instance.currentUser().then((user) {
           if (user != null) {
             handleNotificationForResumeAndLaunch(message);
           }

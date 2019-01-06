@@ -26,19 +26,30 @@ handleNotificationForResumeAndLaunch(map) async {
           String channelID = map[channelIDKey];
           Channel channel = Channel.fromUID(channelID);
 
-          await ConfigHelper.instance.navigatorKey.currentState
-              .push(MaterialPageRoute(
-                  builder: (context) => Conversation(
-                        key:
-                            GlobalKey<ConversationState>(debugLabel: channelID),
-                        channel: channel,
-                      )));
+          GlobalKey<ConversationState> key = getCurrentKey();
+
+          if (key == null ||
+              key.currentState == null ||
+              key.currentState.widget == null ||
+              key.currentState.widget.channel.uid != channelID) {
+            GlobalKey<ConversationState> newKey =
+                GlobalKey<ConversationState>(debugLabel: channelID);
+
+            ConfigHelper.instance.navigatorKey.currentState
+                .push(MaterialPageRoute(builder: (context) {
+              print("it seems to be calling twice");
+              return Conversation(
+                key: newKey,
+                channel: channel,
+              );
+            }));
+          }
         }
 
         break;
 
       case modeNewPotentialOrder:
-        await ConfigHelper.instance.navigatorKey.currentState
+        ConfigHelper.instance.navigatorKey.currentState
             .push(FadeRoute(widget: TabBarPage()));
         break;
     }
