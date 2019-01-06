@@ -9,6 +9,8 @@ import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/DabaoerReward.dart';
+import 'package:flutterdabao/Model/DabaoeeReward.dart';
+
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
@@ -50,13 +52,17 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<Voucher>> currentUserOpenVouchersProperty =
       MutableProperty<List<Voucher>>(List());
 
-  MutableProperty<DabaoerReward>  currentDabaoerRewards =
+  MutableProperty<DabaoerReward> currentDabaoerRewards =
       MutableProperty<DabaoerReward>(null);
+
+  MutableProperty<DabaoeeReward> currentDabaoeeRewards =
+      MutableProperty<DabaoeeReward>(null);
 
   MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
   MutableProperty<double> _globalFixedPrice = MutableProperty<double>(1.5);
   MutableProperty<int> _globalMinItemCount = MutableProperty<int>(2);
-  final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> navigatorKey =
+      new GlobalKey<NavigatorState>();
 
   String error;
 
@@ -113,7 +119,8 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription
         .add(currentDabaoerRewards.bindTo(currentDabaoerRewardsProducer()));
 
-
+    subscription
+        .add(currentDabaoeeRewards.bindTo(currentDabaoeeRewardsProducer()));
   }
 
   bool get isInDebugMode {
@@ -136,7 +143,21 @@ class ConfigHelper with HavingSubscriptionMixin {
                 .orderBy(DabaoerReward.startTimeKey, descending: true)
                 .limit(1))
             .observable
-            .map((list) => list == null ? null : list.length == 0 ? null : list.first ));
+            .map((list) =>
+                list == null ? null : list.length == 0 ? null : list.first));
+  }
+
+  Stream<DabaoeeReward> currentDabaoeeRewardsProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? null
+        : FirebaseCollectionReactive<DabaoeeReward>(Firestore.instance
+                .collection("dabaoeeRewards")
+                .where(DabaoeeReward.validKey, isEqualTo: true)
+                .orderBy(DabaoeeReward.startTimeKey, descending: true)
+                .limit(1))
+            .observable
+            .map((list) =>
+                list == null ? null : list.length == 0 ? null : list.first));
   }
 
   Stream<Wallet> currentUserWalletProducer() {
@@ -160,7 +181,8 @@ class ConfigHelper with HavingSubscriptionMixin {
         ? List<DabaoRoute.Route>()
         : FirebaseCollectionReactive<DabaoRoute.Route>(Firestore.instance
                 .collection("routes")
-                .where(DabaoRoute.Route.statusKey, isEqualTo: DabaoRoute.routeStatus_Open)
+                .where(DabaoRoute.Route.statusKey,
+                    isEqualTo: DabaoRoute.routeStatus_Open)
                 .where(DabaoRoute.Route.creatorKey, isEqualTo: user.uid))
             .observable);
   }

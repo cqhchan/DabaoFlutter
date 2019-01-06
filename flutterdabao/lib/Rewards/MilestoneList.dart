@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/Model/DabaoeeReward.dart';
 import 'package:flutterdabao/Model/DabaoerReward.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class MilestonesList extends StatefulWidget {
-  final Stream<List<DabaoerRewardsMilestone>> milestones;
+  final Stream<List> milestones;
   final Stream<int> points;
   final context;
   MilestonesList({
@@ -56,7 +57,7 @@ class _MilestonesListState extends State<MilestonesList> {
   }
 
   Widget _buildMileStones(data) {
-    return StreamBuilder<List<DabaoerRewardsMilestone>>(
+    return StreamBuilder<List>(
         stream: Observable(widget.milestones),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return JumpingDotsProgressIndicator();
@@ -72,7 +73,7 @@ class _MilestonesListState extends State<MilestonesList> {
         });
   }
 
-  Widget _buildItemCell(DabaoerRewardsMilestone data) {
+  Widget _buildItemCell(data) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       margin: EdgeInsets.fromLTRB(18, 5, 18, 5),
@@ -96,7 +97,7 @@ class _MilestonesListState extends State<MilestonesList> {
               ],
             ),
             Column(
-              children: <Widget>[_buildProgress(data), _buildFooter()],
+              children: <Widget>[_buildProgress(data), _buildFooter(data)],
             ),
           ],
         ),
@@ -225,10 +226,28 @@ class _MilestonesListState extends State<MilestonesList> {
     );
   }
 
-  Widget _buildFooter() {
-    return Text(
-      'Reward:',
-      style: FontHelper.semiBold10Grey,
-    );
+  Widget _buildFooter(data) {
+    if (data is DabaoerRewardsMilestone) {
+      return StreamBuilder(
+        stream: data.rewardAmount,
+        builder: (context, snapshot) {
+          return Text(
+            'Reward: ${snapshot.data}',
+            style: FontHelper.semiBold10Grey,
+          );
+        },
+      );
+    } else if (data is DabaoeeRewardsMilestone) {
+      return StreamBuilder(
+        stream: data.voucherDescription,
+        builder: (context, snapshot) {
+          return Text(
+            'Reward: ${snapshot.data}',
+            style: FontHelper.semiBold10Grey,
+          );
+        },
+      );
+    }
+    return Text('');
   }
 }

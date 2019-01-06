@@ -30,6 +30,7 @@ class User extends FirebaseType {
   Observable<List<Voucher>> listOfAvalibleVouchers;
   Observable<List<Voucher>> listOfInUsedVouchers;
   Observable<int> currentDabaoerRewardsNumber;
+  Observable<int> currentDabaoeeRewardsNumber;
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   User.fromUID(String uid) : super.fromUID(uid);
@@ -52,9 +53,23 @@ class User extends FirebaseType {
             .collection("vouchers")
             .where(Voucher.statusKey, isEqualTo: voucher_Status_InUse))
         .observable;
-    
+
     currentDabaoerRewardsNumber = ConfigHelper
         .instance.currentDabaoerRewards.producer
+        .switchMap((reward) => reward == null
+            ? Observable.just(0)
+            : Observable(Firestore.instance
+                .collection(this.className)
+                .document(this.uid)
+                .collection(reward.className)
+                .document(reward.uid)
+                .snapshots()
+                .map((doc) => !doc.exists
+                    ? 0
+                    : !doc.data.containsKey("QTY") ? 0 : doc.data["QTY"])));
+
+    currentDabaoeeRewardsNumber = ConfigHelper
+        .instance.currentDabaoeeRewards.producer
         .switchMap((reward) => reward == null
             ? Observable.just(0)
             : Observable(Firestore.instance

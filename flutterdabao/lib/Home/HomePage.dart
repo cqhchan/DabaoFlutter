@@ -96,6 +96,179 @@ class _Home extends State<Home> {
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: ColorHelper.dabaoOffWhiteF5,
+        drawer: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: Drawer(
+            child: ListView(
+              shrinkWrap: true,
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      StreamBuilder<String>(
+                        stream: ConfigHelper
+                            .instance.currentUserProperty.value.thumbnailImage,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data == null) {
+                            return Image.asset(
+                              'assets/icons/profile_icon.png',
+                            );
+                          }
+                          return CircleAvatar(
+                            backgroundImage: NetworkImage(snapshot.data),
+                            radius: 20,
+                          );
+                        },
+                      ),
+                      StreamBuilder<String>(
+                        stream: ConfigHelper
+                            .instance.currentUserProperty.producer
+                            .switchMap((user) {
+                          if (user == null) return Observable.just("");
+                          return user.name;
+                        }),
+                        builder: (context, snap) {
+                          if (!snap.hasData) return Offstage();
+                          return Container(
+                            padding: EdgeInsets.only(top: 10.0, left: 10.0),
+                            child: Text(
+                              "${snap.data}",
+                              overflow: TextOverflow.ellipsis,
+                              style: FontHelper.regular(
+                                  ColorHelper.dabaoOffGrey70, 14),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                      Color(0xFFF6A818),
+                      Color(0xFFF6AC23),
+                      Color(0xFFF7B131),
+                      Color(0xFFF9C15A),
+                      Color(0xFFFBD184),
+                      Color(0xFFFDE3B4),
+                      Color(0xFFFEEFD3),
+                      Color(0xFFFFFCF8)
+                    ]),
+                  ),
+                ),
+                ListTile(
+                  title: Text(
+                    'Active',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text(
+                    'History',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text(
+                    'DabaoPay',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text(
+                    'DabaoRewards',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text(
+                    'Payment Methods',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text(
+                    'Notifications',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                SizedBox(height: 20),
+                ListTile(
+                  title: Text(
+                    'About Dabao',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text(
+                    'Contact Us',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                SizedBox(height: 20),
+                ListTile(
+                  title: Text(
+                    'Log Out',
+                    style: FontHelper.regular12Black,
+                  ),
+                  onTap: () {
+                    FirebaseAuth.instance.signOut();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
         body: Stack(children: <Widget>[
           ListView(
             controller: _controller,

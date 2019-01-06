@@ -3,6 +3,7 @@ import 'package:flutterdabao/CustomError/FatalError.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/Model/Channels.dart';
+import 'package:flutterdabao/Model/DabaoeeReward.dart';
 import 'package:flutterdabao/Model/DabaoerReward.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Message.dart';
@@ -75,8 +76,16 @@ abstract class Mappable extends Identifiable {
       return new DabaoerReward.fromDocument(doc) as T;
     }
 
+    if (T == DabaoeeReward) {
+      return new DabaoeeReward.fromDocument(doc) as T;
+    }
+
     if (T == DabaoerRewardsMilestone) {
       return new DabaoerRewardsMilestone.fromDocument(doc) as T;
+    }
+
+    if (T == DabaoeeRewardsMilestone) {
+      return new DabaoeeRewardsMilestone.fromDocument(doc) as T;
     }
 
     throw FatalError("Mappable Not Declared");

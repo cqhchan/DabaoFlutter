@@ -3,7 +3,7 @@ import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:rxdart/rxdart.dart';
 
-class DabaoerReward extends FirebaseType {
+class DabaoeeReward extends FirebaseType {
   static final String startTimeKey = "ST";
   static final String endTimeKey = "ET";
   static final String validKey = "V";
@@ -11,9 +11,9 @@ class DabaoerReward extends FirebaseType {
   BehaviorSubject<DateTime> startDate;
   BehaviorSubject<DateTime> endDate;
 
-  Observable<List<DabaoerRewardsMilestone>> milestones;
+  Observable<List<DabaoeeRewardsMilestone>> milestones;
 
-  DabaoerReward.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
+  DabaoeeReward.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
   @override
   void map(Map<String, dynamic> data) {
@@ -36,31 +36,34 @@ class DabaoerReward extends FirebaseType {
   void setUpVariables() {
     endDate = BehaviorSubject();
     startDate = BehaviorSubject();
-    milestones = FirebaseCollectionReactive<DabaoerRewardsMilestone>(Firestore
+    milestones = FirebaseCollectionReactive<DabaoeeRewardsMilestone>(Firestore
             .instance
             .collection(this.className)
             .document(this.uid)
-            .collection("dabaoerRewardsMilestones"))
+            .collection("dabaoeeRewardsMilestones"))
         .observable;
   }
 }
 
-class DabaoerRewardsMilestone extends FirebaseType {
+class DabaoeeRewardsMilestone extends FirebaseType {
   final String quantityOfComfirmedOrdersKey = "QTY";
-  final String rewardAmountKey = "A";
   final String titleKey = "T";
   final String descriptionKey = "D";
+  final String voucherKey = "V";
+  final String voucherDescriptionKey = "VD";
 
   BehaviorSubject<int> quantityOfComfirmedOrders;
-  BehaviorSubject<double> rewardAmount;
   BehaviorSubject<String> title;
   BehaviorSubject<String> description;
+  BehaviorSubject<String> voucher;
+  BehaviorSubject<String> voucherDescription;
 
-  DabaoerRewardsMilestone.fromDocument(DocumentSnapshot doc)
+  DabaoeeRewardsMilestone.fromDocument(DocumentSnapshot doc)
       : super.fromDocument(doc);
 
   @override
   void map(Map<String, dynamic> data) {
+    
     if (data.containsKey(quantityOfComfirmedOrdersKey)) {
       quantityOfComfirmedOrders.add(data[quantityOfComfirmedOrdersKey]);
     } else {
@@ -79,10 +82,16 @@ class DabaoerRewardsMilestone extends FirebaseType {
       description.add(null);
     }
 
-    if (data.containsKey(rewardAmountKey)) {
-      rewardAmount.add(data[rewardAmountKey] + 0.0);
+    if (data.containsKey(voucherKey)) {
+      voucher.add(data[voucherKey]);
     } else {
-      rewardAmount.add(null);
+      voucher.add(null);
+    }
+
+    if (data.containsKey(voucherDescriptionKey)) {
+      voucherDescription.add(data[voucherDescriptionKey]);
+    } else {
+      voucherDescription.add(null);
     }
   }
 
@@ -91,6 +100,7 @@ class DabaoerRewardsMilestone extends FirebaseType {
     quantityOfComfirmedOrders = BehaviorSubject();
     title = BehaviorSubject();
     description = BehaviorSubject();
-    rewardAmount = BehaviorSubject();
+    voucher = BehaviorSubject();
+    voucherDescription = BehaviorSubject();
   }
 }
