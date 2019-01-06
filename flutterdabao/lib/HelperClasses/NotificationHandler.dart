@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ChatPage/ChatPage.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/DabaoerChat.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
+import 'package:settings/settings.dart';
 
 const String modeChannel = "NEWMESSAGE";
 
@@ -15,7 +18,7 @@ const String modeCompletedOrder = "ORDERCOMPLETED";
 const String modeNewPotentialOrder = "POTENTIALORDER";
 
 handleNotificationForResumeAndLaunch(map) async {
-  print("testing 12345" + map.toString());
+  print("testing " + map.toString());
 
   if (map.containsKey("mode")) {
     String mode = map["mode"];
@@ -37,7 +40,6 @@ handleNotificationForResumeAndLaunch(map) async {
 
             ConfigHelper.instance.navigatorKey.currentState
                 .push(MaterialPageRoute(builder: (context) {
-              print("it seems to be calling twice");
               return Conversation(
                 key: newKey,
                 channel: channel,
@@ -70,29 +72,29 @@ handleNotificationForOnMessage(map) async {
     String mode = data["mode"];
 
     switch (mode) {
-      case modeChannel:
-        if (data.containsKey(channelIDKey)) {
-          String channelID = data[channelIDKey];
-          Channel channel = Channel.fromUID(channelID);
-          GlobalKey<ConversationState> key = getCurrentKey();
-
-          if (key == null ||
-              key.currentState == null ||
-              key.currentState.widget == null ||
-              key.currentState.widget.channel.uid != channelID)
-            print("Not same channel");
-          else {
-            print("same channel");
-          }
-        }
-
+      case modeAcceptedOrder:
+        showDialog(
+            context: ConfigHelper.instance.navigatorKey.currentState.context,
+            builder: (_) => new AlertDialog(
+                  title: const Text("Order Accepted"),
+                  content: const Text("Your Order has been accepted!"),
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "VIEW",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
+                        await Settings.openAppSettings();
+                        ConfigHelper.instance.navigatorKey.currentState
+                            .popUntil(ModalRoute.withName(
+                                Navigator.defaultRouteName));
+                      },
+                    ),
+                  ],
+                ));
         break;
 
-      case modeNewPotentialOrder:
-        // print("testing it came here");
-        // await ConfigHelper.instance.navigatorKey.currentState
-        //     .push(FadeRoute(widget: TabBarPage()));
-        break;
     }
   }
 }

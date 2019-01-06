@@ -22,8 +22,6 @@ import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutterdabao/HelperClasses/NotificationHandler.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -47,11 +45,6 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin{
 
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
-
-    //Firebase Push  Notifications
-    // _firebaseMessaging = FirebaseMessaging();
-
-
   }
 
 
