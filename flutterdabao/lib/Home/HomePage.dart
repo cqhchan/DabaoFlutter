@@ -127,8 +127,9 @@ class _Home extends State<Home> {
               opacityProperty: _opacityProperty,
               rightButton: GestureDetector(
                 onTap: () {
-                  //TODO
-                  //ADD in navigate to chat
+                   Navigator.of(context).push(
+                      FadeRoute(widget: ChatPage()),
+                    );
                 },
                 child: Container(
                     height: 40.0,
