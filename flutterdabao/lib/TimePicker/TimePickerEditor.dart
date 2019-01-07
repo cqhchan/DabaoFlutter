@@ -157,6 +157,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
       ),

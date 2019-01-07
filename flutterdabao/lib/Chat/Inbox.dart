@@ -39,6 +39,7 @@ class _ChatPageState extends State<ChatPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text('Your Inbox', style: FontHelper.header3TextStyle),
       ),
       body: _buildChatPage(),
@@ -271,7 +272,9 @@ class _ChannelCellState extends State<_ChannelCell> {
                                     color: ColorHelper.dabaoOrange),
                                 child: Center(
                                     child: Text(
-                                  snapshot.data >= 100 ? "99" : snapshot.data.toString(),
+                                  snapshot.data >= 100
+                                      ? "99"
+                                      : snapshot.data.toString(),
                                   style: FontHelper.medium(Colors.white, 12.0),
                                 )),
                               ),

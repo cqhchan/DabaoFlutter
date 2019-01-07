@@ -9,7 +9,6 @@ import 'package:flutterdabao/Rewards/MyVoucherPage.dart';
 import 'package:flutterdabao/Rewards/SearchPromoCodePage.dart';
 
 class RewardsTabBarPage extends StatefulWidget {
-
   final int initalIndex;
 
   RewardsTabBarPage({Key key, this.initalIndex = 2}) : super(key: key);
@@ -20,12 +19,13 @@ class RewardsTabBarPage extends StatefulWidget {
   }
 }
 
-class RewardsTabBarPageState extends State<RewardsTabBarPage>{
+class RewardsTabBarPageState extends State<RewardsTabBarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorHelper.dabaoOffWhiteF5,
       appBar: AppBar(
+        centerTitle: true,
         automaticallyImplyLeading: false,
         leading: GestureDetector(
           onTap: () {
@@ -101,6 +101,4 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage>{
       ),
     );
   }
-
-
 }

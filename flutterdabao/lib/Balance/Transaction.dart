@@ -25,6 +25,7 @@ class _TransactionsState extends State<TransactionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text('Dabao Balance', style: FontHelper.header3TextStyle),
       ),
       body: _buildTransactionPage(),

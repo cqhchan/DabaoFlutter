@@ -429,6 +429,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
 
   AppBar buildAppBar() {
     return AppBar(
+      centerTitle: true,
       backgroundColor: Colors.white,
       title: Text(
         "D A B A O",

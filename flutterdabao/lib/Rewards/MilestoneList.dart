@@ -20,7 +20,7 @@ class MilestonesList extends StatefulWidget {
   _MilestonesListState createState() => _MilestonesListState();
 }
 
-class _MilestonesListState extends State<MilestonesList> {
+class _MilestonesListState extends State<MilestonesList> with AutomaticKeepAliveClientMixin {
   int _totalPoints;
   int temp;
   int lastTemp;
@@ -36,6 +36,7 @@ class _MilestonesListState extends State<MilestonesList> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -250,4 +251,8 @@ class _MilestonesListState extends State<MilestonesList> {
     }
     return Text('');
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

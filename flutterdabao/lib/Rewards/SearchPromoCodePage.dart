@@ -37,7 +37,7 @@ class _SearchPromoCodePageState extends State<SearchPromoCodePage> {
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     _controller.dispose();
     super.dispose();
   }
@@ -84,6 +84,7 @@ class _SearchPromoCodePageState extends State<SearchPromoCodePage> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
+          centerTitle: true,
           leading: GestureDetector(
             onTap: () {
               Navigator.pop(context);

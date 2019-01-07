@@ -5,7 +5,6 @@ import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Matches extends StatefulWidget {
-
   final DabaoRoute.Route route;
 
   Matches({Key key, @required this.route}) : super(key: key);
@@ -17,22 +16,25 @@ class Matches extends StatefulWidget {
 }
 
 class MatchesState extends State<Matches> {
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            appBar: AppBar(automaticallyImplyLeading: true, title: Text(
+      appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+        title: Text(
           'MATCHES',
           style: FontHelper.header3TextStyle,
-        ),),
-        body: OrderList(
-          context: context,
-          route: widget.route,
-          input: widget.route.listOfPotentialOrders,
-          location: widget.route.deliveryLocation.value.map((geopoint)=> LatLng(geopoint.latitude, geopoint.longitude)).first,
         ),
-      
+      ),
+      body: OrderList(
+        context: context,
+        route: widget.route,
+        input: widget.route.listOfPotentialOrders,
+        location: widget.route.deliveryLocation.value
+            .map((geopoint) => LatLng(geopoint.latitude, geopoint.longitude))
+            .first,
+      ),
     );
   }
 }

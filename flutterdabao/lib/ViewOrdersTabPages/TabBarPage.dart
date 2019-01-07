@@ -16,10 +16,9 @@ class TabBarPage extends StatefulWidget {
 }
 
 class TabBarPageState extends State<TabBarPage> {
-
-  void initState() { 
+  void initState() {
     super.initState();
-     // Request permission and start listening to current location
+    // Request permission and start listening to current location
     startListeningToCurrentLocation();
   }
 
@@ -37,6 +36,7 @@ class TabBarPageState extends State<TabBarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         automaticallyImplyLeading: false,
         leading: GestureDetector(
           onTap: () {
