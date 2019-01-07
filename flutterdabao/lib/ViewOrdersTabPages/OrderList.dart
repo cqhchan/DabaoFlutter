@@ -15,7 +15,7 @@ import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/DabaoerChat.dart';
+import 'package:flutterdabao/Chat/DabaoerChat.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';

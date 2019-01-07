@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutterdabao/ChatPage/CounterOfferOverlay.dart';
+import 'package:flutterdabao/Chat/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
@@ -102,6 +102,7 @@ class _ConversationState extends State<Conversation>
       });
     }
   }
+
   bool _userStoppedScrolling(
       Notification notification, ScrollController scrollController) {
     return notification is UserScrollNotification &&
@@ -110,50 +111,20 @@ class _ConversationState extends State<Conversation>
   }
 
   bool _scrollListener(Notification notification) {
+    if (!_userStoppedScrolling(notification, _scrollController)) {
+      if (_scrollController.offset > initial) {
+        setState(() {
+          expandFlag = false;
+        });
+      }
 
-    // if (notification is ScrollNotification) {
-    // ScrollNotification scrollNotification = notification;
-
-    if(!_userStoppedScrolling(notification, _scrollController)){
-      print("test 1");
-    if (_scrollController.offset > initial) {
-            print("test 2");
-
-      setState(() {
-        expandFlag = false;
-      });
-    }
-
-    if (_scrollController.offset < initial) {
-            print("test 3");
-
-      setState(() {
-        expandFlag = true;
-      });
-    }
-
-    // if (_scrollController.offset >=
-    //         _scrollController.position.maxScrollExtent &&
-    //     !_scrollController.position.outOfRange) {
-    //             print("test 4");
-
-    //   setState(() {
-    //     expandFlag = false;
-    //   });
-    // }
-
-    // if (_scrollController.offset <=
-    //         _scrollController.position.minScrollExtent &&
-    //     !_scrollController.position.outOfRange) {
-    //   setState(() {
-    //                     print("test 5");
-
-    //     expandFlag = true;
-    //   });
-    // }
+      if (_scrollController.offset < initial) {
+        setState(() {
+          expandFlag = true;
+        });
+      }
     }
     return true;
-    // }
   }
 
   @override
@@ -783,30 +754,30 @@ class _ConversationState extends State<Conversation>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return CircularProgressIndicator();
           return GestureDetector(
-            onTap: () {
-              if (_myFocusNode.hasFocus) {
-                _myFocusNode.unfocus();
-                setState(() {
-                  expandFlag = false;
-                });
-              }
-            },
-            onPanDown: (_) {
-              initial = _scrollController.position.pixels;
-            },
-            child: new NotificationListener(
-      child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              controller: _scrollController,
-              reverse: true,
-              padding: EdgeInsets.all(10.0),
-              itemBuilder: (context, index) {
-                return _buildChatBox(index, snapshot.data[index]);
+              onTap: () {
+                if (_myFocusNode.hasFocus) {
+                  _myFocusNode.unfocus();
+                  setState(() {
+                    expandFlag = false;
+                  });
+                }
               },
-              itemCount: snapshot.data.length,
-            ),
-          onNotification: _scrollListener ,)
-          );
+              onPanDown: (_) {
+                initial = _scrollController.position.pixels;
+              },
+              child: new NotificationListener(
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: EdgeInsets.all(10.0),
+                  itemBuilder: (context, index) {
+                    return _buildChatBox(index, snapshot.data[index]);
+                  },
+                  itemCount: snapshot.data.length,
+                ),
+                onNotification: _scrollListener,
+              ));
         },
       ),
     );
@@ -1183,7 +1154,6 @@ class _ConversationState extends State<Conversation>
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }
 

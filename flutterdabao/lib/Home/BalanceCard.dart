@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutterdabao/Balance/Transaction.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
@@ -161,7 +162,10 @@ class BalanceCard extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => TransactionsPage()));
+            },
             child: Container(
                 padding: EdgeInsets.only(right: 5.0, left: 5.0),
                 child: Icon(

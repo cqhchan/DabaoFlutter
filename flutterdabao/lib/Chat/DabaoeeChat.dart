@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutterdabao/ChatPage/CounterOfferOverlay.dart';
+import 'package:flutterdabao/Chat/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
@@ -70,6 +70,9 @@ class _ConversationState extends State<Conversation>
 
   @override
   void initState() {
+
+    print('\n------------------Talking to: ${widget.otherUser}------------------');
+
     super.initState();
     expandFlag = false;
     isTouchDown = false;
@@ -112,50 +115,19 @@ class _ConversationState extends State<Conversation>
   }
 
   bool _scrollListener(Notification notification) {
-
-    // if (notification is ScrollNotification) {
-    // ScrollNotification scrollNotification = notification;
-
-    if(!_userStoppedScrolling(notification, _scrollController)){
-      print("test 1");
-    if (_scrollController.offset > initial) {
-            print("test 2");
-
-      setState(() {
-        expandFlag = false;
-      });
-    }
-
-    if (_scrollController.offset < initial) {
-            print("test 3");
-
-      setState(() {
-        expandFlag = true;
-      });
-    }
-
-    // if (_scrollController.offset >=
-    //         _scrollController.position.maxScrollExtent &&
-    //     !_scrollController.position.outOfRange) {
-    //             print("test 4");
-
-    //   setState(() {
-    //     expandFlag = false;
-    //   });
-    // }
-
-    // if (_scrollController.offset <=
-    //         _scrollController.position.minScrollExtent &&
-    //     !_scrollController.position.outOfRange) {
-    //   setState(() {
-    //                     print("test 5");
-
-    //     expandFlag = true;
-    //   });
-    // }
+    if (!_userStoppedScrolling(notification, _scrollController)) {
+      if (_scrollController.offset > initial) {
+        setState(() {
+          expandFlag = false;
+        });
+      }
+      if (_scrollController.offset < initial) {
+        setState(() {
+          expandFlag = true;
+        });
+      }
     }
     return true;
-    // }
   }
 
   @override
@@ -784,7 +756,7 @@ class _ConversationState extends State<Conversation>
               initial = _scrollController.position.pixels;
             },
             child: NotificationListener(
-                          child: ListView.builder(
+              child: ListView.builder(
                 cacheExtent: 500.0 * snapshot.data.length,
                 physics: const AlwaysScrollableScrollPhysics(),
                 controller: _scrollController,
@@ -797,7 +769,6 @@ class _ConversationState extends State<Conversation>
               ),
               onNotification: _scrollListener,
             ),
-            
           );
         },
       ),

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutterdabao/Balance/Transaction.dart';
 import 'package:flutterdabao/CustomError/FatalError.dart';
 import 'package:flutterdabao/ExtraProperties/Identifiable.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
@@ -10,6 +11,7 @@ import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/Route.dart';
+import 'package:flutterdabao/Model/Transaction.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
 
@@ -86,6 +88,10 @@ abstract class Mappable extends Identifiable {
 
     if (T == DabaoeeRewardsMilestone) {
       return new DabaoeeRewardsMilestone.fromDocument(doc) as T;
+    }
+
+    if (T == Transact) {
+      return new Transact.fromDocument(doc) as T;
     }
 
     throw FatalError("Mappable Not Declared");

@@ -6,6 +6,13 @@ class DateTimeHelper {
     return DateTime.fromMillisecondsSinceEpoch(int.parse(epoch));
   }
 
+  static String convertEpochSecondsToDateTimeString(int epoch) {
+    DateTime date = DateTime.fromMillisecondsSinceEpoch(epoch * 1000);
+
+
+    return convertTimeToDisplayString(date);
+  }
+
   static String convertDateTimeToAMPM(DateTime date) {
     return DateFormat.jm().format(date);
   }

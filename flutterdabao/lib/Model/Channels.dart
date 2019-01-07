@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/User.dart';
@@ -21,6 +22,7 @@ class Channel extends FirebaseType with Selectable {
   BehaviorSubject<String> deliverer;
 
   Observable<List<Message>> listOfMessages;
+  Observable<List<Channel>> listOfChannel;
 
   Channel.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
@@ -49,6 +51,14 @@ class Channel extends FirebaseType with Selectable {
       temp.sort((a, b) => b.timestamp.value.compareTo(a.timestamp.value));
       return temp.toList();
     });
+
+    // listOfChannel = FirebaseCollectionReactive<Channel>(Firestore.instance
+    //         .collection(className)
+    //         .where('P',
+    //             arrayContains:
+    //                 ConfigHelper.instance.currentUserProperty.value.uid)
+    //         .limit(20))
+    //     .observable;
   }
 
   @override
