@@ -185,13 +185,12 @@ class ConfigHelper with HavingSubscriptionMixin {
   Stream<List<Channel>> currentUserChannelProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? List<Channel>()
-        : FirebaseCollectionReactive<Order>(Firestore.instance
+        : FirebaseCollectionReactive<Channel>(Firestore.instance
                 .collection('channels')
                 .where('P',
                     arrayContains:
                         ConfigHelper.instance.currentUserProperty.value.uid)
-                .orderBy(Channel.lastSentKey, descending: true)
-                .limit(30))
+                .orderBy(Channel.lastSentKey, descending: true))
             .observable);
   }
 

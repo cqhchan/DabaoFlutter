@@ -35,23 +35,14 @@ class Channel extends FirebaseType with Selectable {
     lastSent = BehaviorSubject();
     orderUid = BehaviorSubject();
     deliverer = BehaviorSubject();
-
+    unreadMessages = BehaviorSubject();
     listOfMessages = FirebaseCollectionReactive<Message>(Firestore.instance
             .collection(className)
             .document(this.uid)
             .collection("messages")
             .orderBy('T', descending: true)
-            .limit(20))
-        .observable
-        .map((data) {
-      List<Message> temp = List<Message>();
-
-      data.forEach((element) {
-        temp.add(element);
-      });
-      temp.sort((a, b) => b.timestamp.value.compareTo(a.timestamp.value));
-      return temp.toList();
-    });
+            .limit(100)).observable;
+        
 
     // listOfChannel = FirebaseCollectionReactive<Channel>(Firestore.instance
     //         .collection(className)
@@ -78,8 +69,10 @@ class Channel extends FirebaseType with Selectable {
 
     // handle unread messages
     if (ConfigHelper.instance.currentUserProperty.value != null) {
-      if (data.containsKey(ConfigHelper.instance.currentUserProperty.value.uid)) {
-        unreadMessages.add(data[ConfigHelper.instance.currentUserProperty.value.uid]);
+      if (data
+          .containsKey(ConfigHelper.instance.currentUserProperty.value.uid)) {
+        unreadMessages
+            .add(data[ConfigHelper.instance.currentUserProperty.value.uid]);
       } else {
         unreadMessages.add(0);
       }

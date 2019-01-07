@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutterdabao/ChatPage/CounterOfferOverlay.dart';
+import 'package:flutterdabao/Chat/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
@@ -47,7 +47,7 @@ class Conversation extends StatefulWidget {
 }
 
 class ConversationState extends State<Conversation>
-    with HavingSubscriptionMixin, AutomaticKeepAliveClientMixin {
+    with HavingSubscriptionMixin {
   MutableProperty<Order> order = MutableProperty(null);
 
   //text input properties in textfield
@@ -94,16 +94,18 @@ class ConversationState extends State<Conversation>
     subscription.add(order.bindTo(widget.channel.orderUid
         .where((uid) => uid != null)
         .map((uid) => Order.fromUID(uid))));
+
+  subscription.add(widget.channel.listOfMessages.listen((onData){
+
+    print("testing messages " + onData.length.toString());
+  }));
+  
   }
 
   @override
   void dispose() {
-    if (currentKey.currentState == this) {
-      print("current key disposed");
-      currentKey = null;
-    }
+    currentKey = null;
 
-    print("disposed");
     _myFocusNode.dispose();
     _textController.dispose();
     _scrollController.dispose();
@@ -153,7 +155,6 @@ class ConversationState extends State<Conversation>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
@@ -200,15 +201,17 @@ class ConversationState extends State<Conversation>
           widget.channel.participantsID,
           ConfigHelper.instance.currentUserProperty.producer,
           (participantsID, currentUser) {
-        if (participantsID == null || currentUser == null) {
+        List tempID = List.from(participantsID);
+        if (tempID == null || currentUser == null) {
           return null;
         }
-        participantsID.removeWhere((id) => id != currentUser.uid);
-        if (participantsID.length == 0) {
+        tempID.remove(currentUser.uid);
+
+        if (tempID.length == 0) {
           return null;
         }
 
-        return User.fromUID(participantsID.first);
+        return User.fromUID(tempID.first);
       }),
       builder: (context, user) {
         if (!user.hasData || user == null) return Offstage();
@@ -298,10 +301,14 @@ class ConversationState extends State<Conversation>
                     order.producer.switchMap((currentOrder) =>
                         currentOrder == null ? null : currentOrder.status),
                     (currentUser, orderUserID, status) {
-              if (currentUser == null || orderUserID == null || status == null)
+              if (currentUser == null ||
+                  orderUserID == null ||
+                  status == null) {
                 return false;
-
-              if (status != orderStatus_Requested) return false;
+              }
+              if (status != orderStatus_Requested) {
+                return false;
+              }
 
               return currentUser.uid != orderUserID;
             }),
@@ -822,15 +829,21 @@ class ConversationState extends State<Conversation>
   Widget _buildMessages() {
     return Flexible(
       child: StreamBuilder<List<Message>>(
-        stream: widget.channel.listOfMessages,
+        stream: widget.channel.listOfMessages.map((data) {
+          List<Message> temp = List<Message>();
+
+          data.forEach((element) {
+            temp.add(element);
+          });
+          temp.sort((a, b) => b.timestamp.value.compareTo(a.timestamp.value));
+          return temp.toList();
+        }),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return CircularProgressIndicator();
           return GestureDetector(
               onTap: () {
                 if (_myFocusNode.hasFocus) {
                   _myFocusNode.unfocus();
-                  print("testing it came 3");
-
                   setState(() {
                     expandFlag = false;
                   });
@@ -860,264 +873,173 @@ class ConversationState extends State<Conversation>
   Widget _buildChatBox(index, Message data) {
     if (data.message.value == null && data.imageUrl.value != null) {
       //query images
-      return Row(
-        mainAxisAlignment: data.sender.value ==
-                ConfigHelper.instance.currentUserProperty.value.uid
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        children: <Widget>[
-          Offstage(
-            offstage: data.sender.value ==
-                    ConfigHelper.instance.currentUserProperty.value.uid
-                ? true
-                : false,
-            child: StreamBuilder<User>(
-              stream: order.value.creator.where((uid) => uid != null).map(
-                    (uid) => User.fromUID(uid),
-                  ),
-              builder: (context, user) {
-                if (!user.hasData) return Offstage();
-                return Row(
-                  children: <Widget>[
-                    StreamBuilder<String>(
-                      stream: user.data.thumbnailImage,
-                      builder: (context, user) {
-                        if (!user.hasData) return Offstage();
-                        return FittedBox(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(30.0),
-                            child: SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: CachedNetworkImage(
-                                imageUrl: user.data,
-                                placeholder: GlowingProgressIndicator(
-                                  child: Icon(
-                                    Icons.image,
-                                    size: 50,
-                                  ),
-                                ),
-                                errorWidget: Icon(Icons.error),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-          Column(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Offstage(
-                    offstage: data.sender.value ==
-                            ConfigHelper.instance.currentUserProperty.value.uid
-                        ? false
-                        : true,
-                    child: Center(
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                        child: Text(
-                          DateTimeHelper.convertDateTimeToDate(
-                              data.timestamp.value),
-                          style: FontHelper.smallTimeTextStyle,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.5),
-                    margin: EdgeInsets.fromLTRB(5, 5, 12, 5),
-                    child: Wrap(
-                      alignment: data.sender.value ==
-                              ConfigHelper
-                                  .instance.currentUserProperty.value.uid
-                          ? WrapAlignment.end
-                          : WrapAlignment.start,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 4,
-                      children: <Widget>[
-                        GestureDetector(
-                          child: CachedNetworkImage(
-                            imageUrl: data.imageUrl.value,
-                            placeholder: GlowingProgressIndicator(
-                              child: Icon(
-                                Icons.account_circle,
-                                size: 30,
-                              ),
-                            ),
-                            errorWidget: Icon(Icons.error),
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => HeroPhotoViewWrapper(
-                                        tag: data.imageUrl.value,
-                                        imageProvider:
-                                            NetworkImage(data.imageUrl.value),
-                                      ),
-                                ));
-                          },
-                        ),
-                        Text(
-                          DateTimeHelper.convertDateTimeToTime(
-                              data.timestamp.value),
-                          style: FontHelper.smallTimeTextStyle,
-                        )
-                      ],
-                    ),
-                  ),
-                  Offstage(
-                    offstage: data.sender.value ==
-                            ConfigHelper.instance.currentUserProperty.value.uid
-                        ? true
-                        : false,
-                    child: Center(
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                        child: Text(
-                          DateTimeHelper.convertDateTimeToDate(
-                              data.timestamp.value),
-                          style: FontHelper.smallTimeTextStyle,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      );
+      if (data.sender.value ==
+          ConfigHelper.instance.currentUserProperty.value.uid) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            buildMessgeDate(data),
+            buildMessageImage(data),
+          ],
+        );
+      } else {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            buildSenderImage(data),
+            buildMessageImage(data),
+            buildMessgeDate(data),
+          ],
+        );
+      }
     } else {
       //query messages
-      return Row(
-        mainAxisAlignment: data.sender.value ==
-                ConfigHelper.instance.currentUserProperty.value.uid
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        children: <Widget>[
-          Offstage(
-            offstage: data.sender.value ==
+
+      if (data.sender.value ==
+          ConfigHelper.instance.currentUserProperty.value.uid) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            buildMessgeDate(data),
+            buildMessageMessage(data),
+          ],
+        );
+      } else {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            buildSenderImage(data),
+            buildMessageMessage(data),
+            buildMessgeDate(data),
+          ],
+        );
+      }
+    }
+  }
+
+  Flexible buildMessageMessage(Message data) {
+    return Flexible(
+      child: Container(
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+        padding: EdgeInsets.all(9),
+        margin: EdgeInsets.all(5),
+        decoration: BoxDecoration(
+            color: data.sender.value ==
                     ConfigHelper.instance.currentUserProperty.value.uid
-                ? true
-                : false,
-            child: StreamBuilder<User>(
-              stream: order.value.creator.where((uid) => uid != null).map(
-                    (uid) => User.fromUID(uid),
-                  ),
+                ? ColorHelper.dabaoPaleOrange
+                : ColorHelper.dabaoGreyE0,
+            borderRadius: BorderRadius.circular(10)),
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 4,
+          children: <Widget>[
+            Text(data.message.value),
+            Text(
+              DateTimeHelper.convertDateTimeToTime(data.timestamp.value),
+              style: FontHelper.smallTimeTextStyle,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  StreamBuilder<User> buildSenderImage(Message data) {
+    return StreamBuilder<User>(
+      stream: data.sender.where((uid) => uid != null).map(
+            (uid) => User.fromUID(uid),
+          ),
+      builder: (context, user) {
+        if (!user.hasData) return Offstage();
+        return Row(
+          children: <Widget>[
+            StreamBuilder<String>(
+              stream: user.data.thumbnailImage,
               builder: (context, user) {
                 if (!user.hasData) return Offstage();
-                return Row(
-                  children: <Widget>[
-                    StreamBuilder<String>(
-                      stream: user.data.thumbnailImage,
-                      builder: (context, user) {
-                        if (!user.hasData) return Offstage();
-                        return FittedBox(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(30.0),
-                            child: SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: CachedNetworkImage(
-                                imageUrl: user.data,
-                                placeholder: GlowingProgressIndicator(
-                                  child: Icon(
-                                    Icons.account_circle,
-                                    size: 30,
-                                  ),
-                                ),
-                                errorWidget: Icon(Icons.error),
-                              ),
-                            ),
+                return FittedBox(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30.0),
+                    child: SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: CachedNetworkImage(
+                        imageUrl: user.data,
+                        placeholder: GlowingProgressIndicator(
+                          child: Icon(
+                            Icons.image,
+                            size: 50,
                           ),
-                        );
-                      },
+                        ),
+                        errorWidget: Icon(Icons.error),
+                      ),
                     ),
-                  ],
+                  ),
                 );
               },
             ),
-          ),
-          Column(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Offstage(
-                    offstage: data.sender.value ==
-                            ConfigHelper.instance.currentUserProperty.value.uid
-                        ? false
-                        : true,
-                    child: Center(
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                        child: Text(
-                          DateTimeHelper.convertDateTimeToDate(
-                              data.timestamp.value),
-                          style: FontHelper.smallTimeTextStyle,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8),
-                    padding: EdgeInsets.all(9),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                        color: data.sender.value ==
-                                ConfigHelper
-                                    .instance.currentUserProperty.value.uid
-                            ? ColorHelper.dabaoPaleOrange
-                            : ColorHelper.dabaoGreyE0,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 4,
-                      children: <Widget>[
-                        Text(data.message.value),
-                        Text(
-                          DateTimeHelper.convertDateTimeToTime(
-                              data.timestamp.value),
-                          style: FontHelper.smallTimeTextStyle,
-                        )
-                      ],
-                    ),
-                  ),
-                  Offstage(
-                    offstage: data.sender.value ==
-                            ConfigHelper.instance.currentUserProperty.value.uid
-                        ? true
-                        : false,
-                    child: Center(
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                        child: Text(
-                          DateTimeHelper.convertDateTimeToDate(
-                              data.timestamp.value),
-                          style: FontHelper.smallTimeTextStyle,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+          ],
+        );
+      },
+    );
+  }
+
+  Container buildMessageImage(Message data) {
+    return Container(
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.5),
+      margin: EdgeInsets.fromLTRB(5, 5, 12, 5),
+      child: Wrap(
+        alignment: data.sender.value ==
+                ConfigHelper.instance.currentUserProperty.value.uid
+            ? WrapAlignment.end
+            : WrapAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 4,
+        children: <Widget>[
+          GestureDetector(
+            child: CachedNetworkImage(
+              imageUrl: data.imageUrl.value,
+              placeholder: GlowingProgressIndicator(
+                //TODO CHANGE DEFAULT IMAGE
+                child: Icon(
+                  Icons.check_circle,
+                  size: 30,
+                ),
               ),
-            ],
+              errorWidget: Icon(Icons.account_circle),
+            ),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HeroPhotoViewWrapper(
+                          tag: data.imageUrl.value,
+                          imageProvider: NetworkImage(data.imageUrl.value),
+                        ),
+                  ));
+            },
           ),
+          Text(
+            DateTimeHelper.convertDateTimeToTime(data.timestamp.value),
+            style: FontHelper.smallTimeTextStyle,
+          )
         ],
-      );
-    }
+      ),
+    );
+  }
+
+  Widget buildMessgeDate(Message data) {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+        child: Text(
+          DateTimeHelper.convertDateTimeToDate(data.timestamp.value),
+          style: FontHelper.smallTimeTextStyle,
+        ),
+      ),
+    );
   }
 
   Widget _buildInput() {
@@ -1230,10 +1152,6 @@ class ConversationState extends State<Conversation>
     );
     return croppedFile;
   }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }
 
 class PhotoHero extends StatelessWidget {
