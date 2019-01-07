@@ -55,8 +55,7 @@ class Wallet extends FirebaseType {
           .collection(className)
           .document(this.uid)
           .collection("statements")
-          // .document(DateTimeHelper.convertDateTimeToWeek(DateTime.now()))
-          .document('2019_WEEK_01')
+          .document(DateTimeHelper.convertDateTimeToWeek(DateTime.now()))
           .collection('transactions'),
     ).observable;
 

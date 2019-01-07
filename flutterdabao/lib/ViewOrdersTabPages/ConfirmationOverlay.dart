@@ -410,7 +410,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
           initialValue: selectedDate.value.minute ~/ 10,
           step: 1,
           onChanged: (value) {
-            lastSelectedMinute = value;
             _handleMinuteChanged(value * 10);
           },
         ),

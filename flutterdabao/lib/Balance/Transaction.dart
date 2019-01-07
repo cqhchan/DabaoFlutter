@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
-import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -29,6 +29,7 @@ class _TransactionsState extends State<TransactionsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: <Widget>[ChatNavigationButton()],
         centerTitle: true,
         title: Text('Dabao Balance', style: FontHelper.header3TextStyle),
       ),
