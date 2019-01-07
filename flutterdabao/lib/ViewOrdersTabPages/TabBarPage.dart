@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
@@ -48,6 +49,7 @@ class TabBarPageState extends State<TabBarPage> {
             color: Colors.black,
           ),
         ),
+        actions: <Widget>[ChatNavigationButton()],
         elevation: 0.0,
         title: Text(
           'DABAOER',
