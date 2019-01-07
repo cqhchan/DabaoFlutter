@@ -157,6 +157,7 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
       ),
@@ -342,7 +343,6 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
         selectedStartDate.value.minute,
         selectedStartDate.value.second,
         selectedStartDate.value.millisecond);
-    print("start" + selectedStartDate.value.toString());
   }
 
   _handleStartMinuteChanged(num minute) {
@@ -413,7 +413,6 @@ class __TimePickerEditorState extends State<_TimePickerEditor>
   }
 
   Widget buildEndDeliverSelector() {
-    print("end" + selectedEndDate.value.hour.toString());
     integerEndHourPicker = new LoopingHourPicker.hour(
       maxValue: 23,
       minValue: 0,

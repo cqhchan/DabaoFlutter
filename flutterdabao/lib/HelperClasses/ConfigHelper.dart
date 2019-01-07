@@ -58,6 +58,9 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<DabaoeeReward> currentDabaoeeRewards =
       MutableProperty<DabaoeeReward>(null);
 
+  MutableProperty<List<Channel>> currentUserChannelProperty =
+      MutableProperty<List<Channel>>(List());
+
   MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
   MutableProperty<double> _globalFixedPrice = MutableProperty<double>(1.5);
   MutableProperty<int> _globalMinItemCount = MutableProperty<int>(2);
@@ -121,6 +124,9 @@ class ConfigHelper with HavingSubscriptionMixin {
 
     subscription
         .add(currentDabaoeeRewards.bindTo(currentDabaoeeRewardsProducer()));
+
+    subscription
+        .add(currentUserChannelProperty.bindTo(currentUserChannelProducer()));
   }
 
   bool get isInDebugMode {
@@ -173,6 +179,18 @@ class ConfigHelper with HavingSubscriptionMixin {
                 .collection("orders")
                 .where(Order.statusKey, isEqualTo: orderStatus_Requested)
                 .where(Order.creatorKey, isEqualTo: user.uid))
+            .observable);
+  }
+
+  Stream<List<Channel>> currentUserChannelProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Channel>()
+        : FirebaseCollectionReactive<Channel>(Firestore.instance
+                .collection('channels')
+                .where('P',
+                    arrayContains:
+                        ConfigHelper.instance.currentUserProperty.value.uid)
+                .orderBy(Channel.lastSentKey, descending: true))
             .observable);
   }
 

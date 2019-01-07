@@ -19,6 +19,7 @@ class Channel extends FirebaseType with Selectable {
   BehaviorSubject<List<String>> participantsID;
   BehaviorSubject<DateTime> lastSent;
   BehaviorSubject<String> orderUid;
+  BehaviorSubject<int> unreadMessages;
   BehaviorSubject<String> deliverer;
 
   Observable<List<Message>> listOfMessages;
@@ -34,23 +35,22 @@ class Channel extends FirebaseType with Selectable {
     lastSent = BehaviorSubject();
     orderUid = BehaviorSubject();
     deliverer = BehaviorSubject();
-
+    unreadMessages = BehaviorSubject();
     listOfMessages = FirebaseCollectionReactive<Message>(Firestore.instance
             .collection(className)
             .document(this.uid)
             .collection("messages")
             .orderBy('T', descending: true)
-            .limit(20))
-        .observable
-        .map((data) {
-      List<Message> temp = List<Message>();
+            .limit(100))
+        .observable;
+  }
 
-      data.forEach((element) {
-        temp.add(element);
-      });
-      temp.sort((a, b) => b.timestamp.value.compareTo(a.timestamp.value));
-      return temp.toList();
-    });
+  void markAsRead() {
+    if (ConfigHelper.instance.currentUserProperty.value != null)
+      Firestore.instance
+          .collection(this.className)
+          .document(this.uid)
+          .updateData({ConfigHelper.instance.currentUserProperty.value.uid: 0});
   }
 
   @override
@@ -65,6 +65,17 @@ class Channel extends FirebaseType with Selectable {
       orderUid.add(data[orderUidKey]);
     } else {
       orderUid.add(null);
+    }
+
+    // handle unread messages
+    if (ConfigHelper.instance.currentUserProperty.value != null) {
+      if (data
+          .containsKey(ConfigHelper.instance.currentUserProperty.value.uid)) {
+        unreadMessages
+            .add(data[ConfigHelper.instance.currentUserProperty.value.uid]);
+      } else {
+        unreadMessages.add(0);
+      }
     }
 
     if (data.containsKey(participantsKey)) {

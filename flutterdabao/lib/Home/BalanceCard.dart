@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutterdabao/Balance/Transaction.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -19,45 +23,36 @@ class BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
-        width: MediaQuery.of(context).size.width,
-        height: 170.0,
-        child: Card(
-          elevation: 4.0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-          child: user.hasData
-              ? Column(
-                  children: <Widget>[
-                    topWidget(),
-                    Line(
-                      margin: EdgeInsets.fromLTRB(25.0, 0.0, 35.0, 0.0),
-                    ),
-                    bottomRow(),
-                  ],
-                )
-              : Center(
-                  child: new CircularProgressIndicator(
-                  value: null,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(ColorHelper.dabaoOrange),
-                  strokeWidth: 7.0,
-                )),
-        ));
+    return Card(
+      margin: EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+      child: user.hasData
+          ? Column(
+              children: <Widget>[
+                topWidget(),
+                Line(
+                  color: ColorHelper.dabaoOrange,
+                  margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
+                ),
+                bottomRow(),
+              ],
+            )
+          : Center(
+              child: new CircularProgressIndicator(
+              value: null,
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(ColorHelper.dabaoOrange),
+              strokeWidth: 7.0,
+            )),
+    );
   }
 
-  Row bottomRow() {
-    return Row(
-      children: <Widget>[
-        voucherBox(),
-        Container(
-          height: 80,
-          width: 1.0,
-          color: ColorHelper.dabaoGreyE0,
-        ),
-        rewardsBox()
-      ],
+  Widget bottomRow() {
+    return Container(
+      child: Row(
+        children: <Widget>[withdrawalBox(), voucherBox(), rewardsBox()],
+      ),
     );
   }
 
@@ -83,7 +78,36 @@ class BalanceCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Image.asset("assets/icons/reward_gift.png"),
-            Text("Dabao Rewards", style: FontHelper.semiBold14Black)
+            Text("DabaoRewards", style: FontHelper.regular12Black)
+          ],
+        ),
+      ),
+    ));
+  }
+
+  Expanded withdrawalBox() {
+    return Expanded(
+        // How much Earned
+        child: GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          FadeRoute(
+              widget: RewardsTabBarPage(
+            initalIndex: 1,
+          )),
+        );
+      },
+      child: Container(
+        color: Colors.transparent,
+        height: 85.0,
+        margin: EdgeInsets.fromLTRB(10.0, 5, 0.0, 12.5),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Image.asset("assets/icons/cash_out.png"),
+            Text("Cash Out", style: FontHelper.regular12Black)
           ],
         ),
       ),
@@ -106,23 +130,27 @@ class BalanceCard extends StatelessWidget {
       child: Container(
         color: Colors.transparent,
         height: 85.0,
-        margin: EdgeInsets.fromLTRB(10.0, 5, 0.0, 12.5),
+        margin: EdgeInsets.fromLTRB(0.0, 5, 0.0, 12.5),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            // Transform(
+            //   transform: new Matrix4.rotationZ(-0.5),
+            //   alignment: FractionalOffset.center,
+            //   child: ,
+            // ),
             Image.asset("assets/icons/wallet_voucher.png"),
-            Text("Your Vouchers", style: FontHelper.semiBold14Black)
+            Text("Your Vouchers", style: FontHelper.regular12Black)
           ],
         ),
       ),
     ));
   }
 
-  Expanded topWidget() {
-    return Expanded(
-        child: Container(
-      margin: EdgeInsets.fromLTRB(25.0, 0.0, 0.0, 0.0),
+  Widget topWidget() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(15.0, 15.0, 10.0, 10.0),
       child: Center(
           child: Row(
         children: <Widget>[
@@ -177,6 +205,6 @@ class BalanceCard extends StatelessWidget {
           )
         ],
       )),
-    ));
+    );
   }
 }

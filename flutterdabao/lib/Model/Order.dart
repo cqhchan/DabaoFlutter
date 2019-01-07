@@ -8,9 +8,9 @@ import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:rxdart/rxdart.dart';
 
-final String orderStatus_Requested = "Requested";
-final String orderStatus_Accepted = "Accepted";
-final String orderStatus_Completed = "Completed";
+const String orderStatus_Requested = "Requested";
+const String orderStatus_Accepted = "Accepted";
+const String orderStatus_Completed = "Completed";
 
 class Order extends FirebaseType with Selectable {
   static final String createdTimeKey = "CT";
@@ -139,10 +139,8 @@ class Order extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(endTimeKey)) {
-      
       Timestamp temp = data[endTimeKey];
       endDeliveryTime.add(temp.toDate());
-
     } else {
       endDeliveryTime.add(null);
     }

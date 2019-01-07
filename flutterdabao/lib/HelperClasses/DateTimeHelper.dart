@@ -25,6 +25,13 @@ class DateTimeHelper {
 
   static String convertDateTimeToDate(DateTime date) {
     if (isToday(date))
+      return formatDate(date, ['Today, ', dd, '-', mm]);
+    else
+      return formatDate(date, [D, ', ', dd, '-', mm]);
+  }
+
+    static String convertDateTimeToNewLineDate(DateTime date) {
+    if (isToday(date))
       return formatDate(date, ['Today,\n', dd, '-', mm]);
     else
       return formatDate(date, [D, ',\n', dd, '-', mm]);
@@ -62,7 +69,7 @@ class DateTimeHelper {
           date, ['Today, ', date.hour == 12 ? "12" : hh, ':', nn, am]);
     else
       return formatDate(date,
-          [D, ', ', dd, '-', m, ' ', date.hour == 12 ? "12" : hh, ':', nn, am]);
+          [D, ', ', dd, '-', mm, ' ', date.hour == 12 ? "12" : hh, ':', nn, am]);
   }
 
   static String convertStartTimeToDisplayString(DateTime date) {
@@ -95,7 +102,7 @@ class DateTimeHelper {
             ', ',
             dd,
             '-',
-            m,
+            mm,
             ' ',
             start.hour == 12 ? "12" : hh,
             ':',

@@ -24,6 +24,7 @@ class VoucherApplicationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         automaticallyImplyLeading: false,
         leading: GestureDetector(
           onTap: () {
@@ -102,7 +103,7 @@ class _MyVoucherPageState extends State<MyVoucherPage>
                       color: ColorHelper.dabaoOffBlack9B,
                     )),
                 Container(
-                  padding: EdgeInsets.only(left: 4, right: 7),
+                    padding: EdgeInsets.only(left: 4, right: 7),
                     child: Image.asset(
                       "assets/icons/Line 41.png",
                       color: ColorHelper.dabaoOffBlack9B,
@@ -119,7 +120,8 @@ class _MyVoucherPageState extends State<MyVoucherPage>
           ),
         ),
         Expanded(
-            child: _buildBody(context),),
+          child: _buildBody(context),
+        ),
       ],
     );
   }
