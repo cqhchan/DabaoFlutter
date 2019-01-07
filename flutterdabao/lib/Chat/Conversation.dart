@@ -553,7 +553,7 @@ class ConversationState extends State<Conversation>
                   : Container(
                       child: Text(
                         snap.hasData
-                            ? DateTimeHelper.convertDateTimeToDate(startTime) +
+                            ? DateTimeHelper.convertDateTimeToNewLineDate(startTime) +
                                 ', ' +
                                 DateTimeHelper.convertDateTimeToAMPM(endTime)
                             : "Error",
@@ -1036,7 +1036,7 @@ class ConversationState extends State<Conversation>
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         child: Text(
-          DateTimeHelper.convertDateTimeToDate(data.timestamp.value),
+          DateTimeHelper.convertDateTimeToNewLineDate(data.timestamp.value),
           style: FontHelper.smallTimeTextStyle,
         ),
       ),

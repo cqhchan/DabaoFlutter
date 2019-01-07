@@ -123,20 +123,12 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
                       Container(
                         constraints: BoxConstraints(
                             maxWidth: MediaQuery.of(context).size.width - 50),
-                        child: Flex(
-                          direction: Axis.horizontal,
+                        child: Row(
                           children: <Widget>[
                             Expanded(
-                              flex: 5,
                               child: _buildDeliveryPeriod(widget.order),
                             ),
-                            Expanded(
-                              flex: 2,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 6.0),
-                                child: _buildQuantity(widget.order),
-                              ),
-                            ),
+                            _buildQuantity(widget.order),
                           ],
                         ),
                       ),
@@ -327,38 +319,32 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
   }
 
   Widget _buildDeliveryPeriod(Order order) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        StreamBuilder<DateTime>(
-          stream: order.deliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            if (snap.data.day == DateTime.now().day &&
-                snap.data.month == DateTime.now().month &&
-                snap.data.year == DateTime.now().year) {
-              return Text(
-                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              );
-            } else {
-              return Container(
-                child: Text(
-                  snap.hasData
-                      ? DateTimeHelper.convertDateTimeToDate(snap.data) +
-                          ', ' +
-                          DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                      : "Error",
-                  style: FontHelper.semiBoldgrey14TextStyle,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            }
-          },
-        ),
-      ],
+    return StreamBuilder<DateTime>(
+      stream: order.deliveryTime,
+      builder: (context, snap) {
+        if (!snap.hasData) return Offstage();
+        if (snap.data.day == DateTime.now().day &&
+            snap.data.month == DateTime.now().month &&
+            snap.data.year == DateTime.now().year) {
+          return Text(
+            'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
+            style: FontHelper.semiBoldgrey14TextStyle,
+            overflow: TextOverflow.ellipsis,
+          );
+        } else {
+          return Container(
+            child: Text(
+              snap.hasData
+                  ? DateTimeHelper.convertDateTimeToDate(snap.data) +
+                      ', ' +
+                      DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                  : "Error",
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -727,7 +713,8 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
       },
       merge: true,
     ).then((_) {
-          GlobalKey<ConversationState> key = GlobalKey<ConversationState>(debugLabel: channel.uid);
+      GlobalKey<ConversationState> key =
+          GlobalKey<ConversationState>(debugLabel: channel.uid);
 
       Navigator.push(
         context,

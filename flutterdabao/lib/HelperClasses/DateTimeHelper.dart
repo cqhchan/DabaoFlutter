@@ -22,6 +22,13 @@ class DateTimeHelper {
 
   static String convertDateTimeToDate(DateTime date) {
     if (isToday(date))
+      return formatDate(date, ['Today, ', dd, '-', mm]);
+    else
+      return formatDate(date, [D, ', ', dd, '-', mm]);
+  }
+
+    static String convertDateTimeToNewLineDate(DateTime date) {
+    if (isToday(date))
       return formatDate(date, ['Today,\n', dd, '-', mm]);
     else
       return formatDate(date, [D, ',\n', dd, '-', mm]);
