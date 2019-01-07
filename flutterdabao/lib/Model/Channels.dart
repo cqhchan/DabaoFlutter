@@ -51,14 +51,6 @@ class Channel extends FirebaseType with Selectable {
       temp.sort((a, b) => b.timestamp.value.compareTo(a.timestamp.value));
       return temp.toList();
     });
-
-    // listOfChannel = FirebaseCollectionReactive<Channel>(Firestore.instance
-    //         .collection(className)
-    //         .where('P',
-    //             arrayContains:
-    //                 ConfigHelper.instance.currentUserProperty.value.uid)
-    //         .limit(20))
-    //     .observable;
   }
 
   @override

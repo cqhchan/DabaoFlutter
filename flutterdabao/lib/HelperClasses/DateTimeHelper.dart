@@ -8,9 +8,11 @@ class DateTimeHelper {
 
   static String convertEpochSecondsToDateTimeString(int epoch) {
     DateTime date = DateTime.fromMillisecondsSinceEpoch(epoch * 1000);
-
-
     return convertTimeToDisplayString(date);
+  }
+
+  static String convertDateTimeToWeek(DateTime datetime) {
+    return formatDate(datetime, [yyyy, '_WEEK_', WW]);
   }
 
   static String convertDateTimeToAMPM(DateTime date) {
@@ -135,14 +137,13 @@ class DateTimeHelper {
         time.year == today.year);
   }
 
-    static bool sameDay(DateTime time, DateTime other) {
-  
+  static bool sameDay(DateTime time, DateTime other) {
     return (time.day == other.day &&
         time.month == other.month &&
         time.year == other.year);
   }
 
-    static bool isTomorrow(DateTime time) {
+  static bool isTomorrow(DateTime time) {
     DateTime today = DateTime.now().add(Duration(days: 1));
     return (time.day == today.day &&
         time.month == today.month &&

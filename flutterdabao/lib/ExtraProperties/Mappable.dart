@@ -11,9 +11,10 @@ import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/Route.dart';
-import 'package:flutterdabao/Model/Transaction.dart';
+import 'package:flutterdabao/Model/Transact.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
+import 'package:flutterdabao/Model/Wallet.dart';
 
 // ALL MAPPABLE MUST DECLARE THEIR Mapping Method here
 
@@ -92,6 +93,10 @@ abstract class Mappable extends Identifiable {
 
     if (T == Transact) {
       return new Transact.fromDocument(doc) as T;
+    }
+
+    if (T == Wallet) {
+      return new Wallet.fromDocument(doc) as T;
     }
 
     throw FatalError("Mappable Not Declared");

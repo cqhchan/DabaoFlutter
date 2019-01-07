@@ -163,8 +163,10 @@ class BalanceCard extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => TransactionsPage()));
+              Navigator.push(
+                context,
+                FadeRoute(widget: TransactionsPage()),
+              );
             },
             child: Container(
                 padding: EdgeInsets.only(right: 5.0, left: 5.0),
