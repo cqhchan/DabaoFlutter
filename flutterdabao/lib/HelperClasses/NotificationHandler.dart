@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutterdabao/ChatPage/ChatPage.dart';
+import 'package:flutterdabao/Chat/Inbox.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/DabaoerChat.dart';
+import 'package:flutterdabao/Chat/DabaoerChat.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:settings/settings.dart';
 
