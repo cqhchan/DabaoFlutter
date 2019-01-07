@@ -99,13 +99,13 @@ class ConversationState extends State<Conversation>
 
     print("testing messages " + onData.length.toString());
   }));
-  
+
   }
 
   @override
   void dispose() {
+    widget.channel.markAsRead();
     currentKey = null;
-
     _myFocusNode.dispose();
     _textController.dispose();
     _scrollController.dispose();

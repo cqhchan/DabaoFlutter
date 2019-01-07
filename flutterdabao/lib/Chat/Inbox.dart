@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/Conversation.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -9,11 +10,13 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:random_string/random_string.dart';
 import 'package:rxdart/rxdart.dart';
+
 // TODO fix a bug where by if a image is error, it causes the card to not load properly
 class ChatPage extends StatefulWidget {
   _ChatPageState createState() => _ChatPageState();
@@ -63,16 +66,14 @@ class _ChatPageState extends State<ChatPage>
 
   ListView _buildChatList(BuildContext context, List<Channel> snapshot) {
     return ListView(
-            // key: new Key(randomString(20)),
+      // key: new Key(randomString(20)),
 
       cacheExtent: 500.0 * snapshot.length,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
-      children: snapshot.map((data) => _ChannelCell(channel:data)).toList(),
+      children: snapshot.map((data) => _ChannelCell(channel: data)).toList(),
     );
   }
-
-
 
   @override
   bool get wantKeepAlive => true;
@@ -87,32 +88,30 @@ class _ChannelCell extends StatefulWidget {
     // TODO: implement createState
     return _ChannelCellState();
   }
-
-
 }
 
 class _ChannelCellState extends State<_ChannelCell> {
-  Channel channel; 
+  Channel channel;
   @override
-    void initState() {
-      super.initState();
-      channel = widget.channel;
-    }
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildChat(context,channel);
+  void initState() {
+    super.initState();
+    channel = widget.channel;
   }
 
   @override
-void didUpdateWidget(_ChannelCell oldWidget) {
-    if(channel != widget.channel) {
-        setState((){
-            channel = widget.channel;
-        });
+  Widget build(BuildContext context) {
+    return _buildChat(context, channel);
+  }
+
+  @override
+  void didUpdateWidget(_ChannelCell oldWidget) {
+    if (channel != widget.channel) {
+      setState(() {
+        channel = widget.channel;
+      });
     }
     super.didUpdateWidget(oldWidget);
-}
+  }
 
   Widget _buildChat(BuildContext context, Channel channel) {
     return StreamBuilder<User>(
@@ -179,33 +178,16 @@ void didUpdateWidget(_ChannelCell oldWidget) {
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          StreamBuilder<String>(
-                              stream: snap.data.name,
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData || snapshot.data == null)
-                                  return Offstage();
-                                return Text(
-                                  snapshot.data != null ? snapshot.data : '',
-                                  style: FontHelper.regular10Black,
-                                );
-                              }),
-                          StreamBuilder<DateTime>(
-                            stream: channel.lastSent,
-                            builder: (BuildContext context, snapshot) {
-                              if (!snapshot.hasData || snapshot.data == null)
-                                return Offstage();
-                              return Text(
-                                DateTimeHelper.convertTimeToDisplayString(
-                                    snapshot.data),
-                                style: FontHelper.semiBold10Grey,
-                              );
-                            },
-                          )
-                        ],
-                      ),
+                      StreamBuilder<String>(
+                          stream: snap.data.name,
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData || snapshot.data == null)
+                              return Offstage();
+                            return Text(
+                              snapshot.data != null ? snapshot.data : '',
+                              style: FontHelper.regular10Black,
+                            );
+                          }),
                       StreamBuilder<Order>(
                           stream: channel.orderUid.map((orderID) =>
                               orderID == null ? null : Order.fromUID(orderID)),
@@ -239,6 +221,8 @@ void didUpdateWidget(_ChannelCell oldWidget) {
                             .document(channel.orderUid.value +
                                 channel.deliverer.value)
                             .collection('messages')
+                            .orderBy(Message.timestampKey, descending: true)
+                            .limit(1)
                             .snapshots()
                             .map((snapshot) => snapshot.documents.last),
                         builder: (context, snapshot) {
@@ -249,8 +233,53 @@ void didUpdateWidget(_ChannelCell oldWidget) {
                                 ? snapshot.data['M']
                                 : '[Photo]',
                             style: FontHelper.regular12Black,
+                            overflow: TextOverflow.ellipsis,
                           );
                         }),
+                  ),
+                  trailing: Column(
+                    children: <Widget>[
+                      StreamBuilder<DateTime>(
+                        stream: channel.lastSent,
+                        builder: (BuildContext context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data == null)
+                            return Offstage();
+                          return Text(
+                            DateTimeHelper.convertTimeToDisplayString(
+                                snapshot.data),
+                            style: FontHelper.semiBold10Grey,
+                          );
+                        },
+                      ),
+                      //Building unread messages
+                      Container(
+                        height: 50,
+                        width: 50,
+                        child: StreamBuilder<int>(
+                          stream: channel.unreadMessages,
+                          builder: (BuildContext context, snapshot) {
+                            if (!snapshot.hasData ||
+                                snapshot.data == null ||
+                                snapshot.data == 0) return Offstage();
+
+                            return Center(
+                              child: Container(
+                                height: 20,
+                                width: 20,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: ColorHelper.dabaoOrange),
+                                child: Center(
+                                    child: Text(
+                                  snapshot.data >= 100 ? "99" : snapshot.data.toString(),
+                                  style: FontHelper.medium(Colors.white, 12.0),
+                                )),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    ],
                   ),
                   onTap: () {
                     _toChat(channel);
@@ -281,6 +310,4 @@ void didUpdateWidget(_ChannelCell oldWidget) {
       ),
     );
   }
-
-
 }

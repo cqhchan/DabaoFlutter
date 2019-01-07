@@ -41,16 +41,16 @@ class Channel extends FirebaseType with Selectable {
             .document(this.uid)
             .collection("messages")
             .orderBy('T', descending: true)
-            .limit(100)).observable;
-        
+            .limit(100))
+        .observable;
+  }
 
-    // listOfChannel = FirebaseCollectionReactive<Channel>(Firestore.instance
-    //         .collection(className)
-    //         .where('P',
-    //             arrayContains:
-    //                 ConfigHelper.instance.currentUserProperty.value.uid)
-    //         .limit(20))
-    //     .observable;
+  void markAsRead() {
+    if (ConfigHelper.instance.currentUserProperty.value != null)
+      Firestore.instance
+          .collection(this.className)
+          .document(this.uid)
+          .updateData({ConfigHelper.instance.currentUserProperty.value.uid: 0});
   }
 
   @override
