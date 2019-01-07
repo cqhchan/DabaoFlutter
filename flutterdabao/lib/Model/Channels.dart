@@ -19,6 +19,7 @@ class Channel extends FirebaseType with Selectable {
   BehaviorSubject<List<String>> participantsID;
   BehaviorSubject<DateTime> lastSent;
   BehaviorSubject<String> orderUid;
+  BehaviorSubject<int> unreadMessages;
   BehaviorSubject<String> deliverer;
 
   Observable<List<Message>> listOfMessages;
@@ -73,6 +74,15 @@ class Channel extends FirebaseType with Selectable {
       orderUid.add(data[orderUidKey]);
     } else {
       orderUid.add(null);
+    }
+
+    // handle unread messages
+    if (ConfigHelper.instance.currentUserProperty.value != null) {
+      if (data.containsKey(ConfigHelper.instance.currentUserProperty.value.uid)) {
+        unreadMessages.add(data[ConfigHelper.instance.currentUserProperty.value.uid]);
+      } else {
+        unreadMessages.add(0);
+      }
     }
 
     if (data.containsKey(participantsKey)) {
