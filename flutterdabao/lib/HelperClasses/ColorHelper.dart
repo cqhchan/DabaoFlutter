@@ -20,6 +20,7 @@ class ColorHelper {
   static const Color dabaoOffBlack9B = Color.fromRGBO(0x9B, 0x9B, 0x9B, 1.0);
 
   static const Color dabaoGreyE0 = Color.fromRGBO(0xE0, 0xE0, 0xE0, 1.0);
+  static const Color dabaoTealColor = Color.fromRGBO(0x87, 0xBC, 0xBF, 1.0);
 
   static MaterialColor dabaoOrangeMaterial = MaterialColor(
     dabaoOrangeHexCode,

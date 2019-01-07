@@ -57,178 +57,8 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
 
     return Scaffold(
       backgroundColor: ColorHelper.dabaoOffWhiteF5,
-      drawer: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: Drawer(
-          child: ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    StreamBuilder<String>(
-                      stream: ConfigHelper
-                          .instance.currentUserProperty.value.thumbnailImage,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == null) {
-                          return Image.asset(
-                            'assets/icons/profile_icon.png',
-                          );
-                        }
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(snapshot.data),
-                          radius: 20,
-                        );
-                      },
-                    ),
-                    StreamBuilder<String>(
-                      stream: ConfigHelper.instance.currentUserProperty.producer
-                          .switchMap((user) {
-                        if (user == null) return Observable.just("");
-                        return user.name;
-                      }),
-                      builder: (context, snap) {
-                        if (!snap.hasData) return Offstage();
-                        return Container(
-                          padding: EdgeInsets.only(top: 10.0, left: 10.0),
-                          child: Text(
-                            "${snap.data}",
-                            overflow: TextOverflow.ellipsis,
-                            style: FontHelper.regular(
-                                ColorHelper.dabaoOffGrey70, 14),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                    Color(0xFFF6A818),
-                    Color(0xFFF6AC23),
-                    Color(0xFFF7B131),
-                    Color(0xFFF9C15A),
-                    Color(0xFFFBD184),
-                    Color(0xFFFDE3B4),
-                    Color(0xFFFEEFD3),
-                    Color(0xFFFFFCF8)
-                  ]),
-                ),
-              ),
-              ListTile(
-                title: Text(
-                  'Active',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'History',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'DabaoPay',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'DabaoRewards',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'Payment Methods',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'Notifications',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 20),
-              ListTile(
-                title: Text(
-                  'About Dabao',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'Contact Us',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 20),
-              ListTile(
-                title: Text(
-                  'Log Out',
-                  style: FontHelper.regular12Black,
-                ),
-                onTap: () {
-                  FirebaseAuth.instance.signOut();
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      appBar: buildAppBar(),
+      drawer: buildDrawer(context),
       body: Stack(children: <Widget>[
         ListView(
           controller: _controller,
@@ -284,77 +114,77 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
             ),
           ],
         ),
-        // AppBar Widget
-        Material(
-          type: MaterialType.transparency,
-          child: FloatingHeader(
-            header: StreamBuilder<String>(stream: ConfigHelper
-                .instance.currentUserProperty.producer
-                .switchMap((user) {
-              if (user == null) return Observable.just("");
-              return user.name;
-            }), builder: (context, snap) {
-              if (!snap.hasData) return Offstage();
-              return Align(
-                  alignment: Alignment.topLeft,
-                  child: Container(
-                      padding: EdgeInsets.only(top: 10.0, left: 10.0),
-                      child: Text(
-                        "Welcome back, ${snap.data}",
-                        overflow: TextOverflow.ellipsis,
-                        style:
-                            FontHelper.regular(ColorHelper.dabaoOffGrey70, 14),
-                      )));
-            }),
-            backgroundColor: Colors.white,
-            opacityProperty: _opacityProperty,
-            rightButton: GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  FadeRoute(widget: ChatPage()),
-                );
-              },
-              child: Container(
-                  height: 40.0,
-                  width: 40.0,
-                  decoration: new BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: ColorHelper.dabaoOrange,
-                      image: new DecorationImage(
-                          fit: BoxFit.scaleDown,
-                          image:
-                              new AssetImage('assets/icons/chat_white.png')))),
-            ),
-            leftButton: Container(
-              height: 40.0,
-              width: 40.0,
-              child: GestureDetector(
-                onTap: () {},
-                child: StreamBuilder<String>(
-                  stream: ConfigHelper
-                      .instance.currentUserProperty.value.thumbnailImage,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data == null) {
-                      return Image.asset(
-                        'assets/icons/profile_icon.png',
-                        fit: BoxFit.fill,
-                      );
-                    }
-                    return GestureDetector(
-                      onLongPress: () async {
-                        FirebaseAuth.instance.signOut();
-                      },
-                      child: CircleAvatar(
-                        backgroundImage: NetworkImage(snapshot.data),
-                        radius: 20,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
+        // // AppBar Widget
+        // Material(
+        //   type: MaterialType.transparency,
+        //   child: FloatingHeader(
+        //     header: StreamBuilder<String>(stream: ConfigHelper
+        //         .instance.currentUserProperty.producer
+        //         .switchMap((user) {
+        //       if (user == null) return Observable.just("");
+        //       return user.name;
+        //     }), builder: (context, snap) {
+        //       if (!snap.hasData) return Offstage();
+        //       return Align(
+        //           alignment: Alignment.topLeft,
+        //           child: Container(
+        //               padding: EdgeInsets.only(top: 10.0, left: 10.0),
+        //               child: Text(
+        //                 "Welcome back, ${snap.data}",
+        //                 overflow: TextOverflow.ellipsis,
+        //                 style:
+        //                     FontHelper.regular(ColorHelper.dabaoOffGrey70, 14),
+        //               )));
+        //     }),
+        //     backgroundColor: Colors.white,
+        //     opacityProperty: _opacityProperty,
+        //     rightButton: GestureDetector(
+        //       onTap: () {
+        //         Navigator.of(context).push(
+        //           FadeRoute(widget: ChatPage()),
+        //         );
+        //       },
+        //       child: Container(
+        //           height: 40.0,
+        //           width: 40.0,
+        //           decoration: new BoxDecoration(
+        //               shape: BoxShape.circle,
+        //               color: ColorHelper.dabaoOrange,
+        //               image: new DecorationImage(
+        //                   fit: BoxFit.scaleDown,
+        //                   image:
+        //                       new AssetImage('assets/icons/chat_white.png')))),
+        //     ),
+        //     leftButton: Container(
+        //       height: 40.0,
+        //       width: 40.0,
+        //       child: GestureDetector(
+        //         onTap: () {},
+        //         child: StreamBuilder<String>(
+        //           stream: ConfigHelper
+        //               .instance.currentUserProperty.value.thumbnailImage,
+        //           builder: (context, snapshot) {
+        //             if (!snapshot.hasData || snapshot.data == null) {
+        //               return Image.asset(
+        //                 'assets/icons/profile_icon.png',
+        //                 fit: BoxFit.fill,
+        //               );
+        //             }
+        //             return GestureDetector(
+        //               onLongPress: () async {
+        //                 FirebaseAuth.instance.signOut();
+        //               },
+        //               child: CircleAvatar(
+        //                 backgroundImage: NetworkImage(snapshot.data),
+        //                 radius: 20,
+        //               ),
+        //             );
+        //           },
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
 
         StreamBuilder<List>(
           stream: ConfigHelper.instance.currentUserOpenRoutesProperty.producer,
@@ -417,6 +247,247 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
           },
         )
       ]),
+    );
+  }
+
+  SizedBox buildDrawer(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.8,
+      child: Drawer(
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  StreamBuilder<String>(
+                    stream: ConfigHelper
+                        .instance.currentUserProperty.value.thumbnailImage,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data == null) {
+                        return Image.asset(
+                          'assets/icons/profile_icon.png',
+                        );
+                      }
+                      return CircleAvatar(
+                        backgroundImage: NetworkImage(snapshot.data),
+                        radius: 20,
+                      );
+                    },
+                  ),
+                  StreamBuilder<String>(
+                    stream: ConfigHelper.instance.currentUserProperty.producer
+                        .switchMap((user) {
+                      if (user == null) return Observable.just("");
+                      return user.name;
+                    }),
+                    builder: (context, snap) {
+                      if (!snap.hasData) return Offstage();
+                      return Container(
+                        padding: EdgeInsets.only(top: 10.0, left: 10.0),
+                        child: Text(
+                          "${snap.data}",
+                          overflow: TextOverflow.ellipsis,
+                          style: FontHelper.regular(
+                              ColorHelper.dabaoOffGrey70, 14),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [
+                  Color(0xFFF6A818),
+                  Color(0xFFF6AC23),
+                  Color(0xFFF7B131),
+                  Color(0xFFF9C15A),
+                  Color(0xFFFBD184),
+                  Color(0xFFFDE3B4),
+                  Color(0xFFFEEFD3),
+                  Color(0xFFFFFCF8)
+                ]),
+              ),
+            ),
+            ListTile(
+              title: Text(
+                'Active',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text(
+                'History',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text(
+                'DabaoPay',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text(
+                'DabaoRewards',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Payment Methods',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Notifications',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: 20),
+            ListTile(
+              title: Text(
+                'About Dabao',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Contact Us',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: 20),
+            ListTile(
+              title: Text(
+                'Log Out',
+                style: FontHelper.regular12Black,
+              ),
+              onTap: () {
+                FirebaseAuth.instance.signOut();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  AppBar buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      title: Text(
+        "D A B A O",
+        style: FontHelper.regular(Colors.black, 20.0),
+      ),
+      actions: <Widget>[
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              FadeRoute(widget: ChatPage()),
+            );
+          },
+          child: Container(
+              child: Stack(
+            children: <Widget>[
+              Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                      padding: EdgeInsets.only(right: 15),
+                      child: Icon(Icons.inbox))),
+              StreamBuilder<int>(
+                stream: ConfigHelper
+                    .instance.currentUserChannelProperty.producer
+                    .map((channels) {
+                  return channels
+                      .map((channel) => channel.unreadMessages.value == null
+                          ? 0
+                          : channel.unreadMessages.value)
+                      .reduce((a, b) => a + b);
+                }),
+                builder: (BuildContext context, snapshot) {
+                  if (!snapshot.hasData ||
+                      snapshot.data == null ||
+                      snapshot.data == 0) return Offstage();
+
+                  return Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        padding: EdgeInsets.only(left: 5, right: 5),
+                        margin: EdgeInsets.only(left: 10, bottom: 20),
+                        height: 20,
+                        decoration: BoxDecoration(
+                            color: ColorHelper.dabaoTealColor,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: ConstrainedBox(
+                          child: Center(
+                              child: Text(
+                            snapshot.data > 99
+                                ? "99+"
+                                : snapshot.data.toString(),
+                            style: FontHelper.regular(Colors.white, 10),
+                          )),
+                          constraints: BoxConstraints(minWidth: 10),
+                        ),
+                      ));
+                },
+              )
+            ],
+          )),
+        )
+      ],
     );
   }
 
