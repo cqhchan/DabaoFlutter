@@ -14,6 +14,7 @@ import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
 import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'dart:core';
+
 class ConfirmationOverlay extends StatefulWidget {
   final Order order;
   final DabaoRoute.Route route;
@@ -39,27 +40,37 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     super.initState();
 
     DateTime currentTime = DateTime.now();
-    switch (widget.order.mode.value) {
-      case OrderMode.asap:
-        endTime = widget.order.endDeliveryTime.value == null
-            ? currentTime.add(Duration(minutes: 90))
-            : widget.order.endDeliveryTime.value;
-        startTime = currentTime.isAfter(endTime) ? endTime : currentTime;
 
-        break;
-      case OrderMode.scheduled:
-        endTime = widget.order.endDeliveryTime.value;
-        startTime = widget.order.startDeliveryTime.value;
+    subscription.add(widget.order.mode.listen((mode) {
+      switch (mode) {
+        case OrderMode.asap:
+          setState(() {
+            endTime = widget.order.endDeliveryTime.value == null
+                ? currentTime.add(Duration(minutes: 90))
+                : widget.order.endDeliveryTime.value;
+            startTime = currentTime.isAfter(endTime) ? endTime : currentTime;
+          });
 
-        break;
-    }
-    //Copy to prevent editting
-    selectedDate = MutableProperty(
-        DateTime.fromMillisecondsSinceEpoch(startTime.millisecondsSinceEpoch));
+          break;
+        case OrderMode.scheduled:
+          setState(() {
+            endTime = widget.order.endDeliveryTime.value;
+            startTime = widget.order.startDeliveryTime.value;
+          });
 
-    subscription.add(selectedDate.producer.listen((date) {
-      print(date.toString());
+          break;
+      }
+
+      //Copy to prevent editting
+      selectedDate = MutableProperty(DateTime.fromMillisecondsSinceEpoch(
+          startTime.millisecondsSinceEpoch));
     }));
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
   }
 
   //Minute change is dependant on the hour change.
@@ -72,7 +83,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
         selectedDate.value.minute,
         selectedDate.value.second,
         selectedDate.value.millisecond);
-
 
     selectedDate.value = newDate;
   }
@@ -90,60 +100,61 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
 
   @override
   Widget build(BuildContext context) {
-
-     
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body:Builder(builder: (context) =>Align(
-        alignment: Alignment.bottomCenter,
-              child: Container(
-        color: Colors.white,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                _buildDeliveryPeriod(widget.order),
-                _buildArrivalTime(widget.order),
-                _buildHeader(widget.order),
-                SizedBox(
-                  height: 15,
-                ),
-                _buildLocationDescription(widget.order),
-                SizedBox(
-                  height: 15,
-                ),
-                Flex(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  verticalDirection: VerticalDirection.up,
-                  direction: Axis.horizontal,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: _buildBackButton(),
+        backgroundColor: Colors.transparent,
+        body: Builder(
+          builder: (context) => Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  color: Colors.white,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          _buildDeliveryPeriod(widget.order),
+                          _buildArrivalTime(widget.order),
+                          _buildHeader(widget.order),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          _buildLocationDescription(widget.order),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Flex(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            verticalDirection: VerticalDirection.up,
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: _buildBackButton(),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child:
+                                      _buildPickUpButton(widget.order, context),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
                       ),
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: _buildPickUpButton(widget.order, context),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ),),
-      ),) 
-    );
+                  ),
+                ),
+              ),
+        ));
   }
 
   Row _buildDeliveryPeriod(Order order) {
@@ -151,46 +162,27 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        StreamBuilder<DateTime>(
-          stream: order.startDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            if (snap.data.day == DateTime.now().day &&
-                snap.data.month == DateTime.now().month &&
-                snap.data.year == DateTime.now().year) {
-              return Text(
-                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
+        (startTime.day == DateTime.now().day &&
+                startTime.month == DateTime.now().month &&
+                startTime.year == DateTime.now().year)
+            ? Text(
+                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(startTime),
                 style: FontHelper.semiBold14Black,
                 overflow: TextOverflow.ellipsis,
-              );
-            } else {
-              return Container(
-                child: Text(
-                  snap.hasData
-                      ? DateTimeHelper.convertDateTimeToDate(snap.data) +
-                          ', ' +
-                          DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                      : "Error",
-                  style: FontHelper.semiBold14Black,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            }
-          },
-        ),
-        StreamBuilder<DateTime>(
-          stream: order.endDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            return Text(
-              snap.hasData
-                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                  : '',
+              )
+            : Text(
+                DateTimeHelper.convertDateTimeToDate(startTime) +
+                    ', ' +
+                    DateTimeHelper.convertDateTimeToAMPM(startTime),
+                style: FontHelper.semiBold14Black,
+                overflow: TextOverflow.ellipsis,
+              ),
+        Container(
+            child: Text( " - " +
+              DateTimeHelper.convertDateTimeToAMPM(endTime),
               style: FontHelper.semiBold14Black,
               overflow: TextOverflow.ellipsis,
-            );
-          },
-        ),
+            )),
       ],
     );
   }
@@ -326,39 +318,36 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
         ),
       ),
       onPressed: () async {
-   
         print(selectedDate.value);
 
-        if (selectedDate.value.isAfter(startTime.subtract(Duration(minutes: 9))) && selectedDate.value.isBefore(endTime.add(Duration(minutes: 9)))){
-        
-        order.isSelectedProperty.value = false;
-        showLoadingOverlay(context: context);
-        var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
-          routeID: widget.route == null ? null : widget.route.uid,
-          orderID: widget.order.uid,
-          acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
-          deliveryTime:
-              DateTimeHelper.convertDateTimeToString(selectedDate.value),
-        );
-        if (isSuccessful) {
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
+        if (selectedDate.value
+                .isAfter(startTime.subtract(Duration(minutes: 9))) &&
+            selectedDate.value.isBefore(endTime.add(Duration(minutes: 9)))) {
+          order.isSelectedProperty.value = false;
+          showLoadingOverlay(context: context);
+          var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
+            routeID: widget.route == null ? null : widget.route.uid,
+            orderID: widget.order.uid,
+            acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
+            deliveryTime:
+                DateTimeHelper.convertDateTimeToString(selectedDate.value),
+          );
+          if (isSuccessful) {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          } else {
+            Navigator.of(context).pop();
+            final snackBar = SnackBar(
+                content: Text(
+                    'An Error has occured. Please check your network connectivity'));
+            Scaffold.of(context).showSnackBar(snackBar);
+          }
         } else {
-          Navigator.of(context).pop();
           final snackBar = SnackBar(
-              content: Text(
-                  'An Error has occured. Please check your network connectivity'));
-          Scaffold.of(context).showSnackBar(snackBar);
-        }
-
-        } else {
-                    final snackBar = SnackBar(
               content: Text(
                   'Delivery Time must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(startTime, endTime)}'));
           Scaffold.of(context).showSnackBar(snackBar);
         }
-
-
       },
     );
   }
@@ -385,8 +374,12 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
       return Text("ERROR");
     }
     int lastSelectedMinute = selectedDate.value.minute;
-    print("testing Max : " + (startTime.hour + (endTime.difference(startTime).inMinutes / 60).ceil()).toString());
-    print("testing init : " + (startTime.hour + selectedDate.value.difference(startTime).inHours).toString());
+    print("testing Max : " +
+        (startTime.hour + (endTime.difference(startTime).inMinutes / 60).ceil())
+            .toString());
+    print("testing init : " +
+        (startTime.hour + selectedDate.value.difference(startTime).inHours)
+            .toString());
 
     return Row(
       children: <Widget>[
@@ -401,7 +394,8 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
           width: 10.0,
         ),
         HourPicker.hour(
-          maxValue: startTime.hour + (endTime.difference(startTime).inMinutes / 60).ceil() ,
+          maxValue: startTime.hour +
+              (endTime.difference(startTime).inMinutes / 60).ceil(),
           minValue: startTime.hour,
           initialValue:
               startTime.hour + selectedDate.value.difference(startTime).inHours,
@@ -412,13 +406,13 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
         ),
         Text(':', style: FontHelper.robotoRegular50Black),
         MinutePicker.minute(
-              maxValue: 5,
-              minValue: 0,
-              initialValue: selectedDate.value.minute ~/10,
-              step: 1,
-              onChanged: (value) {
-                lastSelectedMinute = value;
-                _handleMinuteChanged(value * 10);
+          maxValue: 5,
+          minValue: 0,
+          initialValue: selectedDate.value.minute ~/ 10,
+          step: 1,
+          onChanged: (value) {
+            lastSelectedMinute = value;
+            _handleMinuteChanged(value * 10);
           },
         ),
       ],

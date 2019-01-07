@@ -22,16 +22,13 @@ import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Home extends StatefulWidget {
   @override
   _Home createState() => _Home();
 }
 
-class _Home extends State<Home> {
-  FirebaseMessaging _firebaseMessaging;
-
+class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
   ScrollController _controller = ScrollController();
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
   _Home() {
@@ -47,45 +44,6 @@ class _Home extends State<Home> {
 
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
-
-    //Firebase Push  Notifications
-    _firebaseMessaging = FirebaseMessaging();
-    firebaseCloudMessaging_Listeners();
-  }
-
-  void firebaseCloudMessaging_Listeners() {
-    if (Platform.isIOS) iOS_Permission();
-
-    _firebaseMessaging.getToken().then((token) {
-      // print("testing Token ");
-      // print(token);
-    });
-
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume " + message.toString());
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch " + message.toString());
-        ConfigHelper.instance.navigatorKey.currentState
-            .push(FadeRoute(widget: TabBarPage()));
-      },
-    );
-  }
-
-  void iOS_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
   }
 
   @override
@@ -94,373 +52,373 @@ class _Home extends State<Home> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        backgroundColor: ColorHelper.dabaoOffWhiteF5,
-        drawer: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: Drawer(
-            child: ListView(
-              shrinkWrap: true,
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      StreamBuilder<String>(
-                        stream: ConfigHelper
-                            .instance.currentUserProperty.value.thumbnailImage,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data == null) {
-                            return Image.asset(
-                              'assets/icons/profile_icon.png',
-                            );
-                          }
-                          return CircleAvatar(
-                            backgroundImage: NetworkImage(snapshot.data),
-                            radius: 20,
-                          );
-                        },
-                      ),
-                      StreamBuilder<String>(
-                        stream: ConfigHelper
-                            .instance.currentUserProperty.producer
-                            .switchMap((user) {
-                          if (user == null) return Observable.just("");
-                          return user.name;
-                        }),
-                        builder: (context, snap) {
-                          if (!snap.hasData) return Offstage();
-                          return Container(
-                            padding: EdgeInsets.only(top: 10.0, left: 10.0),
-                            child: Text(
-                              "${snap.data}",
-                              overflow: TextOverflow.ellipsis,
-                              style: FontHelper.regular(
-                                  ColorHelper.dabaoOffGrey70, 14),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Color(0xFFF6A818),
-                      Color(0xFFF6AC23),
-                      Color(0xFFF7B131),
-                      Color(0xFFF9C15A),
-                      Color(0xFFFBD184),
-                      Color(0xFFFDE3B4),
-                      Color(0xFFFEEFD3),
-                      Color(0xFFFFFCF8)
-                    ]),
-                  ),
-                ),
-                ListTile(
-                  title: Text(
-                    'Active',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'History',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'DabaoPay',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'DabaoRewards',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'Payment Methods',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'Notifications',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                SizedBox(height: 20),
-                ListTile(
-                  title: Text(
-                    'About Dabao',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'Contact Us',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                SizedBox(height: 20),
-                ListTile(
-                  title: Text(
-                    'Log Out',
-                    style: FontHelper.regular12Black,
-                  ),
-                  onTap: () {
-                    FirebaseAuth.instance.signOut();
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        body: Stack(children: <Widget>[
-          ListView(
-            controller: _controller,
-            children: <Widget>[
-              //First Widget consisting of Bg, and balance
+  Widget build(BuildContext context) {
+    super.build(context);
 
-              SafeArea(
-                child: Container(
-                  margin: EdgeInsets.only(top: 50.0),
-                  child: Text(
-                    "What would you like to do today?",
-                    style: FontHelper.regular(ColorHelper.dabaoOffGrey70, 22),
-                  ),
-                  padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
-                ),
-              ),
+    return Scaffold(
+      backgroundColor: ColorHelper.dabaoOffWhiteF5,
+      drawer: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Drawer(
+          child: ListView(
+            shrinkWrap: true,
+            children: <Widget>[
               Container(
-                padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  runSpacing: 25,
-                  spacing: 25.0,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    //Dabaoee
-                    squardCard(
-                        'assets/icons/person.png', 'Dabaoee', 'I want to Order',
-                        () {
-                      Navigator.push(
-                        context,
-                        FadeRoute(widget: OrderNow()),
-                      );
-                    }),
-                    //Dabaoer
-                    squardCard(
-                        'assets/icons/bike.png', 'Dabaoer', 'I want to Deliver',
-                        () {
-                      Navigator.push(
-                        context,
-                        FadeRoute(widget: RouteOverview()),
-                      );
-                    }),
+                    StreamBuilder<String>(
+                      stream: ConfigHelper
+                          .instance.currentUserProperty.value.thumbnailImage,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData || snapshot.data == null) {
+                          return Image.asset(
+                            'assets/icons/profile_icon.png',
+                          );
+                        }
+                        return CircleAvatar(
+                          backgroundImage: NetworkImage(snapshot.data),
+                          radius: 20,
+                        );
+                      },
+                    ),
+                    StreamBuilder<String>(
+                      stream: ConfigHelper.instance.currentUserProperty.producer
+                          .switchMap((user) {
+                        if (user == null) return Observable.just("");
+                        return user.name;
+                      }),
+                      builder: (context, snap) {
+                        if (!snap.hasData) return Offstage();
+                        return Container(
+                          padding: EdgeInsets.only(top: 10.0, left: 10.0),
+                          child: Text(
+                            "${snap.data}",
+                            overflow: TextOverflow.ellipsis,
+                            style: FontHelper.regular(
+                                ColorHelper.dabaoOffGrey70, 14),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
-              ),
-              balanceCardStream(context),
-
-              Container(
-                child: Text(
-                  "Notifications",
-                  style: FontHelper.semiBold18Black,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [
+                    Color(0xFFF6A818),
+                    Color(0xFFF6AC23),
+                    Color(0xFFF7B131),
+                    Color(0xFFF9C15A),
+                    Color(0xFFFBD184),
+                    Color(0xFFFDE3B4),
+                    Color(0xFFFEEFD3),
+                    Color(0xFFFFFCF8)
+                  ]),
                 ),
-                padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 0.0),
+              ),
+              ListTile(
+                title: Text(
+                  'Active',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(
+                  'History',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(
+                  'DabaoPay',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(
+                  'DabaoRewards',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(
+                  'Payment Methods',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(
+                  'Notifications',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(height: 20),
+              ListTile(
+                title: Text(
+                  'About Dabao',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(
+                  'Contact Us',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(height: 20),
+              ListTile(
+                title: Text(
+                  'Log Out',
+                  style: FontHelper.regular12Black,
+                ),
+                onTap: () {
+                  FirebaseAuth.instance.signOut();
+                },
               ),
             ],
           ),
-          // AppBar Widget
-          Material(
-            type: MaterialType.transparency,
-            child: FloatingHeader(
-              header: StreamBuilder<String>(stream: ConfigHelper
-                  .instance.currentUserProperty.producer
-                  .switchMap((user) {
-                if (user == null) return Observable.just("");
-                return user.name;
-              }), builder: (context, snap) {
-                if (!snap.hasData) return Offstage();
-                return Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                        padding: EdgeInsets.only(top: 10.0, left: 10.0),
-                        child: Text(
-                          "Welcome back, ${snap.data}",
-                          overflow: TextOverflow.ellipsis,
-                          style: FontHelper.regular(
-                              ColorHelper.dabaoOffGrey70, 14),
-                        )));
-              }),
-              backgroundColor: Colors.white,
-              opacityProperty: _opacityProperty,
-              rightButton: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    FadeRoute(widget: ChatPage()),
-                  );
-                },
-                child: Container(
-                    height: 40.0,
-                    width: 40.0,
-                    decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: ColorHelper.dabaoOrange,
-                        image: new DecorationImage(
-                            fit: BoxFit.scaleDown,
-                            image: new AssetImage(
-                                'assets/icons/chat_white.png')))),
+        ),
+      ),
+      body: Stack(children: <Widget>[
+        ListView(
+          controller: _controller,
+          children: <Widget>[
+            //First Widget consisting of Bg, and balance
+
+            SafeArea(
+              child: Container(
+                margin: EdgeInsets.only(top: 50.0),
+                child: Text(
+                  "What would you like to do today?",
+                  style: FontHelper.regular(ColorHelper.dabaoOffGrey70, 22),
+                ),
+                padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
               ),
-              leftButton: Container(
-                height: 40.0,
-                width: 40.0,
-                child: GestureDetector(
-                  onTap: () {},
-                  child: StreamBuilder<String>(
-                    stream: ConfigHelper
-                        .instance.currentUserProperty.value.thumbnailImage,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData || snapshot.data == null) {
-                        return Image.asset(
-                          'assets/icons/profile_icon.png',
-                          fit: BoxFit.fill,
-                        );
-                      }
-                      return GestureDetector(
-                        onLongPress: () async {
-                          FirebaseAuth.instance.signOut();
-                        },
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(snapshot.data),
-                          radius: 20,
-                        ),
+            ),
+            Container(
+              padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                runSpacing: 25,
+                spacing: 25.0,
+                children: <Widget>[
+                  //Dabaoee
+                  squardCard(
+                      'assets/icons/person.png', 'Dabaoee', 'I want to Order',
+                      () {
+                    Navigator.push(
+                      context,
+                      FadeRoute(widget: OrderNow()),
+                    );
+                  }),
+                  //Dabaoer
+                  squardCard(
+                      'assets/icons/bike.png', 'Dabaoer', 'I want to Deliver',
+                      () {
+                    Navigator.push(
+                      context,
+                      FadeRoute(widget: RouteOverview()),
+                    );
+                  }),
+                ],
+              ),
+            ),
+            balanceCardStream(context),
+
+            Container(
+              child: Text(
+                "Notifications",
+                style: FontHelper.semiBold18Black,
+              ),
+              padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 0.0),
+            ),
+          ],
+        ),
+        // AppBar Widget
+        Material(
+          type: MaterialType.transparency,
+          child: FloatingHeader(
+            header: StreamBuilder<String>(stream: ConfigHelper
+                .instance.currentUserProperty.producer
+                .switchMap((user) {
+              if (user == null) return Observable.just("");
+              return user.name;
+            }), builder: (context, snap) {
+              if (!snap.hasData) return Offstage();
+              return Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                      padding: EdgeInsets.only(top: 10.0, left: 10.0),
+                      child: Text(
+                        "Welcome back, ${snap.data}",
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            FontHelper.regular(ColorHelper.dabaoOffGrey70, 14),
+                      )));
+            }),
+            backgroundColor: Colors.white,
+            opacityProperty: _opacityProperty,
+            rightButton: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  FadeRoute(widget: ChatPage()),
+                );
+              },
+              child: Container(
+                  height: 40.0,
+                  width: 40.0,
+                  decoration: new BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: ColorHelper.dabaoOrange,
+                      image: new DecorationImage(
+                          fit: BoxFit.scaleDown,
+                          image:
+                              new AssetImage('assets/icons/chat_white.png')))),
+            ),
+            leftButton: Container(
+              height: 40.0,
+              width: 40.0,
+              child: GestureDetector(
+                onTap: () {},
+                child: StreamBuilder<String>(
+                  stream: ConfigHelper
+                      .instance.currentUserProperty.value.thumbnailImage,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return Image.asset(
+                        'assets/icons/profile_icon.png',
+                        fit: BoxFit.fill,
                       );
-                    },
-                  ),
+                    }
+                    return GestureDetector(
+                      onLongPress: () async {
+                        FirebaseAuth.instance.signOut();
+                      },
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(snapshot.data),
+                        radius: 20,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
           ),
+        ),
 
-          StreamBuilder<List>(
-            stream:
-                ConfigHelper.instance.currentUserOpenRoutesProperty.producer,
-            builder: (context, snap) {
-              if (!snap.hasData || snap.data.length == 0)
-                return Container();
-              else
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      FadeRoute(widget: TabBarPage()),
-                    );
-                  },
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      decoration:
-                          BoxDecoration(color: Colors.yellow, boxShadow: [
-                        BoxShadow(
-                          offset: Offset(0.0, 1.0),
-                          color: Colors.grey,
-                          blurRadius: 5.0,
-                        )
-                      ]),
-                      child: SafeArea(
-                        top: false,
-                        child: Container(
-                          padding: EdgeInsets.only(left: 20.0),
-                          height: 50,
-                          width: MediaQuery.of(context).size.width,
-                          child: Row(
-                            children: <Widget>[
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "View your Routes (${snap.data.length})",
-                                  style: FontHelper.semiBold14Black,
-                                ),
+        StreamBuilder<List>(
+          stream: ConfigHelper.instance.currentUserOpenRoutesProperty.producer,
+          builder: (context, snap) {
+            if (!snap.hasData || snap.data.length == 0)
+              return Container();
+            else
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    FadeRoute(widget: TabBarPage()),
+                  );
+                },
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    decoration: BoxDecoration(color: Colors.yellow, boxShadow: [
+                      BoxShadow(
+                        offset: Offset(0.0, 1.0),
+                        color: Colors.grey,
+                        blurRadius: 5.0,
+                      )
+                    ]),
+                    child: SafeArea(
+                      top: false,
+                      child: Container(
+                        padding: EdgeInsets.only(left: 20.0),
+                        height: 50,
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          children: <Widget>[
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "View your Routes (${snap.data.length})",
+                                style: FontHelper.semiBold14Black,
                               ),
-                              Expanded(
-                                child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Container(
-                                      padding: EdgeInsets.only(bottom: 4.0),
-                                      height: 19.0,
-                                      width: 24.0,
-                                      child: Transform(
-                                        transform:
-                                            Matrix4.rotationZ(math.pi / 2),
-                                        child: Image.asset(
-                                            "assets/icons/arrow_left_icon.png"),
-                                      ),
-                                    )),
-                              ),
-                            ],
-                          ),
+                            ),
+                            Expanded(
+                              child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Container(
+                                    padding: EdgeInsets.only(bottom: 4.0),
+                                    height: 19.0,
+                                    width: 24.0,
+                                    child: Transform(
+                                      transform: Matrix4.rotationZ(math.pi / 2),
+                                      child: Image.asset(
+                                          "assets/icons/arrow_left_icon.png"),
+                                    ),
+                                  )),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                );
-            },
-          )
-        ]),
-      );
+                ),
+              );
+          },
+        )
+      ]),
+    );
+  }
 
   Container squardCard(
     String imagePath,
@@ -510,4 +468,8 @@ class _Home extends State<Home> {
           return BalanceCard(user, context);
         });
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

@@ -44,8 +44,12 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
             return tempOrders;
           }), (routes, orders) {
             List<Object> temp = List();
+            List<DabaoRoute.Route> tempRoutes = List.from(routes);
 
-            temp.addAll(routes);
+            tempRoutes.sort((lhs, rhs) =>
+                rhs.deliveryTime.value.compareTo(lhs.deliveryTime.value));
+
+            temp.addAll(tempRoutes);
 
             if (orders != null && orders.length != 0) temp.add(orders);
 
@@ -53,7 +57,7 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
           }),
           builder: (context, snapshot) {
             if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-            if (!snapshot.hasData) return Text('No Routes Avaliable');
+            if (!snapshot.hasData) return Center(child:Text('No Routes Avaliable'));
             return _buildList(context, snapshot.data);
           },
         ));
