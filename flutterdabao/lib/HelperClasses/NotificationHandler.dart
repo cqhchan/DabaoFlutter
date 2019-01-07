@@ -14,6 +14,8 @@ const String modeChannel = "NEWMESSAGE";
 const String channelIDKey = "channelID";
 
 const String modeAcceptedOrder = "ORDERACCEPTED";
+const String modeNewTransaction = "NEWTRANSACTION";
+
 const String modeCompletedOrder = "ORDERCOMPLETED";
 const String modeNewPotentialOrder = "POTENTIALORDER";
 
@@ -85,7 +87,6 @@ handleNotificationForOnMessage(map) async {
                         style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
                       ),
                       onPressed: () async {
-                        await Settings.openAppSettings();
                         ConfigHelper.instance.navigatorKey.currentState
                             .popUntil(ModalRoute.withName(
                                 Navigator.defaultRouteName));
@@ -95,6 +96,27 @@ handleNotificationForOnMessage(map) async {
                 ));
         break;
 
+      case modeNewTransaction:
+        showDialog(
+            context: ConfigHelper.instance.navigatorKey.currentState.context,
+            builder: (_) => new AlertDialog(
+                  title: Text(title),
+                  content: Text(body),
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "VIEW",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
+                        ConfigHelper.instance.navigatorKey.currentState
+                            .popUntil(ModalRoute.withName(
+                                Navigator.defaultRouteName));
+                      },
+                    ),
+                  ],
+                ));
+        break;
     }
   }
 }

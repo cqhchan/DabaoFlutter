@@ -57,7 +57,7 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
           }),
           builder: (context, snapshot) {
             if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-            if (!snapshot.hasData) return Text('No Routes Avaliable');
+            if (!snapshot.hasData) return Center(child:Text('No Routes Avaliable'));
             return _buildList(context, snapshot.data);
           },
         ));
