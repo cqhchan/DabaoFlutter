@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -161,7 +163,16 @@ class BalanceCard extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () async {
+              await FirebaseCloudFunctions.requestWithdrawal(
+                  userID: ConfigHelper.instance.currentUserProperty.value.uid,
+                  amount: 2).catchError((e) {
+                    if(e is PlatformException){
+                      PlatformException exception = e;
+                      print(exception.message);
+                    }
+                  });
+            },
             child: Container(
                 padding: EdgeInsets.only(right: 5.0, left: 5.0),
                 child: Icon(

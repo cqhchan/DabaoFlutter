@@ -20,26 +20,33 @@ import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:flutterdabao/Model/User.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:rxdart/rxdart.dart' as Rxdart;
+
+GlobalKey<ConversationState> currentKey;
+
+getCurrentKey() {
+  return currentKey;
+}
 
 class Conversation extends StatefulWidget {
   final Channel channel;
   final LatLng location;
-  final String otherUser;
 
-  const Conversation({Key key, this.channel, this.location, this.otherUser})
-      : super(key: key);
-      
+  Conversation({@required Key key, @required this.channel, this.location})
+      : super(key: key) {
+    currentKey = key;
+  }
 
-  _ConversationState createState() => _ConversationState();
-
+  ConversationState createState() => ConversationState();
 }
 
-class _ConversationState extends State<Conversation>
+class ConversationState extends State<Conversation>
     with HavingSubscriptionMixin, AutomaticKeepAliveClientMixin {
   MutableProperty<Order> order = MutableProperty(null);
 
@@ -53,7 +60,7 @@ class _ConversationState extends State<Conversation>
   ScrollController _scrollController;
 
   //expansion of whole card
-  bool expandFlag;
+  bool expandFlag = false;
 
   //expansion of location description only
   bool expansionFlag;
@@ -70,16 +77,20 @@ class _ConversationState extends State<Conversation>
   //control color of send button
   bool sendButtonFlag;
 
+  ConversationState() {
+    isTouchDown = false;
+    sendButtonFlag = false;
+  }
+
   @override
   void initState() {
     super.initState();
-    expandFlag = false;
-    isTouchDown = false;
-    sendButtonFlag = false;
+
     _myFocusNode = FocusNode();
     _myFocusNode.addListener(_keyboardListener);
     _textController = TextEditingController();
     _scrollController = ScrollController();
+
     subscription.add(order.bindTo(widget.channel.orderUid
         .where((uid) => uid != null)
         .map((uid) => Order.fromUID(uid))));
@@ -87,6 +98,12 @@ class _ConversationState extends State<Conversation>
 
   @override
   void dispose() {
+    if (currentKey.currentState == this) {
+      print("current key disposed");
+      currentKey = null;
+    }
+
+    print("disposed");
     _myFocusNode.dispose();
     _textController.dispose();
     _scrollController.dispose();
@@ -95,6 +112,7 @@ class _ConversationState extends State<Conversation>
   }
 
   _keyboardListener() {
+    print("testing it came 2");
     if (_myFocusNode.hasFocus) {
       setState(() {
         expandFlag = true;
@@ -114,54 +132,28 @@ class _ConversationState extends State<Conversation>
   }
 
   bool _scrollListener(Notification notification) {
-
     // if (notification is ScrollNotification) {
     // ScrollNotification scrollNotification = notification;
 
-    if(!_userStoppedScrolling(notification, _scrollController)){
-      print("test 1");
-    if (_scrollController.offset > initial) {
-            print("test 2");
+    if (!_userStoppedScrolling(notification, _scrollController)) {
+      if (_scrollController.offset > initial) {
+        setState(() {
+          expandFlag = false;
+        });
+      }
 
-      setState(() {
-        expandFlag = false;
-      });
-    }
-
-    if (_scrollController.offset < initial) {
-            print("test 3");
-
-      setState(() {
-        expandFlag = true;
-      });
-    }
-
-    // if (_scrollController.offset >=
-    //         _scrollController.position.maxScrollExtent &&
-    //     !_scrollController.position.outOfRange) {
-    //             print("test 4");
-
-    //   setState(() {
-    //     expandFlag = false;
-    //   });
-    // }
-
-    // if (_scrollController.offset <=
-    //         _scrollController.position.minScrollExtent &&
-    //     !_scrollController.position.outOfRange) {
-    //   setState(() {
-    //                     print("test 5");
-
-    //     expandFlag = true;
-    //   });
-    // }
+      if (_scrollController.offset < initial) {
+        setState(() {
+          expandFlag = true;
+        });
+      }
     }
     return true;
-    // }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
@@ -203,40 +195,62 @@ class _ConversationState extends State<Conversation>
   }
 
   Widget _buildUser() {
-    return StreamBuilder(
-      stream: Firestore.instance
-          .collection('users')
-          .document(widget.otherUser)
-          .snapshots(),
+    return StreamBuilder<User>(
+      stream: Rxdart.Observable.combineLatest2<List<String>, User, User>(
+          widget.channel.participantsID,
+          ConfigHelper.instance.currentUserProperty.producer,
+          (participantsID, currentUser) {
+        if (participantsID == null || currentUser == null) {
+          return null;
+        }
+        participantsID.removeWhere((id) => id != currentUser.uid);
+        if (participantsID.length == 0) {
+          return null;
+        }
+
+        return User.fromUID(participantsID.first);
+      }),
       builder: (context, user) {
-        if (!user.hasData) return Offstage();
+        if (!user.hasData || user == null) return Offstage();
         return Row(
           children: <Widget>[
-            FittedBox(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30.0),
-                child: SizedBox(
-                  height: 30,
-                  width: 30,
-                  child: CachedNetworkImage(
-                    imageUrl: user.data['TI'],
-                    placeholder: GlowingProgressIndicator(
-                      child: Icon(
-                        Icons.account_circle,
-                        size: 30,
+            StreamBuilder<String>(
+              stream: user.data.thumbnailImage,
+              builder: (context, user) {
+                if (!user.hasData) return Offstage();
+                return FittedBox(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30.0),
+                    child: SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: CachedNetworkImage(
+                        imageUrl: user.data,
+                        placeholder: GlowingProgressIndicator(
+                          child: Icon(
+                            Icons.account_circle,
+                            size: 30,
+                          ),
+                        ),
+                        errorWidget: Icon(Icons.error),
                       ),
                     ),
-                    errorWidget: Icon(Icons.error),
                   ),
-                ),
-              ),
+                );
+              },
             ),
             SizedBox(
               width: 10,
             ),
-            Text(
-              user.data['N'],
-              style: FontHelper.semiBold16Black,
+            StreamBuilder<String>(
+              stream: user.data.name,
+              builder: (context, user) {
+                if (!user.hasData) return Offstage();
+                return Text(
+                  user.hasData ? user.data : "Error",
+                  style: FontHelper.semiBold16Black,
+                );
+              },
             ),
           ],
         );
@@ -245,13 +259,7 @@ class _ConversationState extends State<Conversation>
   }
 
   Widget _buildB() {
-    return StreamBuilder(
-        stream: order.producer,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-          if (!snapshot.hasData) return Offstage();
-          return _buildBody();
-        });
+    return _buildBody();
   }
 
   Widget _buildBody() {
@@ -281,7 +289,27 @@ class _ConversationState extends State<Conversation>
             offstage: expandFlag,
             child: _buildCard(),
           ),
-          _buildButtons(),
+          StreamBuilder<bool>(
+            stream:
+                Rxdart.Observable.combineLatest3<User, String, String, bool>(
+                    ConfigHelper.instance.currentUserProperty.producer,
+                    order.producer.switchMap((currentOrder) =>
+                        currentOrder == null ? null : currentOrder.creator),
+                    order.producer.switchMap((currentOrder) =>
+                        currentOrder == null ? null : currentOrder.status),
+                    (currentUser, orderUserID, status) {
+              if (currentUser == null || orderUserID == null || status == null)
+                return false;
+
+              if (status != orderStatus_Requested) return false;
+
+              return currentUser.uid != orderUserID;
+            }),
+            builder: (BuildContext context, snapshot) {
+              if (!snapshot.hasData || !snapshot.data) return Offstage();
+              return _buildButtons();
+            },
+          ),
         ],
       ),
     );
@@ -316,15 +344,18 @@ class _ConversationState extends State<Conversation>
                 child: Wrap(
                   children: <Widget>[
                     StreamBuilder(
-                      stream: order.value.deliveryLocationDescription,
+                      stream: order.producer.switchMap((order) => order != null
+                          ? order.deliveryLocationDescription
+                          : Rxdart.Observable.just(null)),
                       builder: (context, snap) {
-                        if (!snap.hasData) return Offstage();
+                        if (!snap.hasData || snap.data == null)
+                          return Offstage();
                         return ConfigurableExpansionTile(
-                          selectable: order.producer.value,
+                          selectable: order.value,
                           initiallyExpanded: false,
-                          onExpansionChanged: (expand) {
+                          onExpansionChanged: (expanded) {
                             setState(() {
-                              widget.channel.isSelectedProperty.value = expand;
+                              expansionFlag = order.value.isSelected;
                             });
                           },
                           header: Column(
@@ -467,43 +498,64 @@ class _ConversationState extends State<Conversation>
   }
 
   Widget _buildDeliveryPeriod() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        StreamBuilder<DateTime>(
-          stream: order.value.startDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            if (snap.data.day == DateTime.now().day &&
-                snap.data.month == DateTime.now().month &&
-                snap.data.year == DateTime.now().year) {
-              return Text(
-                'Today, ' +
-                    DateTimeHelper.convertDateTimeToAMPM(snap.data) +
-                    ' - ' +
-                    DateTimeHelper.convertDateTimeToAMPM(
-                        snap.data.add(Duration(hours: 2))),
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              );
-            } else {
-              return Container(
-                child: Text(
-                  snap.hasData
-                      ? DateTimeHelper.convertDateTimeToDate(snap.data) +
-                          ', ' +
-                          DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                      : "Error",
-                  style: FontHelper.semiBoldgrey14TextStyle,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            }
-          },
-        ),
-      ],
-    );
+    return StreamBuilder<OrderMode>(
+        stream: order.producer
+            .switchMap((order) => order == null ? null : order.mode),
+        builder: (context, snap) {
+          if (!snap.hasData || snap.data == null) return Offstage();
+          DateTime startTime;
+          DateTime endTime;
+
+          switch (snap.data) {
+            case OrderMode.asap:
+              startTime = DateTime.now();
+              endTime = order.value.endDeliveryTime.value == null
+                  ? startTime.add(Duration(minutes: 90))
+                  : order.value.endDeliveryTime.value;
+              break;
+            case OrderMode.scheduled:
+              startTime = order.value.startDeliveryTime.value;
+              endTime = order.value.endDeliveryTime.value;
+              break;
+          }
+
+          if (startTime == null || endTime == null) return Offstage();
+
+          if (startTime.isBefore(endTime) || endTime.isBefore(DateTime.now()))
+            return Text(
+              "Expired",
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
+            );
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              (startTime.day == DateTime.now().day &&
+                      startTime.month == DateTime.now().month &&
+                      startTime.year == DateTime.now().year)
+                  ? Text(
+                      'Today, ' +
+                          DateTimeHelper.convertDateTimeToAMPM(startTime) +
+                          ' - ' +
+                          DateTimeHelper.convertDateTimeToAMPM(endTime),
+                      style: FontHelper.semiBoldgrey14TextStyle,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  : Container(
+                      child: Text(
+                        snap.hasData
+                            ? DateTimeHelper.convertDateTimeToDate(startTime) +
+                                ', ' +
+                                DateTimeHelper.convertDateTimeToAMPM(endTime)
+                            : "Error",
+                        style: FontHelper.semiBoldgrey14TextStyle,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )
+            ],
+          );
+        });
   }
 
   Widget _buildLocationDescription() {
@@ -534,13 +586,13 @@ class _ConversationState extends State<Conversation>
                                       snap.data.longitude)
                                   .toStringAsFixed(1) +
                               'km away'
-                          : '?.??km away',
+                          : "?.??km",
                       style: FontHelper.medium12TextStyle,
                     ),
                   );
                 } else {
                   return Text(
-                    "My Location",
+                    "?.??km",
                     style: FontHelper.medium12TextStyle,
                   );
                 }
@@ -774,33 +826,32 @@ class _ConversationState extends State<Conversation>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return CircularProgressIndicator();
           return GestureDetector(
-            onTap: () {
-              if (_myFocusNode.hasFocus) {
-                _myFocusNode.unfocus();
-                setState(() {
-                  expandFlag = false;
-                });
-              }
-            },
-            onPanDown: (_) {
-              initial = _scrollController.position.pixels;
-            },
-            child: NotificationListener(
-                          child: ListView.builder(
-                cacheExtent: 500.0 * snapshot.data.length,
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                reverse: true,
-                padding: EdgeInsets.all(10.0),
-                itemBuilder: (context, index) {
-                  return _buildChatBox(index, snapshot.data[index]);
-                },
-                itemCount: snapshot.data.length,
-              ),
-              onNotification: _scrollListener,
-            ),
-            
-          );
+              onTap: () {
+                if (_myFocusNode.hasFocus) {
+                  _myFocusNode.unfocus();
+                  print("testing it came 3");
+
+                  setState(() {
+                    expandFlag = false;
+                  });
+                }
+              },
+              onPanDown: (_) {
+                initial = _scrollController.position.pixels;
+              },
+              child: new NotificationListener(
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: EdgeInsets.all(10.0),
+                  itemBuilder: (context, index) {
+                    return _buildChatBox(index, snapshot.data[index]);
+                  },
+                  itemCount: snapshot.data.length,
+                ),
+                onNotification: _scrollListener,
+              ));
         },
       ),
     );
@@ -820,33 +871,38 @@ class _ConversationState extends State<Conversation>
                     ConfigHelper.instance.currentUserProperty.value.uid
                 ? true
                 : false,
-            child: StreamBuilder(
-              stream: Firestore.instance
-                  .collection('users')
-                  .document(widget.otherUser)
-                  .snapshots(),
+            child: StreamBuilder<User>(
+              stream: order.value.creator.where((uid) => uid != null).map(
+                    (uid) => User.fromUID(uid),
+                  ),
               builder: (context, user) {
                 if (!user.hasData) return Offstage();
                 return Row(
                   children: <Widget>[
-                    FittedBox(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30.0),
-                        child: SizedBox(
-                          height: 30,
-                          width: 30,
-                          child: CachedNetworkImage(
-                            imageUrl: user.data['TI'],
-                            placeholder: GlowingProgressIndicator(
-                              child: Icon(
-                                Icons.image,
-                                size: 50,
+                    StreamBuilder<String>(
+                      stream: user.data.thumbnailImage,
+                      builder: (context, user) {
+                        if (!user.hasData) return Offstage();
+                        return FittedBox(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30.0),
+                            child: SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: CachedNetworkImage(
+                                imageUrl: user.data,
+                                placeholder: GlowingProgressIndicator(
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 50,
+                                  ),
+                                ),
+                                errorWidget: Icon(Icons.error),
                               ),
                             ),
-                            errorWidget: Icon(Icons.error),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 );
@@ -954,33 +1010,38 @@ class _ConversationState extends State<Conversation>
                     ConfigHelper.instance.currentUserProperty.value.uid
                 ? true
                 : false,
-            child: StreamBuilder(
-              stream: Firestore.instance
-                  .collection('users')
-                  .document(widget.otherUser)
-                  .snapshots(),
+            child: StreamBuilder<User>(
+              stream: order.value.creator.where((uid) => uid != null).map(
+                    (uid) => User.fromUID(uid),
+                  ),
               builder: (context, user) {
                 if (!user.hasData) return Offstage();
                 return Row(
                   children: <Widget>[
-                    FittedBox(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30.0),
-                        child: SizedBox(
-                          height: 30,
-                          width: 30,
-                          child: CachedNetworkImage(
-                            imageUrl: user.data['TI'],
-                            placeholder: GlowingProgressIndicator(
-                              child: Icon(
-                                Icons.account_circle,
-                                size: 30,
+                    StreamBuilder<String>(
+                      stream: user.data.thumbnailImage,
+                      builder: (context, user) {
+                        if (!user.hasData) return Offstage();
+                        return FittedBox(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30.0),
+                            child: SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: CachedNetworkImage(
+                                imageUrl: user.data,
+                                placeholder: GlowingProgressIndicator(
+                                  child: Icon(
+                                    Icons.account_circle,
+                                    size: 30,
+                                  ),
+                                ),
+                                errorWidget: Icon(Icons.error),
                               ),
                             ),
-                            errorWidget: Icon(Icons.error),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 );
@@ -1087,11 +1148,15 @@ class _ConversationState extends State<Conversation>
                   },
                   focusNode: _myFocusNode,
                   onTap: () {
+                    print("testing it came 4");
+
                     setState(() {
                       expandFlag = true;
                     });
                   },
                   onSubmitted: (_) {
+                    print("testing it came 5");
+
                     setState(() {
                       expandFlag = false;
                     });
@@ -1140,7 +1205,7 @@ class _ConversationState extends State<Conversation>
       if (image != null) {
         _image = await _cropImage(image);
         final StorageReference profileRef = FirebaseStorage.instance.ref().child(
-            'channels/${widget.channel.uid}/IMG-${DateTimeHelper.convertDateTimeToStorageString(DateTime.now())}-${_image.hashCode}.jpg');
+            'user/${ConfigHelper.instance.currentUserProperty.value.uid}/${_image.hashCode}.jpg');
 
         final StorageUploadTask imageTask = profileRef.putFile(_image);
 
@@ -1158,6 +1223,10 @@ class _ConversationState extends State<Conversation>
     File croppedFile = await ImageCropper.cropImage(
       toolbarColor: ColorHelper.dabaoOrange,
       sourcePath: imageFile.path,
+      ratioX: 1.0,
+      ratioY: 1.0,
+      maxWidth: 300,
+      maxHeight: 300,
     );
     return croppedFile;
   }

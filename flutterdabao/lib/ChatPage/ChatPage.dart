@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterdabao/ChatPage/DabaoeeChat.dart';
+import 'package:flutterdabao/ChatPage/Conversation.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -189,7 +189,6 @@ class _ChatPageState extends State<ChatPage>
         MaterialPageRoute(
           builder: (BuildContext context) => Conversation(
                 channel: channel,
-                otherUser: otherUser,
               ),
         ),
       );
