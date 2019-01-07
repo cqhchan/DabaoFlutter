@@ -9,7 +9,6 @@ class DateTimeHelper {
   static String convertEpochSecondsToDateTimeString(int epoch) {
     DateTime date = DateTime.fromMillisecondsSinceEpoch(epoch * 1000);
 
-
     return convertTimeToDisplayString(date);
   }
 
@@ -60,7 +59,7 @@ class DateTimeHelper {
           date, ['Today, ', date.hour == 12 ? "12" : hh, ':', nn, am]);
     else
       return formatDate(date,
-          [D, ', ', dd, '-', m, ' ', date.hour == 12 ? "12" : hh, ':', nn, am]);
+          [D, ', ', dd, '-', mm, ' ', date.hour == 12 ? "12" : hh, ':', nn, am]);
   }
 
   static String convertStartTimeToDisplayString(DateTime date) {
@@ -93,7 +92,7 @@ class DateTimeHelper {
             ', ',
             dd,
             '-',
-            m,
+            mm,
             ' ',
             start.hour == 12 ? "12" : hh,
             ':',
@@ -135,14 +134,13 @@ class DateTimeHelper {
         time.year == today.year);
   }
 
-    static bool sameDay(DateTime time, DateTime other) {
-  
+  static bool sameDay(DateTime time, DateTime other) {
     return (time.day == other.day &&
         time.month == other.month &&
         time.year == other.year);
   }
 
-    static bool isTomorrow(DateTime time) {
+  static bool isTomorrow(DateTime time) {
     DateTime today = DateTime.now().add(Duration(days: 1));
     return (time.day == today.day &&
         time.month == today.month &&

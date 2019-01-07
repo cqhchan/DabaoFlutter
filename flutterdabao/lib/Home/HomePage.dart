@@ -9,14 +9,19 @@ import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CreateRoute/RouteOverview.dart';
 import 'package:flutterdabao/CustomWidget/Headers/FloatingHeader.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
+import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
+import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/DabaoerReward.dart';
+import 'package:flutterdabao/Model/Order.dart';
+import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
@@ -59,60 +64,57 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
       backgroundColor: ColorHelper.dabaoOffWhiteF5,
       appBar: buildAppBar(),
       drawer: buildDrawer(context),
-      body: Stack(children: <Widget>[
-        ListView(
-          controller: _controller,
-          children: <Widget>[
-            //First Widget consisting of Bg, and balance
-
-            SafeArea(
-              child: Container(
-                margin: EdgeInsets.only(top: 50.0),
+      body: Column(children: <Widget>[
+        Expanded(
+          child: ListView(
+            controller: _controller,
+            children: <Widget>[
+              //First Widget consisting of Bg, and balance
+              _ActiveOrderCard(),
+              Container(
+                margin: EdgeInsets.only(top: 20.0),
                 child: Text(
-                  "What would you like to do today?",
-                  style: FontHelper.regular(ColorHelper.dabaoOffGrey70, 22),
+                  "What would you like today?",
+                  style: FontHelper.semiBold(Colors.black, 18),
                 ),
-                padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
+                padding: EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
               ),
-            ),
-            Container(
-              padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                runSpacing: 25,
-                spacing: 25.0,
-                children: <Widget>[
-                  //Dabaoee
-                  squardCard(
-                      'assets/icons/person.png', 'Dabaoee', 'I want to Order',
-                      () {
-                    Navigator.push(
-                      context,
-                      FadeRoute(widget: OrderNow()),
-                    );
-                  }),
-                  //Dabaoer
-                  squardCard(
-                      'assets/icons/bike.png', 'Dabaoer', 'I want to Deliver',
-                      () {
-                    Navigator.push(
-                      context,
-                      FadeRoute(widget: RouteOverview()),
-                    );
-                  }),
-                ],
-              ),
-            ),
-            balanceCardStream(context),
 
-            Container(
-              child: Text(
-                "Notifications",
-                style: FontHelper.semiBold18Black,
+              Container(
+                padding: EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 30.0),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  runSpacing: 25,
+                  spacing: 25.0,
+                  children: <Widget>[
+                    //Dabaoee
+                    squardCard(
+                        'assets/images/dabaoee_splash.png',
+                        'assets/icons/person.png',
+                        'Dabaoee',
+                        'I want to Order', () {
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: OrderNow()),
+                      );
+                    }),
+                    //Dabaoer
+                    squardCard(
+                        'assets/images/dabaoer_splash.png',
+                        'assets/icons/bike.png',
+                        'Dabaoer',
+                        'I want to Deliver', () {
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: RouteOverview()),
+                      );
+                    }),
+                  ],
+                ),
               ),
-              padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 0.0),
-            ),
-          ],
+              balanceCardStream(context),
+            ],
+          ),
         ),
         // // AppBar Widget
         // Material(
@@ -465,12 +467,13 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                   return Align(
                       alignment: Alignment.center,
                       child: Container(
-                        padding: EdgeInsets.only(left: 5, right: 5),
+                        padding: EdgeInsets.only(left: 3, right: 3),
                         margin: EdgeInsets.only(left: 10, bottom: 20),
-                        height: 20,
+                        height: 22,
                         decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white, width: 2.0),
                             color: ColorHelper.dabaoTealColor,
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(11)),
                         child: ConstrainedBox(
                           child: Center(
                               child: Text(
@@ -479,7 +482,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                                 : snapshot.data.toString(),
                             style: FontHelper.regular(Colors.white, 10),
                           )),
-                          constraints: BoxConstraints(minWidth: 10),
+                          constraints: BoxConstraints(minWidth: 12),
                         ),
                       ));
                 },
@@ -491,44 +494,72 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  Container squardCard(
+  Widget squardCard(
     String imagePath,
+    String iconPath,
     String title,
     String body,
     VoidCallback onPressed,
   ) {
-    return Container(
-      child: RaisedButton(
-        padding: EdgeInsets.fromLTRB(10, 18, 10, 10),
-        color: Colors.white,
-        elevation: 4.0,
-        disabledElevation: 4.0,
-        highlightElevation: 4.0,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8.0))),
-        onPressed: onPressed,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+    return RaisedButton(
+      color: Colors.white,
+      padding: EdgeInsets.all(0),
+      elevation: 4.0,
+      disabledElevation: 4.0,
+      highlightElevation: 4.0,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(15.0))),
+      onPressed: onPressed,
+      child: ConstrainedBox(
+        constraints:
+            BoxConstraints(maxHeight: 180.0, minHeight: 180, maxWidth: 135.0),
+        child: Stack(
+          alignment: Alignment.center,
           children: <Widget>[
-            Container(height: 40, width: 40, child: Image.asset(imagePath)),
-            SizedBox(height: 2),
-            Text(
-              title,
-              style: FontHelper.bold14Black,
+            Flex(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                    height: 108,
+                    child: Image.asset(imagePath, fit: BoxFit.fitHeight)),
+                Expanded(
+                  flex: 3,
+                  child: Container(),
+                ),
+                Text(
+                  title,
+                  style: FontHelper.bold14Black,
+                ),
+                Text(
+                  body,
+                  style: FontHelper.regular(Colors.black, 12.0),
+                ),
+                Expanded(
+                  child: Container(),
+                ),
+              ],
+              direction: Axis.vertical,
             ),
-            Expanded(
-              child: Container(),
-            ),
-            Text(
-              body,
-              style: FontHelper.regular(Colors.black, 12.0),
-            ),
+            Container(
+                margin: EdgeInsets.only(top: 30),
+                height: 44,
+                width: 44,
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        offset: new Offset(0.0, 10.0),
+                        blurRadius: 30.0,
+                      )
+                    ]),
+                child: Image.asset(iconPath, fit: BoxFit.contain)),
           ],
         ),
       ),
-      height: 120.0,
-      width: 120.0,
     );
   }
 
@@ -543,4 +574,255 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
+}
+
+class _ActiveOrderCard extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _ActiveOrderCardState();
+  }
+}
+
+class _ActiveOrderCardState extends State<_ActiveOrderCard> {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Order>>(
+        stream:
+            Observable.combineLatest2<List<Order>, List<Order>, List<Order>>(
+                ConfigHelper
+                    .instance.currentUserAcceptedOrdersProperty.producer,
+                ConfigHelper.instance.currentUserRequestedOrdersProperty
+                    .producer, (accepted, requested) {
+          print(requested.length);
+
+          List<Order> tempAccepted = List.from(accepted);
+          List<Order> tempRequested = List.from(requested);
+          tempAccepted.sort((lhs, rhs) =>
+              rhs.deliveryTime.value.compareTo(lhs.deliveryTime.value));
+          tempRequested.sort((lhs, rhs) => rhs.startDeliveryTime.value
+              .compareTo(lhs.startDeliveryTime.value));
+
+          tempAccepted.addAll(tempRequested);
+
+          return tempAccepted;
+        }),
+        builder: (context, snap) {
+          if (!snap.hasData || snap.data == null || snap.data.length == 0)
+            return Offstage();
+
+          // creating the list of widgets
+          List<Widget> listOfWidget = List();
+          listOfWidget.add(headerWidget(snap.data));
+          listOfWidget.add(Line(
+            color: ColorHelper.dabaoOrange,
+            size: 2.0,
+          ));
+          snap.data.take(2).forEach((order) {
+            listOfWidget.add(orderCell(order));
+            listOfWidget.add(Line());
+          });
+
+          // adding the view all
+          listOfWidget.add(buildViewAll());
+
+          return Card(
+              margin: EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 0.0),
+              elevation: 4.0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0)),
+              child: Column(
+                children: listOfWidget,
+              ));
+        });
+  }
+
+  Widget headerWidget(List<Order> orders) {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.only(top: 10.0, bottom: 5.0),
+        child: Text(
+          "Active Orders (${orders.length})",
+          style: FontHelper.bold(Colors.black, 14),
+        ),
+      ),
+    );
+  }
+
+  Widget orderCell(Order order) {
+    return Container(
+      margin: EdgeInsets.only(left: 10, right: 5, top: 5),
+      height: 55,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                StreamBuilder<String>(
+                    stream: order.foodTag,
+                    builder: (context, snap) {
+                      return Text(
+                        (snap.hasData && snap.data != null)
+                            ? StringHelper.upperCaseWords(snap.data)
+                            : "Error",
+                        style: FontHelper.semiBold14Black,
+                      );
+                    }),
+                StreamBuilder<List<OrderItem>>(
+                    stream: order.orderItems,
+                    builder: (context, snap) {
+                      if (!snap.hasData || snap.data == null) return Offstage();
+
+                      int totalItems = snap.data
+                          .map((orderItem) => orderItem.quantity.value)
+                          .reduce((lhs, rhs) => lhs + rhs);
+
+                      double totalPrice = snap.data
+                          .map((orderItem) =>
+                              orderItem.quantity.value * orderItem.price.value)
+                          .reduce((lhs, rhs) => lhs + rhs);
+
+                      return Text(
+                        "Your Order: ${totalItems} items • ${StringHelper.doubleToPriceString(totalPrice)}",
+                        style: FontHelper.regular(
+                            ColorHelper.dabaoOffBlack9B, 12.0),
+                      );
+                    })
+              ],
+            ),
+          ),
+          Container(
+            width: 120,
+            child: Column(
+              children: <Widget>[
+                StreamBuilder<String>(
+                  stream: order.status.switchMap((status) {
+                    switch (status) {
+                      case orderStatus_Accepted:
+                        return order.deliveryTime.map((date) => date == null
+                            ? "Error"
+                            : DateTimeHelper.convertTimeToDisplayString(date));
+
+                      case orderStatus_Requested:
+                        return order.mode.switchMap((mode) {
+                          switch (mode) {
+                            case OrderMode.asap:
+                              return BehaviorSubject(seedValue: "ASAP");
+                            case OrderMode.scheduled:
+                              return Observable.combineLatest2(
+                                  order.startDeliveryTime,
+                                  order.endDeliveryTime, (start, end) {
+                                if (start == null || end == null)
+                                  return "Error";
+
+                                return DateTimeHelper
+                                    .convertDoubleTimeToDisplayString(
+                                        start, end);
+                              });
+                          }
+                        });
+
+                      default:
+                        return null;
+                    }
+                  }),
+                  builder: (BuildContext context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return Offstage();
+                    }
+                    return Text(
+                      snapshot.data,
+                      style: FontHelper.semiBold(
+                          ColorHelper.dabaoOffBlack9B, 10.0),
+                      textAlign: TextAlign.center,
+                    );
+                  },
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: StreamBuilder<String>(
+                      stream: order.status,
+                      builder: (BuildContext context, snapshot) {
+                        if (!snapshot.hasData || snapshot.data == null) {
+                          return Offstage();
+                        }
+
+                        switch (snapshot.data) {
+                          case orderStatus_Accepted:
+                            return Container(
+                              height: 19,
+                              width: 60,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5.0),
+                                color: ColorHelper.dabaoOrange,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "Enroute",
+                                  style: FontHelper.semiBold12Black,
+                                ),
+                              ),
+                            );
+                          case orderStatus_Requested:
+                            return Container(
+                              height: 19,
+                              width: 60,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  color: Color.fromRGBO(0x95, 0x9D, 0xAD, 1.0)),
+                              child: Center(
+                                child: Text("Pending",
+                                    style: FontHelper.semiBold(
+                                        Colors.white, 12.0)),
+                              ),
+                            );
+                          default:
+                            return Offstage();
+                        }
+                      },
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildViewAll() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        child: Container(
+          color: Colors.transparent,
+          padding: EdgeInsets.all(10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                "VIEW ALL",
+                style: TextStyle(
+                    decoration: TextDecoration.underline,
+                    color: ColorHelper.dabaoOffGrey70),
+              ),
+              SizedBox(
+                width: 3,
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 18,
+                color: ColorHelper.dabaoOffGrey70,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
