@@ -215,7 +215,7 @@ class _ChannelCellState extends State<_ChannelCell> {
                     ],
                   ),
                   subtitle: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 100, 0),
+                    padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                     child: StreamBuilder(
                         stream: Firestore.instance
                             .collection('channels')

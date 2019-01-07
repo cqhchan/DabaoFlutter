@@ -269,7 +269,6 @@ class _RouteCellState extends State<_RouteCell> {
             alignment: Alignment.centerRight,
             child: GestureDetector(
                 onTap: () {
-                  print('Tapped');
                   Navigator.push(
                       context,
                       MaterialPageRoute(

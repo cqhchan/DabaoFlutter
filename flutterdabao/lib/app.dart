@@ -84,7 +84,6 @@ class DabaoApp extends StatelessWidget with HavingSubscriptionMixin {
 
   @override
   Widget build(BuildContext context) {
-    print("testing");
     return MaterialApp(
       navigatorKey: ConfigHelper.instance.navigatorKey,
       title: 'DABAO',

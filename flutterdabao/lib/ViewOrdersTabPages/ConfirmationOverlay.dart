@@ -373,7 +373,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     if (startTime == null || endTime == null) {
       return Text("ERROR");
     }
-    int lastSelectedMinute = selectedDate.value.minute;
     print("testing Max : " +
         (startTime.hour + (endTime.difference(startTime).inMinutes / 60).ceil())
             .toString());

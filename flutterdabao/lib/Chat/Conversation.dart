@@ -95,11 +95,6 @@ class ConversationState extends State<Conversation>
         .where((uid) => uid != null)
         .map((uid) => Order.fromUID(uid))));
 
-  subscription.add(widget.channel.listOfMessages.listen((onData){
-
-    print("testing messages " + onData.length.toString());
-  }));
-
   }
 
   @override
@@ -114,7 +109,6 @@ class ConversationState extends State<Conversation>
   }
 
   _keyboardListener() {
-    print("testing it came 2");
     if (_myFocusNode.hasFocus) {
       setState(() {
         expandFlag = true;
@@ -157,7 +151,6 @@ class ConversationState extends State<Conversation>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -326,12 +319,39 @@ class ConversationState extends State<Conversation>
   Widget _buildCard() {
     return Column(
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(11.0),
-          child: Text(
-            'You are chatting about the following listing:',
-            style: FontHelper.regular15LightGrey,
-          ),
+        StreamBuilder<bool>(
+          stream: order.producer.switchMap((order) {
+            if (order == null) return null;
+
+            return Rxdart.Observable.combineLatest2<User, String, bool>(
+                ConfigHelper.instance.currentUserProperty.producer,
+                order.creator, (user, creatorID) {
+              if (user == null || creatorID == null) {
+                return null;
+              }
+
+              return user.uid == creatorID;
+            });
+          }),
+          builder: (BuildContext context, snapshot) {
+            if (!snapshot.hasData || snapshot.data == null) return Offstage();
+            if (snapshot.data)
+              return Padding(
+                padding: const EdgeInsets.all(11.0),
+                child: Text(
+                  'You are chatting about your order:',
+                  style: FontHelper.regular15LightGrey,
+                ),
+              );
+            else
+              return Padding(
+                padding: const EdgeInsets.all(11.0),
+                child: Text(
+                  'You are chatting about the other party order:',
+                  style: FontHelper.regular15LightGrey,
+                ),
+              );
+          },
         ),
         Card(
           shape:
@@ -553,7 +573,8 @@ class ConversationState extends State<Conversation>
                   : Container(
                       child: Text(
                         snap.hasData
-                            ? DateTimeHelper.convertDateTimeToNewLineDate(startTime) +
+                            ? DateTimeHelper.convertDateTimeToNewLineDate(
+                                    startTime) +
                                 ', ' +
                                 DateTimeHelper.convertDateTimeToAMPM(endTime)
                             : "Error",
@@ -1071,14 +1092,11 @@ class ConversationState extends State<Conversation>
                   },
                   focusNode: _myFocusNode,
                   onTap: () {
-                    print("testing it came 4");
-
                     setState(() {
                       expandFlag = true;
                     });
                   },
                   onSubmitted: (_) {
-                    print("testing it came 5");
 
                     setState(() {
                       expandFlag = false;
