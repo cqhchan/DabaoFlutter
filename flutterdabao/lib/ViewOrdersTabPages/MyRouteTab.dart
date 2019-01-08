@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -21,7 +22,6 @@ class MyRouteTabView extends StatefulWidget {
 
 class _MyRouteTabViewState extends State<MyRouteTabView>
     with AutomaticKeepAliveClientMixin<MyRouteTabView> {
-
   @override
   bool get wantKeepAlive => true;
 
@@ -58,7 +58,8 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
           }),
           builder: (context, snapshot) {
             if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-            if (!snapshot.hasData) return Center(child:Text('No Routes Avaliable'));
+            if (!snapshot.hasData)
+              return Center(child: Text('No Routes Avaliable'));
             return _buildList(context, snapshot.data);
           },
         ));
@@ -87,7 +88,23 @@ class _RouteCell extends StatefulWidget {
   }
 }
 
-class _RouteCellState extends State<_RouteCell> {
+class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
+  MutableProperty<List<Order>> listOfPotentialMatches = MutableProperty(List());
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    subscription
+        .add(listOfPotentialMatches.bindTo(widget.route.listOfPotentialOrders));
+  }
+
+  @override
+    void dispose() {
+      disposeAndReset();
+      super.dispose();
+    }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -136,7 +153,7 @@ class _RouteCellState extends State<_RouteCell> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         StreamBuilder<List<User>>(
-          stream: widget.route.listOfPotentialOrders.map((orders) {
+          stream: listOfPotentialMatches.producer.map((orders) {
             return orders
                 .take(3)
                 .map((order) => User.fromUID(order.creator.value))
@@ -249,7 +266,7 @@ class _RouteCellState extends State<_RouteCell> {
           child: Container(
             padding: EdgeInsets.only(),
             child: StreamBuilder<List<Order>>(
-              stream: widget.route.listOfPotentialOrders,
+              stream: listOfPotentialMatches.producer,
               builder: (context, snap) => snap.hasData && snap.data.length > 0
                   ? Text(
                       "${snap.data.length} matches for Your Route!",
@@ -335,7 +352,7 @@ class _RouteCellState extends State<_RouteCell> {
                         style: FontHelper.regular14Black,
                       );
                     }),
-                    StreamBuilder<DateTime>(
+                StreamBuilder<DateTime>(
                     stream: widget.route.deliveryTime,
                     builder: (context, snap) {
                       if (!snap.hasData || snap.data == null)

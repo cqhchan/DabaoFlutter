@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
+import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/OrderList.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -15,7 +18,24 @@ class Matches extends StatefulWidget {
   }
 }
 
-class MatchesState extends State<Matches> {
+class MatchesState extends State<Matches> with HavingSubscriptionMixin {
+  MutableProperty<List<Order>> listOfPotentialMatches = MutableProperty(List());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    subscription
+        .add(listOfPotentialMatches.bindTo(widget.route.listOfPotentialOrders));
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +50,7 @@ class MatchesState extends State<Matches> {
       body: OrderList(
         context: context,
         route: widget.route,
-        input: widget.route.listOfPotentialOrders,
+        input: listOfPotentialMatches.producer,
         location: widget.route.deliveryLocation.value
             .map((geopoint) => LatLng(geopoint.latitude, geopoint.longitude))
             .first,

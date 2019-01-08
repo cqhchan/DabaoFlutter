@@ -23,7 +23,6 @@ class Channel extends FirebaseType with Selectable {
   BehaviorSubject<String> deliverer;
 
   Observable<List<Message>> listOfMessages;
-  Observable<List<Channel>> listOfChannel;
 
   Channel.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 

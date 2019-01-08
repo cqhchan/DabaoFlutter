@@ -49,6 +49,7 @@ class Conversation extends StatefulWidget {
 class ConversationState extends State<Conversation>
     with HavingSubscriptionMixin {
   MutableProperty<Order> order = MutableProperty(null);
+  MutableProperty<List<Message>> listOfMessages = MutableProperty(List());
 
   //text input properties in textfield
   TextEditingController _textController;
@@ -95,6 +96,9 @@ class ConversationState extends State<Conversation>
         .where((uid) => uid != null)
         .map((uid) => Order.fromUID(uid))));
 
+    // You need to listen manually to the list of messages
+    // TODO for some strange reason again.
+    subscription.add(listOfMessages.bindTo(widget.channel.listOfMessages));
   }
 
   @override
@@ -851,7 +855,7 @@ class ConversationState extends State<Conversation>
   Widget _buildMessages() {
     return Flexible(
       child: StreamBuilder<List<Message>>(
-        stream: widget.channel.listOfMessages.map((data) {
+        stream: listOfMessages.producer.map((data) {
           List<Message> temp = List<Message>();
 
           data.forEach((element) {
@@ -1097,7 +1101,6 @@ class ConversationState extends State<Conversation>
                     });
                   },
                   onSubmitted: (_) {
-
                     setState(() {
                       expandFlag = false;
                     });
