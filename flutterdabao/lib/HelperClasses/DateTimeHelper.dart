@@ -15,6 +15,62 @@ class DateTimeHelper {
     return formatDate(datetime, [yyyy, '_WEEK_', WW]);
   }
 
+  static String convertDateTimeToAgo(DateTime datetime) {
+    Duration diff = DateTime.now().difference(datetime);
+
+   double timeLeftinSecond = diff.inMilliseconds / 1000;
+
+
+    double secondPerMinute = 60.0;
+    double minutePerHour = 60.0;
+    double hourPerDay = 24.0;
+    double dayPerWeek = 7.0;
+    double weekPerYear = 53.0;
+
+    if (isToday(datetime)) {
+      if (timeLeftinSecond < secondPerMinute)
+        return timeLeftinSecond.toString() + ' seconds ago';
+      if (timeLeftinSecond >= secondPerMinute &&
+          timeLeftinSecond < secondPerMinute * minutePerHour)
+        return (timeLeftinSecond / secondPerMinute).round().toString() +
+            ' minute(s) ago';
+      if (timeLeftinSecond >= secondPerMinute * minutePerHour &&
+          timeLeftinSecond < secondPerMinute * minutePerHour * hourPerDay)
+        return (timeLeftinSecond / (secondPerMinute * minutePerHour))
+                .round()
+                .toString() +
+            ' hour(s) ago';
+    }
+
+    if (timeLeftinSecond >= (secondPerMinute * minutePerHour * hourPerDay) &&
+        timeLeftinSecond < (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek))
+      return (timeLeftinSecond / (secondPerMinute * minutePerHour * hourPerDay))
+              .ceil()
+              .toString() +
+          ' day(s) ago';
+    if (timeLeftinSecond >= (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek) &&
+        timeLeftinSecond <
+            (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek * weekPerYear))
+      return (timeLeftinSecond /
+                  (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek))
+              .ceil()
+              .toString() +
+          ' week(s) ago';
+    if (timeLeftinSecond >=
+            (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek * weekPerYear))
+      return (timeLeftinSecond /
+                  (secondPerMinute *
+                      minutePerHour *
+                      hourPerDay *
+                      dayPerWeek 
+                      ))
+              .ceil()
+              .toString() +
+          ' year(s) ago';
+
+    return 'Please try again.';
+  }
+
   static String convertDateTimeToAMPM(DateTime date) {
     return DateFormat.jm().format(date);
   }
@@ -69,8 +125,18 @@ class DateTimeHelper {
       return formatDate(
           date, ['Today, ', date.hour == 12 ? "12" : hh, ':', nn, am]);
     else
-      return formatDate(date,
-          [D, ', ', dd, '-', mm, ' ', date.hour == 12 ? "12" : hh, ':', nn, am]);
+      return formatDate(date, [
+        D,
+        ', ',
+        dd,
+        '-',
+        mm,
+        ' ',
+        date.hour == 12 ? "12" : hh,
+        ':',
+        nn,
+        am
+      ]);
   }
 
   static String convertStartTimeToDisplayString(DateTime date) {

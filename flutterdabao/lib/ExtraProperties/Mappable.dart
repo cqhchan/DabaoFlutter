@@ -10,6 +10,7 @@ import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:flutterdabao/Model/Rating.dart';
 import 'package:flutterdabao/Model/Route.dart';
 import 'package:flutterdabao/Model/Transact.dart';
 import 'package:flutterdabao/Model/User.dart';
@@ -97,6 +98,10 @@ abstract class Mappable extends Identifiable {
 
     if (T == Wallet) {
       return new Wallet.fromDocument(doc) as T;
+    }
+
+    if (T == Rating) {
+      return new Rating.fromDocument(doc) as T;
     }
 
     throw FatalError("Mappable Not Declared");

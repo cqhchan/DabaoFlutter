@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_format/date_format.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutterdabao/Chat/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
+import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -21,12 +23,16 @@ import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/Profile/ViewProfile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart' as Rxdart;
+import 'package:crypto/crypto.dart' as crypto;
+import 'package:convert/convert.dart';
+import 'dart:convert';
 
 GlobalKey<ConversationState> currentKey;
 
@@ -77,6 +83,8 @@ class ConversationState extends State<Conversation>
 
   //control color of send button
   bool sendButtonFlag;
+
+  File _thumbnail;
 
   ConversationState() {
     isTouchDown = false;
@@ -213,47 +221,57 @@ class ConversationState extends State<Conversation>
       }),
       builder: (context, user) {
         if (!user.hasData || user == null) return Offstage();
-        return Row(
-          children: <Widget>[
-            StreamBuilder<String>(
-              stream: user.data.thumbnailImage,
-              builder: (context, user) {
-                if (!user.hasData) return Offstage();
-                return FittedBox(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(30.0),
-                    child: SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: CachedNetworkImage(
-                        imageUrl: user.data,
-                        placeholder: GlowingProgressIndicator(
-                          child: Icon(
-                            Icons.account_circle,
-                            size: 30,
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              FadeRoute(
+                  widget: ViewProfile(
+                currentUser: user,
+              )),
+            );
+          },
+          child: Row(
+            children: <Widget>[
+              StreamBuilder<String>(
+                stream: user.data.thumbnailImage,
+                builder: (context, user) {
+                  if (!user.hasData) return Offstage();
+                  return FittedBox(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30.0),
+                      child: SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: CachedNetworkImage(
+                          imageUrl: user.data,
+                          placeholder: GlowingProgressIndicator(
+                            child: Icon(
+                              Icons.account_circle,
+                              size: 30,
+                            ),
                           ),
+                          errorWidget: Icon(Icons.error),
                         ),
-                        errorWidget: Icon(Icons.error),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            StreamBuilder<String>(
-              stream: user.data.name,
-              builder: (context, user) {
-                if (!user.hasData) return Offstage();
-                return Text(
-                  user.hasData ? user.data : "Error",
-                  style: FontHelper.semiBold16Black,
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              StreamBuilder<String>(
+                stream: user.data.name,
+                builder: (context, user) {
+                  if (!user.hasData) return Offstage();
+                  return Text(
+                    user.hasData ? user.data : "Error",
+                    style: FontHelper.semiBold16Black,
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );
@@ -846,6 +864,7 @@ class ConversationState extends State<Conversation>
         context: context,
         builder: (builder) {
           return CounterOfferOverlay(
+            //TODO COUNTER-OFFER DELIVERY FEE
             order: order,
             // route: widget.route,
           );
@@ -879,7 +898,8 @@ class ConversationState extends State<Conversation>
                 initial = _scrollController.position.pixels;
               },
               child: new NotificationListener(
-                child: ListView.builder(
+                child: 
+                ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
                   controller: _scrollController,
                   reverse: true,
@@ -920,7 +940,6 @@ class ConversationState extends State<Conversation>
       }
     } else {
       //query messages
-
       if (data.sender.value ==
           ConfigHelper.instance.currentUserProperty.value.uid) {
         return Row(
@@ -978,34 +997,44 @@ class ConversationState extends State<Conversation>
           ),
       builder: (context, user) {
         if (!user.hasData) return Offstage();
-        return Row(
-          children: <Widget>[
-            StreamBuilder<String>(
-              stream: user.data.thumbnailImage,
-              builder: (context, user) {
-                if (!user.hasData) return Offstage();
-                return FittedBox(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(30.0),
-                    child: SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: CachedNetworkImage(
-                        imageUrl: user.data,
-                        placeholder: GlowingProgressIndicator(
-                          child: Icon(
-                            Icons.image,
-                            size: 50,
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              FadeRoute(
+                  widget: ViewProfile(
+                currentUser: user,
+              )),
+            );
+          },
+          child: Row(
+            children: <Widget>[
+              StreamBuilder<String>(
+                stream: user.data.thumbnailImage,
+                builder: (context, user) {
+                  if (!user.hasData) return Offstage();
+                  return FittedBox(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30.0),
+                      child: SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: CachedNetworkImage(
+                          imageUrl: user.data,
+                          placeholder: GlowingProgressIndicator(
+                            child: Icon(
+                              Icons.account_circle,
+                              size: 30,
+                            ),
                           ),
+                          errorWidget: Icon(Icons.error),
                         ),
-                        errorWidget: Icon(Icons.error),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );
@@ -1030,7 +1059,7 @@ class ConversationState extends State<Conversation>
               placeholder: GlowingProgressIndicator(
                 //TODO CHANGE DEFAULT IMAGE
                 child: Icon(
-                  Icons.check_circle,
+                  Icons.image,
                   size: 30,
                 ),
               ),
@@ -1077,8 +1106,8 @@ class ConversationState extends State<Conversation>
           children: <Widget>[
             Expanded(
                 child: GestureDetector(
-              onTap: getImageFromGallery,
-              child: Icon(Icons.camera_alt),
+              onTap: _updatePhotoOptionsBottomModal,
+              child: Icon(Icons.add),
             )),
             Expanded(
                 flex: 5,
@@ -1144,12 +1173,56 @@ class ConversationState extends State<Conversation>
     );
   }
 
-  void getImageFromGallery() async {
+  Future _updatePhotoOptionsBottomModal() async {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return SafeArea(
+            child: Container(
+              color: Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.camera),
+                    title: Text('Camera'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      getImageFromCamera();
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.photo_album),
+                    title: Text('Photos'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      getImageFromGallery();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  generateMd5(String data) {
+    var content = new Utf8Encoder().convert(data);
+    var md5 = crypto.md5;
+    var digest = md5.convert(content);
+    return hex.encode(digest.bytes);
+  }
+
+  void getImageFromCamera() async {
     ImagePicker.pickImage(source: ImageSource.camera).then((image) async {
       if (image != null) {
         _image = await _cropImage(image);
         final StorageReference profileRef = FirebaseStorage.instance.ref().child(
-            'user/${ConfigHelper.instance.currentUserProperty.value.uid}/${_image.hashCode}.jpg');
+            'storage/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(),[yyyy,mm,dd])}-DABAO-${generateMd5(_image.toString())}.jpg');
+
+        print(_image.toString());
+
+        print(generateMd5(_image.toString()));
 
         final StorageUploadTask imageTask = profileRef.putFile(_image);
 
@@ -1160,6 +1233,29 @@ class ConversationState extends State<Conversation>
           });
         });
       }
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  void getImageFromGallery() async {
+    ImagePicker.pickImage(source: ImageSource.gallery).then((image) async {
+      if (image != null) {
+        _image = await _cropImage(image);
+        final StorageReference profileRef = FirebaseStorage.instance.ref().child(
+            'storage/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(),[yyyy,mm,dd])}-DABAO-${generateMd5(_image.toString())}.jpg');
+
+        final StorageUploadTask imageTask = profileRef.putFile(_image);
+
+        imageTask.onComplete.then((result) {
+          result.ref.getDownloadURL().then((url) {
+            widget.channel.addMessage(
+                null, ConfigHelper.instance.currentUserProperty.value.uid, url);
+          });
+        });
+      }
+    }).catchError((e) {
+      print(e);
     });
   }
 

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/Conversation.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
+import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -16,6 +17,7 @@ import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/Profile/ViewProfile.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -569,47 +571,57 @@ class _OrderItemCellState extends State<_OrderItemCell> {
           .map((uid) => User.fromUID(uid)),
       builder: (context, user) {
         if (!user.hasData) return Offstage();
-        return Row(
-          children: <Widget>[
-            StreamBuilder<String>(
-              stream: user.data.thumbnailImage,
-              builder: (context, user) {
-                if (!user.hasData) return Offstage();
-                return FittedBox(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(30.0),
-                    child: SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: CachedNetworkImage(
-                        imageUrl: user.data,
-                        placeholder: GlowingProgressIndicator(
-                          child: Icon(
-                            Icons.account_circle,
-                            size: 30,
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              FadeRoute(
+                  widget: ViewProfile(
+                currentUser: user,
+              )),
+            );
+          },
+          child: Row(
+            children: <Widget>[
+              StreamBuilder<String>(
+                stream: user.data.thumbnailImage,
+                builder: (context, user) {
+                  if (!user.hasData) return Offstage();
+                  return FittedBox(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30.0),
+                      child: SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: CachedNetworkImage(
+                          imageUrl: user.data,
+                          placeholder: GlowingProgressIndicator(
+                            child: Icon(
+                              Icons.account_circle,
+                              size: 30,
+                            ),
                           ),
+                          errorWidget: Icon(Icons.error),
                         ),
-                        errorWidget: Icon(Icons.error),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            StreamBuilder<String>(
-              stream: user.data.name,
-              builder: (context, user) {
-                if (!user.hasData) return Offstage();
-                return Text(
-                  user.hasData ? user.data : "Error",
-                  style: FontHelper.semiBold16Black,
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              StreamBuilder<String>(
+                stream: user.data.name,
+                builder: (context, user) {
+                  if (!user.hasData) return Offstage();
+                  return Text(
+                    user.hasData ? user.data : "Error",
+                    style: FontHelper.semiBold16Black,
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );
@@ -690,7 +702,8 @@ class _OrderItemCellState extends State<_OrderItemCell> {
       },
       merge: true,
     ).then((_) {
-                GlobalKey<ConversationState> key = GlobalKey<ConversationState>(debugLabel: channel.uid);
+      GlobalKey<ConversationState> key =
+          GlobalKey<ConversationState>(debugLabel: channel.uid);
 
       Navigator.push(
         context,
