@@ -859,6 +859,7 @@ class ConversationState extends State<Conversation>
         context: context,
         builder: (builder) {
           return CounterOfferOverlay(
+            //TODO COUNTER-OFFER DELIVERY FEE
             order: order,
             // route: widget.route,
           );
@@ -892,7 +893,8 @@ class ConversationState extends State<Conversation>
                 initial = _scrollController.position.pixels;
               },
               child: new NotificationListener(
-                child: ListView.builder(
+                child: 
+                ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
                   controller: _scrollController,
                   reverse: true,
@@ -933,7 +935,6 @@ class ConversationState extends State<Conversation>
       }
     } else {
       //query messages
-
       if (data.sender.value ==
           ConfigHelper.instance.currentUserProperty.value.uid) {
         return Row(
@@ -1212,7 +1213,7 @@ class ConversationState extends State<Conversation>
       if (image != null) {
         _image = await _cropImage(image);
         final StorageReference profileRef = FirebaseStorage.instance.ref().child(
-            'channel/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(),[yyyy,mm,dd])}-DABAO-${generateMd5(_image.toString())}.jpg');
+            'storage/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(),[yyyy,mm,dd])}-DABAO-${generateMd5(_image.toString())}.jpg');
 
         print(_image.toString());
 
@@ -1237,7 +1238,7 @@ class ConversationState extends State<Conversation>
       if (image != null) {
         _image = await _cropImage(image);
         final StorageReference profileRef = FirebaseStorage.instance.ref().child(
-            'channel/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(),[yyyy,mm,dd])}-DABAO-${generateMd5(_image.toString())}.jpg');
+            'storage/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(),[yyyy,mm,dd])}-DABAO-${generateMd5(_image.toString())}.jpg');
 
         final StorageUploadTask imageTask = profileRef.putFile(_image);
 
