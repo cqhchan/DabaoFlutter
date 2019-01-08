@@ -259,9 +259,7 @@ class _OrderCheckoutState extends State<OrderCheckout>
                     showLoadingOverlay(context: context);
                     var isSuccessful = await Order.createOrder(widget.holder);
 
-
                     if (isSuccessful) {
-
                       Navigator.popUntil(context,
                           ModalRoute.withName(Navigator.defaultRouteName));
                     } else {
@@ -464,6 +462,7 @@ class _OrderCheckoutState extends State<OrderCheckout>
                         time,
                         style: FontHelper.medium(
                             ColorHelper.dabaoOffBlack4A, 14.0),
+                        textAlign: TextAlign.right,
                       )))
             ],
           ),

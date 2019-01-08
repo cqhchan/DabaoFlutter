@@ -86,7 +86,8 @@ class DateTimeHelper {
       return formatDate(date, [D, ', ', dd, '-', mm]);
   }
 
-  static String convertDateTimeToNewLineDate(DateTime date) {
+    static String convertDateTimeToNewLineDate(DateTime date) {
+
     if (isToday(date))
       return formatDate(date, ['Today,\n', dd, '-', mm]);
     else

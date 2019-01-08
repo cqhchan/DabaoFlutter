@@ -106,12 +106,11 @@ class User extends FirebaseType {
     completedOrders = BehaviorSubject();
     rating = BehaviorSubject();
 
-    listOfReviews = FirebaseCollectionReactive<Rating>(
-      Firestore.instance
-          .collection(className)
-          .document(this.uid)
-          .collection("ratings")
-    ).observable;
+    listOfReviews = FirebaseCollectionReactive<Rating>(Firestore.instance
+            .collection(className)
+            .document(this.uid)
+            .collection("ratings"))
+        .observable;
   }
 
   @override
@@ -179,7 +178,7 @@ class User extends FirebaseType {
     }
 
     if (data.containsKey(ratingKey)) {
-      rating.add(data[ratingKey] * 1.0);
+      rating.add(data[ratingKey] + 0.0);
     } else {
       rating.add(0.0);
     }

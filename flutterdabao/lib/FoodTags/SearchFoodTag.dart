@@ -46,7 +46,7 @@ class _FoodTypeSearchState extends State<FoodTypeSearch> {
                       .where(FoodTag.titleKey,
                           isGreaterThanOrEqualTo: criteria.toLowerCase().trim())
                       .where(FoodTag.titleKey,
-                          isLessThanOrEqualTo: criteria.toLowerCase().trim() + "z")
+                          isLessThanOrEqualTo: criteria.toLowerCase().trim() + "zzzzzzzzzzzzzzzzzzzz")
                       .limit(10))
               .future;
           List resultList = list

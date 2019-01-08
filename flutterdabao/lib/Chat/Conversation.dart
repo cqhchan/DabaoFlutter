@@ -878,7 +878,7 @@ class ConversationState extends State<Conversation>
           return temp.toList();
         }),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return CircularProgressIndicator();
+          if (!snapshot.hasData) return Offstage();
           return GestureDetector(
               onTap: () {
                 if (_myFocusNode.hasFocus) {
