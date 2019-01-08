@@ -170,7 +170,7 @@ class User extends FirebaseType {
     }
 
     if (data.containsKey(ratingKey)) {
-      rating.add(data[ratingKey]);
+      rating.add(data[ratingKey] +0.0);
     } else {
       rating.add(0.0);
     }
