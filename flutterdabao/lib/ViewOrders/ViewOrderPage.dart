@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
+import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -9,6 +10,7 @@ import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -95,20 +97,19 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage> {
 
   Widget buildTotal(Order order) {
     return StreamBuilder<double>(
-      stream:
-          Observable.combineLatest2<List<OrderItem>, double, double>(
-              order.orderItems, order.deliveryFee,
-              (orderItems, deliveryFee) {
+      stream: Observable.combineLatest2<List<OrderItem>, double, double>(
+          order.orderItems, order.deliveryFee, (orderItems, deliveryFee) {
         double maxTotalPrice = orderItems
             .map(
                 (orderItem) => orderItem.price.value * orderItem.quantity.value)
             .reduce((lhs, rhs) => lhs + rhs);
 
-        double totalPrice = maxTotalPrice + (order.deliveryFeeDiscount.value == null
-            ? deliveryFee
-            : deliveryFee - order.deliveryFeeDiscount.value < 0
-                ? 0
-                : deliveryFee - order.deliveryFeeDiscount.value);
+        double totalPrice = maxTotalPrice +
+            (order.deliveryFeeDiscount.value == null
+                ? deliveryFee
+                : deliveryFee - order.deliveryFeeDiscount.value < 0
+                    ? 0
+                    : deliveryFee - order.deliveryFeeDiscount.value);
         return totalPrice;
       }),
       builder: (BuildContext context, snapshot) {
@@ -124,7 +125,8 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage> {
                   SizedBox(
                     width: 5.0,
                   ),
-                  Text(StringHelper.doubleToPriceString(snapshot.data), style: FontHelper.bold14Black),
+                  Text(StringHelper.doubleToPriceString(snapshot.data),
+                      style: FontHelper.bold14Black),
                 ],
               )
             ]);
@@ -358,22 +360,36 @@ class _DeliveryLocation extends StatelessWidget {
           style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 14.0),
           textAlign: TextAlign.center,
         ),
-        ConstrainedBox(
-          child: StreamBuilder<String>(
-            stream: order.deliveryLocationDescription,
-            builder: (BuildContext context, snapshot) {
-              if (!snapshot.hasData || snapshot.data == null) {
-                return Offstage();
-              }
-              return Text(
-                snapshot.data,
-                style: FontHelper.regular(Colors.black, 14.0),
-                textAlign: TextAlign.right,
-              );
-            },
-          ),
-          constraints:
-              BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2),
+        Row(
+          children: <Widget>[
+            ConstrainedBox(
+              child: StreamBuilder<String>(
+                stream: order.deliveryLocationDescription,
+                builder: (BuildContext context, snapshot) {
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return Offstage();
+                  }
+                  return Text(
+                    snapshot.data,
+                    style: FontHelper.regular(Colors.black, 14.0),
+                    textAlign: TextAlign.right,
+                  );
+                },
+              ),
+              constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width / 2),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 10.0),
+              child: GestureDetector(
+                  child: Image.asset('assets/icons/google-maps.png'),
+                  onTap: () {
+                    LatLng temp = LatLng(order.deliveryLocation.value.latitude,
+                        order.deliveryLocation.value.longitude);
+                    launchMaps(temp);
+                  }),
+            ),
+          ],
         ),
       ],
     );
@@ -419,7 +435,7 @@ class _OrderItems extends StatelessWidget {
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: 55),
       child: Container(
-        padding: EdgeInsets.only(top:5, left: 5, right: 5),
+        padding: EdgeInsets.only(top: 5, left: 5, right: 5),
         color: Colors.white,
         margin: EdgeInsets.only(top: 10.0),
         child: Row(

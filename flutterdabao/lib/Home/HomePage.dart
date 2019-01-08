@@ -116,6 +116,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 ),
               ),
               balanceCardStream(context),
+              SizedBox(height: 20),
             ],
           ),
         ),
