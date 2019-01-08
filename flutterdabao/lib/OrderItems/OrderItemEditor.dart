@@ -400,7 +400,7 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
                 .where(OrderItem.titleKey,
                     isGreaterThanOrEqualTo: pattern.toLowerCase())
                 .where(OrderItem.titleKey,
-                    isLessThanOrEqualTo: pattern.toLowerCase() + "z")
+                    isLessThanOrEqualTo: pattern.toLowerCase() + "zzzzzzzz")
                 .orderBy(OrderItem.titleKey)
                 .limit(5))
             .future;
