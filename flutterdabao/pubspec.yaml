@@ -16,7 +16,9 @@ dependencies:
   flutter:
     sdk: flutter
   intl: ^0.15.7
+  timeago: ^2.0.10
   percent_indicator: ^1.0.12
+  smooth_star_rating: ^1.0.1
   datetime_picker_formfield: ^0.1.4
   flutter_colorpicker: any
   flutter_masked_text: ^0.6.0

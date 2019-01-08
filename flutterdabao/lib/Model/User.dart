@@ -4,6 +4,7 @@ import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
+import 'package:flutterdabao/Model/Rating.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -33,12 +34,13 @@ class User extends FirebaseType {
   BehaviorSubject<int> completedOrders;
   BehaviorSubject<double> rating;
 
-
   // Only avaliable in from Auth
   Observable<List<Voucher>> listOfAvalibleVouchers;
   Observable<List<Voucher>> listOfInUsedVouchers;
   Observable<int> currentDabaoerRewardsNumber;
   Observable<int> currentDabaoeeRewardsNumber;
+
+  Observable<List<Rating>> listOfReviews;
 
   User.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   User.fromUID(String uid) : super.fromUID(uid);
@@ -103,6 +105,13 @@ class User extends FirebaseType {
     completedDeliveries = BehaviorSubject();
     completedOrders = BehaviorSubject();
     rating = BehaviorSubject();
+
+    listOfReviews = FirebaseCollectionReactive<Rating>(
+      Firestore.instance
+          .collection(className)
+          .document(this.uid)
+          .collection("ratings")
+    ).observable;
   }
 
   @override
@@ -170,7 +179,7 @@ class User extends FirebaseType {
     }
 
     if (data.containsKey(ratingKey)) {
-      rating.add(data[ratingKey]);
+      rating.add(data[ratingKey] * 1.0);
     } else {
       rating.add(0.0);
     }

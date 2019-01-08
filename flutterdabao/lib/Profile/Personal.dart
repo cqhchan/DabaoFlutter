@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -38,9 +36,6 @@ class _PersonalState extends State<Personal> {
   final _hpTextController = TextEditingController();
   final _emailTextController = TextEditingController();
   final _scrollController = ScrollController();
-  final _focusNode1 = FocusNode();
-  final _focusNode2 = FocusNode();
-  final _focusNode3 = FocusNode();
 
   void initState() {
     super.initState();
