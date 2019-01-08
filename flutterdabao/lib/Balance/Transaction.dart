@@ -47,10 +47,10 @@ class _TransactionsState extends State<TransactionsPage>
           children: <Widget>[
             _buildCurrentBalance(),
             Container(
-          height: 60,
-          width: 1.0,
-          color: Color(0x11000000),
-        ),
+              height: 60,
+              width: 1.0,
+              color: Color(0x11000000),
+            ),
             _buildEarnedThisWeek(),
           ],
         ),
@@ -306,18 +306,19 @@ class _TransactionsState extends State<TransactionsPage>
   }
 
   Widget _buildPayment(Transact data) {
-    print(data.orderID.value);
     return StreamBuilder<User>(
         stream: data.orderID.switchMap(
           (orderID) => orderID == null
               ? null
-              : Order.fromUID(orderID).creator.where((uid) => uid != null).map(
-                  (creatorID) =>
-                      creatorID == null ? null : User.fromUID(creatorID)),
+              : Order.fromUID(orderID)
+                  .creator
+                  .where((uid) => uid != null)
+                  .map((creatorID) {
+                  return creatorID == null ? null : User.fromUID(creatorID);
+                }),
         ),
         builder: (context, user) {
           if (!user.hasData || user.data == null) {
-            print('creator is ${user.data}');
             return Offstage();
           } else if (user.hasData)
             return Column(
@@ -345,11 +346,16 @@ class _TransactionsState extends State<TransactionsPage>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Text(
-                            user.data.name.value == null
-                                ? 'Please try again'
-                                : user.data.name.value,
-                            style: FontHelper.regular10Black,
+                          StreamBuilder(
+                            stream: user.data.name,
+                            builder: (BuildContext context, snapshot) {
+                              return Text(
+                                !snapshot.hasData || snapshot.data == null
+                                    ? 'Please try again'
+                                    : snapshot.data,
+                                style: FontHelper.regular10Black,
+                              );
+                            },
                           ),
                           Text(
                             DateTimeHelper.convertTimeToDisplayString(
@@ -420,15 +426,27 @@ class _TransactionsState extends State<TransactionsPage>
         child: SizedBox(
           height: 50,
           width: 50,
-          child: CachedNetworkImage(
-            imageUrl: user.data.thumbnailImage.value,
-            placeholder: GlowingProgressIndicator(
-              child: Icon(
-                Icons.image,
-                size: 50,
+          child: StreamBuilder<String>(
+            stream: user.data.thumbnailImage,
+            builder: (BuildContext context, snapshot) {
+              if (!snapshot.hasData || snapshot.data == null) return GlowingProgressIndicator(
+                child: Icon(
+                  Icons.image,
+                  size: 50,
+                ),
+              );
+
+              return CachedNetworkImage(
+              imageUrl: user.data.thumbnailImage.value,
+              placeholder: GlowingProgressIndicator(
+                child: Icon(
+                  Icons.image,
+                  size: 50,
+                ),
               ),
-            ),
-            errorWidget: Icon(Icons.error),
+              errorWidget: Icon(Icons.error),
+            );
+            },
           ),
         ),
       ),
