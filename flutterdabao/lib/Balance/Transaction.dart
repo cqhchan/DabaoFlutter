@@ -533,6 +533,5 @@ class _TransactionsState extends State<TransactionsPage>
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }
