@@ -19,6 +19,8 @@ class User extends FirebaseType {
   static String thumbnailImageKey = 'TI';
   static String creationTime = 'CT';
   static String lastLoginTime = 'LLT';
+  static String completedDeliveriesKey = 'CD';
+  static String completedOrdersKey = 'CO';
 
   BehaviorSubject<String> email;
   BehaviorSubject<String> profileImage;
@@ -26,6 +28,8 @@ class User extends FirebaseType {
   BehaviorSubject<String> handPhone;
   BehaviorSubject<String> thumbnailImage;
   BehaviorSubject<List<FoodTag>> userFoodTags;
+  BehaviorSubject<int> completedDeliveries;
+  BehaviorSubject<int> completedOrders;
 
   // Only avaliable in from Auth
   Observable<List<Voucher>> listOfAvalibleVouchers;
@@ -37,9 +41,8 @@ class User extends FirebaseType {
   User.fromUID(String uid) : super.fromUID(uid);
 
   User.fromAuth(FirebaseUser user) : super.fromUID(user.uid) {
-
     if (ConfigHelper.instance.currentUserProperty.value != this)
-    ConfigHelper.instance.currentUserProperty.value = this;
+      ConfigHelper.instance.currentUserProperty.value = this;
 
     listOfAvalibleVouchers = FirebaseCollectionReactive<Voucher>(Firestore
             .instance
@@ -94,6 +97,8 @@ class User extends FirebaseType {
     thumbnailImage = BehaviorSubject();
     userFoodTags = BehaviorSubject(seedValue: List());
     handPhone = BehaviorSubject();
+    completedDeliveries = BehaviorSubject();
+    completedOrders = BehaviorSubject();
   }
 
   @override
@@ -146,6 +151,18 @@ class User extends FirebaseType {
     } else {
       handPhone.add(null);
       //print("hp null");
+    }
+
+    if (data.containsKey(completedDeliveriesKey)) {
+      completedDeliveries.add(data[completedDeliveriesKey]);
+    } else {
+      completedDeliveries.add(0);
+    }
+
+    if (data.containsKey(completedOrdersKey)) {
+      completedOrders.add(data[completedOrdersKey]);
+    } else {
+      completedOrders.add(0);
     }
   }
 
