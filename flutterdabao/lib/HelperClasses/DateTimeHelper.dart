@@ -31,6 +31,7 @@ class DateTimeHelper {
   }
 
     static String convertDateTimeToNewLineDate(DateTime date) {
+
     if (isToday(date))
       return formatDate(date, ['Today,\n', dd, '-', mm]);
     else

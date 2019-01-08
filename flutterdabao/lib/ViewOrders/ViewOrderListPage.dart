@@ -300,7 +300,7 @@ class _ViewOrderCellState extends State<_ViewOrderCell> {
         return Text(
           snapshot.data,
           style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 10.0),
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.right,
         );
       },
     );

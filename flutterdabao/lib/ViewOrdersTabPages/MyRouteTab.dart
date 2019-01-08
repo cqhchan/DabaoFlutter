@@ -21,6 +21,7 @@ class MyRouteTabView extends StatefulWidget {
 
 class _MyRouteTabViewState extends State<MyRouteTabView>
     with AutomaticKeepAliveClientMixin<MyRouteTabView> {
+
   @override
   bool get wantKeepAlive => true;
 
@@ -321,16 +322,34 @@ class _RouteCellState extends State<_RouteCell> {
         Expanded(
           child: Container(
             padding: EdgeInsets.only(left: 12.0, right: 20.0),
-            child: StreamBuilder<List<String>>(
-                stream: widget.route.deliveryLocationDescription,
-                builder: (context, snap) {
-                  if (!snap.hasData || snap.data.first == null)
-                    return CircularProgressIndicator();
-                  return Text(
-                    snap.data.first,
-                    style: FontHelper.regular14Black,
-                  );
-                }),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                StreamBuilder<List<String>>(
+                    stream: widget.route.deliveryLocationDescription,
+                    builder: (context, snap) {
+                      if (!snap.hasData || snap.data.first == null)
+                        return CircularProgressIndicator();
+                      return Text(
+                        snap.data.first,
+                        style: FontHelper.regular14Black,
+                      );
+                    }),
+                    StreamBuilder<DateTime>(
+                    stream: widget.route.deliveryTime,
+                    builder: (context, snap) {
+                      if (!snap.hasData || snap.data == null)
+                        return CircularProgressIndicator();
+                      return Text(
+                        "Arriving at " +
+                            DateTimeHelper.convertTimeToDisplayString(
+                                snap.data),
+                        style: FontHelper.regular(
+                            ColorHelper.dabaoOffBlack9B, 12.0),
+                      );
+                    })
+              ],
+            ),
           ),
         ),
       ],
