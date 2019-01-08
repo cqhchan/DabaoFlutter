@@ -25,7 +25,7 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
-       static const TextStyle smallTimeTextStyle = TextStyle(
+  static const TextStyle smallTimeTextStyle = TextStyle(
       color: Colors.black54,
       fontSize: 10.0,
       fontStyle: FontStyle.normal,
@@ -127,19 +127,19 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
-      static const TextStyle semiBold12Grey = TextStyle(
+  static const TextStyle semiBold12Grey = TextStyle(
       color: Color(0xFF9B9B9B),
       fontSize: 12.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
-      static const TextStyle semiBold12Black = TextStyle(
+  static const TextStyle semiBold12Black = TextStyle(
       color: Colors.black,
       fontSize: 12.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
-      static const TextStyle semiBold10Grey = TextStyle(
+  static const TextStyle semiBold10Grey = TextStyle(
       color: Color(0xFF9B9B9B),
       fontSize: 10.0,
       fontStyle: FontStyle.normal,
@@ -165,6 +165,12 @@ class FontHelper {
       fontFamily: "SF_UI_Display");
   static const TextStyle semiBold20Orange = TextStyle(
       color: ColorHelper.dabaoOrange,
+      fontSize: 20.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
+  static const TextStyle semiBold20Black = TextStyle(
+      color: Colors.black,
       fontSize: 20.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
@@ -199,13 +205,25 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
       fontFamily: "SF_UI_Display");
+      static const TextStyle regular10lightgrey = TextStyle(
+      color: Color(0xFFD0D0D0),
+      fontSize: 10.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w400,
+      fontFamily: "SF_UI_Display");
   static const TextStyle regular10Black = TextStyle(
       color: Colors.black,
       fontSize: 10.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
-      static const TextStyle regular12Black = TextStyle(
+  static const TextStyle regular11Black = TextStyle(
+      color: Colors.black,
+      fontSize: 11.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontFamily: "SF_UI_Display");
+  static const TextStyle regular12Black = TextStyle(
       color: Colors.black,
       fontSize: 12.0,
       fontStyle: FontStyle.normal,

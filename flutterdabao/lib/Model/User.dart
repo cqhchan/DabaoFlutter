@@ -21,6 +21,7 @@ class User extends FirebaseType {
   static String lastLoginTime = 'LLT';
   static String completedDeliveriesKey = 'CD';
   static String completedOrdersKey = 'CO';
+  static String ratingKey = 'R';
 
   BehaviorSubject<String> email;
   BehaviorSubject<String> profileImage;
@@ -30,6 +31,8 @@ class User extends FirebaseType {
   BehaviorSubject<List<FoodTag>> userFoodTags;
   BehaviorSubject<int> completedDeliveries;
   BehaviorSubject<int> completedOrders;
+  BehaviorSubject<double> rating;
+
 
   // Only avaliable in from Auth
   Observable<List<Voucher>> listOfAvalibleVouchers;
@@ -99,6 +102,7 @@ class User extends FirebaseType {
     handPhone = BehaviorSubject();
     completedDeliveries = BehaviorSubject();
     completedOrders = BehaviorSubject();
+    rating = BehaviorSubject();
   }
 
   @override
@@ -163,6 +167,12 @@ class User extends FirebaseType {
       completedOrders.add(data[completedOrdersKey]);
     } else {
       completedOrders.add(0);
+    }
+
+    if (data.containsKey(ratingKey)) {
+      rating.add(data[ratingKey]);
+    } else {
+      rating.add(0.0);
     }
   }
 

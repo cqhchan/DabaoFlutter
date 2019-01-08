@@ -25,6 +25,7 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
+import 'package:flutterdabao/Profile/Personal.dart';
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
@@ -266,20 +267,29 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  StreamBuilder<String>(
-                    stream: ConfigHelper
-                        .instance.currentUserProperty.value.thumbnailImage,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData || snapshot.data == null) {
-                        return Image.asset(
-                          'assets/icons/profile_icon.png',
-                        );
-                      }
-                      return CircleAvatar(
-                        backgroundImage: NetworkImage(snapshot.data),
-                        radius: 20,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        FadeRoute(widget: Personal()),
                       );
                     },
+                    child: StreamBuilder<String>(
+                      stream: ConfigHelper
+                          .instance.currentUserProperty.value.thumbnailImage,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData || snapshot.data == null) {
+                          return Image.asset(
+                            'assets/icons/profile_icon.png',
+                          );
+                        }
+                        return CircleAvatar(
+                          backgroundImage: NetworkImage(snapshot.data),
+                          radius: 20,
+                        );
+                      },
+                    ),
                   ),
                   StreamBuilder<String>(
                     stream: ConfigHelper.instance.currentUserProperty.producer
