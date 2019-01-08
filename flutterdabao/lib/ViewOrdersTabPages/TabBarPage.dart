@@ -49,7 +49,7 @@ class TabBarPageState extends State<TabBarPage> {
             color: Colors.black,
           ),
         ),
-        actions: <Widget>[ChatNavigationButton()],
+        actions: <Widget>[ChatNavigationButton(bgColor: ColorHelper.dabaoOrange,)],
         elevation: 0.0,
         title: Text(
           'DABAOER',

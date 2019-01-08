@@ -6,6 +6,10 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 
 class ChatNavigationButton extends StatefulWidget {
+
+  final Color bgColor;
+
+  const ChatNavigationButton({Key key, this.bgColor = Colors.white}) : super(key: key);
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -53,7 +57,7 @@ class ChatNavigationButtonState extends State<ChatNavigationButton> {
                     margin: EdgeInsets.only(left: 10, bottom: 20),
                     height: 22,
                     decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 2.0),
+                        border: Border.all(color: widget.bgColor, width: 2.0),
                         color: ColorHelper.dabaoTealColor,
                         borderRadius: BorderRadius.circular(11)),
                     child: ConstrainedBox(
