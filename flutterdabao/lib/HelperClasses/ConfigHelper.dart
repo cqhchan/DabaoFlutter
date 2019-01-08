@@ -38,6 +38,9 @@ class ConfigHelper with HavingSubscriptionMixin {
   // A users active Orders
   MutableProperty<List<Order>> currentUserAcceptedOrdersProperty =
       MutableProperty<List<Order>>(List());
+  // A users Orders from the past week
+  MutableProperty<List<Order>> currentUserPastWeekCompletedOrdersProperty =
+      MutableProperty<List<Order>>(List());
 
   MutableProperty<List<Order>> currentUserDeliveredCompletedOrdersProperty =
       MutableProperty<List<Order>>(List());
@@ -112,6 +115,9 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription.add(currentUserDeliveredCompletedOrdersProperty
         .bindTo(currentUserDeliveredCompletedOrdersProducer()));
 
+    subscription.add(currentUserPastWeekCompletedOrdersProperty
+        .bindTo(currentUserCompletedOrdersProducer()));
+
     subscription
         .add(currentUserWalletProperty.bindTo(currentUserWalletProducer()));
 
@@ -127,6 +133,7 @@ class ConfigHelper with HavingSubscriptionMixin {
 
     subscription
         .add(currentUserChannelProperty.bindTo(currentUserChannelProducer()));
+
   }
 
   bool get isInDebugMode {
@@ -235,6 +242,19 @@ class ConfigHelper with HavingSubscriptionMixin {
                         DateTime.now().add(Duration(days: -2)))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
+            .observable);
+  }
+
+  Stream<List<Order>> currentUserCompletedOrdersProducer() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Order>()
+        : FirebaseCollectionReactive<Order>(Firestore.instance
+                .collection("orders")
+                .where(Order.completedTimeKey,
+                    isGreaterThanOrEqualTo:
+                        DateTime.now().add(Duration(days: -7)))
+                .where(Order.statusKey, isEqualTo: orderStatus_Completed)
+                .where(Order.creatorKey, isEqualTo: user.uid))
             .observable);
   }
 
