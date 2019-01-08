@@ -159,34 +159,42 @@ class BalanceCard extends StatelessWidget {
             style: FontHelper.semiBold16Black,
           ),
           Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: StreamBuilder<double>(
-                  stream: ConfigHelper
-                      .instance.currentUserWalletProperty.producer
-                      .switchMap((wallet) => wallet == null
-                          ? null
-                          : Observable.combineLatest2<double, double, double>(
-                              (wallet.currentValue), (wallet.inWithdrawal),
-                              (currentValue, inWithdrawalValue) {
-                              if (currentValue != null &&
-                                  inWithdrawalValue != null) {
-                                return currentValue - inWithdrawalValue;
-                              }
-                              return 0.0;
-                            })),
-                  builder: (context, snap) {
-                    if (!snap.hasData)
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  FadeRoute(widget: TransactionsPage()),
+                );
+              },
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: StreamBuilder<double>(
+                    stream: ConfigHelper
+                        .instance.currentUserWalletProperty.producer
+                        .switchMap((wallet) => wallet == null
+                            ? null
+                            : Observable.combineLatest2<double, double, double>(
+                                (wallet.currentValue), (wallet.inWithdrawal),
+                                (currentValue, inWithdrawalValue) {
+                                if (currentValue != null &&
+                                    inWithdrawalValue != null) {
+                                  return currentValue - inWithdrawalValue;
+                                }
+                                return 0.0;
+                              })),
+                    builder: (context, snap) {
+                      if (!snap.hasData)
+                        return Text(
+                          "\$0.00",
+                          style: FontHelper.semiBold16Black,
+                        );
+
                       return Text(
-                        "\$0.00",
+                        StringHelper.doubleToPriceString(snap.data),
                         style: FontHelper.semiBold16Black,
                       );
-
-                    return Text(
-                      StringHelper.doubleToPriceString(snap.data),
-                      style: FontHelper.semiBold16Black,
-                    );
-                  }),
+                    }),
+              ),
             ),
           ),
           GestureDetector(

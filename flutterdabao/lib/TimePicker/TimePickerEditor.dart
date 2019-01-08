@@ -746,7 +746,7 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
         Container(
           constraints: BoxConstraints(minHeight: 20, minWidth: 40),
           child: Text(
-            'Start: ',
+            'Time: ',
             style: TextStyle(color: ColorHelper.dabaoOffBlack9B),
           ),
         ),

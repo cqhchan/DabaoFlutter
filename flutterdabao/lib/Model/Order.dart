@@ -42,13 +42,17 @@ class Order extends FirebaseType with Selectable {
 
   //Created when Dabaoer Accepts exact delivery timing
   BehaviorSubject<DateTime> deliveryTime;
+  BehaviorSubject<DateTime> completedTime;
 
   BehaviorSubject<GeoPoint> deliveryLocation;
   BehaviorSubject<String> deliveryLocationDescription;
   BehaviorSubject<String> foodTag;
   BehaviorSubject<String> status;
   BehaviorSubject<List<OrderItem>> orderItems;
+
   BehaviorSubject<String> creator;
+  BehaviorSubject<String> delivererID;
+
   BehaviorSubject<String> message;
   BehaviorSubject<String> routeID;
 
@@ -80,10 +84,18 @@ class Order extends FirebaseType with Selectable {
     message = BehaviorSubject();
     routeID = BehaviorSubject();
     deliveryFeeDiscount = BehaviorSubject();
+    completedTime = BehaviorSubject();
+    delivererID = BehaviorSubject();
   }
 
   @override
   void map(Map<String, dynamic> data) {
+    if (data.containsKey(deliveryFeeDiscountKey)) {
+      deliveryFeeDiscount.add(data[deliveryFeeDiscountKey] + 0.0);
+    } else {
+      deliveryFeeDiscount.add(null);
+    }
+
     if (data.containsKey(createdTimeKey)) {
       Timestamp temp = data[createdTimeKey];
 
@@ -98,6 +110,14 @@ class Order extends FirebaseType with Selectable {
       startDeliveryTime.add(temp.toDate());
     } else {
       startDeliveryTime.add(null);
+    }
+
+    if (data.containsKey(completedTimeKey)) {
+      Timestamp temp = data[completedTimeKey];
+
+      completedTime.add(temp.toDate());
+    } else {
+      completedTime.add(null);
     }
 
     if (data.containsKey(deliveryTimeKey)) {
@@ -169,12 +189,6 @@ class Order extends FirebaseType with Selectable {
       deliveryFee.add(null);
     }
 
-    if (data.containsKey(deliveryFeeDiscountKey)) {
-      deliveryFeeDiscount.add(data[deliveryFeeDiscountKey] + 0.0);
-    } else {
-      deliveryFeeDiscount.add(null);
-    }
-
     if (data.containsKey(messageKey)) {
       message.add(data[messageKey]);
     } else {
@@ -197,6 +211,12 @@ class Order extends FirebaseType with Selectable {
       creator.add(data[creatorKey]);
     } else {
       creator.add(null);
+    }
+
+    if (data.containsKey(delivererKey)) {
+      delivererID.add(data[delivererKey]);
+    } else {
+      delivererID.add(null);
     }
 
     if (data.containsKey(foodTagKey)) {

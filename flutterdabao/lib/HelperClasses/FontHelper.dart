@@ -281,10 +281,11 @@ class FontHelper {
         fontFamily: "SF_UI_Display");
   }
 
-  static TextStyle regular(Color color, double size) {
+  static TextStyle regular(Color color, double size,{double letterSpacing}) {
     return TextStyle(
         color: color,
         fontSize: size,
+        letterSpacing: letterSpacing,
         fontStyle: FontStyle.normal,
         fontWeight: FontWeight.w400,
         fontFamily: "SF_UI_Display");

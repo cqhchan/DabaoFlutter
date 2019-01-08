@@ -27,6 +27,7 @@ import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Profile/Personal.dart';
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
+import 'package:flutterdabao/ViewOrders/ViewOrderListPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -190,10 +191,18 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
         //   ),
         // ),
 
-        StreamBuilder<List>(
-          stream: ConfigHelper.instance.currentUserOpenRoutesProperty.producer,
+        StreamBuilder<int>(
+          stream: Observable.combineLatest3<List<DabaoRoute.Route>, List<Order>,
+                  List<Order>, int>(
+              ConfigHelper.instance.currentUserOpenRoutesProperty.producer,
+              ConfigHelper.instance.currentUserDeliveredCompletedOrdersProperty
+                  .producer,
+              ConfigHelper.instance.currentUserDeliveringOrdersProperty
+                  .producer, (routes, completed, deliverying) {
+            return routes.length + completed.length + deliverying.length;
+          }),
           builder: (context, snap) {
-            if (!snap.hasData || snap.data.length == 0)
+            if (!snap.hasData || snap.data == 0)
               return Container();
             else
               return GestureDetector(
@@ -205,7 +214,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                    decoration: BoxDecoration(color: Colors.yellow, boxShadow: [
+                    decoration: BoxDecoration(color: ColorHelper.dabaoOrange, boxShadow: [
                       BoxShadow(
                         offset: Offset(0.0, 1.0),
                         color: Colors.grey,
@@ -222,9 +231,24 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                           children: <Widget>[
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: Text(
-                                "View your Routes (${snap.data.length})",
-                                style: FontHelper.semiBold14Black,
+                              child: StreamBuilder<List>(
+                                stream: ConfigHelper
+                                    .instance
+                                    .currentUserDeliveringOrdersProperty
+                                    .producer,
+                                builder: (BuildContext context, snapshot) {
+                                  if (!snapshot.hasData ||
+                                      snapshot.data.length == 0)
+                                    return Text(
+                                      "View Active Deliveries",
+                                      style: FontHelper.semiBold14Black,
+                                    );
+
+                                  return Text(
+                                    "Track Active Deliveries (${snapshot.data.length})",
+                                    style: FontHelper.semiBold14Black,
+                                  );
+                                },
                               ),
                             ),
                             Expanded(
@@ -617,133 +641,15 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                StreamBuilder<String>(
-                    stream: order.foodTag,
-                    builder: (context, snap) {
-                      return Text(
-                        (snap.hasData && snap.data != null)
-                            ? StringHelper.upperCaseWords(snap.data)
-                            : "Error",
-                        style: FontHelper.semiBold14Black,
-                      );
-                    }),
-                StreamBuilder<List<OrderItem>>(
-                    stream: order.orderItems,
-                    builder: (context, snap) {
-                      if (!snap.hasData || snap.data == null) return Offstage();
-
-                      int totalItems = snap.data
-                          .map((orderItem) => orderItem.quantity.value)
-                          .reduce((lhs, rhs) => lhs + rhs);
-
-                      double totalPrice = snap.data
-                          .map((orderItem) =>
-                              orderItem.quantity.value * orderItem.price.value)
-                          .reduce((lhs, rhs) => lhs + rhs);
-
-                      return Text(
-                        "Your Order: ${totalItems} items • ${StringHelper.doubleToPriceString(totalPrice)}",
-                        style: FontHelper.regular(
-                            ColorHelper.dabaoOffBlack9B, 12.0),
-                      );
-                    })
+                foodTagHeader(order),
+                orderItemAndPrice(order)
               ],
             ),
           ),
           Container(
             width: 120,
             child: Column(
-              children: <Widget>[
-                StreamBuilder<String>(
-                  stream: order.status.switchMap((status) {
-                    switch (status) {
-                      case orderStatus_Accepted:
-                        return order.deliveryTime.map((date) => date == null
-                            ? "Error"
-                            : DateTimeHelper.convertTimeToDisplayString(date));
-
-                      case orderStatus_Requested:
-                        return order.mode.switchMap((mode) {
-                          switch (mode) {
-                            case OrderMode.asap:
-                              return BehaviorSubject(seedValue: "ASAP");
-                            case OrderMode.scheduled:
-                              return Observable.combineLatest2(
-                                  order.startDeliveryTime,
-                                  order.endDeliveryTime, (start, end) {
-                                if (start == null || end == null)
-                                  return "Error";
-
-                                return DateTimeHelper
-                                    .convertDoubleTimeToDisplayString(
-                                        start, end);
-                              });
-                          }
-                        });
-
-                      default:
-                        return null;
-                    }
-                  }),
-                  builder: (BuildContext context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data == null) {
-                      return Offstage();
-                    }
-                    return Text(
-                      snapshot.data,
-                      style: FontHelper.semiBold(
-                          ColorHelper.dabaoOffBlack9B, 10.0),
-                      textAlign: TextAlign.center,
-                    );
-                  },
-                ),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: StreamBuilder<String>(
-                      stream: order.status,
-                      builder: (BuildContext context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == null) {
-                          return Offstage();
-                        }
-
-                        switch (snapshot.data) {
-                          case orderStatus_Accepted:
-                            return Container(
-                              height: 19,
-                              width: 60,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5.0),
-                                color: ColorHelper.dabaoOrange,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "Enroute",
-                                  style: FontHelper.semiBold12Black,
-                                ),
-                              ),
-                            );
-                          case orderStatus_Requested:
-                            return Container(
-                              height: 19,
-                              width: 60,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                  color: Color.fromRGBO(0x95, 0x9D, 0xAD, 1.0)),
-                              child: Center(
-                                child: Text("Pending",
-                                    style: FontHelper.semiBold(
-                                        Colors.white, 12.0)),
-                              ),
-                            );
-                          default:
-                            return Offstage();
-                        }
-                      },
-                    ),
-                  ),
-                )
-              ],
+              children: <Widget>[deliveryTime(order), status(order)],
             ),
           ),
         ],
@@ -751,10 +657,141 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
     );
   }
 
+  Expanded status(Order order) {
+    return Expanded(
+      child: Align(
+        alignment: Alignment.center,
+        child: StreamBuilder<String>(
+          stream: order.status,
+          builder: (BuildContext context, snapshot) {
+            if (!snapshot.hasData || snapshot.data == null) {
+              return Offstage();
+            }
+
+            switch (snapshot.data) {
+              case orderStatus_Accepted:
+                return Container(
+                  height: 19,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.0),
+                    color: ColorHelper.dabaoOrange,
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Enroute",
+                      style: FontHelper.semiBold12Black,
+                    ),
+                  ),
+                );
+              case orderStatus_Requested:
+                return Container(
+                  height: 19,
+                  width: 60,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                      color: Color.fromRGBO(0x95, 0x9D, 0xAD, 1.0)),
+                  child: Center(
+                    child: Text("Pending",
+                        style: FontHelper.semiBold(Colors.white, 12.0)),
+                  ),
+                );
+              default:
+                return Offstage();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  StreamBuilder<String> deliveryTime(Order order) {
+    return StreamBuilder<String>(
+      stream: order.status.switchMap((status) {
+        switch (status) {
+          case orderStatus_Accepted:
+            return order.deliveryTime.map((date) => date == null
+                ? "Error"
+                : DateTimeHelper.convertTimeToDisplayString(date));
+
+          case orderStatus_Requested:
+            return order.mode.switchMap((mode) {
+              switch (mode) {
+                case OrderMode.asap:
+                  return BehaviorSubject(seedValue: "ASAP");
+                case OrderMode.scheduled:
+                  return Observable.combineLatest2(
+                      order.startDeliveryTime, order.endDeliveryTime,
+                      (start, end) {
+                    if (start == null || end == null) return "Error";
+
+                    return DateTimeHelper.convertDoubleTimeToDisplayString(
+                        start, end);
+                  });
+              }
+            });
+
+          default:
+            return BehaviorSubject(seedValue: null);
+        }
+      }),
+      builder: (BuildContext context, snapshot) {
+        if (!snapshot.hasData || snapshot.data == null) {
+          return Offstage();
+        }
+        return Text(
+          snapshot.data,
+          style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 10.0),
+          textAlign: TextAlign.center,
+        );
+      },
+    );
+  }
+
+  StreamBuilder<List<OrderItem>> orderItemAndPrice(Order order) {
+    return StreamBuilder<List<OrderItem>>(
+        stream: order.orderItems,
+        builder: (context, snap) {
+          if (!snap.hasData || snap.data == null) return Offstage();
+
+          int totalItems = snap.data
+              .map((orderItem) => orderItem.quantity.value)
+              .reduce((lhs, rhs) => lhs + rhs);
+
+          double totalPrice = snap.data
+              .map((orderItem) =>
+                  orderItem.quantity.value * orderItem.price.value)
+              .reduce((lhs, rhs) => lhs + rhs);
+
+          return Text(
+            "Your Order: ${totalItems} items • ${StringHelper.doubleToPriceString(totalPrice)}",
+            style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0),
+          );
+        });
+  }
+
+  StreamBuilder<String> foodTagHeader(Order order) {
+    return StreamBuilder<String>(
+        stream: order.foodTag,
+        builder: (context, snap) {
+          return Text(
+            (snap.hasData && snap.data != null)
+                ? StringHelper.upperCaseWords(snap.data)
+                : "Error",
+            style: FontHelper.semiBold14Black,
+          );
+        });
+  }
+
   Widget buildViewAll() {
     return Align(
       alignment: Alignment.centerRight,
       child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            FadeRoute(widget: ViewOrderListPage()),
+          );
+        },
         child: Container(
           color: Colors.transparent,
           padding: EdgeInsets.all(10.0),

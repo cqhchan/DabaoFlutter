@@ -55,7 +55,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
         return FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
                 .where(Order.geoHashKey, isGreaterThanOrEqualTo: hash)
-                .where(Order.geoHashKey, isLessThanOrEqualTo: hash + "z")
+                .where(Order.geoHashKey, isLessThanOrEqualTo: hash + "zzzzzzzz")
                 .where(Order.statusKey, isEqualTo: orderStatus_Requested))
             .observable;
       }).toList();
