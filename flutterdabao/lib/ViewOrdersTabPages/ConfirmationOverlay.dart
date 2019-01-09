@@ -15,6 +15,8 @@ import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'dart:core';
 
+import 'package:flutterdabao/ViewOrders/OrderOverlayWidgets.dart';
+
 class ConfirmationOverlay extends StatefulWidget {
   final Order order;
   final DabaoRoute.Route route;
@@ -28,12 +30,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     with HavingSubscriptionMixin {
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
 
-  //selected date on press
-  MutableProperty<DateTime> selectedDate;
-
-  HourPicker hourPicker;
-  MinutePicker minutePicker;
-
+  DateTime selectedDateTime;
   DateTime startTime;
   DateTime endTime;
 
@@ -41,64 +38,12 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
   void initState() {
     super.initState();
     listOfOrderItems = widget.order.orderItem;
-
-    DateTime currentTime = DateTime.now();
-
-    subscription.add(widget.order.mode.listen((mode) {
-      switch (mode) {
-        case OrderMode.asap:
-          setState(() {
-            endTime = widget.order.endDeliveryTime.value == null
-                ? currentTime.add(Duration(minutes: 90))
-                : widget.order.endDeliveryTime.value;
-            startTime = currentTime.isAfter(endTime) ? endTime : currentTime;
-          });
-
-          break;
-        case OrderMode.scheduled:
-          setState(() {
-            endTime = widget.order.endDeliveryTime.value;
-            startTime = widget.order.startDeliveryTime.value;
-          });
-
-          break;
-      }
-
-      //Copy to prevent editting
-      selectedDate = MutableProperty(DateTime.fromMillisecondsSinceEpoch(
-          startTime.millisecondsSinceEpoch));
-    }));
   }
 
   @override
   void dispose() {
     disposeAndReset();
     super.dispose();
-  }
-
-  //Minute change is dependant on the hour change.
-  _handleHour(num hour) {
-    DateTime newDate = new DateTime(
-        startTime.year,
-        startTime.month,
-        startTime.day,
-        startTime.hour + hour,
-        selectedDate.value.minute,
-        selectedDate.value.second,
-        selectedDate.value.millisecond);
-
-    selectedDate.value = newDate;
-  }
-
-  _handleMinuteChanged(num minute) {
-    selectedDate.value = new DateTime(
-        selectedDate.value.year,
-        selectedDate.value.month,
-        selectedDate.value.day,
-        selectedDate.value.hour,
-        minute,
-        selectedDate.value.second,
-        selectedDate.value.millisecond);
   }
 
   @override
@@ -117,13 +62,23 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          _buildDeliveryPeriod(widget.order),
-                          _buildArrivalTime(widget.order),
+                          DateTimePicker(
+                            order: widget.order,
+                            selectedTimeCallback: (DateTime selected) {
+                              selectedDateTime = selected;
+                            },
+                            endTime: (DateTime end) {
+                              endTime = end;
+                            },
+                            startTime: (DateTime start) {
+                              startTime = start;
+                            },
+                          ),
                           _buildHeader(widget.order),
                           SizedBox(
                             height: 15,
                           ),
-                          _buildLocationDescription(widget.order),
+                          DeliveryLocation(order: widget.order),
                           SizedBox(
                             height: 15,
                           ),
@@ -158,36 +113,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                 ),
               ),
         ));
-  }
-
-  Row _buildDeliveryPeriod(Order order) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        (startTime.day == DateTime.now().day &&
-                startTime.month == DateTime.now().month &&
-                startTime.year == DateTime.now().year)
-            ? Text(
-                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(startTime),
-                style: FontHelper.semiBold14Black,
-                overflow: TextOverflow.ellipsis,
-              )
-            : Text(
-                DateTimeHelper.convertDateTimeToDate(startTime) +
-                    ', ' +
-                    DateTimeHelper.convertDateTimeToAMPM(startTime),
-                style: FontHelper.semiBold14Black,
-                overflow: TextOverflow.ellipsis,
-              ),
-        Container(
-            child: Text(
-          " - " + DateTimeHelper.convertDateTimeToAMPM(endTime),
-          style: FontHelper.semiBold14Black,
-          overflow: TextOverflow.ellipsis,
-        )),
-      ],
-    );
   }
 
   Flex _buildHeader(Order order) {
@@ -267,49 +192,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     );
   }
 
-  Row _buildLocationDescription(Order order) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(
-            right: 5,
-          ),
-          child: Container(
-            height: 30,
-            child: Image.asset("assets/icons/red_marker_icon.png"),
-          ),
-        ),
-        SizedBox(
-          width: 10,
-        ),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            StreamBuilder<String>(
-              stream: order.deliveryLocationDescription,
-              builder: (context, snap) {
-                if (!snap.hasData) return Offstage();
-                return Container(
-                  constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width - 180),
-                  child: Text(
-                    snap.hasData ? '''${snap.data}''' : "Error",
-                    style: FontHelper.regular14Black,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildPickUpButton(Order order, BuildContext context) {
     return RaisedButton(
       elevation: 12,
@@ -322,11 +204,11 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
         ),
       ),
       onPressed: () async {
-        print(selectedDate.value);
+        print(selectedDateTime);
 
-        if (selectedDate.value
+        if (selectedDateTime
                 .isAfter(startTime.subtract(Duration(minutes: 9))) &&
-            selectedDate.value.isBefore(endTime.add(Duration(minutes: 9)))) {
+            selectedDateTime.isBefore(endTime.add(Duration(minutes: 9)))) {
           order.isSelectedProperty.value = false;
           showLoadingOverlay(context: context);
           var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
@@ -334,7 +216,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
             orderID: widget.order.uid,
             acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
             deliveryTime:
-                DateTimeHelper.convertDateTimeToString(selectedDate.value),
+                DateTimeHelper.convertDateTimeToString(selectedDateTime),
           );
           if (isSuccessful) {
             Navigator.of(context).pop();
@@ -370,54 +252,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
       onPressed: () {
         Navigator.pop(context);
       },
-    );
-  }
-
-  Widget _buildArrivalTime(Order order) {
-    if (startTime == null || endTime == null) {
-      return Text("ERROR");
-    }
-    print("testing Max : " +
-        (startTime.hour + (endTime.difference(startTime).inMinutes / 60).ceil())
-            .toString());
-    print("testing init : " +
-        (startTime.hour + selectedDate.value.difference(startTime).inHours)
-            .toString());
-
-    return Row(
-      children: <Widget>[
-        Container(
-          constraints: BoxConstraints(minHeight: 20, minWidth: 40),
-          child: Text(
-            'I can arrive by: ',
-            style: FontHelper.regular14Black,
-          ),
-        ),
-        SizedBox(
-          width: 10.0,
-        ),
-        HourPicker.hour(
-          maxValue: startTime.hour +
-              (endTime.difference(startTime).inMinutes / 60).ceil(),
-          minValue: startTime.hour,
-          initialValue:
-              startTime.hour + selectedDate.value.difference(startTime).inHours,
-          onChanged: (value) {
-            print(value);
-            _handleHour(value);
-          },
-        ),
-        Text(':', style: FontHelper.robotoRegular50Black),
-        MinutePicker.minute(
-          maxValue: 5,
-          minValue: 0,
-          initialValue: selectedDate.value.minute ~/ 10,
-          step: 1,
-          onChanged: (value) {
-            _handleMinuteChanged(value * 10);
-          },
-        ),
-      ],
     );
   }
 }

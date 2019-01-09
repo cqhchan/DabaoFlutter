@@ -151,6 +151,17 @@ class Channel extends FirebaseType with Selectable {
         .document(this.uid)
         .updateData({counterOfferKey: data});
   }
+
+    accept() {
+    Map data = Map();
+
+    data[CounterOffer.statusKey] = CounterOffer.counterOffStatus_Accepted;
+
+    Firestore.instance
+        .collection(className)
+        .document(this.uid)
+        .updateData({counterOfferKey: data});
+  }
 }
 
 class CounterOffer {

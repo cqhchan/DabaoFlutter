@@ -5,12 +5,16 @@ import 'package:date_format/date_format.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterdabao/Chat/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
+import 'package:flutterdabao/CustomWidget/Line.dart';
+import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -24,6 +28,7 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Profile/ViewProfile.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -833,10 +838,12 @@ class ConversationState extends State<Conversation>
           child: Padding(
             padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
             child: OutlineButton(
-              onPressed: () {},
+              onPressed: () {
+                showConfirmation(order.value);
+              },
               child: Container(
                 child: Text(
-                  'LEAVE FEEDBACK',
+                  'PICK UP ORDER',
                   style: FontHelper.semiBoldgrey14TextStyle,
                   textAlign: TextAlign.center,
                 ),
@@ -844,24 +851,56 @@ class ConversationState extends State<Conversation>
             ),
           ),
         ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
-            child: FlatButton(
-              color: Color(0xFF959DAD),
-              onPressed: () {
-                showOverlay(order.value);
-              },
-              child: Container(
-                child: Text(
-                  'COUNTER-OFFER DELIVERY FEE',
-                  style: FontHelper.semiBold12White,
-                  textAlign: TextAlign.center,
+        StreamBuilder<CounterOffer>(
+            stream: widget.channel.counterOffer,
+            builder: (context, snap) {
+              if (!snap.hasData ||
+                  snap.data == null ||
+                  snap.data.status == CounterOffer.counterOffStatus_Open)
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                    child: FlatButton(
+                      color: Color(0xFF959DAD),
+                      onPressed: () {
+                        widget.channel.reject();
+                        widget.channel.addMessage(
+                            ConfigHelper.instance.currentUserProperty.value.name
+                                    .value +
+                                " has cancelled the offer",
+                            ConfigHelper.instance.currentUserProperty.value.uid,
+                            null);
+                      },
+                      child: Container(
+                        child: Text(
+                          "CANCEL\nCOUNTER-OFFER",
+                          style: FontHelper.semiBold12White,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                  child: FlatButton(
+                    color: Color(0xFF959DAD),
+                    onPressed: () {
+                      showOverlay(order.value);
+                    },
+                    child: Container(
+                      child: Text(
+                        "COUNTER-OFFER\nDELIVERY FEE",
+                        style: FontHelper.semiBold12White,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-        )
+              );
+            })
       ],
     );
   }
@@ -871,6 +910,17 @@ class ConversationState extends State<Conversation>
         context: context,
         builder: (builder) {
           return CounterOfferOverlay(
+            //TODO COUNTER-OFFER DELIVERY FEE
+            order: order, channel: widget.channel,
+          );
+        });
+  }
+
+  showConfirmation(Order order) {
+    showHalfBottomSheet(
+        context: context,
+        builder: (builder) {
+          return ConfirmationOverlay(
             //TODO COUNTER-OFFER DELIVERY FEE
             order: order,
           );
@@ -1104,77 +1154,213 @@ class ConversationState extends State<Conversation>
 
   Widget _buildInput() {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Flex(
-          direction: Axis.horizontal,
-          children: <Widget>[
-            Expanded(
-                child: GestureDetector(
-              onTap: _updatePhotoOptionsBottomModal,
-              child: Icon(Icons.add),
-            )),
-            Expanded(
-                flex: 5,
-                child: TextField(
-                  onChanged: (typedText) {
-                    if (_textController.text.length > 0) {
-                      setState(() {
-                        sendButtonFlag = true;
-                      });
-                    } else {
-                      setState(() {
-                        sendButtonFlag = false;
-                      });
-                    }
-                  },
-                  focusNode: _myFocusNode,
-                  onTap: () {
-                    setState(() {
-                      expandFlag = true;
-                    });
-                  },
-                  onSubmitted: (_) {
-                    setState(() {
-                      expandFlag = false;
-                    });
-                  },
-                  controller: _textController,
-                  style: TextStyle(height: 1, color: Colors.black),
-                  decoration: const InputDecoration(
-                      hintStyle: FontHelper.regular15Grey,
-                      hintText: "Enter your message",
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 10),
-                      border: OutlineInputBorder()),
-                )),
-            Expanded(
-                child: Container(
+      child: Column(
+        children: <Widget>[
+          _buildCounterOfferReply(),
+          Line(),
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Flex(
+              direction: Axis.horizontal,
+              children: <Widget>[
+                Expanded(
                     child: GestureDetector(
-                        onTap: () {
-                          if (_textController.text != '') {
+                  onTap: _updatePhotoOptionsBottomModal,
+                  child: Icon(Icons.add),
+                )),
+                Expanded(
+                    flex: 5,
+                    child: TextField(
+                      onChanged: (typedText) {
+                        if (_textController.text.length > 0) {
+                          setState(() {
+                            sendButtonFlag = true;
+                          });
+                        } else {
+                          setState(() {
+                            sendButtonFlag = false;
+                          });
+                        }
+                      },
+                      focusNode: _myFocusNode,
+                      onTap: () {
+                        setState(() {
+                          expandFlag = true;
+                        });
+                      },
+                      onSubmitted: (_) {
+                        setState(() {
+                          expandFlag = false;
+                        });
+                      },
+                      controller: _textController,
+                      style: TextStyle(height: 1, color: Colors.black),
+                      decoration: const InputDecoration(
+                          hintStyle: FontHelper.regular15Grey,
+                          hintText: "Enter your message",
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          border: OutlineInputBorder()),
+                    )),
+                Expanded(
+                    child: Container(
+                        child: GestureDetector(
+                            onTap: () {
+                              if (_textController.text != '') {
+                                widget.channel.addMessage(
+                                    _textController.text,
+                                    ConfigHelper
+                                        .instance.currentUserProperty.value.uid,
+                                    null);
+                                setState(() {
+                                  sendButtonFlag = false;
+                                });
+                                _textController.clear();
+                                _scrollController.animateTo(0,
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.easeOut);
+                              }
+                            },
+                            child: Icon(
+                              Icons.send,
+                              color: sendButtonFlag
+                                  ? Colors.black
+                                  : Colors.grey[300],
+                            ))))
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCounterOfferReply() {
+    return StreamBuilder<bool>(
+      stream: Rxdart.Observable.combineLatest2<String, User, bool>(
+          order.producer
+              .switchMap((order) =>
+                  order == null ? Rxdart.Observable.just(null) : order.creator)
+              .map((creatorID) {
+            if (creatorID == null) return null;
+
+            return creatorID;
+          }),
+          ConfigHelper.instance.currentUserProperty.producer,
+          (orderUserID, currentUser) {
+        if (orderUserID == null || currentUser == null)
+          return false;
+        else
+          return orderUserID == currentUser.uid;
+      }),
+      builder: (BuildContext context, snapshot) {
+        if (!snapshot.hasData || snapshot.data == null || !snapshot.data)
+          return Offstage();
+
+        return StreamBuilder<CounterOffer>(
+          stream: widget.channel.counterOffer,
+          builder: (BuildContext context, snapshot) {
+            if (!snapshot.hasData ||
+                snapshot.data == null ||
+                snapshot.data.status != CounterOffer.counterOffStatus_Open)
+              return Offstage();
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Line(
+                  margin: EdgeInsets.only(bottom: 10.0),
+                ),
+                Text(
+                  "Offered to pick up for ${StringHelper.doubleToPriceString(snapshot.data.price)}",
+                  style: FontHelper.regular12Black,
+                  textAlign: TextAlign.center,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    RaisedButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0)),
+                      color: Colors.white,
+                      child: Icon(
+                        Icons.check,
+                        color: ColorHelper.dabaoOrange,
+                      ),
+                      onPressed: () async {
+                        showLoadingOverlay(context: context);
+
+                        await FirebaseCloudFunctions.acceptOrder(
+                            deliveryFee: snapshot.data.price,
+                            orderID: order.value.uid,
+                            acceptorID: ConfigHelper
+                                .instance.currentUserProperty.value.uid,
+                            deliveryTime:
+                                DateTimeHelper.convertDateTimeToString(
+                              snapshot.data.deliveryTime,
+                            )).then((isSuccessful) {
+                          if (isSuccessful) {
+                            Navigator.of(context).pop();
+                            widget.channel.accept();
                             widget.channel.addMessage(
-                                _textController.text,
+                                ConfigHelper.instance.currentUserProperty.value
+                                        .name.value +
+                                    " has accepted the offer",
                                 ConfigHelper
                                     .instance.currentUserProperty.value.uid,
                                 null);
-                            setState(() {
-                              sendButtonFlag = false;
-                            });
-                            _textController.clear();
-                            _scrollController.animateTo(0,
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.easeOut);
+                          } else {
+                            Navigator.of(context).pop();
+                            final snackBar = SnackBar(
+                                content: Text(
+                                    'An Error has occured. Please check your network connectivity'));
+                            Scaffold.of(context).showSnackBar(snackBar);
                           }
-                        },
-                        child: Icon(
-                          Icons.send,
-                          color:
-                              sendButtonFlag ? Colors.black : Colors.grey[300],
-                        ))))
-          ],
-        ),
-      ),
+                        }).catchError((error) {
+                          if (error is PlatformException) {
+                            PlatformException e = error;
+                            Navigator.of(context).pop();
+                            final snackBar = SnackBar(content: Text(e.message));
+                            Scaffold.of(context).showSnackBar(snackBar);
+                          } else {
+                            Navigator.of(context).pop();
+                            final snackBar = SnackBar(
+                                content: Text(
+                                    'An Error has occured. Please check your network connectivity'));
+                            Scaffold.of(context).showSnackBar(snackBar);
+                          }
+                        });
+                      },
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    RaisedButton(
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0)),
+                      child: Icon(
+                        Icons.clear,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        widget.channel.reject();
+                        widget.channel.addMessage(
+                            ConfigHelper.instance.currentUserProperty.value.name
+                                    .value +
+                                " has rejected the offer",
+                            ConfigHelper.instance.currentUserProperty.value.uid,
+                            null);
+                      },
+                    )
+                  ],
+                )
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
