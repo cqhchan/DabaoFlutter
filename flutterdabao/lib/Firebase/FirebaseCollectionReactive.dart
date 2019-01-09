@@ -21,11 +21,11 @@ class FirebaseCollectionReactive<T extends FirebaseType> {
 
           case DocumentChangeType.removed:
             
-            List<T> temp = list
-                .where((element) => element.uid == change.document.documentID)
-                .toList();
+            // List<T> temp = list
+            //     .where((element) => element.uid == change.document.documentID)
+            //     .toList();
 
-            temp.forEach((f) => f.mapFrom(change.document.data));
+            // temp.forEach((f) => f.mapFrom(change.document.data));
 
             list.removeWhere(
                 (element) => element.uid == change.document.documentID);

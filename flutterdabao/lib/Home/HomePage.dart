@@ -195,7 +195,12 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
         StreamBuilder<int>(
           stream: Observable.combineLatest3<List<DabaoRoute.Route>, List<Order>,
                   List<Order>, int>(
-              ConfigHelper.instance.currentUserOpenRoutesProperty.producer,
+              ConfigHelper.instance.currentUserRoutesPastDayProperty.producer.map((routes) {
+                List<DabaoRoute.Route> temp = List.from(routes);
+
+                temp.removeWhere((route) => route.status.value != DabaoRoute.routeStatus_Open);
+                return temp;
+              } ),
               ConfigHelper.instance.currentUserDeliveredCompletedOrdersProperty
                   .producer,
               ConfigHelper.instance.currentUserDeliveringOrdersProperty
