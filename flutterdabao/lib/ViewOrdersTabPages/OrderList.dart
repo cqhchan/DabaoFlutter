@@ -104,7 +104,9 @@ class _OrderItemCellState extends State<_OrderItemCell> with HavingSubscriptionM
   void initState() {
     super.initState();
 
-    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+    listOfOrderItems = widget.order.orderItem;
+
+
   }
 
   @override

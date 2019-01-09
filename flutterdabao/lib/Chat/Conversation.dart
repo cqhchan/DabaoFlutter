@@ -107,7 +107,7 @@ class ConversationState extends State<Conversation>
 
     // You need to listen manually to the list of messages
     // TODO for some strange reason again.
-    subscription.add(listOfMessages.bindTo(widget.channel.listOfMessages));
+    listOfMessages = widget.channel.listOfMessages;
 
     subscription.add(listOfOrderItems.bindTo(order.producer
         .switchMap((o) => o == null ? Rxdart.Observable.just(List()) : o.orderItem)));

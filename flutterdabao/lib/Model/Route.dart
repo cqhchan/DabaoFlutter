@@ -33,9 +33,34 @@ class Route extends FirebaseType {
   BehaviorSubject<String> creator;
   BehaviorSubject<List<String>> foodTags;
 
-  MutableProperty<List<Order>> listOfOrdersAccepted =
-      MutableProperty(List<Order>());
-  Observable<List<Order>> listOfPotentialOrders;
+  MutableProperty<List<Order>> _listOfOrdersAccepted;
+
+  MutableProperty<List<Order>> _listOfPotentialOrders;
+
+  MutableProperty<List<Order>> get listOfPotentialOrders {
+    if (_listOfPotentialOrders == null) {
+      _listOfPotentialOrders = MutableProperty(List());
+      _listOfPotentialOrders.bindTo(FirebaseCollectionReactive<Order>(Firestore
+              .instance
+              .collection("orders")
+              .where(Order.statusKey, isEqualTo: orderStatus_Requested)
+              .where(Order.potentialDeliveryKey, arrayContains: this.uid))
+          .observable);
+    }
+    return _listOfPotentialOrders;
+  }
+
+    MutableProperty<List<Order>> get listOfOrdersAccepted {
+    if (_listOfOrdersAccepted == null) {
+      _listOfOrdersAccepted = MutableProperty(List());
+      _listOfOrdersAccepted.bindTo(FirebaseCollectionReactive<Order>(Firestore
+            .instance
+            .collection("orders")
+            .where(Order.routeKey, isEqualTo: this.uid))
+        .observable);
+    }
+    return _listOfOrdersAccepted;
+  }
 
   Route.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
   Route.fromUID(String uid) : super.fromUID(uid);
@@ -102,17 +127,6 @@ class Route extends FirebaseType {
     deliveryLocation = BehaviorSubject();
     deliveryLocationDescription = BehaviorSubject();
 
-    listOfPotentialOrders = FirebaseCollectionReactive<Order>(Firestore.instance
-            .collection("orders")
-            .where(Order.statusKey, isEqualTo: orderStatus_Requested)
-            .where(Order.potentialDeliveryKey, arrayContains: this.uid))
-        .observable;
-
-    listOfOrdersAccepted.bindTo(FirebaseCollectionReactive<Order>(Firestore
-            .instance
-            .collection("orders")
-            .where(Order.routeKey, isEqualTo: this.uid))
-        .observable);
   }
 
   static bool isValid(RouteHolder holder) {

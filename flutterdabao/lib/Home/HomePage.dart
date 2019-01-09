@@ -688,7 +688,7 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
   void initState() {
     super.initState();
 
-    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+    listOfOrderItems = widget.order.orderItem;
   }
 
   @override

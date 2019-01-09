@@ -41,7 +41,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
   @override
   void initState() {
     super.initState();
-    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+    listOfOrderItems = widget.order.orderItem;
 
     DateTime currentTime = DateTime.now();
 

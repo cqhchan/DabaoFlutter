@@ -140,7 +140,7 @@ MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
   void initState() {
     super.initState();
 
-    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+    listOfOrderItems = widget.order.orderItem;
   }
 
   @override
@@ -332,7 +332,7 @@ MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
         child: StreamBuilder<List<OrderItem>>(
             stream: listOfOrderItems.producer,
             builder: (context, snap) {
-              if (!snap.hasData || snap.data == null) return Offstage();
+              if (!snap.hasData || snap.data == null || snap.data.length  == 0 ) return Offstage();
 
               int totalItems = snap.data
                   .map((orderItem) => orderItem.quantity.value)

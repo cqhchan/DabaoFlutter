@@ -6,6 +6,7 @@ import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:rxdart/rxdart.dart';
@@ -21,8 +22,23 @@ class Channel extends FirebaseType with Selectable {
   BehaviorSubject<String> orderUid;
   BehaviorSubject<int> unreadMessages;
   BehaviorSubject<String> deliverer;
+  String uid;
+  MutableProperty<List<Message>> _listOfMessages;
 
-  Observable<List<Message>> listOfMessages;
+  MutableProperty<List<Message>> get listOfMessages { 
+    if (_listOfMessages == null) {
+      _listOfMessages = MutableProperty(List());
+      _listOfMessages.bindTo(FirebaseCollectionReactive<Message>(Firestore.instance
+            .collection(className)
+            .document(this.uid)
+            .collection("messages")
+            .orderBy('T', descending: true)
+            .limit(100))
+        .observable);
+    }
+    return _listOfMessages;
+    
+    }
 
   Channel.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
@@ -30,18 +46,12 @@ class Channel extends FirebaseType with Selectable {
 
   @override
   void setUpVariables() {
+    
     participantsID = BehaviorSubject();
     lastSent = BehaviorSubject();
     orderUid = BehaviorSubject();
     deliverer = BehaviorSubject();
     unreadMessages = BehaviorSubject();
-    listOfMessages = FirebaseCollectionReactive<Message>(Firestore.instance
-            .collection(className)
-            .document(this.uid)
-            .collection("messages")
-            .orderBy('T', descending: true)
-            .limit(100))
-        .observable;
   }
 
   void markAsRead() {

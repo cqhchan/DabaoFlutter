@@ -5,6 +5,7 @@ import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:random_string/random_string.dart';
@@ -60,7 +61,19 @@ class Order extends FirebaseType with Selectable {
   BehaviorSubject<double> deliveryFee;
   BehaviorSubject<double> deliveryFeeDiscount;
 
-  Observable<List<OrderItem>> orderItem;
+  MutableProperty<List<OrderItem>> _orderItem;
+
+  MutableProperty<List<OrderItem>> get orderItem {
+    if (_orderItem == null) {
+      _orderItem = MutableProperty(List());
+      _orderItem.bindTo(FirebaseCollectionReactive<OrderItem>(Firestore.instance
+              .collection(this.className)
+              .document(this.uid)
+              .collection("orderItems"))
+          .observable);
+    }
+    return _orderItem;
+  }
 
   Order.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
@@ -87,12 +100,6 @@ class Order extends FirebaseType with Selectable {
     deliveryFeeDiscount = BehaviorSubject();
     completedTime = BehaviorSubject();
     delivererID = BehaviorSubject();
-
-    orderItem = FirebaseCollectionReactive<OrderItem>(Firestore.instance
-            .collection(this.className)
-            .document(this.uid)
-            .collection("orderItems"))
-        .observable;
   }
 
   @override

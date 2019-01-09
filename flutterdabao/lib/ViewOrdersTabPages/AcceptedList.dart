@@ -98,7 +98,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> with HavingSubsc
   void initState() {
     super.initState();
 
-    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+    listOfOrderItems = widget.order.orderItem;
   }
 
   @override

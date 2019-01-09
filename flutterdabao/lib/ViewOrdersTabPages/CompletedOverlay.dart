@@ -32,7 +32,7 @@ class _CompletedOverlayState extends State<CompletedOverlay> with HavingSubscrip
   void initState() {
     super.initState();
 
-    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+    listOfOrderItems = widget.order.orderItem;
   }
 
   @override
