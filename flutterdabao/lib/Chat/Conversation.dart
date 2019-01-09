@@ -1201,33 +1201,46 @@ class ConversationState extends State<Conversation>
                           hintText: "Enter your message",
                           contentPadding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 10),
-                          border: OutlineInputBorder()),
+                          border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(20.0)))),
                     )),
                 Expanded(
-                    child: Container(
+                    child: Center(
                         child: GestureDetector(
-                            onTap: () {
-                              if (_textController.text != '') {
-                                widget.channel.addMessage(
-                                    _textController.text,
-                                    ConfigHelper
-                                        .instance.currentUserProperty.value.uid,
-                                    null);
-                                setState(() {
-                                  sendButtonFlag = false;
-                                });
-                                _textController.clear();
-                                _scrollController.animateTo(0,
-                                    duration: Duration(milliseconds: 300),
-                                    curve: Curves.easeOut);
-                              }
-                            },
-                            child: Icon(
-                              Icons.send,
-                              color: sendButtonFlag
-                                  ? Colors.black
-                                  : Colors.grey[300],
-                            ))))
+                  onTap: () {
+                    if (_textController.text != '') {
+                      widget.channel.addMessage(
+                          _textController.text,
+                          ConfigHelper.instance.currentUserProperty.value.uid,
+                          null);
+                      setState(() {
+                        sendButtonFlag = false;
+                      });
+                      _textController.clear();
+                      _scrollController.animateTo(0,
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeOut);
+                    }
+                  },
+                  child: Container(
+                      padding: EdgeInsets.fromLTRB(10, 8, 8, 8),
+                      decoration: BoxDecoration(
+                          boxShadow: sendButtonFlag ? [
+                            BoxShadow(
+                              color:  Color.fromRGBO(0xFC, 0x96, 0x67, 1),
+                              offset: new Offset(0.0, 2.0),
+                              blurRadius: 5.0,
+                            )
+                          ] : [],
+                          shape: BoxShape.circle,
+                          color: sendButtonFlag ? ColorHelper.dabaoOrange : ColorHelper.dabaoOffGreyD3),
+                      child: Icon(
+                        Icons.send,
+                        color: Colors.white,
+                        size: 18,
+                      )),
+                )))
               ],
             ),
           ),

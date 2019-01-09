@@ -38,7 +38,15 @@ class _ChatPageState extends State<ChatPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorHelper.dabaoOffWhiteF5,
+      
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: GestureDetector(
+          onTap: (){
+            Navigator.of(context).pop();
+          },
+          child: Icon(Icons.close,)),
         centerTitle: true,
         title: Text('Your Inbox', style: FontHelper.header3TextStyle),
       ),
