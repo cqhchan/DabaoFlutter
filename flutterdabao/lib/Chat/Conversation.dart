@@ -873,7 +873,6 @@ class ConversationState extends State<Conversation>
           return CounterOfferOverlay(
             //TODO COUNTER-OFFER DELIVERY FEE
             order: order,
-            // route: widget.route,
           );
         });
   }

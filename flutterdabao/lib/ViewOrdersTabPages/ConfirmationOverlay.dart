@@ -26,7 +26,6 @@ class ConfirmationOverlay extends StatefulWidget {
 
 class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     with HavingSubscriptionMixin {
-
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
 
   //selected date on press
@@ -182,11 +181,11 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                 overflow: TextOverflow.ellipsis,
               ),
         Container(
-            child: Text( " - " +
-              DateTimeHelper.convertDateTimeToAMPM(endTime),
-              style: FontHelper.semiBold14Black,
-              overflow: TextOverflow.ellipsis,
-            )),
+            child: Text(
+          " - " + DateTimeHelper.convertDateTimeToAMPM(endTime),
+          style: FontHelper.semiBold14Black,
+          overflow: TextOverflow.ellipsis,
+        )),
       ],
     );
   }
@@ -271,6 +270,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
   Row _buildLocationDescription(Order order) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(
