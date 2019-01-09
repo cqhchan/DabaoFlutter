@@ -630,7 +630,7 @@ class _OrderItemCellState extends State<_OrderItemCell> {
   Widget _buildPickUpButton(Order order) {
     return RaisedButton(
       elevation: 6,
-      color: ColorHelper.dabaoOffPaleBlue,
+      color: ColorHelper.availableColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Row(
         children: <Widget>[
@@ -638,7 +638,7 @@ class _OrderItemCellState extends State<_OrderItemCell> {
             child: Align(
               child: Text(
                 "Pick Up",
-                style: FontHelper.semiBold14White,
+                style: FontHelper.semiBold14Black,
               ),
             ),
           ),

@@ -3,6 +3,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class ColorHelper {
+
+  static const Color availableColor = Color(0xFFA5DE40); 
+  static const Color acceptedBySomeoneElseColor = Color(0xFFD0D0D0); 
+  static const Color acceptedByMeColor = Color(0xFFD0D0D0); 
+  static const Color cancellingColor = Color(0xFFCC0000); 
+
   static int dabaoOrangeHexCode = 0xFFF5A510;
 
   static const Color dabaoOrange = Color.fromRGBO(0xF5, 0xA5, 0x10, 1.0);
@@ -42,7 +48,7 @@ class ColorHelper {
   static Color rgbo(int r, int b, int g, [int a = 100]) {
     return Color.fromARGB((a * 255 / 100).round(), r, b, g);
   }
-}
+} 
 
 Color kBackground = Colors.white;
 Color kBottomNavigator = Colors.amber;

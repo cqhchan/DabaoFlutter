@@ -59,7 +59,11 @@ class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
           List<Widget> list = List();
 
           if (firebaseUser.phoneNumber == null)
-            list.add(Scaffold(body: PhoneVerificationPage(linkCredentials: true,onCompleteCallback:nextPage,)));
+            list.add(Scaffold(
+                body: PhoneVerificationPage(
+              linkCredentials: true,
+              onCompleteCallback: nextPage,
+            )));
 
           if (profileImage == null ||
               firebaseUser.phoneNumber == null) if ((firebaseUser.email ==
@@ -70,7 +74,12 @@ class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Container(padding:EdgeInsets.only(top: 10.0),child: Text("Add Email (Optional)", style: FontHelper.semiBold(Colors.black, 18.0),)),
+                  Container(
+                      padding: EdgeInsets.only(top: 10.0),
+                      child: Text(
+                        "Add Email (Optional)",
+                        style: FontHelper.semiBold(Colors.black, 18.0),
+                      )),
                   Flexible(
                       child: EmailLoginPage(
                     linkCredentials: true,
@@ -81,7 +90,12 @@ class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
                 ],
               ),
             )));
-          if (profileImage == null) list.add(ProfileCreationPage(onCompleteCallback: (){nextPage();},));
+          if (profileImage == null)
+            list.add(ProfileCreationPage(
+              onCompleteCallback: () {
+                nextPage();
+              },
+            ));
 
           return list;
         }),
