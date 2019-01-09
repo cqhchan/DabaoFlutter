@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
@@ -26,7 +28,23 @@ class DabaoeeViewOrderListPage extends StatefulWidget {
   }
 }
 
-class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage> {
+class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage> with HavingSubscriptionMixin {
+
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -82,6 +100,7 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage> {
               padding: EdgeInsets.only(bottom: 5.0),
               child: _OrderItems(
                 order: widget.order,
+                listOfOrderItems: listOfOrderItems,
               ),
             ),
             Container(
@@ -98,7 +117,7 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage> {
   Widget buildTotal(Order order) {
     return StreamBuilder<double>(
       stream: Observable.combineLatest2<List<OrderItem>, double, double>(
-          order.orderItems, order.deliveryFee, (orderItems, deliveryFee) {
+          listOfOrderItems.producer, order.deliveryFee, (orderItems, deliveryFee) {
         double maxTotalPrice = orderItems
             .map(
                 (orderItem) => orderItem.price.value * orderItem.quantity.value)
@@ -398,8 +417,9 @@ class _DeliveryLocation extends StatelessWidget {
 
 class _OrderItems extends StatelessWidget {
   final Order order;
+  final MutableProperty<List<OrderItem>> listOfOrderItems;
 
-  const _OrderItems({Key key, this.order}) : super(key: key);
+  const _OrderItems({Key key, this.order, this.listOfOrderItems }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -415,7 +435,7 @@ class _OrderItems extends StatelessWidget {
 
   Widget buildOrderItemsList() {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.orderItems,
+      stream:listOfOrderItems.producer,
       builder: (context, snap) {
         List<Widget> listOfWidget = List();
         if (!snap.hasData || snap.data == null)
@@ -552,7 +572,7 @@ class _OrderItems extends StatelessWidget {
           },
         ),
         StreamBuilder<int>(
-            stream: order.orderItems.map(
+            stream: listOfOrderItems.producer.map(
                 (orderItems) => orderItems == null ? null : orderItems.length),
             builder: (context, snap) {
               if (!snap.hasData || snap.data == null) return Offstage();

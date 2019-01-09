@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
+import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:random_string/random_string.dart';
 import 'package:rxdart/rxdart.dart';
 
 const String orderStatus_Requested = "Requested";
@@ -48,8 +50,6 @@ class Order extends FirebaseType with Selectable {
   BehaviorSubject<String> deliveryLocationDescription;
   BehaviorSubject<String> foodTag;
   BehaviorSubject<String> status;
-  BehaviorSubject<List<OrderItem>> orderItems;
-
   BehaviorSubject<String> creator;
   BehaviorSubject<String> delivererID;
 
@@ -59,6 +59,8 @@ class Order extends FirebaseType with Selectable {
   BehaviorSubject<OrderMode> mode;
   BehaviorSubject<double> deliveryFee;
   BehaviorSubject<double> deliveryFeeDiscount;
+
+  Observable<List<OrderItem>> orderItem;
 
   Order.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
@@ -77,7 +79,6 @@ class Order extends FirebaseType with Selectable {
     deliveryLocationDescription = BehaviorSubject();
     foodTag = BehaviorSubject();
     status = BehaviorSubject();
-    orderItems = BehaviorSubject();
     creator = BehaviorSubject();
     deliveryFee = BehaviorSubject();
     mode = BehaviorSubject();
@@ -86,6 +87,12 @@ class Order extends FirebaseType with Selectable {
     deliveryFeeDiscount = BehaviorSubject();
     completedTime = BehaviorSubject();
     delivererID = BehaviorSubject();
+
+    orderItem = FirebaseCollectionReactive<OrderItem>(Firestore.instance
+            .collection(this.className)
+            .document(this.uid)
+            .collection("orderItems"))
+        .observable;
   }
 
   @override
@@ -193,18 +200,6 @@ class Order extends FirebaseType with Selectable {
       message.add(data[messageKey]);
     } else {
       message.add(null);
-    }
-
-    if (data.containsKey(orderItemKey)) {
-      List<Map<dynamic, dynamic>> temp =
-          List.castFrom<dynamic, Map<dynamic, dynamic>>(data[orderItemKey]);
-      orderItems.add(temp.map((rawMap) {
-        var map = rawMap.cast<String, dynamic>();
-        return OrderItem.fromMap(
-            map[OrderItem.titleKey].toString().toLowerCase(), map);
-      }).toList());
-    } else {
-      orderItems.add(List());
     }
 
     if (data.containsKey(creatorKey)) {

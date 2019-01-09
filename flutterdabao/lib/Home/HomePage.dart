@@ -215,13 +215,15 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                    decoration: BoxDecoration(color: ColorHelper.dabaoOrange, boxShadow: [
-                      BoxShadow(
-                        offset: Offset(0.0, 1.0),
-                        color: Colors.grey,
-                        blurRadius: 5.0,
-                      )
-                    ]),
+                    decoration: BoxDecoration(
+                        color: ColorHelper.dabaoOrange,
+                        boxShadow: [
+                          BoxShadow(
+                            offset: Offset(0.0, 1.0),
+                            color: Colors.grey,
+                            blurRadius: 5.0,
+                          )
+                        ]),
                     child: SafeArea(
                       top: false,
                       child: Container(
@@ -600,7 +602,7 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
             size: 2.0,
           ));
           snap.data.take(2).forEach((order) {
-            listOfWidget.add(orderCell(order));
+            listOfWidget.add(_OrderCell(order: order));
             listOfWidget.add(Line());
           });
 
@@ -630,6 +632,77 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
     );
   }
 
+  Widget buildViewAll() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            FadeRoute(widget: ViewOrderListPage()),
+          );
+        },
+        child: Container(
+          color: Colors.transparent,
+          padding: EdgeInsets.all(10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                "VIEW ALL",
+                style: TextStyle(
+                    decoration: TextDecoration.underline,
+                    color: ColorHelper.dabaoOffGrey70),
+              ),
+              SizedBox(
+                width: 3,
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 18,
+                color: ColorHelper.dabaoOffGrey70,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderCell extends StatefulWidget {
+  final Order order;
+
+  const _OrderCell({Key key, this.order}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return null;
+  }
+}
+
+class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
+  @override
+  void initState() {
+    super.initState();
+
+    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return orderCell(widget.order);
+  }
+
   Widget orderCell(Order order) {
     return Container(
       margin: EdgeInsets.only(left: 10, right: 5, top: 5),
@@ -656,6 +729,19 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
         ],
       ),
     );
+  }
+
+  StreamBuilder<String> foodTagHeader(Order order) {
+    return StreamBuilder<String>(
+        stream: order.foodTag,
+        builder: (context, snap) {
+          return Text(
+            (snap.hasData && snap.data != null)
+                ? StringHelper.upperCaseWords(snap.data)
+                : "Error",
+            style: FontHelper.semiBold14Black,
+          );
+        });
   }
 
   Expanded status(Order order) {
@@ -751,7 +837,7 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
 
   StreamBuilder<List<OrderItem>> orderItemAndPrice(Order order) {
     return StreamBuilder<List<OrderItem>>(
-        stream: order.orderItems,
+        stream: listOfOrderItems.producer,
         builder: (context, snap) {
           if (!snap.hasData || snap.data == null) return Offstage();
 
@@ -769,54 +855,5 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
             style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0),
           );
         });
-  }
-
-  StreamBuilder<String> foodTagHeader(Order order) {
-    return StreamBuilder<String>(
-        stream: order.foodTag,
-        builder: (context, snap) {
-          return Text(
-            (snap.hasData && snap.data != null)
-                ? StringHelper.upperCaseWords(snap.data)
-                : "Error",
-            style: FontHelper.semiBold14Black,
-          );
-        });
-  }
-
-  Widget buildViewAll() {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(
-            FadeRoute(widget: ViewOrderListPage()),
-          );
-        },
-        child: Container(
-          color: Colors.transparent,
-          padding: EdgeInsets.all(10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                "VIEW ALL",
-                style: TextStyle(
-                    decoration: TextDecoration.underline,
-                    color: ColorHelper.dabaoOffGrey70),
-              ),
-              SizedBox(
-                width: 3,
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 18,
-                color: ColorHelper.dabaoOffGrey70,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

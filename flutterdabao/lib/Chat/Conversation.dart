@@ -56,6 +56,7 @@ class ConversationState extends State<Conversation>
     with HavingSubscriptionMixin {
   MutableProperty<Order> order = MutableProperty(null);
   MutableProperty<List<Message>> listOfMessages = MutableProperty(List());
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
 
   //text input properties in textfield
   TextEditingController _textController;
@@ -107,6 +108,9 @@ class ConversationState extends State<Conversation>
     // You need to listen manually to the list of messages
     // TODO for some strange reason again.
     subscription.add(listOfMessages.bindTo(widget.channel.listOfMessages));
+
+    subscription.add(listOfOrderItems.bindTo(order.producer
+        .switchMap((o) => o == null ? Rxdart.Observable.just(List()) : o.orderItem)));
   }
 
   @override
@@ -694,7 +698,7 @@ class ConversationState extends State<Conversation>
 
   Widget _buildQuantity() {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.value.orderItems,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return Text(
@@ -725,7 +729,7 @@ class ConversationState extends State<Conversation>
 
   _buildOrderItems() {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.value.orderItems,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return _buildOrderItemList(context, snap.data);
@@ -898,8 +902,7 @@ class ConversationState extends State<Conversation>
                 initial = _scrollController.position.pixels;
               },
               child: new NotificationListener(
-                child: 
-                ListView.builder(
+                child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
                   controller: _scrollController,
                   reverse: true,
@@ -1217,8 +1220,14 @@ class ConversationState extends State<Conversation>
     ImagePicker.pickImage(source: ImageSource.camera).then((image) async {
       if (image != null) {
         _image = await _cropImage(image);
-        final StorageReference profileRef = FirebaseStorage.instance.ref().child(
-            'storage/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(),[yyyy,mm,dd])}-DABAO-${generateMd5(_image.toString())}.jpg');
+        final StorageReference profileRef = FirebaseStorage.instance
+            .ref()
+            .child(
+                'storage/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(), [
+              yyyy,
+              mm,
+              dd
+            ])}-DABAO-${generateMd5(_image.toString())}.jpg');
 
         print(_image.toString());
 
@@ -1242,8 +1251,14 @@ class ConversationState extends State<Conversation>
     ImagePicker.pickImage(source: ImageSource.gallery).then((image) async {
       if (image != null) {
         _image = await _cropImage(image);
-        final StorageReference profileRef = FirebaseStorage.instance.ref().child(
-            'storage/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(),[yyyy,mm,dd])}-DABAO-${generateMd5(_image.toString())}.jpg');
+        final StorageReference profileRef = FirebaseStorage.instance
+            .ref()
+            .child(
+                'storage/${ConfigHelper.instance.currentUserProperty.value.uid}/IMG-${formatDate(DateTime.now(), [
+              yyyy,
+              mm,
+              dd
+            ])}-DABAO-${generateMd5(_image.toString())}.jpg');
 
         final StorageUploadTask imageTask = profileRef.putFile(_image);
 

@@ -12,6 +12,7 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
@@ -94,17 +95,23 @@ class _OrderItemCell extends StatefulWidget {
   }
 }
 
-class _OrderItemCellState extends State<_OrderItemCell> {
+class _OrderItemCellState extends State<_OrderItemCell> with HavingSubscriptionMixin {
+
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
+
   @override
   void initState() {
     super.initState();
+
+    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
   }
 
   @override
   void dispose() {
+    disposeAndReset();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -350,7 +357,7 @@ class _OrderItemCellState extends State<_OrderItemCell> {
 
   Widget _buildQuantity(Order order) {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.orderItems,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return Text(
@@ -364,7 +371,7 @@ class _OrderItemCellState extends State<_OrderItemCell> {
 
   Widget _buildOrderItems(Order order) {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.orderItems,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return _buildOrderItemList(context, snap.data);

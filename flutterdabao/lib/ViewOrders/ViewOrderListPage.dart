@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
@@ -129,7 +131,23 @@ class _ViewOrderCell extends StatefulWidget {
   }
 }
 
-class _ViewOrderCellState extends State<_ViewOrderCell> {
+class _ViewOrderCellState extends State<_ViewOrderCell> with HavingSubscriptionMixin {
+
+MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    subscription.add(listOfOrderItems.bindTo(widget.order.orderItem));
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -312,7 +330,7 @@ class _ViewOrderCellState extends State<_ViewOrderCell> {
       child: Container(
         padding: EdgeInsets.only(left: 2.0),
         child: StreamBuilder<List<OrderItem>>(
-            stream: order.orderItems,
+            stream: listOfOrderItems.producer,
             builder: (context, snap) {
               if (!snap.hasData || snap.data == null) return Offstage();
 
@@ -349,4 +367,5 @@ class _ViewOrderCellState extends State<_ViewOrderCell> {
           }),
     );
   }
+
 }
