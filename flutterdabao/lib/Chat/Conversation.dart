@@ -1198,7 +1198,6 @@ class ConversationState extends State<Conversation>
                       controller: _textController,
                       style: TextStyle(height: 1, color: Colors.black),
                       decoration: const InputDecoration(
-                        
                           hintStyle: FontHelper.regular15Grey,
                           hintText: "Enter your message",
                           contentPadding: const EdgeInsets.symmetric(
@@ -1228,15 +1227,19 @@ class ConversationState extends State<Conversation>
                   child: Container(
                       padding: EdgeInsets.fromLTRB(10, 8, 8, 8),
                       decoration: BoxDecoration(
-                          boxShadow: sendButtonFlag ? [
-                            BoxShadow(
-                              color:  Color.fromRGBO(0xFC, 0x96, 0x67, 1),
-                              offset: new Offset(0.0, 2.0),
-                              blurRadius: 5.0,
-                            )
-                          ] : [],
+                          boxShadow: sendButtonFlag
+                              ? [
+                                  BoxShadow(
+                                    color: Color.fromRGBO(0xFC, 0x96, 0x67, 1),
+                                    offset: new Offset(0.0, 2.0),
+                                    blurRadius: 5.0,
+                                  )
+                                ]
+                              : [],
                           shape: BoxShape.circle,
-                          color: sendButtonFlag ? ColorHelper.dabaoOrange : ColorHelper.dabaoOffGreyD3),
+                          color: sendButtonFlag
+                              ? ColorHelper.dabaoOrange
+                              : ColorHelper.dabaoOffGreyD3),
                       child: Icon(
                         Icons.send,
                         color: Colors.white,

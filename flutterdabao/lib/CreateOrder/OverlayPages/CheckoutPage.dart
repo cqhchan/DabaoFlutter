@@ -40,6 +40,7 @@ class _CheckoutPageState extends State<CheckoutPage>
 
   MutableProperty<double> discountDeliveryFee;
 
+  String promoCodeError;
   @override
   void initState() {
     super.initState();
@@ -69,7 +70,21 @@ class _CheckoutPageState extends State<CheckoutPage>
         chosenPercentage.producer,
         (suggested, percentage) => suggested * percentage)));
 
- 
+    subscription.add(Observable.combineLatest2<String, Voucher, String>(
+        widget.holder.foodTag.producer, widget.holder.voucherProperty.producer,
+        (foodTag, voucher) {
+      if (voucher == null || voucher.foodTag.value == null) return null;
+
+      if (foodTag.toLowerCase() != voucher.foodTag.value.toLowerCase()) {
+        return "This promo code is only applicable for ${voucher.foodTag.value}";
+      } else {
+        return null;
+      }
+    }).listen((error) {
+      setState(() {
+        promoCodeError = error;
+      });
+    }));
   }
 
   @override
@@ -106,86 +121,169 @@ class _CheckoutPageState extends State<CheckoutPage>
               margin: EdgeInsets.only(left: 8.0, right: 8.0),
             ),
             buildTotal(),
-            StreamBuilder<List<OrderItemHolder>>(
-              stream: widget.holder.orderItems.producer,
-              builder: (context, snap) {
-                if (snap.hasData && snap.data.length > 0)
-                  return Container(
-                    padding: EdgeInsets.only(
-                        left: 12.0, right: 12.0, bottom: 20.0, top: 0.0),
-                    child: ArrowButton(
-                      title: "Checkout",
-                      onPressedCallback: widget.checkout,
-                    ),
-                  );
-                else
-                  return Container();
-              },
-            )
+            buildCompleteButton()
           ],
         )));
   }
 
+  StreamBuilder<List<OrderItemHolder>> buildCompleteButton() {
+    return StreamBuilder<List<OrderItemHolder>>(
+      stream: widget.holder.orderItems.producer,
+      builder: (context, snap) {
+        if (snap.hasData && snap.data.length > 0)
+          return Container(
+            padding: EdgeInsets.only(
+                left: 12.0, right: 12.0, bottom: 20.0, top: 0.0),
+            child: ArrowButton(
+              title: "Checkout",
+              onPressedCallback: () {
+                if (promoCodeError == null)
+                  widget.checkout();
+                else {
+                  final snackBar =
+                      SnackBar(content: Text('This Promo Code cannot be used'));
+                  Scaffold.of(context).showSnackBar(snackBar);
+                }
+              },
+            ),
+          );
+        else
+          return Container();
+      },
+    );
+  }
+
   Widget buildPromoCode() {
     return GestureDetector(
-        child: Container(
-          color: Colors.transparent,
-          padding: EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0),
-          child: Row(
-            children: <Widget>[
-              Text(
-                "Promo Code",
-                style: FontHelper.bold(Colors.black, 14.0),
-              ),
-              Expanded(
-                child: StreamBuilder<Voucher>(
-                  stream: widget.holder.voucherProperty.producer,
-                  builder: (BuildContext context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data == null)
-                      return Align(
-                          alignment: Alignment.centerRight,
-                          child: Icon(Icons.arrow_forward_ios));
-
-                    return Column(
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                color: Colors.transparent,
+                padding: EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0),
+                child: Column(
+                  children: <Widget>[
+                    Row(
                       children: <Widget>[
-                        StreamBuilder<String>(
-                            stream: snapshot.data.title,
-                            builder: (context, snap) {
-                              if (!snap.hasData) return Offstage();
-                              return Text(snap.data);
-                            }),
-                        StreamBuilder<double>(
-                            stream: snapshot.data.deliveryFeeDiscount,
-                            builder: (context, snap) {
-                              if (!snap.hasData || snap.data == 0)
-                                return Offstage();
+                        Text(
+                          "Promo Code",
+                          style: FontHelper.bold(Colors.black, 14.0),
+                        ),
+                        Expanded(
+                            child: Align(
+                          alignment: Alignment.centerRight,
+                          child: StreamBuilder<Voucher>(
+                            stream: widget.holder.voucherProperty.producer,
+                            builder: (BuildContext context, snapshot) {
+                              if (!snapshot.hasData || snapshot.data == null)
+                                return Icon(Icons.arrow_forward_ios);
 
-                              return Row(children: <Widget>[
-                                Text(
-                                  "Off Delivery Fee",
-                                  style: FontHelper.bold(Colors.black, 14.0),
-                                ),
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      "-" +
-                                          StringHelper.doubleToPriceString(
-                                              snap.data),
-                                      style:
-                                          FontHelper.bold(Colors.black, 14.0),
-                                    ),
-                                  ),
-                                ),
-                              ]);
-                            }),
+                              return StreamBuilder<String>(
+                                  stream: snapshot.data.code,
+                                  builder: (context, snap) {
+                                    if (!snap.hasData || snap.data == null)
+                                      return Offstage();
+
+                                    return Text(
+                                      snap.data,
+                                      style: FontHelper.bold(
+                                          promoCodeError == null
+                                              ? ColorHelper.dabaoOrange
+                                              : Colors.red,
+                                          14.0),
+                                    );
+                                  });
+                            },
+                          ),
+                        )),
                       ],
-                    );
-                  },
+                    ),
+                    StreamBuilder<Voucher>(
+                      stream: widget.holder.voucherProperty.producer,
+                      builder: (BuildContext context, snapshot) {
+                        if (!snapshot.hasData || snapshot.data == null)
+                          return Offstage();
+
+                        return Row(
+                          children: <Widget>[
+                            Text(
+                              "Delivery Fee Discount:",
+                              style: FontHelper.medium(
+                                  promoCodeError == null
+                                      ? Colors.black
+                                      : Colors.red,
+                                  12.0),
+                            ),
+                            Expanded(
+                                child: Align(
+                              alignment: Alignment.centerRight,
+                              child: StreamBuilder<double>(
+                                stream: snapshot.data.deliveryFeeDiscount,
+                                builder: (BuildContext context, snapshot) {
+                                  if (snapshot.data == null) {
+                                    return Offstage();
+                                  }
+                                  return Text(
+                                    "- ${StringHelper.doubleToPriceString(snapshot.data)}",
+                                    style: FontHelper.medium(
+                                        promoCodeError == null
+                                            ? Colors.black
+                                            : Colors.red,
+                                        12.0),
+                                  );
+                                },
+                              ),
+                            ))
+                          ],
+                        );
+                      },
+                    ),
+                    promoCodeError == null
+                        ? Offstage()
+                        : Row(
+                            children: <Widget>[
+                              Text(
+                                "Error:",
+                                style: FontHelper.medium(Colors.red, 12.0),
+                              ),
+                              Expanded(
+                                  child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        promoCodeError,
+                                        style: FontHelper.medium(
+                                            promoCodeError == null
+                                                ? Colors.black
+                                                : Colors.red,
+                                            12.0),
+                                      )))
+                            ],
+                          )
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+            StreamBuilder(
+              stream: widget.holder.voucherProperty.producer,
+              builder: (context, snap) {
+                if (!snap.hasData || snap.data == null) return Offstage();
+
+                return GestureDetector(
+                  onTap: () {
+                    widget.holder.voucherProperty.value = null;
+                  },
+                  child: Container(
+                    color: Colors.transparent,
+                    padding: EdgeInsets.only(left: 10.0),
+                    child: Container(
+                      child: Icon(Icons.add_circle_outline),
+                      transform: new Matrix4.rotationZ(pi / 4),
+                    ),
+                  ),
+                );
+              },
+            )
+          ],
         ),
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(

@@ -66,7 +66,10 @@ class _OrderOverlayState extends State<OrderOverlay> with PageHandler {
                       return DoubleLineHeader(
                         closeTapped: backToLocationCard,
                         title: widget.holder.deliveryLocationDescription.value,
-                        subtitle: DateTimeHelper.convertDoubleTimeToDisplayString(widget.holder.startDeliveryTime.value, widget.holder.endDeliveryTime.value),
+                        subtitle:
+                            DateTimeHelper.convertDoubleTimeToDisplayString(
+                                widget.holder.startDeliveryTime.value,
+                                widget.holder.endDeliveryTime.value),
                       );
                   }
                 }),
@@ -150,7 +153,10 @@ class _OrderOverlayState extends State<OrderOverlay> with PageHandler {
 
   @override
   Widget build(BuildContext context) {
-    return PageTurner(this);
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body:
+            Align(alignment: Alignment.bottomCenter, child: PageTurner(this)));
   }
 
   backEraseOrderItemWarning() {
