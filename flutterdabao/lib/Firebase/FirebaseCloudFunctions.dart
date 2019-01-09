@@ -298,11 +298,14 @@ class FirebaseCloudFunctions {
   /// acceptorID
   /// deliveryTime
   /// routeID Optional
+  /// deliveryfee Optional
+
   static Future<bool> acceptOrder({
     @required String orderID,
     @required String acceptorID,
     @required String deliveryTime,
     String routeID,
+    double deliveryFee
   }) async {
     try {
       Map<String, dynamic> attributeMap = new Map<String, dynamic>();
@@ -310,6 +313,7 @@ class FirebaseCloudFunctions {
       attributeMap["orderID"] = orderID;
       attributeMap["acceptorID"] = acceptorID;
       attributeMap["deliveryTime"] = deliveryTime;
+      attributeMap["deliveryFee"] = deliveryFee;
 
       if (routeID != null) attributeMap["routeID"] = routeID;
 
