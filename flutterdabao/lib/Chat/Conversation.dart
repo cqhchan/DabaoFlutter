@@ -1194,9 +1194,11 @@ class ConversationState extends State<Conversation>
                           expandFlag = false;
                         });
                       },
+                      textCapitalization: TextCapitalization.sentences,
                       controller: _textController,
                       style: TextStyle(height: 1, color: Colors.black),
                       decoration: const InputDecoration(
+                        
                           hintStyle: FontHelper.regular15Grey,
                           hintText: "Enter your message",
                           contentPadding: const EdgeInsets.symmetric(
