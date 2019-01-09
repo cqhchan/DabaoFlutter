@@ -22,7 +22,6 @@ class Channel extends FirebaseType with Selectable {
   BehaviorSubject<String> orderUid;
   BehaviorSubject<int> unreadMessages;
   BehaviorSubject<String> deliverer;
-  String uid;
   MutableProperty<List<Message>> _listOfMessages;
 
   MutableProperty<List<Message>> get listOfMessages { 

@@ -110,17 +110,20 @@ class ConversationState extends State<Conversation>
     listOfMessages = widget.channel.listOfMessages;
 
     subscription.add(listOfOrderItems.bindTo(order.producer
-        .switchMap((o) => o == null ? Rxdart.Observable.just(List()) : o.orderItem)));
+        .where((uid) => uid != null)
+        .switchMap((o) => o == null
+            ? Rxdart.Observable.just(List())
+            : o.orderItem.producer)));
   }
 
   @override
   void dispose() {
+    disposeAndReset();
     widget.channel.markAsRead();
     currentKey = null;
     _myFocusNode.dispose();
     _textController.dispose();
     _scrollController.dispose();
-    subscription.dispose();
     super.dispose();
   }
 
