@@ -677,7 +677,7 @@ class _OrderCell extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return null;
+    return _OrderCellState();
   }
 }
 
@@ -839,7 +839,7 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
     return StreamBuilder<List<OrderItem>>(
         stream: listOfOrderItems.producer,
         builder: (context, snap) {
-          if (!snap.hasData || snap.data == null) return Offstage();
+          if (!snap.hasData || snap.data == null || snap.data.length == 0) return Offstage();
 
           int totalItems = snap.data
               .map((orderItem) => orderItem.quantity.value)
