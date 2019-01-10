@@ -312,13 +312,17 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                           .instance.currentUserProperty.value.thumbnailImage,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData || snapshot.data == null) {
-                          return Image.asset(
-                            'assets/icons/profile_icon.png',
+                          return Container(
+                            height: 35,
+                            width: 35,
+                            child: Image.asset(
+                              'assets/icons/profile_icon.png',
+                            ),
                           );
                         }
                         return CircleAvatar(
                           backgroundImage: NetworkImage(snapshot.data),
-                          radius: 20,
+                          radius: 35,
                         );
                       },
                     ),

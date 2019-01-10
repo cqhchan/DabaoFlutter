@@ -21,7 +21,6 @@ class ProfileCreationPage extends StatefulWidget {
 }
 
 class _ProfileCreationPageState extends State<ProfileCreationPage> {
-
   final _nameController = TextEditingController();
   File _image;
   File _thumbnail;
@@ -30,7 +29,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   bool _autoValidate = false;
 
   @override
-  void dispose() { 
+  void dispose() {
     _nameController.dispose();
     super.dispose();
   }
@@ -45,44 +44,31 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   ///////////////////////////////////////////////////////////////////////////////
 
   //Pre-condition: Called only when _image has been set
-  void creatingThumbnail() {
-    getTemporaryDirectory().then((tempDir) {
+  void creatingThumbnail(File image) async {
+    print("Creating Thumbnail");
+    await getTemporaryDirectory().then((tempDir) async {
+      print("tempDir " + tempDir.path);
       String tempPath = tempDir.path;
-      Resize.Image resizedImage = Resize.decodeImage(_image.readAsBytesSync());
+
+      List<int> data = await image.readAsBytes();
+      print("imaged readAsBytes ");
+
+      Resize.Image resizedImage = Resize.decodeImage(data);
+      print("imaged Resized ");
+
       // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
       Resize.Image thumbnail = Resize.copyResize(resizedImage, 100, 100);
+      print("thumbnail Resized ");
+
       // Save the thumbnail as a PNG.
       var thumbnailImage = new File(tempPath + 'thumbnailImage.png')
         ..writeAsBytesSync(Resize.encodePng(thumbnail));
+
+      print("thumbnail saved ");
+
       _thumbnail = thumbnailImage;
       setState(() {
-        _inProgress = false;
-      });
-    });
-  }
-
-  //get image from camera
-  void getImageFromCamera() async {
-    setState(() {
-      _inProgress = true;
-    });
-
-    ImagePicker.pickImage(source: ImageSource.camera).then((image) async {
-      if (image == null) {
-        setState(() {
-          _inProgress = false;
-        });
-      } else {
-        var croppedImage =
-            await _cropImage(image); //give user the cropping option
-        setState(() {
-          _image = croppedImage;
-        });
-        creatingThumbnail();
-      }
-    }).catchError((e) {
-      print(e);
-      setState(() {
+        _image = image;
         _inProgress = false;
       });
     });
@@ -100,25 +86,34 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     return croppedFile;
   }
 
-  //get image from gallery
-  void getImageFromGallery() async {
+  //get image
+  void getImage(ImageSource imageSource) async {
     setState(() {
       _inProgress = true;
     });
 
-    ImagePicker.pickImage(source: ImageSource.gallery).then((image) async {
+    ImagePicker.pickImage(source: imageSource).then((image) async {
       if (image == null) {
         setState(() {
           _inProgress = false;
         });
       } else {
-        var croppedImage =
-            await _cropImage(image); //give user the cropping option
-        setState(() {
-          _image = croppedImage;
-        });
-        creatingThumbnail();
+        //give user the cropping option
+        var croppedImage = await _cropImage(image);
+
+        if (croppedImage == null) {
+          setState(() {
+            _inProgress = false;
+          });
+        } else {
+          creatingThumbnail(croppedImage);
+        }
       }
+    }).catchError((e) {
+      print(e);
+      setState(() {
+        _inProgress = false;
+      });
     });
   }
 
@@ -170,8 +165,10 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                 ConfigHelper.instance.currentUserProperty.value.setUser(
                   profileLink,
                   _nameController.text,
-                   DateTime.fromMillisecondsSinceEpoch(user.metadata.creationTimestamp ),
-                   DateTime.fromMillisecondsSinceEpoch(user.metadata.lastSignInTimestamp ),
+                  DateTime.fromMillisecondsSinceEpoch(
+                      user.metadata.creationTimestamp),
+                  DateTime.fromMillisecondsSinceEpoch(
+                      user.metadata.lastSignInTimestamp),
                   thumbnailLink,
                 );
                 widget.onCompleteCallback();
@@ -244,7 +241,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                   title: Text('Camera'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    getImageFromCamera();
+                    getImage(ImageSource.camera);
                   },
                 ),
                 ListTile(
@@ -253,7 +250,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                   onTap: () {
                     Navigator.of(context).pop();
 
-                    getImageFromGallery();
+                    getImage(ImageSource.gallery);
                   },
                 ),
                 ListTile(
@@ -285,63 +282,63 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   Widget buildWidget(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-          child: Form(
-            autovalidate: _autoValidate,
-            child: ListView(
-              children: [
-                GestureDetector(
-                  //onTap: getImage,
-                  onTap: _showModalSheet,
+      child: Form(
+        autovalidate: _autoValidate,
+        child: ListView(
+          children: [
+            GestureDetector(
+              //onTap: getImage,
+              onTap: _showModalSheet,
 
-                  child: _image == null
-                      ? Container(
-                          height: MediaQuery.of(context).size.width,
-                          width: MediaQuery.of(context).size.width,
-                          child: Center(
-                            child: Icon(Icons.add_a_photo, size: 100.0),
-                          ),
-                          color: ColorHelper.dabaoGreyE0,
-                        )
-                      : Image.file(
-                          _image,
-                          height: MediaQuery.of(context).size.width,
-                          width: MediaQuery.of(context).size.width,
-                          fit: BoxFit.fill,
-                        ),
+              child: _image == null
+                  ? Container(
+                      height: MediaQuery.of(context).size.width,
+                      width: MediaQuery.of(context).size.width,
+                      child: Center(
+                        child: Icon(Icons.add_a_photo, size: 100.0),
+                      ),
+                      color: ColorHelper.dabaoGreyE0,
+                    )
+                  : Image.file(
+                      _image,
+                      height: MediaQuery.of(context).size.width,
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.fill,
+                    ),
+            ),
+            SizedBox(height: 50.0),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(children: <Widget>[
+                TextFormField(
+                  textCapitalization: TextCapitalization.words,
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                  ),
+                  validator: _validateName,
                 ),
                 SizedBox(height: 50.0),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(children: <Widget>[
-                    TextFormField(
-                      textCapitalization: TextCapitalization.words,
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                      ),
-                      validator: _validateName,
+                RaisedButton(
+                  child: Container(
+                    height: 40,
+                    child: Center(
+                      child: Text('Create Profile'),
                     ),
-                    SizedBox(height: 50.0),
-                    RaisedButton(
-                      child: Container(
-                        height: 40,
-                        child: Center(
-                          child: Text('Create Profile'),
-                        ),
-                      ),
-                      color: ColorHelper.dabaoOrange,
-                      elevation: 5.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      onPressed: createProfile,
-                    )
-                  ]),
-                ),
-              ],
+                  ),
+                  color: ColorHelper.dabaoOrange,
+                  elevation: 5.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                  onPressed: createProfile,
+                )
+              ]),
             ),
-          ),
-        ));
+          ],
+        ),
+      ),
+    ));
   }
 
   @override
