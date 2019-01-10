@@ -314,6 +314,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                   padding: EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(children: <Widget>[
                     TextFormField(
+                      textCapitalization: TextCapitalization.words,
                       controller: _nameController,
                       decoration: InputDecoration(
                         labelText: 'Name',

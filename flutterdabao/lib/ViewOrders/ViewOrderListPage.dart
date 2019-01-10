@@ -155,7 +155,7 @@ MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
         onTap: () {
           Navigator.of(context).push(FadeRoute(
               widget: DabaoeeViewOrderListPage(
-            order: widget.order,
+            order: Order.fromUID(widget.order.uid),
           )));
         },
         child: Container(
