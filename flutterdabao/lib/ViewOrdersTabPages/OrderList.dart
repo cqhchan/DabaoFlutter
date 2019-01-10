@@ -12,6 +12,7 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
@@ -94,14 +95,20 @@ class _OrderItemCell extends StatefulWidget {
   }
 }
 
-class _OrderItemCellState extends State<_OrderItemCell> {
+class _OrderItemCellState extends State<_OrderItemCell>
+    with HavingSubscriptionMixin {
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
   @override
   void initState() {
     super.initState();
+
+    listOfOrderItems = widget.order.orderItem;
   }
 
   @override
   void dispose() {
+    disposeAndReset();
     super.dispose();
   }
 
@@ -135,7 +142,7 @@ class _OrderItemCellState extends State<_OrderItemCell> {
                       direction: Axis.horizontal,
                       children: <Widget>[
                         Expanded(
-                          flex: 5,
+                          flex: 6,
                           child: _buildDeliveryPeriod(order),
                         ),
                         Expanded(
@@ -317,16 +324,14 @@ class _OrderItemCellState extends State<_OrderItemCell> {
                 overflow: TextOverflow.ellipsis,
               );
             } else {
-              return Container(
-                child: Text(
-                  snap.hasData
-                      ? DateTimeHelper.convertDateTimeToDate(snap.data) +
-                          ', ' +
-                          DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                      : "Error",
-                  style: FontHelper.semiBoldgrey14TextStyle,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              return Text(
+                snap.hasData
+                    ? DateTimeHelper.convertDateTimeToDate(snap.data) +
+                        ', ' +
+                        DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                    : "Error",
+                style: FontHelper.semiBoldgrey14TextStyle,
+                overflow: TextOverflow.ellipsis,
               );
             }
           },
@@ -335,12 +340,14 @@ class _OrderItemCellState extends State<_OrderItemCell> {
           stream: order.endDeliveryTime,
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
-            return Text(
-              snap.hasData
-                  ? ' - ' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                  : '',
-              style: FontHelper.semiBoldgrey14TextStyle,
-              overflow: TextOverflow.ellipsis,
+            return Expanded(
+              child: Text(
+                snap.hasData
+                    ? '-' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                    : '',
+                style: FontHelper.semiBoldgrey14TextStyle,
+                overflow: TextOverflow.ellipsis,
+              ),
             );
           },
         ),
@@ -350,7 +357,7 @@ class _OrderItemCellState extends State<_OrderItemCell> {
 
   Widget _buildQuantity(Order order) {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.orderItems,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return Text(
@@ -364,7 +371,7 @@ class _OrderItemCellState extends State<_OrderItemCell> {
 
   Widget _buildOrderItems(Order order) {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.orderItems,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return _buildOrderItemList(context, snap.data);

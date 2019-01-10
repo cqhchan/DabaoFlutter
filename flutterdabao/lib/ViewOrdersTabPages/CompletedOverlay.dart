@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -22,7 +23,23 @@ class CompletedOverlay extends StatefulWidget {
   _CompletedOverlayState createState() => _CompletedOverlayState();
 }
 
-class _CompletedOverlayState extends State<CompletedOverlay> {
+class _CompletedOverlayState extends State<CompletedOverlay> with HavingSubscriptionMixin {
+
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    listOfOrderItems = widget.order.orderItem;
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -151,7 +168,7 @@ class _CompletedOverlayState extends State<CompletedOverlay> {
                 },
               ),
               StreamBuilder<List<OrderItem>>(
-                stream: order.orderItems,
+                stream: listOfOrderItems.producer,
                 builder: (context, snap) {
                   if (!snap.hasData) return Offstage();
                   return Align(

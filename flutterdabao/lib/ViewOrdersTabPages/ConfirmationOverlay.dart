@@ -26,6 +26,9 @@ class ConfirmationOverlay extends StatefulWidget {
 
 class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     with HavingSubscriptionMixin {
+
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
   //selected date on press
   MutableProperty<DateTime> selectedDate;
 
@@ -38,6 +41,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
   @override
   void initState() {
     super.initState();
+    listOfOrderItems = widget.order.orderItem;
 
     DateTime currentTime = DateTime.now();
 
@@ -241,7 +245,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                 },
               ),
               StreamBuilder<List<OrderItem>>(
-                stream: order.orderItems,
+                stream: listOfOrderItems.producer,
                 builder: (context, snap) {
                   if (!snap.hasData) return Offstage();
                   return Align(

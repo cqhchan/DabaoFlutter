@@ -349,7 +349,7 @@ class _ConversationCardState extends State<ConversationCard> {
 
   Widget _buildQuantity() {
     return StreamBuilder<List<OrderItem>>(
-      stream: widget.order.value.orderItems,
+      stream: widget.order.value.orderItem.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return Text(
@@ -363,7 +363,7 @@ class _ConversationCardState extends State<ConversationCard> {
 
   _buildOrderItems() {
     return StreamBuilder<List<OrderItem>>(
-      stream: widget.order.value.orderItems,
+      stream: widget.order.value.orderItem.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return _buildOrderItemList(context, snap.data);

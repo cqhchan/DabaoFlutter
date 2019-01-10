@@ -95,8 +95,7 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
     // TODO: implement initState
     super.initState();
 
-    subscription
-        .add(listOfPotentialMatches.bindTo(widget.route.listOfPotentialOrders));
+    listOfPotentialMatches = widget.route.listOfPotentialOrders;
   }
 
   @override

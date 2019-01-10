@@ -40,6 +40,7 @@ abstract class Mappable extends Identifiable {
   Mappable.fromMap(String uid, Map<String, dynamic> data) : super(uid) {
     setUpVariables();
     map(data);
+
   }
 
   // All classes which intends to use MAPPING must implement their Mappable functions here.

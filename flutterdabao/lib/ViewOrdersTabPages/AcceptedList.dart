@@ -7,11 +7,13 @@ import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
@@ -87,7 +89,24 @@ class _AcceptedOrderCell extends StatefulWidget {
   }
 }
 
-class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
+class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
+    with HavingSubscriptionMixin {
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
+  bool expandedFlag;
+
+  @override
+  void initState() {
+    super.initState();
+    listOfOrderItems = widget.order.orderItem;
+  }
+
+  @override
+  void dispose() {
+    disposeAndReset();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return _buildListItem();
@@ -117,7 +136,6 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
                 ConfigurableExpansionTile(
                   selectable: widget.order,
                   initiallyExpanded: widget.order.isSelectedProperty.value,
-                  onExpansionChanged: (expand) {},
                   header: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -334,16 +352,14 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
             overflow: TextOverflow.ellipsis,
           );
         } else {
-          return Container(
-            child: Text(
-              snap.hasData
-                  ? DateTimeHelper.convertDateTimeToDate(snap.data) +
-                      ', ' +
-                      DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                  : "Error",
-              style: FontHelper.semiBoldgrey14TextStyle,
-              overflow: TextOverflow.ellipsis,
-            ),
+          return Text(
+            snap.hasData
+                ? DateTimeHelper.convertDateTimeToDate(snap.data) +
+                    ', ' +
+                    DateTimeHelper.convertDateTimeToAMPM(snap.data)
+                : "Error",
+            style: FontHelper.semiBoldgrey14TextStyle,
+            overflow: TextOverflow.ellipsis,
           );
         }
       },
@@ -352,7 +368,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
 
   Widget _buildQuantity(Order order) {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.orderItems,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return Text(
@@ -366,7 +382,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
 
   Widget _buildOrderItems(Order order) {
     return StreamBuilder<List<OrderItem>>(
-      stream: order.orderItems,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return _buildOrderItemList(context, snap.data);
@@ -506,40 +522,46 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
   }
 
   Widget _buildCollapsableLocationDescription(Order order) {
-    if (!order.isSelectedProperty.value) {
-      return StreamBuilder<String>(
-        stream: order.deliveryLocationDescription,
-        builder: (context, snap) {
-          if (!snap.hasData) return Offstage();
-          return Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width - 180,
-            ),
-            child: Text(
-              snap.hasData ? '''${snap.data}''' : "Error",
-              style: FontHelper.regular14Black,
-              overflow: TextOverflow.ellipsis,
-            ),
+    return StreamBuilder<bool>(
+      stream: order.isSelectedProperty.producer,
+      builder: (context, snap) {
+        if (!snap.hasData) return Offstage();
+        if (!snap.data) {
+          return StreamBuilder<String>(
+            stream: order.deliveryLocationDescription,
+            builder: (context, snap) {
+              if (!snap.hasData) return Offstage();
+              return Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width - 180,
+                ),
+                child: Text(
+                  snap.hasData ? '''${snap.data}''' : "Error",
+                  style: FontHelper.regular14Black,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            },
           );
-        },
-      );
-    } else {
-      return StreamBuilder<String>(
-        stream: order.deliveryLocationDescription,
-        builder: (context, snap) {
-          if (!snap.hasData) return Offstage();
-          return Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width - 180,
-            ),
-            child: Text(
-              snap.hasData ? '''${snap.data}''' : "Error",
-              style: FontHelper.regular14Black,
-            ),
+        } else {
+          return StreamBuilder<String>(
+            stream: order.deliveryLocationDescription,
+            builder: (context, snap) {
+              if (!snap.hasData) return Offstage();
+              return Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width - 180,
+                ),
+                child: Text(
+                  snap.hasData ? '''${snap.data}''' : "Error",
+                  style: FontHelper.regular14Black,
+                ),
+              );
+            },
           );
-        },
-      );
-    }
+        }
+      },
+    );
   }
 
   Widget _buildTapToLocation(Order order) {
@@ -552,7 +574,6 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
               child: Image.asset('assets/icons/google-maps.png'),
               onTap: () {
                 LatLng temp = LatLng(snap.data.latitude, snap.data.longitude);
-
                 launchMaps(temp);
               });
         },
@@ -570,12 +591,13 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> {
         return GestureDetector(
           onTap: () {
             Navigator.of(context).push(
-              FadeRoute(widget: ViewProfile(
+              FadeRoute(
+                  widget: ViewProfile(
                 currentUser: user,
               )),
             );
           },
-                  child: Row(
+          child: Row(
             children: <Widget>[
               StreamBuilder<String>(
                 stream: user.data.thumbnailImage,
