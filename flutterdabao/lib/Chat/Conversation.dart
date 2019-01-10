@@ -114,14 +114,7 @@ class ConversationState extends State<Conversation>
         .where((uid) => uid != null)
         .map((uid) => Order.fromUID(uid))));
 
-    // You need to listen manually to the list of messages
-    // TODO for some strange reason again.
 
-    // subscription.add(listOfOrderItems.bindTo(order.producer
-    //     .where((uid) => uid != null)
-    //     .switchMap((o) => o == null
-    //         ? Rxdart.Observable.just(List())
-    //         : o.orderItem.producer)));
   }
 
   @override

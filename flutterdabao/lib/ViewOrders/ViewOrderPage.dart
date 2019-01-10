@@ -17,7 +17,9 @@ import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/CompleteOverlay.dart';
+import 'package:flutterdabao/ViewOrders/CancelOverlay.dart';
+import 'package:flutterdabao/ViewOrders/CompleteOverlay.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
@@ -51,12 +53,24 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
     super.dispose();
   }
 
-  showOverlay(Order order) {
+   showCancel(Order order) {
+    showHalfBottomSheet(
+        context: context,
+        builder: (builder) {
+          return CancelOverlay(
+            order: order,
+            // route: widget.route,
+          );
+        });
+  }
+
+  showComplete(Order order) {
     showHalfBottomSheet(
         context: context,
         builder: (builder) {
           return CompleteOverlay(
             order: order,
+            // route: widget.route,
           );
         });
   }
@@ -163,36 +177,8 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                               style: FontHelper.semiBold(Colors.black, 14.0),
                             )),
                         onPressed: () async {
-                          showLoadingOverlay(context: context);
-
-                          await FirebaseCloudFunctions.cancelDeliveringOrder(
-                                  orderID: widget.order.uid)
-                              .then((isSuccessful) {
-                            if (isSuccessful) {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
-                            } else {
-                              Navigator.of(context).pop();
-                              final snackBar = SnackBar(
-                                  content: Text(
-                                      'An Error has occured. Please check your network connectivity'));
-                              Scaffold.of(context).showSnackBar(snackBar);
-                            }
-                          }).catchError((error) {
-                            if (error is PlatformException) {
-                              PlatformException e = error;
-                              Navigator.of(context).pop();
-                              final snackBar =
-                                  SnackBar(content: Text(e.message));
-                              Scaffold.of(context).showSnackBar(snackBar);
-                            } else {
-                              Navigator.of(context).pop();
-                              final snackBar = SnackBar(
-                                  content: Text(
-                                      'An Error has occured. Please check your network connectivity'));
-                              Scaffold.of(context).showSnackBar(snackBar);
-                            }
-                          });
+                          showCancel(widget.order);
+                          
                         }),
                     SizedBox(
                       width: 20,
@@ -210,7 +196,7 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                                 style: FontHelper.semiBold(Colors.black, 14.0),
                               )),
                           onPressed: () async {
-                            showOverlay(widget.order);
+                            showComplete(widget.order);
                           }),
                     ),
                   ],

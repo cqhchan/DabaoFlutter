@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -27,7 +28,6 @@ class CancelOverlay extends StatefulWidget {
 
 class _CancelOverlayState extends State<CancelOverlay>
     with HavingSubscriptionMixin {
-
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
 
   List<String> reasons = [
@@ -129,7 +129,7 @@ class _CancelOverlayState extends State<CancelOverlay>
                       flex: 2,
                       child: Padding(
                         padding: const EdgeInsets.all(4.0),
-                        child: _buildPickUpButton(widget.order),
+                        child: _buildCancelButton(widget.order),
                       ),
                     ),
                   ],
@@ -342,7 +342,7 @@ class _CancelOverlayState extends State<CancelOverlay>
     );
   }
 
-  Widget _buildPickUpButton(Order order) {
+  Widget _buildCancelButton(Order order) {
     return RaisedButton(
       elevation: 12,
       color: Color(0xFFCC0000),
@@ -354,8 +354,35 @@ class _CancelOverlayState extends State<CancelOverlay>
         ),
       ),
       onPressed: () async {
-        print(_textController.text);
-        print(storeReason);
+        showLoadingOverlay(context: context);
+
+        await FirebaseCloudFunctions.cancelDeliveringOrder(
+                orderID: widget.order.uid)
+            .then((isSuccessful) {
+          if (isSuccessful) {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          } else {
+            Navigator.of(context).pop();
+            final snackBar = SnackBar(
+                content: Text(
+                    'An Error has occured. Please check your network connectivity'));
+            Scaffold.of(context).showSnackBar(snackBar);
+          }
+        }).catchError((error) {
+          if (error is PlatformException) {
+            PlatformException e = error;
+            Navigator.of(context).pop();
+            final snackBar = SnackBar(content: Text(e.message));
+            Scaffold.of(context).showSnackBar(snackBar);
+          } else {
+            Navigator.of(context).pop();
+            final snackBar = SnackBar(
+                content: Text(
+                    'An Error has occured. Please check your network connectivity'));
+            Scaffold.of(context).showSnackBar(snackBar);
+          }
+        });
       },
     );
   }

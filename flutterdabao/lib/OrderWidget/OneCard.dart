@@ -150,9 +150,9 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return Offstage();
                     return StatusColor(
-                      color: snapshot.data == orderStatus_Requested
-                          ? ColorHelper.availableColor
-                          : ColorHelper.notAvailableColor,
+                      color: snapshot.data == orderStatus_Requested 
+                          ? ColorHelper.availableColor 
+                          : ConfigHelper.instance.currentUserProperty.value.uid == order.value.delivererID.value ?ColorHelper.dabaoOrange :  ColorHelper.notAvailableColor,
                     );
                   }),
               Container(
@@ -495,8 +495,8 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   Widget _buildStatusReport(Order order) {
     return StreamBuilder<String>(
         stream: order.status,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return Offstage();
+        builder: (context, statusSnap) {
+          if (!statusSnap.hasData) return Offstage();
           return Row(
             children: <Widget>[
               Text(
@@ -504,15 +504,33 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                 style: FontHelper.semiBold14Black,
                 overflow: TextOverflow.ellipsis,
               ),
-              Text(
-                snapshot.data == orderStatus_Requested
-                    ? 'Available for Pick Up'
-                    : 'Picked up',
-                style: snapshot.data == orderStatus_Requested
-                    ? FontHelper.semiBold14Available
-                    : FontHelper.semiBold14NotAvailable,
-                overflow: TextOverflow.ellipsis,
-              ),
+              StreamBuilder<bool>(
+                stream: Rxdart.Observable.combineLatest2<String, User, bool>(
+                    order.delivererID,
+                    ConfigHelper.instance.currentUserProperty.producer,
+                    (userID, currentUser) {
+                  if (userID == null || currentUser == null) return null;
+
+                  return userID == currentUser.uid;
+                }),
+                builder: (BuildContext context, imDeliveryingSnap) {
+                  return Text(
+                    statusSnap.data == orderStatus_Requested
+                        ? 'Available for Pick Up'
+                        : imDeliveryingSnap.data == true &&
+                                statusSnap.data == orderStatus_Accepted || statusSnap.data == orderStatus_Completed
+                            ? 'Picked Up'
+                            : "Order Picked up by someone else",
+                    style: statusSnap.data == orderStatus_Requested
+                        ? FontHelper.semiBold14Available
+                        : imDeliveryingSnap.data == true &&
+                                statusSnap.data == orderStatus_Accepted
+                            ? FontHelper.semiBold(ColorHelper.dabaoOrange, 14.0)
+                            : FontHelper.semiBold14NotAvailable,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                },
+              )
             ],
           );
         });
