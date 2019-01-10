@@ -49,8 +49,9 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<Order>> currentUserDeliveringOrdersProperty =
       MutableProperty<List<Order>>(List());
 
-  MutableProperty<List<DabaoRoute.Route>> currentUserOpenRoutesProperty =
+  MutableProperty<List<DabaoRoute.Route>> currentUserRoutesPastDayProperty =
       MutableProperty<List<DabaoRoute.Route>>(List());
+
 
   MutableProperty<List<Voucher>> currentUserOpenVouchersProperty =
       MutableProperty<List<Voucher>>(List());
@@ -121,10 +122,13 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription
         .add(currentUserWalletProperty.bindTo(currentUserWalletProducer()));
 
-    // get Current open Routes
+    // get Current Routes TODO fix bug
     subscription.add(
-        currentUserOpenRoutesProperty.bindTo(currentUserOpenRoutesProducer()));
+        currentUserRoutesPastDayProperty.bindTo(currentUserRoutesPastDayProducer()));
+ subscription.add(currentUserRoutesPastDayProperty.producer.listen((onData){
 
+   print("testing data " + onData.length.toString());
+ }));
     subscription
         .add(currentDabaoerRewards.bindTo(currentDabaoerRewardsProducer()));
 
@@ -133,7 +137,6 @@ class ConfigHelper with HavingSubscriptionMixin {
 
     subscription
         .add(currentUserChannelProperty.bindTo(currentUserChannelProducer()));
-
   }
 
   bool get isInDebugMode {
@@ -201,14 +204,18 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-  Stream<List<DabaoRoute.Route>> currentUserOpenRoutesProducer() {
+
+  Stream<List<DabaoRoute.Route>> currentUserRoutesPastDayProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
-        ? List<DabaoRoute.Route>()
+        ? Observable.just(List<DabaoRoute.Route>())
         : FirebaseCollectionReactive<DabaoRoute.Route>(Firestore.instance
                 .collection("routes")
-                .where(DabaoRoute.Route.statusKey,
-                    isEqualTo: DabaoRoute.routeStatus_Open)
-                .where(DabaoRoute.Route.creatorKey, isEqualTo: user.uid))
+                // TODO disable time filer for now. solve it later
+                // .where(DabaoRoute.Route.deliveryTimeKey,
+                //     isGreaterThanOrEqualTo:
+                //         DateTime.now().add(Duration(days: -2)))
+                .where(DabaoRoute.Route.creatorKey, isEqualTo: user.uid)
+                )
             .observable);
   }
 
@@ -272,13 +279,16 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   void startListeningToCurrentLocation(Future<bool> askForPermission) async {
     location?.cancel();
-    await askForPermission;
+    bool successful = await askForPermission;
+
+    if (successful != null && successful){
     var lastLocation =
         await LocationHelper.instance.location.getLastKnownPosition();
 
     if (lastLocation != null)
       currentLocationProperty.value =
           LatLng(lastLocation.latitude, lastLocation.longitude);
+    }
 
     location = currentLocationProperty
         .bindTo(LocationHelper.instance.onLocationChange());

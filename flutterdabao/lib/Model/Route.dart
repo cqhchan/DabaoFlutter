@@ -7,10 +7,12 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:flutterdabao/Model/Order.dart';
+import 'package:quiver/core.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/subjects.dart';
 
 final String routeStatus_Open = "Open";
+final String routeStatus_Closed = "Closed";
 
 class Route extends FirebaseType {
   static final String creatorKey = "C";
@@ -31,6 +33,8 @@ class Route extends FirebaseType {
   BehaviorSubject<List<String>> deliveryLocationDescription;
   BehaviorSubject<DateTime> deliveryTime;
   BehaviorSubject<String> creator;
+  BehaviorSubject<String> status;
+
   BehaviorSubject<List<String>> foodTags;
 
   MutableProperty<List<Order>> _listOfOrdersAccepted;
@@ -50,14 +54,14 @@ class Route extends FirebaseType {
     return _listOfPotentialOrders;
   }
 
-    MutableProperty<List<Order>> get listOfOrdersAccepted {
+  MutableProperty<List<Order>> get listOfOrdersAccepted {
     if (_listOfOrdersAccepted == null) {
       _listOfOrdersAccepted = MutableProperty(List());
       _listOfOrdersAccepted.bindTo(FirebaseCollectionReactive<Order>(Firestore
-            .instance
-            .collection("orders")
-            .where(Order.routeKey, isEqualTo: this.uid))
-        .observable);
+              .instance
+              .collection("orders")
+              .where(Order.routeKey, isEqualTo: this.uid))
+          .observable);
     }
     return _listOfOrdersAccepted;
   }
@@ -71,6 +75,12 @@ class Route extends FirebaseType {
       creator.add(data[creatorKey]);
     } else {
       creator.add(null);
+    }
+
+    if (data.containsKey(statusKey)) {
+      status.add(data[statusKey]);
+    } else {
+      status.add(null);
     }
 
     if (data.containsKey(deliveryLocationKey)) {
@@ -126,7 +136,7 @@ class Route extends FirebaseType {
     startLocationDescription = BehaviorSubject();
     deliveryLocation = BehaviorSubject();
     deliveryLocationDescription = BehaviorSubject();
-
+    status = BehaviorSubject();
   }
 
   static bool isValid(RouteHolder holder) {
@@ -145,6 +155,27 @@ class Route extends FirebaseType {
     if (holder.foodTags.value.length == 0) return false;
 
     return true;
+  }
+
+  closeRoute() {
+    Firestore.instance
+        .collection(this.className)
+        .document(this.uid)
+        .updateData({statusKey: routeStatus_Closed});
+  }
+
+  openRoute() {
+    Firestore.instance
+        .collection(this.className)
+        .document(this.uid)
+        .updateData({statusKey: routeStatus_Open});
+  }
+
+  setFoodTags(List<String> foodTag) {
+    Firestore.instance
+        .collection(this.className)
+        .document(this.uid)
+        .updateData({foodTagKey: foodTag});
   }
 
   static Future<bool> createRoute(RouteHolder holder) async {

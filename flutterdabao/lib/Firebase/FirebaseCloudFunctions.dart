@@ -237,8 +237,61 @@ class FirebaseCloudFunctions {
 
     if (results.containsKey("status") && results["status"] == 200) return true;
 
-    throw new PlatformException(code: results["status"].toString(), message: results["message"])
-;}
+    throw new PlatformException(
+        code: results["status"].toString(), message: results["message"]);
+  }
+
+  ///[data] data of an Order
+  static Future<bool> cancelCurrentUserOrder({
+    @required String orderID,
+  }) async {
+    Map<dynamic, dynamic> results = Map();
+    try {
+      Map<String, dynamic> data = Map();
+      data["mode"] = 4;
+      data["orderID"] = orderID;
+
+      results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: data);
+    } on CloudFunctionsException catch (e) {
+      print(e.message);
+      print(e);
+    } catch (e) {
+      print('Error: $e');
+    }
+    print(results);
+
+    if (results.containsKey("status") && results["status"] == 200) return true;
+
+    throw new PlatformException(
+        code: results["status"].toString(), message: results["message"]);
+  }
+
+  ///[data] data of an Order
+  static Future<bool> cancelDeliveringOrder({
+    @required String orderID,
+  }) async {
+    Map<dynamic, dynamic> results = Map();
+    try {
+      Map<String, dynamic> data = Map();
+      data["mode"] = 5;
+      data["orderID"] = orderID;
+
+      results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: data);
+    } on CloudFunctionsException catch (e) {
+      print(e.message);
+      print(e);
+    } catch (e) {
+      print('Error: $e');
+    }
+    print(results);
+
+    if (results.containsKey("status") && results["status"] == 200) return true;
+
+    throw new PlatformException(
+        code: results["status"].toString(), message: results["message"]);
+  }
 
   ///[double] amount of an Order
   ///[userID] the id of the current user
@@ -255,7 +308,6 @@ class FirebaseCloudFunctions {
 
       results = await CloudFunctions.instance
           .call(functionName: 'addRequests', parameters: data);
-
     } on CloudFunctionsException catch (e) {
       print(e.message);
       print(e);
@@ -266,8 +318,9 @@ class FirebaseCloudFunctions {
 
     if (results.containsKey("status") && results["status"] == 200) return true;
 
-    throw new PlatformException(code: results["status"].toString(), message: results["message"])
-;}
+    throw new PlatformException(
+        code: results["status"].toString(), message: results["message"]);
+  }
 
   ///[data] data of an Route
   static Future<bool> createRoute({
@@ -298,30 +351,29 @@ class FirebaseCloudFunctions {
   /// acceptorID
   /// deliveryTime
   /// routeID Optional
-  static Future<bool> acceptOrder({
-    @required String orderID,
-    @required String acceptorID,
-    @required String deliveryTime,
-    String routeID,
-  }) async {
+  /// deliveryfee Optional
+
+  static Future<bool> acceptOrder(
+      {@required String orderID,
+      @required String acceptorID,
+      @required String deliveryTime,
+      String routeID,
+      double deliveryFee}) async {
+    Map<dynamic, dynamic> results = Map();
+
     try {
       Map<String, dynamic> attributeMap = new Map<String, dynamic>();
       attributeMap["mode"] = 2;
       attributeMap["orderID"] = orderID;
       attributeMap["acceptorID"] = acceptorID;
       attributeMap["deliveryTime"] = deliveryTime;
+      attributeMap["deliveryFee"] = deliveryFee;
 
       if (routeID != null) attributeMap["routeID"] = routeID;
 
-      Map<dynamic, dynamic> results = await CloudFunctions.instance
+      results = await CloudFunctions.instance
           .call(functionName: 'creationRequest', parameters: attributeMap);
       print(results);
-
-      if (results.containsKey("status") && results["status"] == 200)
-        return true;
-
-      if (results.containsKey("status") && results["status"] == 400)
-        return false;
     } on CloudFunctionsException catch (e) {
       print(e.message);
       print(e);
@@ -330,8 +382,10 @@ class FirebaseCloudFunctions {
       print('Error: $e');
       return false;
     }
+    if (results.containsKey("status") && results["status"] == 200) return true;
 
-    return false;
+    throw new PlatformException(
+        code: results["status"].toString(), message: results["message"]);
   }
 
   ///[data] acceptOrder

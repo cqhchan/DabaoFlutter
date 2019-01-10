@@ -16,28 +16,31 @@ class Channel extends FirebaseType with Selectable {
   static final String lastSentKey = "LS";
   static final String orderUidKey = "O";
   static final String delivererKey = "D";
+  static final String counterOfferKey = "CO";
 
   BehaviorSubject<List<String>> participantsID;
   BehaviorSubject<DateTime> lastSent;
   BehaviorSubject<String> orderUid;
   BehaviorSubject<int> unreadMessages;
   BehaviorSubject<String> deliverer;
+  BehaviorSubject<CounterOffer> counterOffer;
+
   MutableProperty<List<Message>> _listOfMessages;
 
-  MutableProperty<List<Message>> get listOfMessages { 
+  MutableProperty<List<Message>> get listOfMessages {
     if (_listOfMessages == null) {
       _listOfMessages = MutableProperty(List());
-      _listOfMessages.bindTo(FirebaseCollectionReactive<Message>(Firestore.instance
-            .collection(className)
-            .document(this.uid)
-            .collection("messages")
-            .orderBy('T', descending: true)
-            .limit(100))
-        .observable);
+      _listOfMessages.bindTo(FirebaseCollectionReactive<Message>(Firestore
+              .instance
+              .collection(className)
+              .document(this.uid)
+              .collection("messages")
+              .orderBy('T', descending: true)
+              .limit(100))
+          .observable);
     }
     return _listOfMessages;
-    
-    }
+  }
 
   Channel.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);
 
@@ -45,12 +48,12 @@ class Channel extends FirebaseType with Selectable {
 
   @override
   void setUpVariables() {
-    
     participantsID = BehaviorSubject();
     lastSent = BehaviorSubject();
     orderUid = BehaviorSubject();
     deliverer = BehaviorSubject();
     unreadMessages = BehaviorSubject();
+    counterOffer = BehaviorSubject();
   }
 
   void markAsRead() {
@@ -67,6 +70,16 @@ class Channel extends FirebaseType with Selectable {
       deliverer.add(data[delivererKey]);
     } else {
       deliverer.add(null);
+    }
+
+    if (data.containsKey(counterOfferKey)) {
+      Map<String, dynamic> offerData =
+          Map.castFrom<dynamic, dynamic, String, dynamic>(
+              data[counterOfferKey]);
+
+      counterOffer.add(CounterOffer(offerData));
+    } else {
+      counterOffer.add(null);
     }
 
     if (data.containsKey(orderUidKey)) {
@@ -113,5 +126,73 @@ class Channel extends FirebaseType with Selectable {
       "S": sender,
       "T": DateTime.now(),
     });
+  }
+
+  setCounterOffer(double price, DateTime deliveryTime, String offererID) {
+    Map data = Map();
+    data[CounterOffer.priceKey] = price;
+    data[CounterOffer.deliveryTimeKey] = deliveryTime;
+    data[CounterOffer.statusKey] = CounterOffer.counterOffStatus_Open;
+    data[CounterOffer.offererIDKey] = offererID;
+
+    Firestore.instance
+        .collection(className)
+        .document(this.uid)
+        .updateData({counterOfferKey: data});
+  }
+
+  reject() {
+    Map data = Map();
+
+    data[CounterOffer.statusKey] = CounterOffer.counterOffStatus_Rejected;
+
+    Firestore.instance
+        .collection(className)
+        .document(this.uid)
+        .updateData({counterOfferKey: data});
+  }
+
+    accept() {
+    Map data = Map();
+
+    data[CounterOffer.statusKey] = CounterOffer.counterOffStatus_Accepted;
+
+    Firestore.instance
+        .collection(className)
+        .document(this.uid)
+        .updateData({counterOfferKey: data});
+  }
+}
+
+class CounterOffer {
+  static String counterOffStatus_Open = "Open";
+  static String counterOffStatus_Accepted = "Accepted";
+  static String counterOffStatus_Rejected = "Rejected";
+
+  static String priceKey = "P";
+  static String deliveryTimeKey = "DT";
+  static String statusKey = "S";
+  static String offererIDKey = "O";
+
+  double price;
+  DateTime deliveryTime;
+  String offererID;
+  String status;
+
+  CounterOffer(Map<String, dynamic> offerData) {
+    if (offerData.containsKey(priceKey)) price = offerData[priceKey] + 0.0;
+
+    if (offerData.containsKey(deliveryTimeKey)) {
+      Timestamp timestamp = offerData[deliveryTimeKey];
+      deliveryTime = (timestamp.toDate());
+    }
+
+    if (offerData.containsKey(statusKey)) {
+      status = offerData[statusKey];
+    }
+
+    if (offerData.containsKey(offererIDKey)) {
+      offererIDKey = offerData[offererIDKey];
+    }
   }
 }

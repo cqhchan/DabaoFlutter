@@ -42,10 +42,14 @@ class OrderHolder with HavingSubscriptionMixin {
     foodTag.value = voucher.foodTag.value;
 
 
-    voucherProperty.producer.switchMap((voucher)=> voucher.deliveryFeeDiscount).listen((discount){
+    voucherProperty.producer.switchMap((voucher)=> voucher== null? Observable.just(0.0) :voucher.deliveryFeeDiscount).listen((discount){
 
       if (discount!= null)
       voucherDeliveryFeeDiscount.value = discount;
+
+      else {
+        voucherDeliveryFeeDiscount.value = 0.0;
+      }
     });
 
     maxPrice.bindTo(orderItems.producer.map((items) => items
