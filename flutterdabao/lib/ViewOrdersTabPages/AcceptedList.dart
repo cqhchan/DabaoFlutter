@@ -671,7 +671,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
       onPressed: () {
         Navigator.of(context).push(FadeRoute(
             widget: DabaoerViewOrderListPage(
-          order: widget.order,
+          order: Order.fromUID(widget.order.uid),
         )));
       },
     );
@@ -701,7 +701,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
           Navigator.of(context).push(
             FadeRoute(
               widget: DabaoerViewOrderListPage(
-                order: widget.order,
+                order: Order.fromUID(widget.order.uid),
               ),
             ),
           );

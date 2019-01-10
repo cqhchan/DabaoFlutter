@@ -155,7 +155,8 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                   widget.order.delivererID,
                   ConfigHelper.instance.currentUserProperty.producer,
                   (status, delivererID, currentUser) {
-                if (status == null || status != orderStatus_Accepted)
+                    print(status);
+                if (status == null || status != orderStatus_Accepted )
                   return false;
                 if (delivererID == null || currentUser == null) return false;
                 return delivererID == currentUser.uid;

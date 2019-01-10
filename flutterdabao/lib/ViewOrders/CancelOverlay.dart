@@ -66,80 +66,89 @@ class _CancelOverlayState extends State<CancelOverlay>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                child: _buildTitle(),
-              ),
-              Container(
-                child: _buildHeader(widget.order),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                padding: EdgeInsets.only(bottom: 20.0),
-                child: StreamBuilder<User>(
-                  stream: widget.order.creator
-                      .map((id) => id == null ? null : User.fromUID(id)),
-                  builder: (BuildContext context, snapshot) {
-                    return _buildUser(snapshot.data);
-                  },
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.only(bottom: 20.0),
-                child: _buildOrderCode(widget.order),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 20.0),
-                child: Line(),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 20.0),
-                child: Container(
-                  child: _buildReasons(),
-                ),
-              ),
-              Container(
-                child: Flex(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  verticalDirection: VerticalDirection.up,
-                  direction: Axis.horizontal,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: _buildBackButton(),
-                      ),
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Builder(
+          builder: (BuildContext context) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                color: Colors.white,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Container(
+                          child: _buildTitle(),
+                        ),
+                        Container(
+                          child: _buildHeader(widget.order),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(bottom: 20.0),
+                          child: StreamBuilder<User>(
+                            stream: widget.order.creator.map(
+                                (id) => id == null ? null : User.fromUID(id)),
+                            builder: (BuildContext context, snapshot) {
+                              return _buildUser(snapshot.data);
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(bottom: 20.0),
+                          child: _buildOrderCode(widget.order),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 20.0),
+                          child: Line(),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 20.0),
+                          child: Container(
+                            child: _buildReasons(),
+                          ),
+                        ),
+                        Container(
+                          child: Flex(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            verticalDirection: VerticalDirection.up,
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: _buildBackButton(),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: _buildCancelButton(widget.order,context),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: _buildCancelButton(widget.order),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+              ),
+            );
+          },
+        ));
   }
 
   Widget _buildTitle() {
@@ -342,7 +351,7 @@ class _CancelOverlayState extends State<CancelOverlay>
     );
   }
 
-  Widget _buildCancelButton(Order order) {
+  Widget _buildCancelButton(Order order, BuildContext context) {
     return RaisedButton(
       elevation: 12,
       color: Color(0xFFCC0000),
@@ -360,6 +369,7 @@ class _CancelOverlayState extends State<CancelOverlay>
                 orderID: widget.order.uid)
             .then((isSuccessful) {
           if (isSuccessful) {
+            Navigator.of(context).pop();
             Navigator.of(context).pop();
             Navigator.of(context).pop();
           } else {

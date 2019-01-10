@@ -46,71 +46,79 @@ class _CompleteOverlayState extends State<CompleteOverlay>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                child: _buildTitle(),
-              ),
-              Container(
-                child: _buildHeader(widget.order),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                child: _buildLocationDescription(widget.order),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                padding: EdgeInsets.only(bottom: 20.0),
-                child: StreamBuilder<User>(
-                  stream: widget.order.creator
-                      .map((id) => id == null ? null : User.fromUID(id)),
-                  builder: (BuildContext context, snapshot) {
-                    return _buildUser(snapshot.data);
-                  },
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Builder(
+        builder: (context) => Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                color: Colors.white,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Container(
+                          child: _buildTitle(),
+                        ),
+                        Container(
+                          child: _buildHeader(widget.order),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          child: _buildLocationDescription(widget.order),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(bottom: 20.0),
+                          child: StreamBuilder<User>(
+                            stream: widget.order.creator.map(
+                                (id) => id == null ? null : User.fromUID(id)),
+                            builder: (BuildContext context, snapshot) {
+                              return _buildUser(snapshot.data);
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(bottom: 20.0),
+                          child: _buildOrderCode(widget.order),
+                        ),
+                        Container(
+                          child: Flex(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            verticalDirection: VerticalDirection.up,
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: _buildBackButton(),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: _buildPickUpButton(widget.order, context),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.only(bottom: 20.0),
-                child: _buildOrderCode(widget.order),
-              ),
-              Container(
-                child: Flex(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  verticalDirection: VerticalDirection.up,
-                  direction: Axis.horizontal,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: _buildBackButton(),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: _buildPickUpButton(widget.order),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
+            ),
       ),
     );
   }
@@ -350,7 +358,7 @@ class _CompleteOverlayState extends State<CompleteOverlay>
     );
   }
 
-  Widget _buildPickUpButton(Order order) {
+  Widget _buildPickUpButton(Order order, BuildContext context) {
     return RaisedButton(
       elevation: 12,
       color: ColorHelper.dabaoOrange,

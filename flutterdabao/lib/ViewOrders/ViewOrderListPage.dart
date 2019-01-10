@@ -131,10 +131,9 @@ class _ViewOrderCell extends StatefulWidget {
   }
 }
 
-class _ViewOrderCellState extends State<_ViewOrderCell> with HavingSubscriptionMixin {
-
-MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
-
+class _ViewOrderCellState extends State<_ViewOrderCell>
+    with HavingSubscriptionMixin {
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
 
   @override
   void initState() {
@@ -148,6 +147,7 @@ MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
     disposeAndReset();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -155,7 +155,7 @@ MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
         onTap: () {
           Navigator.of(context).push(FadeRoute(
               widget: DabaoeeViewOrderListPage(
-            order: widget.order,
+            order: Order.fromUID(widget.order.uid),
           )));
         },
         child: Container(
@@ -332,7 +332,8 @@ MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
         child: StreamBuilder<List<OrderItem>>(
             stream: listOfOrderItems.producer,
             builder: (context, snap) {
-              if (!snap.hasData || snap.data == null || snap.data.length  == 0 ) return Offstage();
+              if (!snap.hasData || snap.data == null || snap.data.length == 0)
+                return Offstage();
 
               int totalItems = snap.data
                   .map((orderItem) => orderItem.quantity.value)
@@ -367,5 +368,4 @@ MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
           }),
     );
   }
-
 }
