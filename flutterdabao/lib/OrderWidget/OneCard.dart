@@ -4,6 +4,7 @@ import 'package:flutterdabao/Chat/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
+import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -15,24 +16,41 @@ import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/OrderWidget/StatusColor.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart' as Rxdart;
 
-class ConversationCard extends StatefulWidget {
-  final bool expandFlag;
-  final MutableProperty<Order> order;
-  final LatLng location;
+class OneCard extends StatefulWidget {
   final Channel channel;
+  final LatLng location;
 
-  const ConversationCard(
-      {Key key, this.expandFlag, this.order, this.location, this.channel})
-      : super(key: key);
-  @override
-  _ConversationCardState createState() => _ConversationCardState();
+  const OneCard({Key key, this.location, this.channel}) : super(key: key);
+
+  _OneCardState createState() => _OneCardState();
 }
 
-class _ConversationCardState extends State<ConversationCard> {
-  Color colorStatus = ColorHelper.dabaoOrange;
+class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
+  MutableProperty<Order> order = MutableProperty(null);
+  MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+
+  //expansion of whole card
+  bool expandFlag = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    subscription.add(listOfOrderItems.bindTo(order.producer
+        .where((uid) => uid != null)
+        .switchMap((o) => o == null
+            ? Rxdart.Observable.just(List())
+            : o.orderItem.producer)));
+
+    subscription.add(order.bindTo(widget.channel.orderUid
+        .where((uid) => uid != null)
+        .map((uid) => Order.fromUID(uid))));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,16 +66,16 @@ class _ConversationCardState extends State<ConversationCard> {
         alignment: WrapAlignment.start,
         children: <Widget>[
           Offstage(
-            offstage: widget.expandFlag,
+            offstage: expandFlag,
             child: _buildCard(),
           ),
           StreamBuilder<bool>(
             stream:
                 Rxdart.Observable.combineLatest3<User, String, String, bool>(
                     ConfigHelper.instance.currentUserProperty.producer,
-                    widget.order.producer.switchMap((currentOrder) =>
+                    order.producer.switchMap((currentOrder) =>
                         currentOrder == null ? null : currentOrder.creator),
-                    widget.order.producer.switchMap((currentOrder) =>
+                    order.producer.switchMap((currentOrder) =>
                         currentOrder == null ? null : currentOrder.status),
                     (currentUser, orderUserID, status) {
               if (currentUser == null ||
@@ -73,7 +91,7 @@ class _ConversationCardState extends State<ConversationCard> {
             }),
             builder: (BuildContext context, snapshot) {
               if (!snapshot.hasData || !snapshot.data) return Offstage();
-              return _buildButtons(snapshot.data);
+              return _buildButtons();
             },
           ),
         ],
@@ -85,7 +103,7 @@ class _ConversationCardState extends State<ConversationCard> {
     return Column(
       children: <Widget>[
         StreamBuilder<bool>(
-          stream: widget.order.producer.switchMap((order) {
+          stream: order.producer.switchMap((order) {
             if (order == null) return null;
             return Rxdart.Observable.combineLatest2<User, String, bool>(
                 ConfigHelper.instance.currentUserProperty.producer,
@@ -125,26 +143,31 @@ class _ConversationCardState extends State<ConversationCard> {
           elevation: 6.0,
           child: Stack(
             children: <Widget>[
-              Container(
-                height: 9,
-                decoration: BoxDecoration(
-                  color: colorStatus,
-                ),
-              ),
+              StreamBuilder<String>(
+                  stream: order.producer.switchMap((order) => order != null
+                      ? order.status
+                      : Rxdart.Observable.just(null)),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return Offstage();
+                    return StatusColor(
+                      color: snapshot.data == orderStatus_Requested
+                          ? ColorHelper.availableColor
+                          : ColorHelper.notAvailableColor,
+                    );
+                  }),
               Container(
                 margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
                 child: Wrap(
                   children: <Widget>[
                     StreamBuilder(
-                      stream: widget.order.producer.switchMap((order) =>
-                          order != null
-                              ? order.deliveryLocationDescription
-                              : Rxdart.Observable.just(null)),
+                      stream: order.producer.switchMap((order) => order != null
+                          ? order.deliveryLocationDescription
+                          : Rxdart.Observable.just(null)),
                       builder: (context, snap) {
                         if (!snap.hasData || snap.data == null)
                           return Offstage();
                         return ConfigurableExpansionTile(
-                          selectable: widget.order.value,
+                          selectable: order.value,
                           initiallyExpanded: false,
                           header: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -195,7 +218,8 @@ class _ConversationCardState extends State<ConversationCard> {
                                     ),
                                     Expanded(
                                       flex: 4,
-                                      child: _buildLocationDescription(),
+                                      child: _buildLocationDescription(
+                                          order.value),
                                     ),
                                     Expanded(
                                       flex: 1,
@@ -211,6 +235,7 @@ class _ConversationCardState extends State<ConversationCard> {
                               SizedBox(
                                 height: 10,
                               ),
+                              _buildStatusReport(order.value),
                               Icon(Icons.keyboard_arrow_down)
                             ],
                           ),
@@ -247,7 +272,7 @@ class _ConversationCardState extends State<ConversationCard> {
           Expanded(
             flex: 5,
             child: StreamBuilder<String>(
-              stream: widget.order.value.foodTag,
+              stream: order.value.foodTag,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
                 return Align(
@@ -267,7 +292,7 @@ class _ConversationCardState extends State<ConversationCard> {
           Expanded(
             flex: 2,
             child: StreamBuilder<double>(
-              stream: widget.order.value.deliveryFee,
+              stream: order.value.deliveryFee,
               builder: (context, snap) {
                 if (!snap.hasData) return Offstage();
                 return Text(
@@ -287,7 +312,7 @@ class _ConversationCardState extends State<ConversationCard> {
 
   Widget _buildDeliveryPeriod() {
     return StreamBuilder<OrderMode>(
-        stream: widget.order.producer
+        stream: order.producer
             .switchMap((order) => order == null ? null : order.mode),
         builder: (context, snap) {
           if (!snap.hasData || snap.data == null) return Offstage();
@@ -297,19 +322,19 @@ class _ConversationCardState extends State<ConversationCard> {
           switch (snap.data) {
             case OrderMode.asap:
               startTime = DateTime.now();
-              endTime = widget.order.value.endDeliveryTime.value == null
+              endTime = order.value.endDeliveryTime.value == null
                   ? startTime.add(Duration(minutes: 90))
-                  : widget.order.value.endDeliveryTime.value;
+                  : order.value.endDeliveryTime.value;
               break;
             case OrderMode.scheduled:
-              startTime = widget.order.value.startDeliveryTime.value;
-              endTime = widget.order.value.endDeliveryTime.value;
+              startTime = order.value.startDeliveryTime.value;
+              endTime = order.value.endDeliveryTime.value;
               break;
           }
 
           if (startTime == null || endTime == null) return Offstage();
 
-          if (startTime.isBefore(endTime) || endTime.isBefore(DateTime.now()))
+          if (startTime.isBefore(endTime) && endTime.isBefore(DateTime.now()))
             return Text(
               "Expired",
               style: FontHelper.semiBoldgrey14TextStyle,
@@ -347,9 +372,98 @@ class _ConversationCardState extends State<ConversationCard> {
         });
   }
 
+  Widget _buildLocationDescription(Order order) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        SizedBox(
+          width: 10,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _buildCollapsableLocationDescription(order),
+            StreamBuilder<GeoPoint>(
+              stream: order.deliveryLocation,
+              builder: (context, snap) {
+                if (!snap.hasData) return Offstage();
+                if (widget.location != null && snap.data != null) {
+                  return Container(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width - 180),
+                    child: Text(
+                      snap.hasData
+                          ? LocationHelper.calculateDistancFromSelf(
+                                      widget.location.latitude,
+                                      widget.location.longitude,
+                                      snap.data.latitude,
+                                      snap.data.longitude)
+                                  .toStringAsFixed(1) +
+                              'km away'
+                          : "?.??km",
+                      style: FontHelper.medium12TextStyle,
+                    ),
+                  );
+                } else {
+                  return Text(
+                    "?.??km",
+                    style: FontHelper.medium12TextStyle,
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCollapsableLocationDescription(Order order) {
+    return StreamBuilder<bool>(
+      stream: order.isSelectedProperty.producer,
+      builder: (context, snap) {
+        if (!snap.hasData) return Offstage();
+        if (!snap.data) {
+          return StreamBuilder<String>(
+            stream: order.deliveryLocationDescription,
+            builder: (context, snap) {
+              if (!snap.hasData) return Offstage();
+              return Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width - 180,
+                ),
+                child: Text(
+                  snap.hasData ? '''${snap.data}''' : "Error",
+                  style: FontHelper.regular14Black,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            },
+          );
+        } else {
+          return StreamBuilder<String>(
+            stream: order.deliveryLocationDescription,
+            builder: (context, snap) {
+              if (!snap.hasData) return Offstage();
+              return Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width - 180,
+                ),
+                child: Text(
+                  snap.hasData ? '''${snap.data}''' : "Error",
+                  style: FontHelper.regular14Black,
+                ),
+              );
+            },
+          );
+        }
+      },
+    );
+  }
+
   Widget _buildQuantity() {
     return StreamBuilder<List<OrderItem>>(
-      stream: widget.order.value.orderItem.producer,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return Text(
@@ -361,9 +475,52 @@ class _ConversationCardState extends State<ConversationCard> {
     );
   }
 
-  _buildOrderItems() {
+  Widget _buildTapToLocation() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: StreamBuilder<GeoPoint>(
+        stream: order.value.deliveryLocation,
+        builder: (context, snap) {
+          return GestureDetector(
+              child: Image.asset('assets/icons/google-maps.png'),
+              onTap: () {
+                var temp = LatLng(snap.data.latitude, snap.data.longitude);
+                launchMaps(temp);
+              });
+        },
+      ),
+    );
+  }
+
+  Widget _buildStatusReport(Order order) {
+    return StreamBuilder<String>(
+        stream: order.status,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return Offstage();
+          return Row(
+            children: <Widget>[
+              Text(
+                'Status: ',
+                style: FontHelper.semiBold14Black,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                snapshot.data == orderStatus_Requested
+                    ? 'Available for Pick Up'
+                    : 'Picked up',
+                style: snapshot.data == orderStatus_Requested
+                    ? FontHelper.semiBold14Available
+                    : FontHelper.semiBold14NotAvailable,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          );
+        });
+  }
+
+  Widget _buildOrderItems() {
     return StreamBuilder<List<OrderItem>>(
-      stream: widget.order.value.orderItem.producer,
+      stream: listOfOrderItems.producer,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
         return _buildOrderItemList(context, snap.data);
@@ -456,156 +613,83 @@ class _ConversationCardState extends State<ConversationCard> {
     );
   }
 
-  Widget _buildButtons(data) {
-    return Flex(
-      direction: Axis.horizontal,
-      children: <Widget>[
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
-            child: OutlineButton(
-              onPressed: () {},
-              child: Container(
-                child: Text(
-                  'LEAVE FEEDBACK',
-                  style: FontHelper.semiBoldgrey14TextStyle,
-                  textAlign: TextAlign.center,
+  Widget _buildButtons() {
+    return StreamBuilder(
+        stream: order.producer.value.status,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return Offstage();
+          return Flex(
+            direction: Axis.horizontal,
+            children: <Widget>[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                  child: RaisedButton(
+                    textColor: Colors.black,
+                    disabledColor: ColorHelper.disableColor,
+                    disabledTextColor: ColorHelper.disableTextColor,
+                    color: ColorHelper.availableColor,
+                    onPressed: snapshot.data == orderStatus_Requested
+                        ? () {
+                            showConfirm(order.value);
+                          }
+                        : null,
+                    child: Container(
+                      child: Text(
+                        'PICK UP ORDER',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
-            child: FlatButton(
-              color: Color(0xFF959DAD),
-              onPressed: () {
-                showOverlay(widget.order.value);
-              },
-              child: Container(
-                child: Text(
-                  'COUNTER-OFFER DELIVERY FEE',
-                  style: FontHelper.semiBold12White,
-                  textAlign: TextAlign.center,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                  child: RaisedButton(
+                    textColor: Colors.white,
+                    disabledColor: ColorHelper.disableColor,
+                    disabledTextColor: ColorHelper.disableTextColor,
+                    color: ColorHelper.counterOfferColor,
+                    onPressed: snapshot.data == orderStatus_Requested
+                        ? () {
+                            showCounter(order.value);
+                          }
+                        : null,
+                    child: Container(
+                      child: Text(
+                        'COUNTER-OFFER DELIVERY FEE',
+                        // style: FontHelper.semiBold12White,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        )
-      ],
-    );
+            ],
+          );
+        });
   }
 
-  showOverlay(Order order) {
+  showConfirm(Order order) {
     showHalfBottomSheet(
         context: context,
         builder: (builder) {
-          return CounterOfferOverlay(
-            //TODO COUNTER-OFFER DELIVERY FEE
+          return ConfirmationOverlay(
             order: order,
             // route: widget.route,
           );
         });
   }
 
-  Widget _buildLocationDescription() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(
-          width: 10,
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _buildCollapsableLocationDescription(),
-            StreamBuilder<GeoPoint>(
-              stream: widget.order.value.deliveryLocation,
-              builder: (context, snap) {
-                if (!snap.hasData) return Offstage();
-                if (widget.location != null && snap.data != null) {
-                  return Container(
-                    constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width - 180),
-                    child: Text(
-                      snap.hasData
-                          ? LocationHelper.calculateDistancFromSelf(
-                                      widget.location.latitude,
-                                      widget.location.longitude,
-                                      snap.data.latitude,
-                                      snap.data.longitude)
-                                  .toStringAsFixed(1) +
-                              'km away'
-                          : "?.??km",
-                      style: FontHelper.medium12TextStyle,
-                    ),
-                  );
-                } else {
-                  return Text(
-                    "?.??km",
-                    style: FontHelper.medium12TextStyle,
-                  );
-                }
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  _buildTapToLocation() {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: StreamBuilder<GeoPoint>(
-        stream: widget.order.value.deliveryLocation,
-        builder: (context, snap) {
-          return GestureDetector(
-              child: Image.asset('assets/icons/google-maps.png'),
-              onTap: () {
-                LatLng temp = LatLng(snap.data.latitude, snap.data.longitude);
-                launchMaps(temp);
-              });
-        },
-      ),
-    );
-  }
-
-  Widget _buildCollapsableLocationDescription() {
-    if (!widget.channel.isSelectedProperty.value) {
-      return StreamBuilder<String>(
-        stream: widget.order.value.deliveryLocationDescription,
-        builder: (context, snap) {
-          if (!snap.hasData) return Offstage();
-          return Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width - 180,
-            ),
-            child: Text(
-              snap.hasData ? '''${snap.data}''' : "Error",
-              style: FontHelper.regular14Black,
-              overflow: TextOverflow.ellipsis,
-            ),
+  showCounter(Order order) {
+    showHalfBottomSheet(
+        context: context,
+        builder: (builder) {
+          return CounterOfferOverlay(
+            order: order,
+            // route: widget.route,
           );
-        },
-      );
-    } else {
-      return StreamBuilder<String>(
-        stream: widget.order.value.deliveryLocationDescription,
-        builder: (context, snap) {
-          if (!snap.hasData) return Offstage();
-          return Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width - 180,
-            ),
-            child: Text(
-              snap.hasData ? '''${snap.data}''' : "Error",
-              style: FontHelper.regular14Black,
-            ),
-          );
-        },
-      );
-    }
+        });
   }
 }

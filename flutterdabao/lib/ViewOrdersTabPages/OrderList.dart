@@ -662,7 +662,7 @@ class _OrderItemCellState extends State<_OrderItemCell>
       height: 30,
       child: RaisedButton(
         elevation: 6,
-        color: ColorHelper.dabaoOrange,
+        color: ColorHelper.dabaoOffPaleBlue,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         child: Row(

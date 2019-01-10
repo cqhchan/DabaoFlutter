@@ -19,8 +19,10 @@ import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/OrderWidget/StatusColor.dart';
 import 'package:flutterdabao/Profile/ViewProfile.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
+// import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/ConfirmedSummary.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
@@ -38,7 +40,7 @@ class AcceptedList extends StatefulWidget {
   _AcceptedListState createState() => _AcceptedListState();
 }
 
-class _AcceptedListState extends State<AcceptedList> {
+class _AcceptedListState extends State<AcceptedList> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,6 +72,9 @@ class _AcceptedListState extends State<AcceptedList> {
           .toList(),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class _AcceptedOrderCell extends StatefulWidget {
@@ -119,15 +124,11 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
       color: Colors.white,
       elevation: 6.0,
       child: Stack(
-        fit: StackFit.loose,
         children: <Widget>[
-          Container(
-            height: 9,
-            decoration: BoxDecoration(
-                color: ColorHelper.dabaoOrange,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10))),
+          StatusColor(
+            color: ColorHelper.dabaoOrange,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10), topRight: Radius.circular(10)),
           ),
           Container(
             margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
@@ -649,9 +650,11 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
       elevation: 6,
       color: ColorHelper.dabaoOrange,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Row(
+      child: Flex(
+        direction: Axis.horizontal,
         children: <Widget>[
           Expanded(
+            flex: 10,
             child: Align(
               child: Text(
                 "Complete",
@@ -659,10 +662,22 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
               ),
             ),
           ),
+          Expanded(
+            child: Align(
+              child: Icon(Icons.keyboard_arrow_right,color: Colors.black)
+            ),
+          ),
         ],
       ),
       onPressed: () {
-        showOverlay(order);
+        // showOverlay(order);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ConfirmedSummary(
+                order: order,
+              ),
+            ));
       },
     );
   }
@@ -721,16 +736,16 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
     );
   }
 
-  showOverlay(Order order) {
-    showHalfBottomSheet(
-        context: context,
-        builder: (builder) {
-          return CompletedOverlay(
-            order: order,
-            route: widget.route,
-          );
-        });
-  }
+  // showOverlay(Order order) {
+  //   showHalfBottomSheet(
+  //       context: context,
+  //       builder: (builder) {
+  //         return CompletedOverlay(
+  //           order: order,
+  //           route: widget.route,
+  //         );
+  //       });
+  // }
 
   _toChat(Order order) {
     Channel channel = Channel.fromUID(

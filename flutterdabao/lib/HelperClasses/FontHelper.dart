@@ -91,6 +91,24 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
       fontFamily: "SF_UI_Display");
+      static const TextStyle medium12BlackBold = TextStyle(
+      color: Colors.black,
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w700,
+      fontFamily: "SF_UI_Display");
+       static const TextStyle medium12Black = TextStyle(
+      color: Colors.black,
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontFamily: "SF_UI_Display");
+      static const TextStyle medium12grey = TextStyle(
+      color: Colors.grey,
+      fontSize: 12.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontFamily: "SF_UI_Display");
   static const TextStyle overlaySubtitleHeader = TextStyle(
       color: ColorHelper.dabaoOffBlack9B,
       fontSize: 14.0,
@@ -115,13 +133,31 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
       fontFamily: "SF_UI_Display");
+  static const TextStyle semiBold14Red = TextStyle(
+      color: Color(0xFFCC0000),
+      fontSize: 14.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
+  static const TextStyle semiBold14Available = TextStyle(
+      color: Color(0xFFA5DE40),
+      fontSize: 14.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
+  static const TextStyle semiBold14NotAvailable = TextStyle(
+      color: Color(0xFFD0D0D0),
+      fontSize: 14.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
   static const TextStyle semiBold14Black2 = TextStyle(
       color: Colors.black,
       fontSize: 14.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w400,
       fontFamily: "SF_UI_Display");
-      static const TextStyle semiBold11Grey = TextStyle(
+  static const TextStyle semiBold11Grey = TextStyle(
       color: Color(0xFF9B9B9B),
       fontSize: 11.0,
       fontStyle: FontStyle.normal,
@@ -162,6 +198,12 @@ class FontHelper {
       fontSize: 16.0,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w600,
+      fontFamily: "SF_UI_Display");
+  static const TextStyle semiBold16Red = TextStyle(
+      color: Color(0xFFCC0000),
+      fontSize: 16.0,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w700,
       fontFamily: "SF_UI_Display");
   static const TextStyle semiBold18Black = TextStyle(
       color: Colors.black,
@@ -211,7 +253,7 @@ class FontHelper {
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
       fontFamily: "SF_UI_Display");
-      static const TextStyle regular10lightgrey = TextStyle(
+  static const TextStyle regular10lightgrey = TextStyle(
       color: Color(0xFFD0D0D0),
       fontSize: 10.0,
       fontStyle: FontStyle.normal,
@@ -287,7 +329,7 @@ class FontHelper {
         fontFamily: "SF_UI_Display");
   }
 
-  static TextStyle regular(Color color, double size,{double letterSpacing}) {
+  static TextStyle regular(Color color, double size, {double letterSpacing}) {
     return TextStyle(
         color: color,
         fontSize: size,
