@@ -52,6 +52,7 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<DabaoRoute.Route>> currentUserRoutesPastDayProperty =
       MutableProperty<List<DabaoRoute.Route>>(List());
 
+
   MutableProperty<List<Voucher>> currentUserOpenVouchersProperty =
       MutableProperty<List<Voucher>>(List());
 
@@ -122,11 +123,12 @@ class ConfigHelper with HavingSubscriptionMixin {
         .add(currentUserWalletProperty.bindTo(currentUserWalletProducer()));
 
     // get Current Routes TODO fix bug
-    subscription.add(currentUserRoutesPastDayProperty
-        .bindTo(currentUserRoutesPastDayProducer()));
-    subscription.add(currentUserRoutesPastDayProperty.producer.listen((onData) {
-      print("testing data " + onData.length.toString());
-    }));
+    subscription.add(
+        currentUserRoutesPastDayProperty.bindTo(currentUserRoutesPastDayProducer()));
+ subscription.add(currentUserRoutesPastDayProperty.producer.listen((onData){
+
+   print("testing data " + onData.length.toString());
+ }));
     subscription
         .add(currentDabaoerRewards.bindTo(currentDabaoerRewardsProducer()));
 
@@ -202,66 +204,20 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-  //DabaoRoute.Route is a custom class with a .fromDoc(DocumentSnapshot doc) constructor
+
   Stream<List<DabaoRoute.Route>> currentUserRoutesPastDayProducer() {
-    // currentUserProperty.producer is a behaviorsubject
     return currentUserProperty.producer.switchMap((user) => user == null
         ? Observable.just(List<DabaoRoute.Route>())
-        : Observable(Firestore.instance
+        : FirebaseCollectionReactive<DabaoRoute.Route>(Firestore.instance
                 .collection("routes")
-                // This particular query condition is the issue. Removing this line and replacing with a euqals query on another field works fine
-                .where(DabaoRoute.Route.deliveryTimeKey,
-                    isGreaterThanOrEqualTo:
-                        DateTime.now().add(Duration(days: -2)))
+                // TODO disable time filer for now. solve it later
+                // .where(DabaoRoute.Route.deliveryTimeKey,
+                //     isGreaterThanOrEqualTo:
+                //         DateTime.now().add(Duration(days: -2)))
                 .where(DabaoRoute.Route.creatorKey, isEqualTo: user.uid)
-                .snapshots())
-            .scan((List<DabaoRoute.Route> list, QuerySnapshot snapshot, b) {
-            snapshot.documentChanges.forEach((change) {
-              switch (change.type) {
-                case DocumentChangeType.added:
-                  // Addes a new DabaoRoute.Route if needed
-                  list.removeWhere(
-                      (element) => element.uid == change.document.documentID);
-                  list.add(DabaoRoute.Route.fromDocument(change.document));
-
-                  break;
-
-                case DocumentChangeType.removed:
-                  // Addes remove the old DabaoRoute.Route if needed
-
-                  List<DabaoRoute.Route> temp = list
-                      .where((element) =>
-                          element.uid == change.document.documentID)
-                      .toList();
-
-                  temp.forEach((f) => f.mapFrom(change.document.data));
-
-                  list.removeWhere(
-                      (element) => element.uid == change.document.documentID);
-
-                  break;
-
-                case DocumentChangeType.modified:
-                  // Addes update the DabaoRoute.Route if it already exist
-
-                  list
-                      .where((element) =>
-                          element.uid == change.document.documentID)
-                      .forEach(
-                          (element) => element.mapFrom(change.document.data));
-
-                  break;
-              }
-            });
-
-            return list;
-          }, List<DabaoRoute.Route>()).shareReplay(maxSize: 1));
+                )
+            .observable);
   }
-
-  // : FirebaseCollectionReactive<DabaoRoute.Route>(
-  //         )
-  //     .observable);
-  // TODO disable time filer for now. solve it later
 
   Stream<List<Order>> currentUserAcceptedOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
@@ -325,13 +281,13 @@ class ConfigHelper with HavingSubscriptionMixin {
     location?.cancel();
     bool successful = await askForPermission;
 
-    if (successful != null && successful) {
-      var lastLocation =
-          await LocationHelper.instance.location.getLastKnownPosition();
+    if (successful != null && successful){
+    var lastLocation =
+        await LocationHelper.instance.location.getLastKnownPosition();
 
-      if (lastLocation != null)
-        currentLocationProperty.value =
-            LatLng(lastLocation.latitude, lastLocation.longitude);
+    if (lastLocation != null)
+      currentLocationProperty.value =
+          LatLng(lastLocation.latitude, lastLocation.longitude);
     }
 
     location = currentLocationProperty
