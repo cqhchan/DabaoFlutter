@@ -71,6 +71,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
               padding: EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(children: <Widget>[
                 TextFormField(
+                  textCapitalization: TextCapitalization.words,
                   controller: _nameController,
                   decoration: InputDecoration(
                     labelText: 'Name',
@@ -104,29 +105,34 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     ));
   }
 
-  void creatingThumbnail() {
-    getTemporaryDirectory().then((tempDir) {
+  //Pre-condition: Called only when _image has been set
+  void creatingThumbnail(File image) async {
+    print("Creating Thumbnail");
+    await getTemporaryDirectory().then((tempDir) async {
+      print("tempDir " + tempDir.path);
       String tempPath = tempDir.path;
-      Resize.Image resizedImage = Resize.decodeImage(_image.readAsBytesSync());
+
+      List<int> data = await image.readAsBytes();
+      print("imaged readAsBytes ");
+
+      Resize.Image resizedImage = Resize.decodeImage(data);
+      print("imaged Resized ");
+
+      // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
       Resize.Image thumbnail = Resize.copyResize(resizedImage, 100, 100);
+      print("thumbnail Resized ");
+
+      // Save the thumbnail as a PNG.
       var thumbnailImage = new File(tempPath + 'thumbnailImage.png')
         ..writeAsBytesSync(Resize.encodePng(thumbnail));
-      _thumbnail = thumbnailImage;
-    });
-  }
 
-  void getImageFromCamera() async {
-    ImagePicker.pickImage(source: ImageSource.camera).then((image) async {
-      if (image == null) {
-      } else {
-        var croppedImage = await _cropImage(image);
-        setState(() {
-          _image = croppedImage;
-        });
-        creatingThumbnail();
-      }
-    }).catchError((e) {
-      print(e);
+      print("thumbnail saved ");
+
+      _thumbnail = thumbnailImage;
+      setState(() {
+        _image = image;
+        _inProgress = false;
+      });
     });
   }
 
@@ -141,16 +147,31 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     return croppedFile;
   }
 
-  void getImageFromGallery() async {
-    ImagePicker.pickImage(source: ImageSource.gallery).then((image) async {
+  //get image
+  void getImage(ImageSource imageSource) async {
+    setState(() {
+      _inProgress = true;
+    });
+
+    ImagePicker.pickImage(source: imageSource).then((image) async {
       if (image == null) {
       } else {
+        //give user the cropping option
         var croppedImage = await _cropImage(image);
-        setState(() {
-          _image = croppedImage;
-        });
-        creatingThumbnail();
+
+        if (croppedImage == null) {
+          setState(() {
+            _inProgress = false;
+          });
+        } else {
+          creatingThumbnail(croppedImage);
+        }
       }
+    }).catchError((e) {
+      print(e);
+      setState(() {
+        _inProgress = false;
+      });
     });
   }
 
@@ -165,13 +186,19 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       print('no name');
       return;
     }
-    if (_image != null && _nameController.text != null && _nameController.text != '') {
+    if (_image != null &&
+        _nameController.text != null &&
+        _nameController.text != '') {
       uploadImages();
       print('Uploaded successfully');
     }
   }
 
   void uploadImages() {
+    setState(() {
+      _inProgress = true;
+    });
+
     String uid;
     FirebaseAuth.instance.currentUser().then((user) {
       uid = user.uid;
@@ -254,7 +281,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                   title: Text('Camera'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    getImageFromCamera();
+                    getImage(ImageSource.camera);
                   },
                 ),
                 ListTile(
@@ -262,7 +289,8 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
                   title: Text('Photos'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    getImageFromGallery();
+
+                    getImage(ImageSource.gallery);
                   },
                 ),
               ],
@@ -277,4 +305,78 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     }
     return "Please try again";
   }
+
+  // ///////////////////////////////////////////////////////////////////////////////
+  // //TO BUILD THE SCREEN//////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////////
+  // //This builds the user interface on the screen
+  // //Not written in build so that it can be wrapped with modal_progress_HUD
+  // Widget buildWidget(BuildContext context) {
+  //   return Scaffold(
+  //       body: SafeArea(
+  //     child: Form(
+  //       autovalidate: _autoValidate,
+  //       child: ListView(
+  //         children: [
+  //           GestureDetector(
+  //             //onTap: getImage,
+  //             onTap: _showModalSheet,
+
+  //             child: _image == null
+  //                 ? Container(
+  //                     height: MediaQuery.of(context).size.width,
+  //                     width: MediaQuery.of(context).size.width,
+  //                     child: Center(
+  //                       child: Icon(Icons.add_a_photo, size: 100.0),
+  //                     ),
+  //                     color: ColorHelper.dabaoGreyE0,
+  //                   )
+  //                 : Image.file(
+  //                     _image,
+  //                     height: MediaQuery.of(context).size.width,
+  //                     width: MediaQuery.of(context).size.width,
+  //                     fit: BoxFit.fill,
+  //                   ),
+  //           ),
+  //           SizedBox(height: 50.0),
+  //           Container(
+  //             padding: EdgeInsets.symmetric(horizontal: 24.0),
+  //             child: Column(children: <Widget>[
+  //               TextFormField(
+  //                 textCapitalization: TextCapitalization.words,
+  //                 controller: _nameController,
+  //                 decoration: InputDecoration(
+  //                   labelText: 'Name',
+  //                 ),
+  //                 validator: _validateName,
+  //               ),
+  //               SizedBox(height: 50.0),
+  //               RaisedButton(
+  //                 child: Container(
+  //                   height: 40,
+  //                   child: Center(
+  //                     child: Text('Create Profile'),
+  //                   ),
+  //                 ),
+  //                 color: ColorHelper.dabaoOrange,
+  //                 elevation: 5.0,
+  //                 shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
+  //                 ),
+  //                 onPressed: createProfile,
+  //               )
+  //             ]),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   ));
+  // }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   //ModalProgressHUD is a widget. It takes in a widget as child, and variable used for AsyncCall
+  //   return ModalProgressHUD(
+  //       child: buildWidget(context), inAsyncCall: _inProgress);
+  // }
 }
