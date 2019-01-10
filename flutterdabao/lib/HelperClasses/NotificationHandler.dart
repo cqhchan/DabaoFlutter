@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Balance/Transaction.dart';
 import 'package:flutterdabao/Chat/Conversation.dart';
 import 'package:flutterdabao/Chat/Inbox.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
+import 'package:flutterdabao/CustomWidget/Route/DialogRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -21,6 +24,8 @@ const String modeAcceptedOrder = "ORDERACCEPTED";
 const String modeNewTransaction = "NEWTRANSACTION";
 
 const String modeCompletedOrder = "ORDERCOMPLETED";
+const String modeCancelledOrder = "ORDERCANCELLED";
+
 const String modeNewPotentialOrder = "POTENTIALORDER";
 
 handleNotificationForResumeAndLaunch(map) async {
@@ -86,167 +91,107 @@ handleNotificationForOnMessage(map) async {
   ConfigHelper.instance.currentUserProperty.producer
       .firstWhere((user) => user != null)
       .then((user) {
-    Map<String, dynamic> data =
-        Map.castFrom<dynamic, dynamic, String, dynamic>(map["data"]);
-    Map<String, dynamic> notification =
-        Map.castFrom<dynamic, dynamic, String, dynamic>(map["notification"]);
+    print(map);
+    Map<String, dynamic> data;
+    String title;
+    String body;
+    if (Platform.isIOS) {
+      data = Map.castFrom<dynamic, dynamic, String, dynamic>(map);
+      Map<String, dynamic> alert =
+          Map.castFrom<dynamic, dynamic, String, dynamic>(map["aps"]['alert']);
 
-    String title = notification["title"];
-    String body = notification["body"];
+      title = alert["title"];
+      body = alert["body"];
+    } else {
+      data = Map.castFrom<dynamic, dynamic, String, dynamic>(map["data"]);
+      Map<String, dynamic> notification =
+          Map.castFrom<dynamic, dynamic, String, dynamic>(map["notification"]);
+      title = notification["title"];
+      body = notification["body"];
+    }
 
     if (data.containsKey("mode")) {
       String mode = data["mode"];
 
       switch (mode) {
         case modeAcceptedOrder:
-          ConfigHelper.instance.navigatorKey.currentState.push(FadeRoute(
-              widget: GestureDetector(
-            onTap: () {
-              ConfigHelper.instance.navigatorKey.currentState.pop();
-            },
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: new AlertDialog(
-                title: const Text("Order Accepted"),
-                content: const Text("Your Order has been accepted!"),
-                actions: <Widget>[
-                  new FlatButton(
-                    child: new Text(
-                      "VIEW",
-                      style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
-                    ),
-                    onPressed: () async {
-                      ConfigHelper.instance.navigatorKey.currentState.popUntil(
-                          ModalRoute.withName(Navigator.defaultRouteName));
-
-                      if (data.containsKey(orderIDkey)) {
-                        String orderID = data[orderIDkey];
-                        Order order = Order.fromUID(orderID);
+          ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
+              barrierColor: Colors.black.withOpacity(0.5),
+              child: SafeArea(child: Builder(builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Order Accepted"),
+                  content: const Text("Your Order has been accepted!"),
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "VIEW",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
                         ConfigHelper.instance.navigatorKey.currentState
-                            .push(MaterialPageRoute(builder: (context) {
-                          return DabaoeeViewOrderListPage(
-                            order: order,
-                          );
-                        }));
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-          )));
+                            .popUntil(ModalRoute.withName(
+                                Navigator.defaultRouteName));
 
-          // showDialog(
-          //     context: ConfigHelper.instance.navigatorKey.currentContext,
-          //     builder: (context) => new AlertDialog(
-          //           title: const Text("Order Accepted"),
-          //           content: const Text("Your Order has been accepted!"),
-          //           actions: <Widget>[
-          //             new FlatButton(
-          //               child: new Text(
-          //                 "VIEW",
-          //                 style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
-          //               ),
-          //               onPressed: () async {
-          //                 ConfigHelper.instance.navigatorKey.currentState
-          //                     .popUntil(ModalRoute.withName(
-          //                         Navigator.defaultRouteName));
+                        if (data.containsKey(orderIDkey)) {
+                          String orderID = data[orderIDkey];
+                          Order order = Order.fromUID(orderID);
+                          ConfigHelper.instance.navigatorKey.currentState
+                              .push(MaterialPageRoute(builder: (context) {
+                            return DabaoeeViewOrderListPage(
+                              order: order,
+                            );
+                          }));
+                        }
+                      },
+                    ),
+                  ],
+                );
+              }))));
 
-          //                 if (data.containsKey(orderIDkey)) {
-          //                   String orderID = data[orderIDkey];
-          //                   Order order = Order.fromUID(orderID);
-          //                   ConfigHelper.instance.navigatorKey.currentState
-          //                       .push(MaterialPageRoute(builder: (context) {
-          //                     return DabaoeeViewOrderListPage(
-          //                       order: order,
-          //                     );
-          //                   }));
-          //                 }
-          //               },
-          //             ),
-          //           ],
-          //         ));
           break;
 
         case modeCompletedOrder:
-          ConfigHelper.instance.navigatorKey.currentState.push(FadeRoute(
-              widget: GestureDetector(
-            onTap: () {
-              ConfigHelper.instance.navigatorKey.currentState.pop();
-            },
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: new AlertDialog(
-                title: const Text("Order Completed"),
-                content: const Text("Your Order has been completed!"),
-                actions: <Widget>[
-                  new FlatButton(
-                    child: new Text(
-                      "VIEW",
-                      style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
-                    ),
-                    onPressed: () async {
-                      ConfigHelper.instance.navigatorKey.currentState.popUntil(
-                          ModalRoute.withName(Navigator.defaultRouteName));
-
-                      if (data.containsKey(orderIDkey)) {
-                        String orderID = data[orderIDkey];
-                        Order order = Order.fromUID(orderID);
+          ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
+              barrierColor: Colors.black.withOpacity(0.5),
+              child: SafeArea(child: Builder(builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Order Completed"),
+                  content: const Text("Your Order has been completed!"),
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "VIEW",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
                         ConfigHelper.instance.navigatorKey.currentState
-                            .push(MaterialPageRoute(builder: (context) {
-                          return DabaoeeViewOrderListPage(
-                            order: order,
-                          );
-                        }));
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-          )));
+                            .popUntil(ModalRoute.withName(
+                                Navigator.defaultRouteName));
 
-          // showDialog(
-          //     context: ConfigHelper.instance.navigatorKey.currentContext,
-          //     builder: (context) => new AlertDialog(
-          //           title: const Text("Order Accepted"),
-          //           content: const Text("Your Order has been accepted!"),
-          //           actions: <Widget>[
-          //             new FlatButton(
-          //               child: new Text(
-          //                 "VIEW",
-          //                 style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
-          //               ),
-          //               onPressed: () async {
-          //                 ConfigHelper.instance.navigatorKey.currentState
-          //                     .popUntil(ModalRoute.withName(
-          //                         Navigator.defaultRouteName));
+                        if (data.containsKey(orderIDkey)) {
+                          String orderID = data[orderIDkey];
+                          Order order = Order.fromUID(orderID);
+                          ConfigHelper.instance.navigatorKey.currentState
+                              .push(MaterialPageRoute(builder: (context) {
+                            return DabaoeeViewOrderListPage(
+                              order: order,
+                            );
+                          }));
+                        }
+                      },
+                    ),
+                  ],
+                );
+              }))));
 
-          //                 if (data.containsKey(orderIDkey)) {
-          //                   String orderID = data[orderIDkey];
-          //                   Order order = Order.fromUID(orderID);
-          //                   ConfigHelper.instance.navigatorKey.currentState
-          //                       .push(MaterialPageRoute(builder: (context) {
-          //                     return DabaoeeViewOrderListPage(
-          //                       order: order,
-          //                     );
-          //                   }));
-          //                 }
-          //               },
-          //             ),
-          //           ],
-          //         ));
           break;
 
         case modeNewTransaction:
-          ConfigHelper.instance.navigatorKey.currentState.push(FadeRoute(
-              widget: GestureDetector(
-            onTap: () {
-              ConfigHelper.instance.navigatorKey.currentState.pop();
-            },
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: new AlertDialog(
+
+          ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
+              barrierColor: Colors.black.withOpacity(0.5),
+              child: SafeArea(child: Builder(builder: (BuildContext context) {
+                return AlertDialog(
                 title: Text(title),
                 content: Text(body),
                 actions: <Widget>[
@@ -266,29 +211,9 @@ handleNotificationForOnMessage(map) async {
                     },
                   ),
                 ],
-              ),
-            ),
-          )));
+              );
+              }))));
 
-          // showDialog(
-          //     context: ConfigHelper.instance.navigatorKey.currentState.context,
-          //     builder: (_) => new AlertDialog(
-          //           title: Text(title),
-          //           content: Text(body),
-          //           actions: <Widget>[
-          //             new FlatButton(
-          //               child: new Text(
-          //                 "VIEW",
-          //                 style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
-          //               ),
-          //               onPressed: () async {
-          //                 ConfigHelper.instance.navigatorKey.currentState
-          //                     .popUntil(ModalRoute.withName(
-          //                         Navigator.defaultRouteName));
-          //               },
-          //             ),
-          //           ],
-          //         ));
           break;
       }
     }
