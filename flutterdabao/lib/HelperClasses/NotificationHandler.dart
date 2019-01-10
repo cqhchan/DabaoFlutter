@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutterdabao/Balance/Transaction.dart';
 import 'package:flutterdabao/Chat/Conversation.dart';
 import 'package:flutterdabao/Chat/Inbox.dart';
+import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Route/DialogRoute.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
@@ -61,7 +63,48 @@ handleNotificationForResumeAndLaunch(map) async {
               }));
             }
           }
+          break;
 
+        case modeCancelledOrder:
+          if (map.containsKey(orderIDkey)) {
+            String orderID = map[orderIDkey];
+            Order order = Order.fromUID(orderID);
+
+            ConfigHelper.instance.navigatorKey.currentState
+                .push(MaterialPageRoute(builder: (context) {
+              return DabaoeeViewOrderListPage(
+                order: order,
+              );
+            }));
+
+            ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
+                barrierColor: Colors.black.withOpacity(0.5),
+                child: SafeArea(child: Builder(builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Order Cancelled"),
+                    content: const Text(
+                        "Your Order has been cancelle =( Would you like to reorder?"),
+                    actions: <Widget>[
+                      new FlatButton(
+                        child: new Text(
+                          "Reorder",
+                          style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                        ),
+                        onPressed: () async {
+                          OrderHolder holder =
+                              await generateHolderFromOrder(orderID);
+                          ConfigHelper.instance.navigatorKey.currentState
+                              .push(MaterialPageRoute(builder: (context) {
+                            return OrderNow(
+                              holder: holder,
+                            );
+                          }));
+                        },
+                      ),
+                    ],
+                  );
+                }))));
+          }
           break;
 
         case modeAcceptedOrder:
@@ -150,6 +193,58 @@ handleNotificationForOnMessage(map) async {
 
           break;
 
+        case modeCancelledOrder:
+          ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
+              barrierColor: Colors.black.withOpacity(0.5),
+              child: SafeArea(child: Builder(builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Order Cancelled"),
+                  content: const Text(
+                      "Your Order has been cancelle =( Would you like to reorder?"),
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "VIEW",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
+                        if (data.containsKey(orderIDkey)) {
+                          String orderID = data[orderIDkey];
+                          Order order = Order.fromUID(orderID);
+                          ConfigHelper.instance.navigatorKey.currentState
+                              .push(MaterialPageRoute(builder: (context) {
+                            return DabaoeeViewOrderListPage(
+                              order: order,
+                            );
+                          }));
+                        }
+                      },
+                    ),
+                    new FlatButton(
+                      child: new Text(
+                        "Reorder",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
+                        if (data.containsKey(orderIDkey)) {
+                          String orderID = data[orderIDkey];
+                          OrderHolder holder =
+                              await generateHolderFromOrder(orderID);
+                          ConfigHelper.instance.navigatorKey.currentState
+                              .push(MaterialPageRoute(builder: (context) {
+                            return OrderNow(
+                              holder: holder,
+                            );
+                          }));
+                        }
+                      },
+                    ),
+                  ],
+                );
+              }))));
+
+          break;
+
         case modeCompletedOrder:
           ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
               barrierColor: Colors.black.withOpacity(0.5),
@@ -187,31 +282,31 @@ handleNotificationForOnMessage(map) async {
           break;
 
         case modeNewTransaction:
-
           ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
               barrierColor: Colors.black.withOpacity(0.5),
               child: SafeArea(child: Builder(builder: (BuildContext context) {
                 return AlertDialog(
-                title: Text(title),
-                content: Text(body),
-                actions: <Widget>[
-                  new FlatButton(
-                    child: new Text(
-                      "VIEW",
-                      style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
-                    ),
-                    onPressed: () async {
-                      ConfigHelper.instance.navigatorKey.currentState.popUntil(
-                          ModalRoute.withName(Navigator.defaultRouteName));
+                  title: Text(title),
+                  content: Text(body),
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "VIEW",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
+                        ConfigHelper.instance.navigatorKey.currentState
+                            .popUntil(ModalRoute.withName(
+                                Navigator.defaultRouteName));
 
-                      ConfigHelper.instance.navigatorKey.currentState
-                          .push(MaterialPageRoute(builder: (context) {
-                        return TransactionsPage();
-                      }));
-                    },
-                  ),
-                ],
-              );
+                        ConfigHelper.instance.navigatorKey.currentState
+                            .push(MaterialPageRoute(builder: (context) {
+                          return TransactionsPage();
+                        }));
+                      },
+                    ),
+                  ],
+                );
               }))));
 
           break;
