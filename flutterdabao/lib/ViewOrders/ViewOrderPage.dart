@@ -1,10 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
+import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
+import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
+import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
@@ -12,6 +17,7 @@ import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
@@ -45,6 +51,16 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
     super.dispose();
   }
 
+  showOverlay(Order order) {
+    showHalfBottomSheet(
+        context: context,
+        builder: (builder) {
+          return CompletedOverlay(
+            order: order,
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -61,6 +77,7 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(15.0, 20.0, 20.0, 20.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
@@ -115,7 +132,91 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
               padding: EdgeInsets.only(top: 5.0),
               child: Line(),
             ),
-            buildFinalDeliveryFee(widget.order),
+            Container(
+                padding: EdgeInsets.only(top: 5.0, bottom: 10.0),
+                child: buildFinalDeliveryFee(widget.order)),
+            StreamBuilder<bool>(
+              stream: Observable.combineLatest3<String, String, User, bool>(
+                  widget.order.status,
+                  widget.order.delivererID,
+                  ConfigHelper.instance.currentUserProperty.producer,
+                  (status, delivererID, currentUser) {
+                if (status == null || status != orderStatus_Accepted)
+                  return false;
+                if (delivererID == null || currentUser == null) return false;
+                return delivererID == currentUser.uid;
+              }),
+              builder: (BuildContext context, snapshot) {
+                if (!snapshot.hasData || !snapshot.data) return Offstage();
+
+                return Row(
+                  children: <Widget>[
+                    FlatButton(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.redAccent),
+                            borderRadius: BorderRadius.circular(8.0)),
+                        child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Cancel Delivery",
+                              style: FontHelper.semiBold(Colors.black, 14.0),
+                            )),
+                        onPressed: () async {
+                          showLoadingOverlay(context: context);
+
+                          await FirebaseCloudFunctions.cancelDeliveringOrder(
+                                  orderID: widget.order.uid)
+                              .then((isSuccessful) {
+                            if (isSuccessful) {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+                            } else {
+                              Navigator.of(context).pop();
+                              final snackBar = SnackBar(
+                                  content: Text(
+                                      'An Error has occured. Please check your network connectivity'));
+                              Scaffold.of(context).showSnackBar(snackBar);
+                            }
+                          }).catchError((error) {
+                            if (error is PlatformException) {
+                              PlatformException e = error;
+                              Navigator.of(context).pop();
+                              final snackBar =
+                                  SnackBar(content: Text(e.message));
+                              Scaffold.of(context).showSnackBar(snackBar);
+                            } else {
+                              Navigator.of(context).pop();
+                              final snackBar = SnackBar(
+                                  content: Text(
+                                      'An Error has occured. Please check your network connectivity'));
+                              Scaffold.of(context).showSnackBar(snackBar);
+                            }
+                          });
+                        }),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Expanded(
+                      child: RaisedButton(
+                          elevation: 4.0,
+                          color: ColorHelper.dabaoOrange,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0)),
+                          child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                "Complete Delivery",
+                                style: FontHelper.semiBold(Colors.black, 14.0),
+                              )),
+                          onPressed: () async {
+                            showOverlay(widget.order);
+                          }),
+                    ),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -374,9 +475,70 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
               child: Line(),
             ),
             buildTotal(widget.order),
+            SizedBox(
+              height: 20,
+            ),
+            buildCancelButton(context)
           ],
         ),
       ),
+    );
+  }
+
+  StreamBuilder<String> buildCancelButton(BuildContext context) {
+    return StreamBuilder(
+      stream: widget.order.status,
+      builder: (contexts, snap) {
+        if (snap.hasData && snap.data == orderStatus_Requested)
+          return FlatButton(
+              color: ColorHelper.dabaoOrange,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3.0)),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Cancel Order",
+                            style: FontHelper.semiBold(Colors.black, 14.0),
+                          ))),
+                ],
+              ),
+              onPressed: () async {
+                showLoadingOverlay(context: context);
+
+                await FirebaseCloudFunctions.cancelCurrentUserOrder(
+                        orderID: widget.order.uid)
+                    .then((isSuccessful) {
+                  if (isSuccessful) {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  } else {
+                    Navigator.of(context).pop();
+                    final snackBar = SnackBar(
+                        content: Text(
+                            'An Error has occured. Please check your network connectivity'));
+                    Scaffold.of(context).showSnackBar(snackBar);
+                  }
+                }).catchError((error) {
+                  if (error is PlatformException) {
+                    PlatformException e = error;
+                    Navigator.of(context).pop();
+                    final snackBar = SnackBar(content: Text(e.message));
+                    Scaffold.of(context).showSnackBar(snackBar);
+                  } else {
+                    Navigator.of(context).pop();
+                    final snackBar = SnackBar(
+                        content: Text(
+                            'An Error has occured. Please check your network connectivity'));
+                    Scaffold.of(context).showSnackBar(snackBar);
+                  }
+                });
+              });
+        else
+          return Offstage();
+      },
     );
   }
 
@@ -976,14 +1138,16 @@ class _Promo extends StatelessWidget {
     return StreamBuilder<double>(
       stream: order.deliveryFeeDiscount,
       builder: (context, snap) {
-
         return Container(
           margin: EdgeInsets.only(top: 10.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text("Promo Code", style: FontHelper.regular14Black),
-              Text("- " + StringHelper.doubleToPriceString(!snap.hasData ||snap.data == null? 0.0 : snap.data),
+              Text(
+                  "- " +
+                      StringHelper.doubleToPriceString(
+                          !snap.hasData || snap.data == null ? 0.0 : snap.data),
                   style: FontHelper.regular12Black),
             ],
           ),

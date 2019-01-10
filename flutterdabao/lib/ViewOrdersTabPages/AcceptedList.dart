@@ -20,6 +20,7 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Profile/ViewProfile.dart';
+import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -89,10 +90,9 @@ class _AcceptedOrderCell extends StatefulWidget {
   }
 }
 
-class _AcceptedOrderCellState extends State<_AcceptedOrderCell> with HavingSubscriptionMixin {
-
+class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
+    with HavingSubscriptionMixin {
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
-
 
   @override
   void initState() {
@@ -106,6 +106,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> with HavingSubsc
     disposeAndReset();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return _buildListItem();
@@ -588,12 +589,13 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> with HavingSubsc
         return GestureDetector(
           onTap: () {
             Navigator.of(context).push(
-              FadeRoute(widget: ViewProfile(
+              FadeRoute(
+                  widget: ViewProfile(
                 currentUser: user,
               )),
             );
           },
-                  child: Row(
+          child: Row(
             children: <Widget>[
               StreamBuilder<String>(
                 stream: user.data.thumbnailImage,
@@ -650,7 +652,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> with HavingSubsc
           Expanded(
             child: Align(
               child: Text(
-                "Complete",
+                "Go to Order",
                 style: FontHelper.semiBold14Black,
               ),
             ),
@@ -658,7 +660,10 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> with HavingSubsc
         ],
       ),
       onPressed: () {
-        showOverlay(order);
+        Navigator.of(context).push(FadeRoute(
+            widget: DabaoerViewOrderListPage(
+          order: widget.order,
+        )));
       },
     );
   }
@@ -684,7 +689,10 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> with HavingSubsc
           ],
         ),
         onPressed: () async {
-          _toChat(order);
+          Navigator.of(context).push(FadeRoute(
+              widget: DabaoerViewOrderListPage(
+            order: widget.order,
+          )));
         },
       ),
     );
@@ -715,17 +723,6 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell> with HavingSubsc
         },
       ),
     );
-  }
-
-  showOverlay(Order order) {
-    showHalfBottomSheet(
-        context: context,
-        builder: (builder) {
-          return CompletedOverlay(
-            order: order,
-            route: widget.route,
-          );
-        });
   }
 
   _toChat(Order order) {

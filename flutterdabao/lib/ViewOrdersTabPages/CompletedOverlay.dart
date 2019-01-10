@@ -16,9 +16,8 @@ import 'package:rxdart/rxdart.dart';
 
 class CompletedOverlay extends StatefulWidget {
   final Order order;
-  final DabaoRoute.Route route;
 
-  const CompletedOverlay({Key key, @required this.order, this.route})
+  const CompletedOverlay({Key key, @required this.order})
       : super(key: key);
   _CompletedOverlayState createState() => _CompletedOverlayState();
 }

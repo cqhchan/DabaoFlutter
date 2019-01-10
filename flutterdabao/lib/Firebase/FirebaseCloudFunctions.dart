@@ -241,6 +241,58 @@ class FirebaseCloudFunctions {
         code: results["status"].toString(), message: results["message"]);
   }
 
+  ///[data] data of an Order
+  static Future<bool> cancelCurrentUserOrder({
+    @required String orderID,
+  }) async {
+    Map<dynamic, dynamic> results = Map();
+    try {
+      Map<String, dynamic> data = Map();
+      data["mode"] = 4;
+      data["orderID"] = orderID;
+
+      results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: data);
+    } on CloudFunctionsException catch (e) {
+      print(e.message);
+      print(e);
+    } catch (e) {
+      print('Error: $e');
+    }
+    print(results);
+
+    if (results.containsKey("status") && results["status"] == 200) return true;
+
+    throw new PlatformException(
+        code: results["status"].toString(), message: results["message"]);
+  }
+
+  ///[data] data of an Order
+  static Future<bool> cancelDeliveringOrder({
+    @required String orderID,
+  }) async {
+    Map<dynamic, dynamic> results = Map();
+    try {
+      Map<String, dynamic> data = Map();
+      data["mode"] = 5;
+      data["orderID"] = orderID;
+
+      results = await CloudFunctions.instance
+          .call(functionName: 'creationRequest', parameters: data);
+    } on CloudFunctionsException catch (e) {
+      print(e.message);
+      print(e);
+    } catch (e) {
+      print('Error: $e');
+    }
+    print(results);
+
+    if (results.containsKey("status") && results["status"] == 200) return true;
+
+    throw new PlatformException(
+        code: results["status"].toString(), message: results["message"]);
+  }
+
   ///[double] amount of an Order
   ///[userID] the id of the current user
   static Future<bool> requestWithdrawal({
