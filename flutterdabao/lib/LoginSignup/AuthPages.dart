@@ -94,7 +94,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
                   showLoadingOverlay(context: context);
 
                   if (!widget.linkCredentials) {
-                    signInWithPhone().then((FirebaseUser firebaseUser) {
+                    await signInWithPhone().then((FirebaseUser firebaseUser) {
                       // Navigator.of(context).pop();
 
                       User.fromAuth(firebaseUser)

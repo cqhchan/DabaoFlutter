@@ -16,12 +16,28 @@ import 'package:flutterdabao/LoginSignup/ProcessingPage.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 
-class DabaoApp extends StatelessWidget with HavingSubscriptionMixin {
+class DabaoApp extends StatefulWidget {
   // Add in all set up etc needed
 
+
+  @override
+  DabaoAppState createState() {
+    return new DabaoAppState();
+  }
+}
+
+class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin{
+
+
   FirebaseMessaging _firebaseMessaging;
-  DabaoApp() {
-    // debugPaintSizeEnabled=true;
+
+  Stream<FirebaseUser> authState = FirebaseAuth.instance.onAuthStateChanged;
+
+  @override
+    void initState() {
+      // TODO: implement initState
+      super.initState();
+          // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
 
     var db = Firestore.instance;
@@ -31,7 +47,7 @@ class DabaoApp extends StatelessWidget with HavingSubscriptionMixin {
     disposeAndReset();
     if (Platform.isIOS) iOS_Permission();
     firebaseCloudMessagingListeners();
-  }
+    }
 
   void iOS_Permission() {
     _firebaseMessaging.requestNotificationPermissions(
@@ -85,22 +101,34 @@ class DabaoApp extends StatelessWidget with HavingSubscriptionMixin {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: ConfigHelper.instance.navigatorKey,
+      // navigatorKey: ConfigHelper.instance.navigatorKey,
       title: 'DABAO',
       theme: ThemeData(
         fontFamily: "SF_UI_Display",
         primarySwatch: ColorHelper.dabaoOrangeMaterial,
         brightness: Brightness.light,
       ),
+      builder: (context, widget) {
+        return MediaQuery(
+          child: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute(builder: (context) {
+                return _handleCurrentScreen();
+              });
+            },
+          ),
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        );
+      },
       home: _handleCurrentScreen(),
     );
   }
 
-  // Handles Authentication State
-  // Navigation logic
+  Key loginPageKey = Key("loginPageKey");
+
   Widget _handleCurrentScreen() {
     return StreamBuilder<FirebaseUser>(
-        stream: FirebaseAuth.instance.onAuthStateChanged,
+        stream: authState,
         builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return LoadingPage();
@@ -115,9 +143,10 @@ class DabaoApp extends StatelessWidget with HavingSubscriptionMixin {
               return Navigator(onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(builder: (context) {
                   //return LoginPage();
-                  return LoginPage();
+                  return LoginPage(key:loginPageKey);
                 });
-              });
+              }
+              );
             }
           }
         });

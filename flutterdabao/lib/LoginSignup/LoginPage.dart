@@ -9,6 +9,9 @@ import 'package:flutterdabao/LoginSignup/EntryTextField.dart';
 import 'package:flutter/services.dart';
 
 class LoginPage extends StatefulWidget {
+
+  LoginPage({Key key}):super(key:key);
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -61,6 +64,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 
   void initState() {
+    print("init");
     super.initState();
     _tabController = new TabController(vsync: this, initialIndex: 0, length: 2);
     _tabController.addListener(() {

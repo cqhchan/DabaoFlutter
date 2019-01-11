@@ -153,8 +153,11 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       _inProgress = true;
     });
 
-    ImagePicker.pickImage(source: imageSource).then((image) async {
+    await ImagePicker.pickImage(source: imageSource).then((image) async {
       if (image == null) {
+        setState(() {
+          _inProgress = false;
+        });
       } else {
         //give user the cropping option
         var croppedImage = await _cropImage(image);
@@ -172,6 +175,10 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       setState(() {
         _inProgress = false;
       });
+    });
+    // regardless what happens, _inprogess will be false at the end of this
+    setState(() {
+      _inProgress = false;
     });
   }
 
