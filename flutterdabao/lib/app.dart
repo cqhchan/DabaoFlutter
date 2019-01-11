@@ -19,25 +19,22 @@ import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 class DabaoApp extends StatefulWidget {
   // Add in all set up etc needed
 
-
   @override
   DabaoAppState createState() {
     return new DabaoAppState();
   }
 }
 
-class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin{
-
-
+class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
   FirebaseMessaging _firebaseMessaging;
 
   Stream<FirebaseUser> authState = FirebaseAuth.instance.onAuthStateChanged;
 
   @override
-    void initState() {
-      // TODO: implement initState
-      super.initState();
-          // debugPaintSizeEnabled=true;
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
 
     var db = Firestore.instance;
@@ -47,7 +44,7 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin{
     disposeAndReset();
     if (Platform.isIOS) iOS_Permission();
     firebaseCloudMessagingListeners();
-    }
+  }
 
   void iOS_Permission() {
     _firebaseMessaging.requestNotificationPermissions(
@@ -101,26 +98,21 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin{
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // navigatorKey: ConfigHelper.instance.navigatorKey,
+      navigatorKey: ConfigHelper.instance.navigatorKey,
       title: 'DABAO',
       theme: ThemeData(
         fontFamily: "SF_UI_Display",
         primarySwatch: ColorHelper.dabaoOrangeMaterial,
         brightness: Brightness.light,
       ),
-      builder: (context, widget) {
-        return MediaQuery(
-          child: Navigator(
-            onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute(builder: (context) {
-                return _handleCurrentScreen();
-              });
-            },
-          ),
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-        );
-      },
-      home: _handleCurrentScreen(),
+      home: Builder(
+        builder: (context) {
+          return MediaQuery(
+            child: _handleCurrentScreen(),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          );
+        },
+      ),
     );
   }
 
@@ -143,10 +135,9 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin{
               return Navigator(onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(builder: (context) {
                   //return LoginPage();
-                  return LoginPage(key:loginPageKey);
+                  return LoginPage(key: loginPageKey);
                 });
-              }
-              );
+              });
             }
           }
         });

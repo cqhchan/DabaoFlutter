@@ -83,7 +83,9 @@ class _OrderItemEditor extends StatefulWidget {
   }) : orderItemHolder = template == null
             ? OrderItemHolder()
             : OrderItemHolder(
-                title: template.name.value, price: template.price.value, description: template.description.value);
+                title: template.name.value,
+                price: template.price.value,
+                description: template.description.value);
 
   @override
   State<StatefulWidget> createState() {
@@ -105,11 +107,11 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
         ? ""
         : StringHelper.upperCaseWords(widget.orderItemHolder.title.value);
 
-    _subTitleTextController.text = (widget.orderItemHolder.description.value ==
-                null ||
-            widget.orderItemHolder.description.value.isEmpty)
-        ? ""
-        : (widget.orderItemHolder.description.value);
+    _subTitleTextController.text =
+        (widget.orderItemHolder.description.value == null ||
+                widget.orderItemHolder.description.value.isEmpty)
+            ? ""
+            : (widget.orderItemHolder.description.value);
 
     _priceController.text = widget.orderItemHolder.price.value == null
         ? "\$0.00"
@@ -147,77 +149,81 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){FocusScope.of(context).requestFocus(new FocusNode());
-},
-          child: Scaffold(
+      onTap: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+      child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Container(
             alignment: Alignment(0, 0),
-            margin: EdgeInsets.only(left: 45.0,right: 45.0),
+            margin: EdgeInsets.only(left: 45.0, right: 45.0),
 
             //Card is required for Mateials Design
             child: Card(
               color: Colors.transparent,
               // Set the height and width of the widget
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 300, maxHeight: 360),
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 300, maxHeight: 360),
 
-                // Set the container styling
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      color: Colors.white),
+                  // Set the container styling
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white),
 
-                  //Contents
-                  child: Column(
-                    children: <Widget>[
-                      // Close button
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          color: Colors.black,
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                      //Rest of content
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.only(
-                              left: 18.0, right: 18.0, bottom: 18.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                padding: EdgeInsets.only(bottom: 10.0),
-                                child: Text(
-                                  "CUSTOMISE YOUR ORDER",
-                                  style: FontHelper.bold(
-                                      ColorHelper.dabaoOffBlack4A, 12.0),
-                                ),
-                              ),
-                              buildTitleTextField(),
-                              Container(
-                                padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
-                                child: Text(
-                                  "Special Instructions",
-                                  style: FontHelper.medium(
-                                      ColorHelper.dabaoOffBlack4A, 12.0),
-                                ),
-                              ),
-                              buildDescriptionTextField(),
-                              buildPrice(),
-                              buildQty(),
-                              buildErrorMessage(),
-                              buildBottomButton(context)
-                            ],
+                    //Contents
+                    child: Column(
+                      children: <Widget>[
+                        // Close button
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            color: Colors.black,
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
                           ),
                         ),
-                      ),
-                    ],
+                        //Rest of content
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.only(
+                                left: 18.0, right: 18.0, bottom: 18.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Container(
+                                  padding: EdgeInsets.only(bottom: 10.0),
+                                  child: Text(
+                                    "CUSTOMISE YOUR ORDER",
+                                    style: FontHelper.bold(
+                                        ColorHelper.dabaoOffBlack4A, 12.0),
+                                  ),
+                                ),
+                                buildTitleTextField(),
+                                Container(
+                                  padding:
+                                      EdgeInsets.only(bottom: 10.0, top: 10.0),
+                                  child: Text(
+                                    "Special Instructions",
+                                    style: FontHelper.medium(
+                                        ColorHelper.dabaoOffBlack4A, 12.0),
+                                  ),
+                                ),
+                                buildDescriptionTextField(),
+                                buildPrice(),
+                                buildQty(),
+                                buildErrorMessage(),
+                                buildBottomButton(context)
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -250,8 +256,8 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
               _titleTextController.text != null &&
               _titleTextController.text.isNotEmpty &&
               qty != 0) {
-
-            widget.orderItemHolder.title.value = _titleTextController.text.trim();
+            widget.orderItemHolder.title.value =
+                _titleTextController.text.trim();
             widget.orderItemHolder.description.value =
                 _subTitleTextController.text;
             widget.orderItemHolder.price.value =
