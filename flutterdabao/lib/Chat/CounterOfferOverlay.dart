@@ -10,9 +10,6 @@ import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
-import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
-import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
-import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 import 'package:flutterdabao/ViewOrders/OrderOverlayWidgets.dart';
 
 class CounterOfferOverlay extends StatefulWidget {
@@ -193,16 +190,6 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
             builder: (context, snap) {
               if (!snap.hasData || snap.data == null) return Offstage();
 
-              print("maxx" + (((startingValue.roundToDouble() - 1.5) < 0
-                      ? 0
-                      : startingValue.roundToDouble()) +
-                  1.5).toString());
-
-              print("min" + (((startingValue.roundToDouble() - 1.5) < 0
-                  ? 0
-                  : startingValue.roundToDouble() - 1.5)).toString());
-              print(startingValue.roundToDouble());
-
               return Container(
                 color: Color(0xFFF3F3F3),
                 child: Slider(
@@ -212,7 +199,7 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
                   max: ((startingValue.roundToDouble() - 1.5) < 0
                           ? 0
                           : startingValue.roundToDouble()) +
-                      1.5,
+                      3.0,
                   min: ((startingValue.roundToDouble() - 1.5) < 0
                       ? 0
                       : startingValue.roundToDouble() -1.5),
