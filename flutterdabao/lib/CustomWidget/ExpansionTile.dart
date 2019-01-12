@@ -158,6 +158,7 @@ class _ConfigurableExpansionTileState extends State<ConfigurableExpansionTile>
     if (widget.selectable.isSelected) _controller.value = 1.0;
 
     subscription.add(widget.selectable.isSelectedProperty.producer.listen((selected){
+
       if (selected) {
         _controller.forward();
       } else {

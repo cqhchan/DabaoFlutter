@@ -24,8 +24,9 @@ import 'package:rxdart/rxdart.dart' as Rxdart;
 class OneCard extends StatefulWidget {
   final Channel channel;
   final LatLng location;
+  final bool expandFlag;
 
-  const OneCard({Key key, this.location, this.channel}) : super(key: key);
+  const OneCard({Key key, this.location, this.channel, this.expandFlag}) : super(key: key);
 
   _OneCardState createState() => _OneCardState();
 }
@@ -35,7 +36,6 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
 
   //expansion of whole card
-  bool expandFlag = false;
 
   @override
   void initState() {
@@ -48,51 +48,59 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
             : o.orderItem.producer)));
 
     subscription.add(order.bindTo(widget.channel.orderUid
-        .where((uid) => uid != null)
+        .where((uid) => uid != null && (order.value == null ||  uid != order.value.uid))
         .map((uid) => Order.fromUID(uid))));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.white, boxShadow: [
-        BoxShadow(
-          color: const Color(0x11000000),
-          offset: new Offset(0.0, 5.0),
-          blurRadius: 8.0,
-        ),
-      ]),
-      child: Wrap(
-        alignment: WrapAlignment.start,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height *0.65 ),
+          child: ListView(
+        shrinkWrap: true,
         children: <Widget>[
-          Offstage(
-            offstage: expandFlag,
-            child: _buildCard(),
-          ),
-          StreamBuilder<bool>(
-            stream:
-                Rxdart.Observable.combineLatest3<User, String, String, bool>(
-                    ConfigHelper.instance.currentUserProperty.producer,
-                    order.producer.switchMap((currentOrder) =>
-                        currentOrder == null ? null : currentOrder.creator),
-                    order.producer.switchMap((currentOrder) =>
-                        currentOrder == null ? null : currentOrder.status),
-                    (currentUser, orderUserID, status) {
-              if (currentUser == null ||
-                  orderUserID == null ||
-                  status == null) {
-                return false;
-              }
-              if (status != orderStatus_Requested) {
-                return false;
-              }
+          Container(
+            decoration: BoxDecoration(color: Colors.white, boxShadow: [
+              BoxShadow(
+                color: const Color(0x11000000),
+                offset: new Offset(0.0, 5.0),
+                blurRadius: 8.0,
+              ),
+            ]),
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              children: <Widget>[
+                Offstage(
+                  offstage: widget.expandFlag,
+                  child: _buildCard(),
+                ),
+                StreamBuilder<bool>(
+                  stream:
+                      Rxdart.Observable.combineLatest3<User, String, String, bool>(
+                          ConfigHelper.instance.currentUserProperty.producer,
+                          order.producer.switchMap((currentOrder) =>
+                              currentOrder == null ? null : currentOrder.creator),
+                          order.producer.switchMap((currentOrder) =>
+                              currentOrder == null ? null : currentOrder.status),
+                          (currentUser, orderUserID, status) {
+                    if (currentUser == null ||
+                        orderUserID == null ||
+                        status == null) {
+                      return false;
+                    }
+                    if (status != orderStatus_Requested) {
+                      return false;
+                    }
 
-              return currentUser.uid != orderUserID;
-            }),
-            builder: (BuildContext context, snapshot) {
-              if (!snapshot.hasData || !snapshot.data) return Offstage();
-              return _buildButtons();
-            },
+                    return currentUser.uid != orderUserID;
+                  }),
+                  builder: (BuildContext context, snapshot) {
+                    if (!snapshot.hasData || !snapshot.data) return Offstage();
+                    return _buildButtons();
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -102,39 +110,6 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   Widget _buildCard() {
     return Column(
       children: <Widget>[
-        StreamBuilder<bool>(
-          stream: order.producer.switchMap((order) {
-            if (order == null) return null;
-            return Rxdart.Observable.combineLatest2<User, String, bool>(
-                ConfigHelper.instance.currentUserProperty.producer,
-                order.creator, (user, creatorID) {
-              if (user == null || creatorID == null) {
-                return null;
-              }
-
-              return user.uid == creatorID;
-            });
-          }),
-          builder: (BuildContext context, snapshot) {
-            if (!snapshot.hasData || snapshot.data == null) return Offstage();
-            if (snapshot.data)
-              return Padding(
-                padding: const EdgeInsets.all(11.0),
-                child: Text(
-                  'You are chatting about your order:',
-                  style: FontHelper.regular15LightGrey,
-                ),
-              );
-            else
-              return Padding(
-                padding: const EdgeInsets.all(11.0),
-                child: Text(
-                  'You are chatting about the other party order:',
-                  style: FontHelper.regular15LightGrey,
-                ),
-              );
-          },
-        ),
         Card(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
