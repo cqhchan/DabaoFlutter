@@ -512,8 +512,8 @@ class _TransactionsState extends State<TransactionsPage>
                         );
                       }),
                   Text(
-                    DateTimeHelper.convertEpochSecondsToDateTimeString(
-                        data.createdDate.value.second),
+                    DateTimeHelper.convertTimeToDisplayString(
+                        data.createdDate.value),
                     style: FontHelper.semiBold10Grey,
                   )
                 ],

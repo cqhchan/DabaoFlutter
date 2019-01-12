@@ -156,28 +156,11 @@ class _CompleteOverlayState extends State<CompleteOverlay>
           stream: order.deliveryTime,
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
-            if (snap.data.day == DateTime.now().day &&
-                snap.data.month == DateTime.now().month &&
-                snap.data.year == DateTime.now().year) {
-              return Text(
-                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
+            return Text(
+                DateTimeHelper.convertTimeToDisplayString(snap.data),
                 style: FontHelper.semiBoldgrey14TextStyle,
                 overflow: TextOverflow.ellipsis,
               );
-            } else {
-              return Container(
-                child: Text(
-                  snap.hasData
-                      ? 'For ' +
-                          DateTimeHelper.convertDateTimeToDate(snap.data) +
-                          ', ' +
-                          DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                      : "Error",
-                  style: FontHelper.semiBoldgrey14TextStyle,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            }
           },
         ),
       ],

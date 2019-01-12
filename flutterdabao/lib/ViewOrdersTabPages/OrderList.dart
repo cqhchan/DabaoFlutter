@@ -311,29 +311,47 @@ class _OrderItemCellState extends State<_OrderItemCell>
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        StreamBuilder<DateTime>(
-          stream: order.startDeliveryTime,
+        StreamBuilder<String>(
+          stream:
+              Observable.combineLatest2<OrderMode, DateTime, String>(
+                  order.mode, order.startDeliveryTime,
+                  (mode, start) {
+            DateTime endTime;
+            DateTime startTime;
+            DateTime currentTime = DateTime.now();
+            if (mode == null) return "Error";
+
+            switch (mode) {
+              case OrderMode.asap:
+                setState(() {
+                  endTime = order.endDeliveryTime.value == null
+                      ? currentTime.add(Duration(minutes: 90))
+                      : order.endDeliveryTime.value;
+                  startTime = currentTime.isAfter(endTime)
+                      ? endTime.subtract(Duration(minutes: 60))
+                      : currentTime;
+                });
+
+                break;
+              case OrderMode.scheduled:
+                setState(() {
+                  endTime = order.endDeliveryTime.value;
+                  startTime = start;
+                });
+
+                break;
+            }
+            return DateTimeHelper.convertDoubleTimeToDisplayString(
+                startTime, endTime);
+          }),
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
-            if (snap.data.day == DateTime.now().day &&
-                snap.data.month == DateTime.now().month &&
-                snap.data.year == DateTime.now().year) {
-              return Text(
-                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              );
-            } else {
-              return Text(
-                snap.hasData
-                    ? DateTimeHelper.convertDateTimeToDate(snap.data) +
-                        ', ' +
-                        DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                    : "Error",
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              );
-            }
+
+            return Text(
+              snap.data,
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
+            );
           },
         ),
         StreamBuilder<DateTime>(

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Rating.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
@@ -35,8 +36,37 @@ class User extends FirebaseType {
   BehaviorSubject<double> rating;
 
   // Only avaliable in from Auth
-  Observable<List<Voucher>> listOfAvalibleVouchers;
-  Observable<List<Voucher>> listOfInUsedVouchers;
+  MutableProperty<List<Voucher>> _listOfAvalibleVouchers;
+  MutableProperty<List<Voucher>> _listOfInUsedVouchers;
+
+  MutableProperty<List<Voucher>> get listOfAvalibleVouchers {
+    if (_listOfAvalibleVouchers == null) {
+      _listOfAvalibleVouchers = MutableProperty(List());
+      _listOfAvalibleVouchers.bindTo(FirebaseCollectionReactive<Voucher>(
+              Firestore.instance
+                  .collection(this.className)
+                  .document(this.uid)
+                  .collection("vouchers")
+                  .where(Voucher.statusKey, isEqualTo: voucher_Status_Open))
+          .observable);
+    }
+    return _listOfAvalibleVouchers;
+  }
+
+  MutableProperty<List<Voucher>> get listOfInUsedVouchers {
+    if (_listOfInUsedVouchers == null) {
+      _listOfInUsedVouchers = MutableProperty(List());
+      _listOfInUsedVouchers.bindTo(FirebaseCollectionReactive<Voucher>(Firestore
+              .instance
+              .collection(this.className)
+              .document(this.uid)
+              .collection("vouchers")
+              .where(Voucher.statusKey, isEqualTo: voucher_Status_InUse))
+          .observable);
+    }
+    return _listOfInUsedVouchers;
+  }
+
   Observable<int> currentDabaoerRewardsNumber;
   Observable<int> currentDabaoeeRewardsNumber;
 
@@ -48,22 +78,6 @@ class User extends FirebaseType {
   User.fromAuth(FirebaseUser user) : super.fromUID(user.uid) {
     if (ConfigHelper.instance.currentUserProperty.value != this)
       ConfigHelper.instance.currentUserProperty.value = this;
-
-    listOfAvalibleVouchers = FirebaseCollectionReactive<Voucher>(Firestore
-            .instance
-            .collection(this.className)
-            .document(this.uid)
-            .collection("vouchers")
-            .where(Voucher.statusKey, isEqualTo: voucher_Status_Open))
-        .observable;
-
-    listOfInUsedVouchers = FirebaseCollectionReactive<Voucher>(Firestore
-            .instance
-            .collection(this.className)
-            .document(this.uid)
-            .collection("vouchers")
-            .where(Voucher.statusKey, isEqualTo: voucher_Status_InUse))
-        .observable;
 
     currentDabaoerRewardsNumber = ConfigHelper
         .instance.currentDabaoerRewards.producer
@@ -203,6 +217,15 @@ class User extends FirebaseType {
         .collection(className)
         .document(uid)
         .setData({tokenKey: token}, merge: true);
+  }
+
+  void removeVoucher(Voucher voucher) {
+    Firestore.instance
+        .collection(className)
+        .document(uid)
+        .collection(voucher.className)
+        .document(voucher.uid)
+        .delete();
   }
 
   //last login date

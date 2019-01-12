@@ -1,20 +1,15 @@
 import 'package:date_format/date_format.dart';
+import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:intl/intl.dart';
 
 class DateTimeHelper {
-  static DateTime convertEpochTimeToDateTime(String epoch) {
-    return DateTime.fromMillisecondsSinceEpoch(int.parse(epoch));
-  }
 
-  static String convertEpochSecondsToDateTimeString(int epoch) {
-    DateTime date = DateTime.fromMillisecondsSinceEpoch(epoch * 1000);
-    return convertTimeToDisplayString(date);
-  }
-
+  // to tell what week it is
   static String convertDateTimeToWeek(DateTime datetime) {
     return formatDate(datetime, [yyyy, '_WEEK_', WW]);
   }
 
+  // returns 3 hours ago/ years ago etc
   static String convertDateTimeToAgo(DateTime datetime) {
     Duration diff = DateTime.now().difference(datetime);
 
@@ -76,52 +71,33 @@ class DateTimeHelper {
     return 'Please try again.';
   }
 
+  // 12:12am
   static String convertDateTimeToAMPM(DateTime date) {
     return DateFormat.jm().format(date);
   }
 
+  // 12:12 no am even though its am/pm
   static String hourAndMin12Hour(DateTime date) {
-    return formatDate(date, [hh, ":", nn]);
+    return formatDate(date, [date.hour == 12 ? "12" : hh, ":", nn]);
   }
 
-  static String convertDateTimeToStorageString(DateTime date) {
-    return formatDate(date, [yyyy, mm, dd]);
-  }
-
+  // Today or 14 Jan
   static String convertDateTimeToDate(DateTime date) {
     if (isToday(date))
-      return formatDate(date, ['Today, ', dd, '-', mm]);
+      return "Today";
     else
-      return formatDate(date, [D, ', ', dd, '-', mm]);
+      return StringHelper.upperCaseWords(formatDate(date, [d, ' ', M]))  ;
   }
 
-  static String convertDateTimeToNewLineDate(DateTime date) {
-    if (isToday(date))
-      return formatDate(date, ['Today,\n', dd, '-', mm]);
-    else
-      return formatDate(date, [D, ',\n', dd, '-', mm]);
-  }
 
-  static String convertDateTimeToDateAndYear(DateTime date) {
-    return formatDate(date, [dd, '-', MM, '-', yyyy]);
-  }
 
+  //important for cloud functions
   static String convertDateTimeToString(DateTime date) {
     return formatDate(
         date, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss, ' ', z]);
   }
 
-  static String convertDateTimeToTime(DateTime date) {
-    return formatDate(date, [date.hour == 12 ? "12" : hh, ':', nn, ' ', am]);
-  }
 
-  static String convertDateTimeTo24Hour(DateTime date) {
-    return formatDate(date, [HH]);
-  }
-
-  static String convertDateTimeToMinute(DateTime date) {
-    return formatDate(date, [nn]);
-  }
 
   // //2018-12-17 18:03:26 +0800 input
   // static DateTime convertStringTimeToDateTime(String string) {
@@ -129,22 +105,7 @@ class DateTimeHelper {
   // }
 
   static String convertTimeToDisplayString(DateTime date) {
-    if (isToday(date))
-      return formatDate(
-          date, ['Today, ', date.hour == 12 ? "12" : hh, ':', nn, am]);
-    else
-      return formatDate(date, [
-        D,
-        ', ',
-        dd,
-        '-',
-        mm,
-        ' ',
-        date.hour == 12 ? "12" : hh,
-        ':',
-        nn,
-        am
-      ]);
+  return convertDateTimeToDate(date) + ", " + convertDateTimeToAMPM(date);
   }
 
   static String convertStartTimeToDisplayString(DateTime date) {
@@ -166,50 +127,7 @@ class DateTimeHelper {
   }
 
   static String convertDoubleTimeToDisplayString(DateTime start, DateTime end) {
-    if (isToday(start))
-      return formatDate(
-              start, ['Today, ', start.hour == 12 ? "12" : hh, ':', nn, am]) +
-          " to " +
-          formatDate(end, [end.hour == 12 ? "12" : hh, ':', nn, am]);
-    else
-      return formatDate(start, [
-            D,
-            ', ',
-            dd,
-            '-',
-            mm,
-            ' ',
-            start.hour == 12 ? "12" : hh,
-            ':',
-            nn,
-            am
-          ]) +
-          " to " +
-          formatDate(end, [end.hour == 12 ? "12" : hh, ':', nn, am]);
-  }
-
-  static String convertDoubleTime2ToDisplayString(
-      DateTime start, DateTime end) {
-    if (isToday(start))
-      return formatDate(
-              start, ['Today, ', start.hour == 12 ? "12" : hh, ':', nn, am]) +
-          " - " +
-          formatDate(end, [end.hour == 12 ? "12" : hh, ':', nn, am]);
-    else
-      return formatDate(start, [
-            D,
-            ', ',
-            dd,
-            '-',
-            m,
-            ' ',
-            start.hour == 12 ? "12" : hh,
-            ':',
-            nn,
-            am
-          ]) +
-          " - " +
-          formatDate(end, [end.hour == 12 ? "12" : hh, ':', nn, am]);
+   return convertTimeToDisplayString(start) + " to " + convertDateTimeToAMPM(end);
   }
 
   static bool isToday(DateTime time) {

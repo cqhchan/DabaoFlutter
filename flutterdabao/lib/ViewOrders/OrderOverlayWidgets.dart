@@ -227,27 +227,11 @@ class _DateTimePickerState extends State<DateTimePicker>
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        (startTime.day == DateTime.now().day &&
-                startTime.month == DateTime.now().month &&
-                startTime.year == DateTime.now().year)
-            ? Text(
-                'Today, ' + DateTimeHelper.convertDateTimeToAMPM(startTime),
-                style: FontHelper.semiBold14Black,
-                overflow: TextOverflow.ellipsis,
-              )
-            : Text(
-                DateTimeHelper.convertDateTimeToDate(startTime) +
-                    ', ' +
-                    DateTimeHelper.convertDateTimeToAMPM(startTime),
-                style: FontHelper.semiBold14Black,
-                overflow: TextOverflow.ellipsis,
-              ),
-        Container(
-            child: Text(
-          " - " + DateTimeHelper.convertDateTimeToAMPM(endTime),
+        Text(
+          DateTimeHelper.convertDoubleTimeToDisplayString(startTime,endTime),
           style: FontHelper.semiBold14Black,
           overflow: TextOverflow.ellipsis,
-        )),
+        )
       ],
     );
   }

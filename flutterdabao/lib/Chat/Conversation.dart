@@ -434,7 +434,7 @@ class ConversationState extends State<Conversation>
           children: <Widget>[
             Text(data.message.value),
             Text(
-              DateTimeHelper.convertDateTimeToTime(data.timestamp.value),
+              DateTimeHelper.convertDateTimeToAMPM(data.timestamp.value),
               style: FontHelper.smallTimeTextStyle,
             )
           ],
@@ -529,7 +529,7 @@ class ConversationState extends State<Conversation>
             },
           ),
           Text(
-            DateTimeHelper.convertDateTimeToTime(data.timestamp.value),
+            DateTimeHelper.convertDateTimeToAMPM(data.timestamp.value),
             style: FontHelper.smallTimeTextStyle,
           )
         ],
@@ -542,7 +542,7 @@ class ConversationState extends State<Conversation>
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         child: Text(
-          DateTimeHelper.convertDateTimeToNewLineDate(data.timestamp.value),
+          DateTimeHelper.convertDateTimeToDate(data.timestamp.value),
           style: FontHelper.smallTimeTextStyle,
         ),
       ),

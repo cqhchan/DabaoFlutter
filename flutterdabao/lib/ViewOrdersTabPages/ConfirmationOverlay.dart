@@ -44,7 +44,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
             selectedDateTime.producer, startTime.producer, endTime.producer,
             (selected, start, end) {
       if (selected.isBefore(start) || selected.isAfter(end)) {
-        return 'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(start, end)}';
+        return 'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTimeToDisplayString(start, end)}';
       }
       return "";
     }).listen((error) {
@@ -257,7 +257,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
         } else {
           setState(() {
             errorMessage =
-                'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(startTime.value, endTime.value)}';
+                'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTimeToDisplayString(startTime.value, endTime.value)}';
           });
         }
       },

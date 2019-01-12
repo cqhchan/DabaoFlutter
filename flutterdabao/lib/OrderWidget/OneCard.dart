@@ -326,29 +326,12 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              (startTime.day == DateTime.now().day &&
-                      startTime.month == DateTime.now().month &&
-                      startTime.year == DateTime.now().year)
-                  ? Text(
-                      'Today, ' +
-                          DateTimeHelper.convertDateTimeToAMPM(startTime) +
-                          ' - ' +
-                          DateTimeHelper.convertDateTimeToAMPM(endTime),
-                      style: FontHelper.semiBoldgrey14TextStyle,
-                      overflow: TextOverflow.ellipsis,
-                    )
-                  : Container(
-                      child: Text(
-                        snap.hasData
-                            ? DateTimeHelper.convertDateTimeToNewLineDate(
-                                    startTime) +
-                                ', ' +
-                                DateTimeHelper.convertDateTimeToAMPM(endTime)
-                            : "Error",
-                        style: FontHelper.semiBoldgrey14TextStyle,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    )
+              Text(
+                DateTimeHelper.convertDoubleTimeToDisplayString(
+                    startTime, endTime),
+                style: FontHelper.semiBoldgrey14TextStyle,
+                overflow: TextOverflow.ellipsis,
+              )
             ],
           );
         });

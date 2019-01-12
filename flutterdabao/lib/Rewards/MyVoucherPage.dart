@@ -129,7 +129,7 @@ class _MyVoucherPageState extends State<MyVoucherPage>
   StreamBuilder _buildBody(BuildContext context) {
     return StreamBuilder<List<Voucher>>(
       stream: ConfigHelper
-          .instance.currentUserProperty.value.listOfAvalibleVouchers,
+          .instance.currentUserProperty.value.listOfAvalibleVouchers.producer,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Offstage();
         return _buildList(snapshot.data);

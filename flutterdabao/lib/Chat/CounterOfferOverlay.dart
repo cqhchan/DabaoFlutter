@@ -55,7 +55,7 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
             selectedDateTime.producer, startTime.producer, endTime.producer,
             (selected, start, end) {
       if (selected.isBefore(start) || selected.isAfter(end)) {
-        return 'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(start, end)}';
+        return 'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTimeToDisplayString(start, end)}';
       }
       return "";
     }).listen((error) {
@@ -378,7 +378,7 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
         } else {
           setState(() {
             errorMessage =
-                'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(startTime.value, endTime.value)}';
+                'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTimeToDisplayString(startTime.value, endTime.value)}';
           });
         }
       },

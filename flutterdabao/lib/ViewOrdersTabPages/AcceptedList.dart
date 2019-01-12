@@ -344,25 +344,11 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
       stream: order.deliveryTime,
       builder: (context, snap) {
         if (!snap.hasData) return Offstage();
-        if (snap.data.day == DateTime.now().day &&
-            snap.data.month == DateTime.now().month &&
-            snap.data.year == DateTime.now().year) {
-          return Text(
-            'Today, ' + DateTimeHelper.convertDateTimeToAMPM(snap.data),
-            style: FontHelper.semiBoldgrey14TextStyle,
-            overflow: TextOverflow.ellipsis,
-          );
-        } else {
-          return Text(
-            snap.hasData
-                ? DateTimeHelper.convertDateTimeToDate(snap.data) +
-                    ', ' +
-                    DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                : "Error",
-            style: FontHelper.semiBoldgrey14TextStyle,
-            overflow: TextOverflow.ellipsis,
-          );
-        }
+        return Text(
+          DateTimeHelper.convertTimeToDisplayString(snap.data),
+          style: FontHelper.semiBoldgrey14TextStyle,
+          overflow: TextOverflow.ellipsis,
+        );
       },
     );
   }
@@ -669,7 +655,6 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
         ],
       ),
       onPressed: () {
-
         Navigator.of(context).push(FadeRoute(
             widget: DabaoerViewOrderListPage(
           order: Order.fromUID(widget.order.uid),
@@ -699,8 +684,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
           ],
         ),
         onPressed: () async {
-          Navigator.of(context).push(
-            FadeRoute(
+          Navigator.of(context).push(FadeRoute(
               widget: DabaoerViewOrderListPage(
             order: Order.fromUID(widget.order.uid),
           )));

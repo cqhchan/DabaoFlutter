@@ -231,7 +231,7 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   Stream<List<Order>> currentUserDeliveryingOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
-        ? List<Order>()
+        ? BehaviorSubject(seedValue:List<Order>())
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
                 .where(Order.statusKey, isEqualTo: orderStatus_Accepted)

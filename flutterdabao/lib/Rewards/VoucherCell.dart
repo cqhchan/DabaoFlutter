@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/CustomDecorations.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
@@ -95,7 +96,7 @@ class VoucherCellState extends State<VoucherCell> {
                         builder: (context, snap) {
                           return Text(
                               snap.hasData
-                                  ? "Valid Until " + DateTimeHelper.convertDateTimeToDateAndYear(
+                                  ? "Valid Until " + DateTimeHelper.convertDateTimeToDate(
                                       snap.data)
                                   : "",
                               style: FontHelper.bold(Colors.black, 10.0));
@@ -142,7 +143,10 @@ class VoucherCellState extends State<VoucherCell> {
                                       style:
                                           FontHelper.bold(Colors.black, 12.0),
                                     ),
-                                        onPressed: () {widget.secondaryButtonTapped(widget.voucher);},
+                                        onPressed: () {
+                                          ConfigHelper.instance.currentUserProperty.value.removeVoucher(widget.voucher);
+                                          if (widget.secondaryButtonTapped != null)
+                                          widget.secondaryButtonTapped(widget.voucher);},
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(4.0),
                                       side: BorderSide(
