@@ -56,21 +56,21 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints:
-          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.65),
-      child: ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          Container(
-            decoration: BoxDecoration(color: Colors.white, boxShadow: [
-              BoxShadow(
-                color: const Color(0x11000000),
-                offset: new Offset(0.0, 5.0),
-                blurRadius: 8.0,
-              ),
-            ]),
-            child: Wrap(
+    return Container(
+      decoration: BoxDecoration(color: Colors.white, boxShadow: [
+        BoxShadow(
+          color: const Color(0x11000000),
+          offset: new Offset(0.0, 5.0),
+          blurRadius: 8.0,
+        ),
+      ]),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.65),
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Wrap(
               alignment: WrapAlignment.start,
               children: <Widget>[
                 Offstage(
@@ -104,8 +104,8 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
