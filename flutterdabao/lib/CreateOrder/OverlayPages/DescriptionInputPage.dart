@@ -20,6 +20,7 @@ class MessageInputPage extends StatefulWidget {
 
 class _MessageInputPageState extends State<MessageInputPage> {
   TextEditingController controller = TextEditingController();
+  FocusNode _myFocusNode;
 
   @override
   void initState() {
@@ -47,12 +48,17 @@ class _MessageInputPageState extends State<MessageInputPage> {
         body: Container(
           padding: EdgeInsets.all(10.0),
           child: TextFormField(
+            focusNode: _myFocusNode,
             maxLength: 100,
             controller: controller,
             maxLines: 5,
             autocorrect: false,
             textInputAction: TextInputAction.done,
             textCapitalization: TextCapitalization.sentences,
+            onFieldSubmitted: (text){
+               widget.textCallBack(text);
+              Navigator.of(context).pop();
+            },
             style: FontHelper.medium(Colors.black, 12.0),
             decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
@@ -67,6 +73,7 @@ class _MessageInputPageState extends State<MessageInputPage> {
         ),
       ),
       onWillPop: () {
+        _myFocusNode.unfocus();
         widget.textCallBack(controller.text);
         // Navigator.of(context).pop();
         return Future.value(true);
