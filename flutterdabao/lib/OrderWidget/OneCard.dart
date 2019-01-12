@@ -680,7 +680,6 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
         builder: (builder) {
           return ConfirmationOverlay(
             order: order,
-            // route: widget.route,
           );
         });
   }
@@ -691,7 +690,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
         builder: (builder) {
           return CounterOfferOverlay(
             order: order,
-            // route: widget.route,
+            channel: widget.channel,
           );
         });
   }

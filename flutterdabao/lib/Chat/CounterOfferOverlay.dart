@@ -11,6 +11,7 @@ import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/ViewOrders/OrderOverlayWidgets.dart';
+import 'package:rxdart/rxdart.dart';
 
 class CounterOfferOverlay extends StatefulWidget {
   final Order order;
@@ -27,12 +28,12 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
 
   //selected date on press
-  DateTime selectedDateTime;
-  DateTime startTime;
-  DateTime endTime;
+  MutableProperty<DateTime> selectedDateTime = MutableProperty(null);
+  MutableProperty<DateTime> startTime = MutableProperty(null);
+  MutableProperty<DateTime> endTime = MutableProperty(null);
   MutableProperty<double> _sliderSelector = MutableProperty<double>(null);
   double startingValue;
-
+  String errorMessage = "";
   @override
   void initState() {
     super.initState();
@@ -49,6 +50,19 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
         startingValue = value;
       });
     });
+    subscription.add(
+        Observable.combineLatest3<DateTime, DateTime, DateTime, String>(
+            selectedDateTime.producer, startTime.producer, endTime.producer,
+            (selected, start, end) {
+      if (selected.isBefore(start) || selected.isAfter(end)) {
+        return 'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(start, end)}';
+      }
+      return "";
+    }).listen((error) {
+      setState(() {
+        errorMessage = error;
+      });
+    }));
   }
 
   @override
@@ -80,13 +94,13 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
                           DateTimePicker(
                             order: widget.order,
                             selectedTimeCallback: (DateTime selected) {
-                              selectedDateTime = selected;
+                              selectedDateTime.value = selected;
                             },
                             endTime: (DateTime end) {
-                              endTime = end;
+                              endTime.value = end;
                             },
                             startTime: (DateTime start) {
-                              startTime = start;
+                              startTime.value = start;
                             },
                           ),
                           SizedBox(
@@ -105,6 +119,18 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
                             height: 10,
                           ),
                           _buildOffer(),
+                          Offstage(
+                            offstage: errorMessage.isEmpty,
+                            child: Container(
+                              padding: EdgeInsets.fromLTRB(0.0, 10, 0.0, 10),
+                              child: Text(
+                                errorMessage,
+                                style: FontHelper.semiBold(
+                                    ColorHelper.dabaoErrorRed, 12.0),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
                           Flex(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -202,7 +228,7 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
                       3.0,
                   min: ((startingValue.roundToDouble() - 1.5) < 0
                       ? 0
-                      : startingValue.roundToDouble() -1.5),
+                      : startingValue.roundToDouble() - 1.5),
                   value: snap.data,
                   onChanged: (data) {
                     _sliderSelector.value = data;
@@ -227,7 +253,7 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
               StringHelper.doubleToPriceString(
                   ((startingValue.roundToDouble() - 1.5) < 0
                           ? 0
-                          :startingValue.roundToDouble() - 1.5) +
+                          : startingValue.roundToDouble() - 1.5) +
                       0.5),
               style: FontHelper.regular12Black,
               textAlign: TextAlign.center,
@@ -326,20 +352,20 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
         ),
       ),
       onPressed: () async {
-        print(selectedDateTime);
 
-        if (selectedDateTime
-                .isAfter(startTime.subtract(Duration(minutes: 9))) &&
-            selectedDateTime.isBefore(endTime.add(Duration(minutes: 9)))) {
+        if (selectedDateTime.value
+                .isAfter(startTime.value.subtract(Duration(minutes: 9))) &&
+            selectedDateTime.value
+                .isBefore(endTime.value.add(Duration(minutes: 9)))) {
           if (_sliderSelector.value != null) {
             widget.channel.setCounterOffer(
                 _sliderSelector.value,
-                selectedDateTime,
+                selectedDateTime.value,
                 ConfigHelper.instance.currentUserProperty.value.uid);
             widget.channel.addMessage(
                 "${ConfigHelper.instance.currentUserProperty.value.name.value} " +
                     "has offered to pick up your order! " +
-                    "\nDeliver at: ${DateTimeHelper.convertTimeToDisplayString(selectedDateTime)} " +
+                    "\nDeliver at: ${DateTimeHelper.convertTimeToDisplayString(selectedDateTime.value)} " +
                     "\nCounter-Offer Delivery Fee to:${StringHelper.doubleToPriceString(_sliderSelector.value)}",
                 ConfigHelper.instance.currentUserProperty.value.uid,
                 null);
@@ -350,10 +376,10 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
             Scaffold.of(context).showSnackBar(snackBar);
           }
         } else {
-          final snackBar = SnackBar(
-              content: Text(
-                  'Delivery Time must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(startTime, endTime)}'));
-          Scaffold.of(context).showSnackBar(snackBar);
+          setState(() {
+            errorMessage =
+                'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(startTime.value, endTime.value)}';
+          });
         }
       },
     );

@@ -10,12 +10,11 @@ import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
-import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
-import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'dart:core';
 
 import 'package:flutterdabao/ViewOrders/OrderOverlayWidgets.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ConfirmationOverlay extends StatefulWidget {
   final Order order;
@@ -30,14 +29,29 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     with HavingSubscriptionMixin {
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
 
-  DateTime selectedDateTime;
-  DateTime startTime;
-  DateTime endTime;
+  MutableProperty<DateTime> selectedDateTime = MutableProperty(null);
+  MutableProperty<DateTime> startTime = MutableProperty(null);
+  MutableProperty<DateTime> endTime = MutableProperty(null);
+  String errorMessage = "";
 
   @override
   void initState() {
     super.initState();
     listOfOrderItems = widget.order.orderItem;
+
+    subscription.add(
+        Observable.combineLatest3<DateTime, DateTime, DateTime, String>(
+            selectedDateTime.producer, startTime.producer, endTime.producer,
+            (selected, start, end) {
+      if (selected.isBefore(start) || selected.isAfter(end)) {
+        return 'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(start, end)}';
+      }
+      return "";
+    }).listen((error) {
+      setState(() {
+        errorMessage = error;
+      });
+    }));
   }
 
   @override
@@ -65,13 +79,13 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                           DateTimePicker(
                             order: widget.order,
                             selectedTimeCallback: (DateTime selected) {
-                              selectedDateTime = selected;
+                              selectedDateTime.value = selected;
                             },
                             endTime: (DateTime end) {
-                              endTime = end;
+                              endTime.value = end;
                             },
                             startTime: (DateTime start) {
-                              startTime = start;
+                              startTime.value = start;
                             },
                           ),
                           _buildHeader(widget.order),
@@ -81,6 +95,18 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                           DeliveryLocation(order: widget.order),
                           SizedBox(
                             height: 15,
+                          ),
+                          Offstage(
+                            offstage: errorMessage.isEmpty,
+                            child: Container(
+                              padding: EdgeInsets.fromLTRB(0.0, 10, 0.0, 10),
+                              child: Text(
+                                errorMessage,
+                                style: FontHelper.semiBold(
+                                    ColorHelper.dabaoErrorRed, 12.0),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           ),
                           Flex(
                             mainAxisSize: MainAxisSize.min,
@@ -205,10 +231,10 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
       ),
       onPressed: () async {
         print(selectedDateTime);
-
-        if (selectedDateTime
-                .isAfter(startTime.subtract(Duration(minutes: 9))) &&
-            selectedDateTime.isBefore(endTime.add(Duration(minutes: 9)))) {
+        if (selectedDateTime.value
+                .isAfter(startTime.value.subtract(Duration(minutes: 9))) &&
+            selectedDateTime.value
+                .isBefore(endTime.value.add(Duration(minutes: 9)))) {
           order.isSelectedProperty.value = false;
           showLoadingOverlay(context: context);
           var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
@@ -216,7 +242,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
             orderID: widget.order.uid,
             acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
             deliveryTime:
-                DateTimeHelper.convertDateTimeToString(selectedDateTime),
+                DateTimeHelper.convertDateTimeToString(selectedDateTime.value),
           );
           if (isSuccessful) {
             Navigator.of(context).pop();
@@ -229,10 +255,10 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
             Scaffold.of(context).showSnackBar(snackBar);
           }
         } else {
-          final snackBar = SnackBar(
-              content: Text(
-                  'Delivery Time must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(startTime, endTime)}'));
-          Scaffold.of(context).showSnackBar(snackBar);
+          setState(() {
+            errorMessage =
+                'Delivery Time Selected must be between ${DateTimeHelper.convertDoubleTime2ToDisplayString(startTime.value, endTime.value)}';
+          });
         }
       },
     );

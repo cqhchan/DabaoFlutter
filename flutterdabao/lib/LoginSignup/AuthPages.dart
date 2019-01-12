@@ -220,13 +220,13 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
           width: 120,
           child: OutlineButton(
               borderSide: otpsent
-                  ? BorderSide(color: Colors.red[300])
+                  ? BorderSide(color: ColorHelper.dabaoErrorRed)
                   : BorderSide(color: Color(0xFF707070)),
               child: otpsent
                   ? Container(
                       child: Text('RESEND OTP',
                           maxLines: 1,
-                          style: FontHelper.semiBold(Colors.red[300], null)))
+                          style: FontHelper.semiBold(ColorHelper.dabaoErrorRed, null)))
                   : Container(
                       child: Text('SEND OTP',
                           maxLines: 1,

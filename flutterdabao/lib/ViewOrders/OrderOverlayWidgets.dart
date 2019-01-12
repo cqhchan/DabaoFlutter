@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:date_format/date_format.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -9,8 +13,6 @@ import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
-import 'package:flutterdabao/TimePicker/ScrollableHourPicker.dart';
-import 'package:flutterdabao/TimePicker/ScrollableMinutePicker.dart';
 
 class DeliveryLocation extends StatelessWidget {
   final Order order;
@@ -73,7 +75,11 @@ class DateTimePicker extends StatefulWidget {
   final Function(DateTime) endTime;
 
   const DateTimePicker(
-      {Key key, this.order, @required this.selectedTimeCallback, @required this.startTime,@required this.endTime})
+      {Key key,
+      this.order,
+      @required this.selectedTimeCallback,
+      @required this.startTime,
+      @required this.endTime})
       : super(key: key);
 
   @override
@@ -85,36 +91,9 @@ class DateTimePicker extends StatefulWidget {
 
 class _DateTimePickerState extends State<DateTimePicker>
     with HavingSubscriptionMixin {
-  HourPicker hourPicker;
-  MinutePicker minutePicker;
-
   DateTime startTime;
   DateTime endTime;
   MutableProperty<DateTime> selectedDate;
-
-  _handleHour(num hour) {
-    DateTime newDate = new DateTime(
-        startTime.year,
-        startTime.month,
-        startTime.day,
-        startTime.hour + hour,
-        selectedDate.value.minute,
-        selectedDate.value.second,
-        selectedDate.value.millisecond);
-
-    selectedDate.value = newDate;
-  }
-
-  _handleMinuteChanged(num minute) {
-    selectedDate.value = new DateTime(
-        selectedDate.value.year,
-        selectedDate.value.month,
-        selectedDate.value.day,
-        selectedDate.value.hour,
-        minute,
-        selectedDate.value.second,
-        selectedDate.value.millisecond);
-  }
 
   @override
   void initState() {
@@ -130,7 +109,9 @@ class _DateTimePickerState extends State<DateTimePicker>
             endTime = widget.order.endDeliveryTime.value == null
                 ? currentTime.add(Duration(minutes: 90))
                 : widget.order.endDeliveryTime.value;
-            startTime = currentTime.isAfter(endTime) ? endTime : currentTime;
+            startTime = currentTime.isAfter(endTime)
+                ? endTime.subtract(Duration(minutes: 60))
+                : currentTime;
           });
 
           break;
@@ -148,10 +129,11 @@ class _DateTimePickerState extends State<DateTimePicker>
 
       //Copy to prevent editting
       selectedDate = MutableProperty(DateTime.fromMillisecondsSinceEpoch(
-          startTime.millisecondsSinceEpoch));
+          startTime.millisecondsSinceEpoch + 1000));
 
-      subscription.add(selectedDate.producer
-          .listen((selectedTime) => widget.selectedTimeCallback(selectedTime)));
+      subscription.add(selectedDate.producer.listen((selectedTime) {
+        widget.selectedTimeCallback(selectedTime);
+      }));
     });
   }
 
@@ -177,26 +159,61 @@ class _DateTimePickerState extends State<DateTimePicker>
         SizedBox(
           width: 10.0,
         ),
-        HourPicker.hour(
-          maxValue: startTime.hour +
-              (endTime.difference(startTime).inMinutes / 60).ceil() ,
-          minValue: startTime.hour,
-          initialValue:
-              startTime.hour + selectedDate.value.difference(startTime).inHours,
-          onChanged: (value) {
-            print(value);
-            _handleHour(value);
+        GestureDetector(
+          onTap: () async {
+            // if (Platform.isIOS) {
+
+            await showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return CupertinoDatePicker(
+                    use24hFormat: true,
+                    initialDateTime: selectedDate.value.isBefore(startTime)
+                        ? startTime
+                        : selectedDate.value.isAfter(endTime)
+                            ? endTime
+                            : selectedDate.value,
+                    mode: CupertinoDatePickerMode.dateAndTime,
+                    onDateTimeChanged: (DateTime newDateTime) {
+                      selectedDate.value = newDateTime;
+                    },
+                    minimumDate: DateTimeHelper.sameDay(startTime, endTime)
+                        ? startTime
+                        : startTime.subtract(Duration(days: 1)),
+                    maximumDate: endTime,
+                  );
+                });
           },
-        ),
-        Text(':', style: FontHelper.robotoRegular50Black),
-        MinutePicker.minute(
-          maxValue: 5,
-          minValue: 0,
-          initialValue: selectedDate.value.minute ~/ 10,
-          step: 1,
-          onChanged: (value) {
-            _handleMinuteChanged(value * 10);
-          },
+          child: StreamBuilder<DateTime>(
+            stream: selectedDate.producer,
+            builder: (context, snap) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                      width: 135,
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                              snap.data != null
+                                  ? DateTimeHelper.hourAndMin12Hour(snap.data)
+                                  : "00:00",
+                              style: FontHelper.semiBold(Colors.black, 45)))),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding: EdgeInsets.only(bottom: 6),
+                      child: Text(
+                          snap.data != null
+                              ? formatDate(snap.data, [am])
+                              : "AM",
+                          style: FontHelper.semiBold(Colors.black, 22)),
+                    ),
+                  )
+                ],
+              );
+            },
+          ),
         ),
       ],
     );

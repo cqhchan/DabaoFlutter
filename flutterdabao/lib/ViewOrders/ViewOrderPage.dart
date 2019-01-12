@@ -169,7 +169,7 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                     FlatButton(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.redAccent),
+                            side: BorderSide(color: ColorHelper.dabaoErrorRed),
                             borderRadius: BorderRadius.circular(8.0)),
                         child: Align(
                             alignment: Alignment.center,

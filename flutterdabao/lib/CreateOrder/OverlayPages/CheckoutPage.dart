@@ -189,7 +189,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                                       style: FontHelper.bold(
                                           promoCodeError == null
                                               ? ColorHelper.dabaoOrange
-                                              : Colors.red,
+                                              : ColorHelper.dabaoErrorRed,
                                           14.0),
                                     );
                                   });
@@ -211,7 +211,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                               style: FontHelper.medium(
                                   promoCodeError == null
                                       ? Colors.black
-                                      : Colors.red,
+                                      : ColorHelper.dabaoErrorRed,
                                   12.0),
                             ),
                             Expanded(
@@ -228,7 +228,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                                     style: FontHelper.medium(
                                         promoCodeError == null
                                             ? Colors.black
-                                            : Colors.red,
+                                            : ColorHelper.dabaoErrorRed,
                                         12.0),
                                   );
                                 },
@@ -244,7 +244,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                             children: <Widget>[
                               Text(
                                 "Error:",
-                                style: FontHelper.medium(Colors.red, 12.0),
+                                style: FontHelper.medium(ColorHelper.dabaoErrorRed, 12.0),
                               ),
                               Expanded(
                                   child: Align(
@@ -254,7 +254,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                                         style: FontHelper.medium(
                                             promoCodeError == null
                                                 ? Colors.black
-                                                : Colors.red,
+                                                : ColorHelper.dabaoErrorRed,
                                             12.0),
                                       )))
                             ],

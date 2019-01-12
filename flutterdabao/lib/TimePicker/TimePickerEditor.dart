@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:date_format/date_format.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Route/OverlayRoute.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -154,8 +158,8 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
       }
     }).listen((error) {
       setState(() {
-              errorMessage = error;
-            });
+        errorMessage = error;
+      });
     }));
     ;
   }
@@ -318,38 +322,54 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
         ),
         GestureDetector(
           onTap: () async {
-            TimeOfDay tempStartTimeOfDay = await showTimePicker(
+            // if (Platform.isIOS) {
+            await showModalBottomSheet(
                 context: context,
-                initialTime: TimeOfDay.fromDateTime(selectedStartDate.value));
-            DateTime tempSelectedTime = selectedStartDate.value;
-
-            DateTime newDateTime = DateTime(
-                tempSelectedTime.year,
-                tempSelectedTime.month,
-                tempSelectedTime.day,
-                tempStartTimeOfDay.hour,
-                tempStartTimeOfDay.minute);
-
-            if (newDateTime.isBefore(startTime)) {
-              newDateTime = newDateTime.add(Duration(days: 1));
-            }
-            selectedStartDate.value = newDateTime;
+                builder: (context) {
+                  return CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.time,
+                    use24hFormat: true,
+                    onDateTimeChanged: (DateTime newDateTime) {
+                      if (newDateTime.isBefore(startTime)) {
+                        newDateTime = newDateTime.add(Duration(days: 1));
+                      }
+                      selectedStartDate.value = newDateTime;
+                    },
+                    initialDateTime: selectedStartDate.value,
+                  );
+                });
           },
           child: StreamBuilder(
             stream: selectedStartDate.producer,
             builder: (context, snap) {
-              return Container(
-                  width: 140,
-                  child: Align(
-                      alignment: Alignment.center,
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                      width: 135,
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                              snap.data != null
+                                  ? DateTimeHelper.hourAndMin12Hour(snap.data)
+                                  : "00:00",
+                              style: FontHelper.semiBold(Colors.black, 45),textAlign: TextAlign.center,))),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding: EdgeInsets.only(bottom: 6),
                       child: Text(
                           snap.data != null
-                              ? DateTimeHelper.hourAndMin12Hour(snap.data)
-                              : "00:00",
-                          style: FontHelper.semiBold(Colors.black, 45))));
+                              ? formatDate(snap.data, [am])
+                              : "AM",
+                          style: FontHelper.semiBold(Colors.black, 22)),
+                    ),
+                  )
+                ],
+              );
             },
           ),
-        )
+        ),
       ],
     );
   }
@@ -400,31 +420,65 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
         ),
         GestureDetector(
           onTap: () async {
-            TimeOfDay tempEndTimeOfDay = await showTimePicker(
+            // if (Platform.isIOS) {
+            await showModalBottomSheet(
                 context: context,
-                initialTime: TimeOfDay.fromDateTime(selectedEndDate.value));
-            DateTime tempSelectedTime = selectedEndDate.value;
+                builder: (context) {
+                  return CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.time,
+                    use24hFormat: true,
+                    onDateTimeChanged: (DateTime newDateTime) {
+                      selectedEndDate.value = newDateTime;
+                    },
+                    initialDateTime: selectedEndDate.value,
+                  );
+                });
+            // } else {
+            //   TimeOfDay tempEndTimeOfDay = await showTimePicker(
+            //       context: context,
+            //       initialTime: TimeOfDay.fromDateTime(selectedEndDate.value));
 
-            DateTime newDateTime = DateTime(
-                tempSelectedTime.year,
-                tempSelectedTime.month,
-                tempSelectedTime.day,
-                tempEndTimeOfDay.hour,
-                tempEndTimeOfDay.minute);
-            selectedEndDate.value = newDateTime;
+            //   if (tempEndTimeOfDay != null) {
+            //     DateTime tempSelectedTime = selectedEndDate.value;
+
+            //     DateTime newDateTime = DateTime(
+            //         tempSelectedTime.year,
+            //         tempSelectedTime.month,
+            //         tempSelectedTime.day,
+            //         tempEndTimeOfDay.hour,
+            //         tempEndTimeOfDay.minute);
+            //     selectedEndDate.value = newDateTime;
+            //   }
+            // }
           },
           child: StreamBuilder(
             stream: selectedEndDate.producer,
             builder: (context, snap) {
-              return Container(
-                  width: 140,
-                  child: Align(
-                      alignment: Alignment.center,
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                      width: 135,
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                              snap.data != null
+                                  ? DateTimeHelper.hourAndMin12Hour(snap.data)
+                                  : "00:00",
+                              style: FontHelper.semiBold(Colors.black, 45),))),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding: EdgeInsets.only(bottom: 6),
                       child: Text(
                           snap.data != null
-                              ? DateTimeHelper.hourAndMin12Hour(snap.data)
-                              : "00:00",
-                          style: FontHelper.semiBold(Colors.black, 45))));
+                              ? formatDate(snap.data, [am])
+                              : "AM",
+                          style: FontHelper.semiBold(Colors.black, 22)),
+                    ),
+                  )
+                ],
+              );
             },
           ),
         )
@@ -438,7 +492,7 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
       child: Container(
         child: Text(
           errorMessage,
-          style: FontHelper.semiBold(Colors.red, 12.0),
+          style: FontHelper.semiBold(ColorHelper.dabaoErrorRed, 12.0),
           textAlign: TextAlign.center,
         ),
       ),
@@ -489,24 +543,48 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
   }
 
   Future _selectDate() async {
-    await showDatePicker(
-      context: context,
-      initialDate: selectedStartDate.value,
-      firstDate: DateTime(
-          DateTime.now().year, DateTime.now().month, DateTime.now().day),
-      lastDate: DateTime(9999),
-    ).then((date) {
-      if (date != null) {
-        selectedStartDateByCalander = date;
-        selectedStartDate.value = DateTime(
-            selectedStartDateByCalander.year,
-            selectedStartDateByCalander.month,
-            selectedStartDateByCalander.day,
-            selectedStartDate.value.hour,
-            selectedStartDate.value.minute,
-            selectedStartDate.value.second);
-      }
-    });
+    // if (Platform.isIOS)
+    await showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.date,
+            onDateTimeChanged: (DateTime date) {
+              if (date != null) {
+                selectedStartDateByCalander = date;
+                selectedStartDate.value = DateTime(
+                    selectedStartDateByCalander.year,
+                    selectedStartDateByCalander.month,
+                    selectedStartDateByCalander.day,
+                    selectedStartDate.value.hour,
+                    selectedStartDate.value.minute,
+                    selectedStartDate.value.second);
+              }
+            },
+            initialDateTime: selectedStartDate.value,
+            minimumYear: DateTime.now().year,
+            maximumYear: DateTime.now().year + 1,
+          );
+        });
+    // else
+    //   await showDatePicker(
+    //     context: context,
+    //     initialDate: selectedStartDate.value,
+    //     firstDate: DateTime(
+    //         DateTime.now().year, DateTime.now().month, DateTime.now().day),
+    //     lastDate: DateTime(DateTime.now().year + 1),
+    //   ).then((date) {
+    //     if (date != null) {
+    //       selectedStartDateByCalander = date;
+    //       selectedStartDate.value = DateTime(
+    //           selectedStartDateByCalander.year,
+    //           selectedStartDateByCalander.month,
+    //           selectedStartDateByCalander.day,
+    //           selectedStartDate.value.hour,
+    //           selectedStartDate.value.minute,
+    //           selectedStartDate.value.second);
+    //     }
+    // });
   }
 
   ///Round down minute to the nearest ten.
@@ -702,7 +780,7 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
     }
   }
 
-Widget buildStartDeliverSelector() {
+  Widget buildStartDeliverSelector() {
     return Row(
       children: <Widget>[
         Container(
@@ -714,35 +792,71 @@ Widget buildStartDeliverSelector() {
         ),
         GestureDetector(
           onTap: () async {
-            TimeOfDay tempStartTimeOfDay = await showTimePicker(
+            // if (Platform.isIOS) {
+            await showModalBottomSheet(
                 context: context,
-                initialTime: TimeOfDay.fromDateTime(selectedStartDate.value));
-            DateTime tempSelectedTime = selectedStartDate.value;
+                builder: (context) {
+                  return CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.time,
+                    use24hFormat: true,
+                    onDateTimeChanged: (DateTime newDateTime) {
+                      if (newDateTime.isBefore(_currentStartTime)) {
+                        newDateTime = newDateTime.add(Duration(days: 1));
+                      }
+                      selectedStartDate.value = newDateTime;
+                    },
+                    initialDateTime: selectedStartDate.value,
+                  );
+                });
+            // } else {
+            //   TimeOfDay tempStartTimeOfDay = await showTimePicker(
+            //       context: context,
+            //       initialTime: TimeOfDay.fromDateTime(selectedStartDate.value));
+            //   if (tempStartTimeOfDay != null) {
+            //     DateTime tempSelectedTime = selectedStartDate.value;
 
-            DateTime newDateTime = DateTime(
-                tempSelectedTime.year,
-                tempSelectedTime.month,
-                tempSelectedTime.day,
-                tempStartTimeOfDay.hour,
-                tempStartTimeOfDay.minute);
+            //     DateTime newDateTime = DateTime(
+            //         tempSelectedTime.year,
+            //         tempSelectedTime.month,
+            //         tempSelectedTime.day,
+            //         tempStartTimeOfDay.hour,
+            //         tempStartTimeOfDay.minute);
 
-            if (newDateTime.isBefore(_currentStartTime)) {
-              newDateTime = newDateTime.add(Duration(days: 1));
-            }
-            selectedStartDate.value = newDateTime;
+            //     if (newDateTime.isBefore(_currentStartTime)) {
+            //       newDateTime = newDateTime.add(Duration(days: 1));
+            //     }
+            //     selectedStartDate.value = newDateTime;
+            //   }
+            // }
           },
           child: StreamBuilder(
             stream: selectedStartDate.producer,
             builder: (context, snap) {
-              return Container(
-                  width: 140,
-                  child: Align(
-                      alignment: Alignment.center,
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                      width: 135,
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                              snap.data != null
+                                  ? DateTimeHelper.hourAndMin12Hour(snap.data)
+                                  : "00:00",
+                              style: FontHelper.semiBold(Colors.black, 45)))),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding: EdgeInsets.only(bottom: 6),
                       child: Text(
                           snap.data != null
-                              ? DateTimeHelper.hourAndMin12Hour(snap.data)
-                              : "00:00",
-                          style: FontHelper.semiBold(Colors.black, 45))));
+                              ? formatDate(snap.data, [am])
+                              : "AM",
+                          style: FontHelper.semiBold(Colors.black, 22)),
+                    ),
+                  )
+                ],
+              );
             },
           ),
         )
@@ -750,14 +864,13 @@ Widget buildStartDeliverSelector() {
     );
   }
 
-
   Widget buildErrorMessage() {
     return Align(
       alignment: Alignment.center,
       child: Container(
         child: Text(
           errorMessage,
-          style: FontHelper.semiBold(Colors.red, 12.0),
+          style: FontHelper.semiBold(ColorHelper.dabaoErrorRed, 12.0),
           textAlign: TextAlign.center,
         ),
       ),

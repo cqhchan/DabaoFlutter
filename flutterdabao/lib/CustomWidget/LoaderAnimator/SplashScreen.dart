@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 
-class SplashScreenPage extends StatefulWidget {
+// class SplashScreenPage extends StatefulWidget {
 
-  @override
-  _SplashScreenState createState() => new _SplashScreenState();
-}
+//   @override
+//   _SplashScreenState createState() => new _SplashScreenState();
+// }
 
-class _SplashScreenState extends State<SplashScreenPage> {
+// class _SplashScreenState extends State<SplashScreenPage> {
 
 
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Container(
-        color: Colors.red,
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return new Scaffold(
+//       body: new Container(
+//         color: Colors.red,
+//       ),
+//     );
+//   }
+// }

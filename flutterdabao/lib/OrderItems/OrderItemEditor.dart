@@ -282,7 +282,7 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
         child: Container(
           child: Text(
             errorMessage,
-            style: FontHelper.semiBold(Colors.red, 12.0),
+            style: FontHelper.semiBold(ColorHelper.dabaoErrorRed, 12.0),
           ),
         ),
       ),

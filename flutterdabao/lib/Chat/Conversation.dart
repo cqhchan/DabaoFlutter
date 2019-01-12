@@ -757,7 +757,7 @@ class ConversationState extends State<Conversation>
                           borderRadius: BorderRadius.circular(20.0)),
                       child: Icon(
                         Icons.clear,
-                        color: Colors.red,
+                        color: ColorHelper.dabaoErrorRed,
                       ),
                       onPressed: () {
                         widget.channel.reject();

@@ -27,6 +27,7 @@ class ColorHelper {
 
   static const Color dabaoOffBlack4A = Color.fromRGBO(0x4A, 0x4A, 0x4A, 1.0);
   static const Color dabaoOffBlack9B = Color.fromRGBO(0x9B, 0x9B, 0x9B, 1.0);
+  static const Color dabaoErrorRed = Color.fromRGBO(0xCC, 0x00, 0x00, 1.0);
 
   static const Color dabaoGreyE0 = Color.fromRGBO(0xE0, 0xE0, 0xE0, 1.0);
   static const Color dabaoTealColor = Color.fromRGBO(0x87, 0xBC, 0xBF, 1.0);
