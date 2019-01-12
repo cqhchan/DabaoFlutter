@@ -26,7 +26,8 @@ class OneCard extends StatefulWidget {
   final LatLng location;
   final bool expandFlag;
 
-  const OneCard({Key key, this.location, this.channel, this.expandFlag}) : super(key: key);
+  const OneCard({Key key, this.location, this.channel, this.expandFlag})
+      : super(key: key);
 
   _OneCardState createState() => _OneCardState();
 }
@@ -48,15 +49,17 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
             : o.orderItem.producer)));
 
     subscription.add(order.bindTo(widget.channel.orderUid
-        .where((uid) => uid != null && (order.value == null ||  uid != order.value.uid))
+        .where((uid) =>
+            uid != null && (order.value == null || uid != order.value.uid))
         .map((uid) => Order.fromUID(uid))));
   }
 
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height *0.65 ),
-          child: ListView(
+      constraints:
+          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.65),
+      child: ListView(
         shrinkWrap: true,
         children: <Widget>[
           Container(
@@ -75,14 +78,14 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                   child: _buildCard(),
                 ),
                 StreamBuilder<bool>(
-                  stream:
-                      Rxdart.Observable.combineLatest3<User, String, String, bool>(
-                          ConfigHelper.instance.currentUserProperty.producer,
-                          order.producer.switchMap((currentOrder) =>
-                              currentOrder == null ? null : currentOrder.creator),
-                          order.producer.switchMap((currentOrder) =>
-                              currentOrder == null ? null : currentOrder.status),
-                          (currentUser, orderUserID, status) {
+                  stream: Rxdart.Observable.combineLatest3<User, String, String,
+                          bool>(
+                      ConfigHelper.instance.currentUserProperty.producer,
+                      order.producer.switchMap((currentOrder) =>
+                          currentOrder == null ? null : currentOrder.creator),
+                      order.producer.switchMap((currentOrder) =>
+                          currentOrder == null ? null : currentOrder.status),
+                      (currentUser, orderUserID, status) {
                     if (currentUser == null ||
                         orderUserID == null ||
                         status == null) {
@@ -125,9 +128,13 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return Offstage();
                     return StatusColor(
-                      color: snapshot.data == orderStatus_Requested 
-                          ? ColorHelper.availableColor 
-                          : ConfigHelper.instance.currentUserProperty.value.uid == order.value.delivererID.value ?ColorHelper.dabaoOrange :  ColorHelper.notAvailableColor,
+                      color: snapshot.data == orderStatus_Requested
+                          ? ColorHelper.availableColor
+                          : ConfigHelper
+                                      .instance.currentUserProperty.value.uid ==
+                                  order.value.delivererID.value
+                              ? ColorHelper.dabaoOrange
+                              : ColorHelper.notAvailableColor,
                     );
                   }),
               Container(
@@ -375,13 +382,13 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                                       snap.data.longitude)
                                   .toStringAsFixed(1) +
                               'km away'
-                          : "?.??km",
+                          : "",
                       style: FontHelper.medium12TextStyle,
                     ),
                   );
                 } else {
                   return Text(
-                    "?.??km",
+                    "",
                     style: FontHelper.medium12TextStyle,
                   );
                 }
@@ -493,7 +500,8 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                     statusSnap.data == orderStatus_Requested
                         ? 'Available for Pick Up'
                         : imDeliveryingSnap.data == true &&
-                                statusSnap.data == orderStatus_Accepted || statusSnap.data == orderStatus_Completed
+                                    statusSnap.data == orderStatus_Accepted ||
+                                statusSnap.data == orderStatus_Completed
                             ? 'Picked Up'
                             : "Order Picked up by someone else",
                     style: statusSnap.data == orderStatus_Requested
@@ -611,8 +619,9 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
         stream: order.producer.value.status,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return Offstage();
-          return Flex(
-            direction: Axis.horizontal,
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               Expanded(
                 child: Padding(
@@ -651,9 +660,10 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                         : null,
                     child: Container(
                       child: Text(
-                        'COUNTER-OFFER DELIVERY FEE',
+                        'COUNTER-OFFER',
                         // style: FontHelper.semiBold12White,
                         textAlign: TextAlign.center,
+                        maxLines: 2,
                       ),
                     ),
                   ),
