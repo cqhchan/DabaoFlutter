@@ -18,8 +18,7 @@ class DateTimeHelper {
   static String convertDateTimeToAgo(DateTime datetime) {
     Duration diff = DateTime.now().difference(datetime);
 
-   double timeLeftinSecond = diff.inMilliseconds / 1000;
-
+    double timeLeftinSecond = diff.inMilliseconds / 1000;
 
     double secondPerMinute = 60.0;
     double minutePerHour = 60.0;
@@ -43,27 +42,33 @@ class DateTimeHelper {
     }
 
     if (timeLeftinSecond >= (secondPerMinute * minutePerHour * hourPerDay) &&
-        timeLeftinSecond < (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek))
+        timeLeftinSecond <
+            (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek))
       return (timeLeftinSecond / (secondPerMinute * minutePerHour * hourPerDay))
               .ceil()
               .toString() +
           ' day(s) ago';
-    if (timeLeftinSecond >= (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek) &&
+    if (timeLeftinSecond >=
+            (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek) &&
         timeLeftinSecond <
-            (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek * weekPerYear))
+            (secondPerMinute *
+                minutePerHour *
+                hourPerDay *
+                dayPerWeek *
+                weekPerYear))
       return (timeLeftinSecond /
                   (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek))
               .ceil()
               .toString() +
           ' week(s) ago';
     if (timeLeftinSecond >=
-            (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek * weekPerYear))
+        (secondPerMinute *
+            minutePerHour *
+            hourPerDay *
+            dayPerWeek *
+            weekPerYear))
       return (timeLeftinSecond /
-                  (secondPerMinute *
-                      minutePerHour *
-                      hourPerDay *
-                      dayPerWeek 
-                      ))
+                  (secondPerMinute * minutePerHour * hourPerDay * dayPerWeek))
               .ceil()
               .toString() +
           ' year(s) ago';
@@ -73,6 +78,10 @@ class DateTimeHelper {
 
   static String convertDateTimeToAMPM(DateTime date) {
     return DateFormat.jm().format(date);
+  }
+
+  static String hourAndMin12Hour(DateTime date) {
+    return formatDate(date, [hh, ":", nn]);
   }
 
   static String convertDateTimeToStorageString(DateTime date) {
@@ -86,8 +95,7 @@ class DateTimeHelper {
       return formatDate(date, [D, ', ', dd, '-', mm]);
   }
 
-    static String convertDateTimeToNewLineDate(DateTime date) {
-
+  static String convertDateTimeToNewLineDate(DateTime date) {
     if (isToday(date))
       return formatDate(date, ['Today,\n', dd, '-', mm]);
     else

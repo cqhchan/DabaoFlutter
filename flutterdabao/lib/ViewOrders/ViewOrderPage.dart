@@ -53,7 +53,7 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
     super.dispose();
   }
 
-   showCancel(Order order) {
+  showCancel(Order order) {
     showHalfBottomSheet(
         context: context,
         builder: (builder) {
@@ -155,8 +155,8 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                   widget.order.delivererID,
                   ConfigHelper.instance.currentUserProperty.producer,
                   (status, delivererID, currentUser) {
-                    print(status);
-                if (status == null || status != orderStatus_Accepted )
+                print(status);
+                if (status == null || status != orderStatus_Accepted)
                   return false;
                 if (delivererID == null || currentUser == null) return false;
                 return delivererID == currentUser.uid;
@@ -179,7 +179,6 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                             )),
                         onPressed: () async {
                           showCancel(widget.order);
-                          
                         }),
                     SizedBox(
                       width: 20,
@@ -445,20 +444,19 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
               order: widget.order,
             ),
             Container(
-              padding: EdgeInsets.only(bottom: 5.0),
               child: _OrderItems(
                 order: widget.order,
                 listOfOrderItems: listOfOrderItems,
               ),
             ),
-            _Promo(
-              order: widget.order,
-            ),
             _DeliveryFee(
               order: widget.order,
             ),
+            _Promo(
+              order: widget.order,
+            ),
             Container(
-              padding: EdgeInsets.only(bottom: 10.0),
+              padding: EdgeInsets.only(top:5.0, bottom: 10.0),
               child: Line(),
             ),
             buildTotal(widget.order),

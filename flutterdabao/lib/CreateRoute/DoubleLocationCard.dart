@@ -153,12 +153,12 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
             showOneTimeCreator(
                 context: context,
                 startTime: widget.holder.deliveryTime.value,
-                headerTitle: "Select Delivery Time",
+                headerTitle: "Select Arrival Time",
                 onCompleteCallback: (DateTime selectedTime) {
                   widget.holder.deliveryTime.value = selectedTime;
                   widget.showOverlayCallback();
                 },
-                subTitle: "I will be delivering at...");
+                subTitle: "I will be arriving at...");
         },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
