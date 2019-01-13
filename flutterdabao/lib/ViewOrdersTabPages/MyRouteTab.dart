@@ -59,7 +59,7 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
                   List<Object>>(userRoutes.producer,
               userDeliveryingOrders.producer.map((orders) {
             List<Order> tempOrders = List.from(orders);
-            // tempOrders.removeWhere((order) => order.routeID.value != null);
+            tempOrders.removeWhere((order) => order.routeID.value != null);
             return tempOrders;
           }), (openRoutes, orders) {
             List<Object> temp = List();
