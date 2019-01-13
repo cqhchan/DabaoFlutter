@@ -40,7 +40,6 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
   void initState() {
     // TODO: implement initState
     super.initState();
-
   }
 
   @override
@@ -66,14 +65,11 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
 
             List<DabaoRoute.Route> tempRoutes = List();
 
-
             if (openRoutes != null && openRoutes.length != 0)
               tempRoutes.addAll(openRoutes);
 
-
             tempRoutes.sort((lhs, rhs) =>
                 rhs.deliveryTime.value.compareTo(lhs.deliveryTime.value));
-
 
             temp.addAll(tempRoutes);
             if (orders != null && orders.length != 0) temp.add(orders);
@@ -130,27 +126,26 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
   @override
   Widget build(BuildContext context) {
     return Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        margin: EdgeInsets.all(10.0),
-        color: Colors.white,
-        elevation: 6.0,
-        child: Container(
-          padding: EdgeInsets.fromLTRB(15.0, 12.0, 10.0, 12.0),
-          child: Column(
-            children: <Widget>[
-              buildHeaderRow(),
-              buildStartLocation(),
-              buildDottedLine(),
-              buildListOfAcceptedOrders(),
-              buildDeliveryLocation(),
-              Line(
-                margin: EdgeInsets.only(top: 10.0, bottom: 10.0, right: 8.0),
-              ),
-              buildPossibleMatches()
-            ],
-          ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      margin: EdgeInsets.all(10.0),
+      color: Colors.white,
+      elevation: 6.0,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(15.0, 12.0, 10.0, 12.0),
+        child: Column(
+          children: <Widget>[
+            buildHeaderRow(),
+            buildStartLocation(),
+            buildDottedLine(),
+            buildListOfAcceptedOrders(),
+            buildDeliveryLocation(),
+            Line(
+              margin: EdgeInsets.only(top: 10.0, bottom: 10.0, right: 8.0),
+            ),
+            buildPossibleMatches()
+          ],
         ),
-    
+      ),
     );
   }
 
@@ -178,176 +173,189 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
           if (!snap.hasData ||
               snap.data == null ||
               snap.data == DabaoRoute.routeStatus_Open)
-            return Container(
-              margin: EdgeInsets.only(right: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  StreamBuilder<List<User>>(
-                    stream: listOfPotentialMatches.producer.map((orders) {
-                      return orders
-                          .take(3)
-                          .map((order) => User.fromUID(order.creator.value))
-                          .toList();
-                    }),
-                    builder: (context, snap) {
-                      if (!snap.hasData || snap.data.length == 0)
-                        return Offstage();
+            return GestureDetector(
+              onTap: () {
+                if (widget.route.listOfPotentialOrders.value != null &&
+                    widget.route.listOfPotentialOrders.value.length > 0) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Matches(
+                                route: widget.route,
+                              )));
+                }
+              },
+              child: Container(
+                color: Colors.transparent,
+                margin: EdgeInsets.only(right: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    StreamBuilder<List<User>>(
+                      stream: listOfPotentialMatches.producer.map((orders) {
+                        return orders
+                            .take(3)
+                            .map((order) => User.fromUID(order.creator.value))
+                            .toList();
+                      }),
+                      builder: (context, snap) {
+                        if (!snap.hasData || snap.data.length == 0)
+                          return Offstage();
 
-                      return Stack(
-                        children: <Widget>[
-                          snap.data == null || snap.data.length <= 2
-                              ? Image.asset(
-                                  "assets/icons/filler_image_girl.png")
-                              : StreamBuilder<String>(
-                                  stream: snap.data.elementAt(2).thumbnailImage,
-                                  builder: (context, snap) {
-                                    if (!snap.hasData)
-                                      return Image.asset(
-                                          "assets/icons/filler_image_girl.png");
-                                    return FittedBox(
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(30.0),
-                                        child: SizedBox(
-                                          height: 30,
-                                          width: 30,
-                                          child: CachedNetworkImage(
-                                            imageUrl: snap.data,
-                                            placeholder:
-                                                GlowingProgressIndicator(
-                                              child: Icon(
-                                                Icons.account_circle,
-                                                size: 30,
+                        return Stack(
+                          children: <Widget>[
+                            snap.data == null || snap.data.length <= 2
+                                ? Image.asset(
+                                    "assets/icons/filler_image_girl.png")
+                                : StreamBuilder<String>(
+                                    stream:
+                                        snap.data.elementAt(2).thumbnailImage,
+                                    builder: (context, snap) {
+                                      if (!snap.hasData)
+                                        return Image.asset(
+                                            "assets/icons/filler_image_girl.png");
+                                      return FittedBox(
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(30.0),
+                                          child: SizedBox(
+                                            height: 30,
+                                            width: 30,
+                                            child: CachedNetworkImage(
+                                              imageUrl: snap.data,
+                                              placeholder:
+                                                  GlowingProgressIndicator(
+                                                child: Icon(
+                                                  Icons.account_circle,
+                                                  size: 30,
+                                                ),
                                               ),
+                                              errorWidget: Icon(Icons.error),
                                             ),
-                                            errorWidget: Icon(Icons.error),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                          Container(
-                              margin: EdgeInsets.only(left: 17.0),
-                              child: snap.data == null || snap.data.length <= 1
-                                  ? Image.asset(
-                                      "assets/icons/filler_image_food.png")
-                                  : StreamBuilder<String>(
-                                      stream:
-                                          snap.data.elementAt(1).thumbnailImage,
-                                      builder: (context, snap) {
-                                        if (!snap.hasData)
-                                          return Image.asset(
-                                              "assets/icons/filler_image_food.png");
-                                        return FittedBox(
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(30.0),
-                                            child: SizedBox(
-                                              height: 30,
-                                              width: 30,
-                                              child: CachedNetworkImage(
-                                                imageUrl: snap.data,
-                                                placeholder:
-                                                    GlowingProgressIndicator(
-                                                  child: Icon(
-                                                    Icons.account_circle,
-                                                    size: 30,
-                                                  ),
-                                                ),
-                                                errorWidget: Icon(Icons.error),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    )),
-                          Container(
-                              margin: EdgeInsets.only(left: 34.0),
-                              child: snap.data == null || snap.data.length == 0
-                                  ? Image.asset(
-                                      "assets/icons/filler_image_girl.png")
-                                  : StreamBuilder<String>(
-                                      stream:
-                                          snap.data.elementAt(0).thumbnailImage,
-                                      builder: (context, snap) {
-                                        if (!snap.hasData)
-                                          return Image.asset(
-                                              "assets/icons/filler_image_girl.png");
-                                        return FittedBox(
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(30.0),
-                                            child: SizedBox(
-                                              height: 30,
-                                              width: 30,
-                                              child: CachedNetworkImage(
-                                                imageUrl: snap.data,
-                                                placeholder:
-                                                    GlowingProgressIndicator(
-                                                  child: Icon(
-                                                    Icons.account_circle,
-                                                    size: 30,
-                                                  ),
-                                                ),
-                                                errorWidget: Icon(Icons.error),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    )),
-                        ],
-                      );
-                    },
-                  ),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 10.0, minWidth: 5.0),
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.only(),
-                      child: StreamBuilder<List<Order>>(
-                        stream: listOfPotentialMatches.producer,
-                        builder: (context, snap) =>
-                            snap.hasData && snap.data.length > 0
-                                ? Text(
-                                    "${snap.data.length} matches for Your Route!",
-                                    style: FontHelper.semiBold14Black,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  )
-                                : Text(
-                                    "No Matches Found for this Route",
-                                    style: FontHelper.semiBold14Black,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                      );
+                                    },
                                   ),
+                            Container(
+                                margin: EdgeInsets.only(left: 17.0),
+                                child: snap.data == null ||
+                                        snap.data.length <= 1
+                                    ? Image.asset(
+                                        "assets/icons/filler_image_food.png")
+                                    : StreamBuilder<String>(
+                                        stream: snap.data
+                                            .elementAt(1)
+                                            .thumbnailImage,
+                                        builder: (context, snap) {
+                                          if (!snap.hasData)
+                                            return Image.asset(
+                                                "assets/icons/filler_image_food.png");
+                                          return FittedBox(
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(30.0),
+                                              child: SizedBox(
+                                                height: 30,
+                                                width: 30,
+                                                child: CachedNetworkImage(
+                                                  imageUrl: snap.data,
+                                                  placeholder:
+                                                      GlowingProgressIndicator(
+                                                    child: Icon(
+                                                      Icons.account_circle,
+                                                      size: 30,
+                                                    ),
+                                                  ),
+                                                  errorWidget:
+                                                      Icon(Icons.error),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      )),
+                            Container(
+                                margin: EdgeInsets.only(left: 34.0),
+                                child: snap.data == null ||
+                                        snap.data.length == 0
+                                    ? Image.asset(
+                                        "assets/icons/filler_image_girl.png")
+                                    : StreamBuilder<String>(
+                                        stream: snap.data
+                                            .elementAt(0)
+                                            .thumbnailImage,
+                                        builder: (context, snap) {
+                                          if (!snap.hasData)
+                                            return Image.asset(
+                                                "assets/icons/filler_image_girl.png");
+                                          return FittedBox(
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(30.0),
+                                              child: SizedBox(
+                                                height: 30,
+                                                width: 30,
+                                                child: CachedNetworkImage(
+                                                  imageUrl: snap.data,
+                                                  placeholder:
+                                                      GlowingProgressIndicator(
+                                                    child: Icon(
+                                                      Icons.account_circle,
+                                                      size: 30,
+                                                    ),
+                                                  ),
+                                                  errorWidget:
+                                                      Icon(Icons.error),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      )),
+                          ],
+                        );
+                      },
+                    ),
+                    ConstrainedBox(
+                      constraints:
+                          BoxConstraints(maxWidth: 10.0, minWidth: 5.0),
+                    ),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.only(),
+                        child: StreamBuilder<List<Order>>(
+                          stream: listOfPotentialMatches.producer,
+                          builder: (context, snap) =>
+                              snap.hasData && snap.data.length > 0
+                                  ? Text(
+                                      "${snap.data.length} matches for Your Route!",
+                                      style: FontHelper.semiBold14Black,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    )
+                                  : Text(
+                                      "No Matches Found for this Route",
+                                      style: FontHelper.semiBold14Black,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                        ),
                       ),
                     ),
-                  ),
-                  Align(
-                      alignment: Alignment.centerRight,
-                      child: StreamBuilder<List<Order>>(
-                          stream: listOfPotentialMatches.producer,
-                          builder: (context, snap) => snap.hasData &&
-                                  snap.data.length > 0
-                              ? GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Matches(
-                                                  route: widget.route,
-                                                )));
-                                  },
-                                  child: Image.asset(
-                                      "assets/icons/arrow_right_black_outline.png"))
-                              : Container(
-                                  height: 30,
-                                ))),
-                ],
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: StreamBuilder<List<Order>>(
+                            stream: listOfPotentialMatches.producer,
+                            builder: (context, snap) => snap.hasData &&
+                                    snap.data.length > 0
+                                ? Image.asset(
+                                    "assets/icons/arrow_right_black_outline.png")
+                                : Container(
+                                    height: 30,
+                                  ))),
+                  ],
+                ),
               ),
             );
           else
@@ -454,9 +462,7 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
     showHalfBottomSheet(
         context: context,
         builder: (builder) {
-          return EditFoodTagOverlay(
-            route: widget.route
-          );
+          return EditFoodTagOverlay(route: widget.route);
         });
   }
 
@@ -528,8 +534,7 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
                         child: ConstrainedBox(
                       child: DropdownButton<String>(
                         iconSize: 0.0,
-                        items:
-                            <String>['Open'].map((String value) {
+                        items: <String>['Open'].map((String value) {
                           return new DropdownMenuItem<String>(
                             value: value,
                             child: new Text(
@@ -539,9 +544,7 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
                           );
                         }).toList(),
                         onChanged: (chosen) {
-                  
-                            widget.route.openRoute();
-                        
+                          widget.route.openRoute();
                         },
                       ),
                       constraints: BoxConstraints(maxHeight: 25),
