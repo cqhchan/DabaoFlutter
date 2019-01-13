@@ -133,6 +133,7 @@ class _CompleteOverlayState extends State<CompleteOverlay>
               Text(
                 'Complete Delivery',
                 style: FontHelper.semiBold16Black,
+                textAlign: TextAlign.center,
               ),
               SizedBox(
                 width: 5,

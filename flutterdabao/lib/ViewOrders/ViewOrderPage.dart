@@ -193,6 +193,7 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                               alignment: Alignment.center,
                               child: Text(
                                 "Complete Delivery",
+                                textAlign: TextAlign.center,
                                 style: FontHelper.semiBold(Colors.black, 14.0),
                               )),
                           onPressed: () async {
@@ -456,7 +457,7 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
               order: widget.order,
             ),
             Container(
-              padding: EdgeInsets.only(top:5.0, bottom: 10.0),
+              padding: EdgeInsets.only(top: 5.0, bottom: 10.0),
               child: Line(),
             ),
             buildTotal(widget.order),
