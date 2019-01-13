@@ -195,27 +195,52 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
         StreamBuilder<int>(
           stream: Observable.combineLatest3<List<DabaoRoute.Route>, List<Order>,
                   List<Order>, int>(
-              ConfigHelper.instance.currentUserRoutesPastDayProperty.producer.map((routes) {
+              ConfigHelper.instance.currentUserRoutesPastDayProperty.producer
+                  .map((routes) {
                 List<DabaoRoute.Route> temp = List.from(routes);
 
-                temp.removeWhere((route) => route.status.value != DabaoRoute.routeStatus_Open);
+                temp.removeWhere((route) =>
+                    route.status.value != DabaoRoute.routeStatus_Open);
                 return temp;
-              } ),
+              }),
               ConfigHelper.instance.currentUserDeliveredCompletedOrdersProperty
                   .producer,
-              ConfigHelper.instance.currentUserDeliveringOrdersProperty
-                  .producer, (routes, completed, deliverying) {
-            return routes.length + completed.length + deliverying.length;
-          }),
+              ConfigHelper
+                  .instance.currentUserDeliveringOrdersProperty.producer,
+              (routes, completed, deliverying) {
+                return routes.length + completed.length + deliverying.length;
+              }),
           builder: (context, snap) {
             if (!snap.hasData || snap.data == 0)
               return Container();
             else
               return GestureDetector(
                 onTap: () {
-                  Navigator.of(context).push(
-                    FadeRoute(widget: TabBarPage()),
-                  );
+                  Navigator.of(context).push(PageRouteBuilder(
+                    pageBuilder: (BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation) {
+                      return TabBarPage();
+                    },
+                    transitionsBuilder: (BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                        Widget child) {
+                      return SlideTransition(
+                        position: new Tween<Offset>(
+                          begin: const Offset(0.0, 1.0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: new SlideTransition(
+                          position: new Tween<Offset>(
+                            begin: Offset.zero,
+                            end: const Offset(0.0, 1.0),
+                          ).animate(secondaryAnimation),
+                          child: child,
+                        ),
+                      );
+                    },
+                  ));
                 },
                 child: Align(
                   alignment: Alignment.bottomCenter,
@@ -268,8 +293,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                                     width: 24.0,
                                     child: Transform(
                                       transform: Matrix4.rotationZ(math.pi / 2),
-                                      child: Image.asset(
-                                          "assets/icons/arrow_left_icon.png"),
+                                      child: Icon(Icons.arrow_back_ios),
                                     ),
                                   )),
                             ),
@@ -848,7 +872,8 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
     return StreamBuilder<List<OrderItem>>(
         stream: listOfOrderItems.producer,
         builder: (context, snap) {
-          if (!snap.hasData || snap.data == null || snap.data.length == 0) return Offstage();
+          if (!snap.hasData || snap.data == null || snap.data.length == 0)
+            return Offstage();
 
           int totalItems = snap.data
               .map((orderItem) => orderItem.quantity.value)

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 
@@ -37,23 +39,44 @@ class TabBarPageState extends State<TabBarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
+        centerTitle: false,
         automaticallyImplyLeading: false,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Icon(
-            Icons.home,
-            size: 26,
-            color: Colors.black,
+        leading: null,
+        actions: <Widget>[
+          ChatNavigationButton(
+            bgColor: ColorHelper.dabaoOrange,
           ),
-        ),
-        actions: <Widget>[ChatNavigationButton(bgColor: ColorHelper.dabaoOrange,)],
+          GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                color: Colors.transparent,
+                padding: EdgeInsets.only(right: 20, left: 10),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    "assets/icons/arrow_down.png",
+                  ),
+                ),
+              ))
+        ],
         elevation: 0.0,
-        title: Text(
-          'DABAOER',
-          style: FontHelper.header3TextStyle,
+        title: StreamBuilder<List>(
+          stream: ConfigHelper
+              .instance.currentUserDeliveringOrdersProperty.producer,
+          builder: (BuildContext context, snapshot) {
+            if (!snapshot.hasData || snapshot.data.length == 0)
+              return Text(
+                "Your Active Deliveries",
+                style: FontHelper.regular(Colors.black, 16),
+              );
+
+            return Text(
+              "Your Active Deliveries (${snapshot.data.length})",
+              style: FontHelper.regular(Colors.black, 16),
+            );
+          },
         ),
       ),
       body: DefaultTabController(
