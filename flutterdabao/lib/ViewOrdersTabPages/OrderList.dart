@@ -132,7 +132,7 @@ class _OrderItemCellState extends State<_OrderItemCell>
               selectable: order,
               initiallyExpanded: order.isSelectedProperty.value,
               header: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   _buildHeader(order),
                   Container(
@@ -191,6 +191,26 @@ class _OrderItemCellState extends State<_OrderItemCell>
                   ),
                   SizedBox(
                     height: 10,
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: StreamBuilder<bool>(
+                      stream: widget.order.isSelectedProperty.producer,
+                      builder: (BuildContext context, snapshot) {
+                        if (!snapshot.hasData ||
+                            snapshot.data == null ||
+                            snapshot.data) return Offstage();
+
+                        return Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Tap Card for Order Summary",
+                              textAlign: TextAlign.center,
+                              style: FontHelper.medium(
+                                  ColorHelper.dabaoOffBlack9B, 12),
+                            ));
+                      },
+                    ),
                   )
                 ],
               ),
@@ -198,6 +218,20 @@ class _OrderItemCellState extends State<_OrderItemCell>
                 Column(
                   children: <Widget>[
                     _buildOrderItems(order),
+                    StreamBuilder<bool>(
+                      stream: widget.order.isSelectedProperty.producer,
+                      builder: (BuildContext context, snapshot) {
+                        if (!snapshot.hasData ||
+                            snapshot.data == null ||
+                            !snapshot.data) return Offstage();
+
+                        return Text(
+                          "Tap to minimize",
+                          style: FontHelper.medium(
+                              ColorHelper.dabaoOffBlack9B, 12),
+                        );
+                      },
+                    ),
                     SizedBox(
                       height: 8,
                     ),
@@ -312,10 +346,8 @@ class _OrderItemCellState extends State<_OrderItemCell>
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         StreamBuilder<String>(
-          stream:
-              Observable.combineLatest2<OrderMode, DateTime, String>(
-                  order.mode, order.startDeliveryTime,
-                  (mode, start) {
+          stream: Observable.combineLatest2<OrderMode, DateTime, String>(
+              order.mode, order.startDeliveryTime, (mode, start) {
             DateTime endTime;
             DateTime startTime;
             DateTime currentTime = DateTime.now();

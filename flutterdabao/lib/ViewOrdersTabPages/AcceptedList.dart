@@ -138,7 +138,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
                   selectable: widget.order,
                   initiallyExpanded: widget.order.isSelectedProperty.value,
                   header: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       _buildHeader(widget.order),
                       Container(
@@ -189,6 +189,26 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
                       ),
                       SizedBox(
                         height: 10,
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: StreamBuilder<bool>(
+                          stream: widget.order.isSelectedProperty.producer,
+                          builder: (BuildContext context, snapshot) {
+                            if (!snapshot.hasData ||
+                                snapshot.data == null ||
+                                snapshot.data) return Offstage();
+
+                            return Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Tap Card for Order Summary",
+                                  textAlign: TextAlign.center,
+                                  style: FontHelper.medium(
+                                      ColorHelper.dabaoOffBlack9B, 12),
+                                ));
+                          },
+                        ),
                       )
                     ],
                   ),
@@ -196,6 +216,20 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
                     Column(
                       children: <Widget>[
                         _buildOrderItems(widget.order),
+                        StreamBuilder<bool>(
+                          stream: widget.order.isSelectedProperty.producer,
+                          builder: (BuildContext context, snapshot) {
+                            if (!snapshot.hasData ||
+                                snapshot.data == null ||
+                                !snapshot.data) return Offstage();
+
+                            return Text(
+                              "Tap to minimize",
+                              style: FontHelper.medium(
+                                  ColorHelper.dabaoOffBlack9B, 12),
+                            );
+                          },
+                        ),
                         SizedBox(
                           height: 8,
                         ),
@@ -385,82 +419,82 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
 
   Widget _buildOrderItem(BuildContext context, OrderItem orderItem) {
     return GestureDetector(
-        onTap: () {
-          orderItem.updateBought(widget.order, !orderItem.isBought.value);
-        },
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: 45),
-          child: Container(
-            padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-            color: ColorHelper.dabaoOffWhiteF5,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  width: 30.0,
-                  margin: EdgeInsets.only(top: 5),
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: StreamBuilder<bool>(
-                      stream: orderItem.isBought,
-                      builder: (BuildContext context, snapshot) {
-                        if (!snapshot.hasData ||
-                            snapshot.data == null ||
-                            !snapshot.data)
-                          return Container(
-                            height: 18,
-                            width: 18,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: ColorHelper.dabaoOrange,
-                                width: 1.5,
-                              ),
+      onTap: () {
+        orderItem.updateBought(widget.order, !orderItem.isBought.value);
+      },
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: 45),
+        child: Container(
+          padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+          color: ColorHelper.dabaoOffWhiteF5,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 30.0,
+                margin: EdgeInsets.only(top: 5),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: StreamBuilder<bool>(
+                    stream: orderItem.isBought,
+                    builder: (BuildContext context, snapshot) {
+                      if (!snapshot.hasData ||
+                          snapshot.data == null ||
+                          !snapshot.data)
+                        return Container(
+                          height: 18,
+                          width: 18,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: ColorHelper.dabaoOrange,
+                              width: 1.5,
                             ),
-                          );
-                        else
-                          return Icon(
-                            Icons.check_circle,
-                            color: ColorHelper.dabaoOrange,
-                            size: 18,
-                          );
-                      },
+                          ),
+                        );
+                      else
+                        return Icon(
+                          Icons.check_circle,
+                          color: ColorHelper.dabaoOrange,
+                          size: 18,
+                        );
+                    },
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      orderItem.name.value,
+                      style: FontHelper.semiBold12Black,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
+                    Text(
+                      orderItem.description.value,
+                      style:
+                          FontHelper.semiBold(ColorHelper.dabaoOffBlack4A, 10),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        orderItem.name.value,
-                        style: FontHelper.semiBold12Black,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        orderItem.description.value,
-                        style: FontHelper.semiBold(
-                            ColorHelper.dabaoOffBlack4A, 10),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 10.0,
-                ),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Text(
-                      "Max: ${StringHelper.doubleToPriceString(orderItem.price.value)}",
-                      style: FontHelper.regular12Black),
-                )
-              ],
-            ),
+              ),
+              SizedBox(
+                width: 10.0,
+              ),
+              Align(
+                alignment: Alignment.topRight,
+                child: Text(
+                    "Max: ${StringHelper.doubleToPriceString(orderItem.price.value)}",
+                    style: FontHelper.regular12Black),
+              )
+            ],
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildLocationDescription(Order order) {
