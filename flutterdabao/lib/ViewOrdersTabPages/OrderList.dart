@@ -246,14 +246,15 @@ class _OrderItemCellState extends State<_OrderItemCell>
                 if (snapshot.data) {
                   return Column(
                     children: <Widget>[
-                      Flex(
-                        direction: Axis.horizontal,
+                      Row(
                         children: <Widget>[
                           Expanded(
-                            flex: 4,
                             child: _buildUser(order),
                           ),
-                          Expanded(flex: 2, child: _buildChatButton(order)),
+                          _buildChatButton(order),
+                          SizedBox(
+                            width: 8,
+                          ),
                         ],
                       ),
                       SizedBox(
@@ -270,14 +271,15 @@ class _OrderItemCellState extends State<_OrderItemCell>
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 8, 0, 5),
-                        child: Flex(
-                          direction: Axis.horizontal,
+                        child: Row(
                           children: <Widget>[
                             Expanded(
-                              flex: 4,
                               child: _buildUser(order),
                             ),
-                            Expanded(flex: 2, child: _buildChatButton(order)),
+                            _buildChatButton(order),
+                            SizedBox(
+                              width: 8,
+                            ),
                           ],
                         ),
                       ),
@@ -708,29 +710,16 @@ class _OrderItemCellState extends State<_OrderItemCell>
   }
 
   Widget _buildChatButton(Order order) {
-    return Container(
-      height: 30,
-      child: RaisedButton(
-        elevation: 6,
-        color: ColorHelper.dabaoOffPaleBlue,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: Align(
-                child: Text(
-                  "Chat",
-                  style: FontHelper.semiBold14White,
-                ),
-              ),
-            ),
-          ],
-        ),
-        onPressed: () {
-          _toChat(order);
-        },
-      ),
+    return GestureDetector(
+      onTap: () {
+        _toChat(order);
+      },
+      child: Container(
+          height: 30,
+          child: Icon(
+            Icons.chat,
+            size: 30,
+          )),
     );
   }
 

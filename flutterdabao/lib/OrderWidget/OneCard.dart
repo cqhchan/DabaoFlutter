@@ -130,8 +130,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                     return StatusColor(
                       color: snapshot.data == orderStatus_Requested
                           ? ColorHelper.availableColor
-                          : ConfigHelper
-                                      .instance.currentUserProperty.value.uid ==
+                          : widget.channel.deliverer.value ==
                                   order.value.delivererID.value
                               ? ColorHelper.dabaoOrange
                               : ColorHelper.notAvailableColor,
@@ -218,13 +217,49 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                                 height: 10,
                               ),
                               _buildStatusReport(order.value),
-                              Icon(Icons.keyboard_arrow_down)
+                              Align(
+                                alignment: Alignment.center,
+                                child: StreamBuilder<bool>(
+                                  stream:
+                                      order.value.isSelectedProperty.producer,
+                                  builder: (BuildContext context, snapshot) {
+                                    if (!snapshot.hasData ||
+                                        snapshot.data == null ||
+                                        snapshot.data) return Offstage();
+
+                                    return Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          "Tap Card for Order Summary",
+                                          textAlign: TextAlign.center,
+                                          style: FontHelper.medium(
+                                              ColorHelper.dabaoOffBlack9B, 12),
+                                        ));
+                                  },
+                                ),
+                              ),
+                              Icon(Icons.keyboard_arrow_down),
                             ],
                           ),
                           children: <Widget>[
                             Column(
                               children: <Widget>[
                                 _buildOrderItems(),
+                                StreamBuilder<bool>(
+                                  stream:
+                                      order.value.isSelectedProperty.producer,
+                                  builder: (BuildContext context, snapshot) {
+                                    if (!snapshot.hasData ||
+                                        snapshot.data == null ||
+                                        !snapshot.data) return Offstage();
+
+                                    return Text(
+                                      "Tap to minimize",
+                                      style: FontHelper.medium(
+                                          ColorHelper.dabaoOffBlack9B, 12),
+                                    );
+                                  },
+                                ),
                                 SizedBox(
                                   height: 8,
                                 ),
@@ -293,47 +328,60 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   }
 
   Widget _buildDeliveryPeriod() {
-    return StreamBuilder<OrderMode>(
+    return StreamBuilder<DateTime>(
         stream: order.producer
-            .switchMap((order) => order == null ? null : order.mode),
+            .switchMap((order) => order == null ? null : order.deliveryTime),
         builder: (context, snap) {
-          if (!snap.hasData || snap.data == null) return Offstage();
-          DateTime startTime;
-          DateTime endTime;
+          if (!snap.hasData || snap.data == null)
+            return StreamBuilder<OrderMode>(
+                stream: order.producer
+                    .switchMap((order) => order == null ? null : order.mode),
+                builder: (context, snap) {
+                  if (!snap.hasData || snap.data == null) return Offstage();
+                  DateTime startTime;
+                  DateTime endTime;
 
-          switch (snap.data) {
-            case OrderMode.asap:
-              startTime = DateTime.now();
-              endTime = order.value.endDeliveryTime.value == null
-                  ? startTime.add(Duration(minutes: 90))
-                  : order.value.endDeliveryTime.value;
-              break;
-            case OrderMode.scheduled:
-              startTime = order.value.startDeliveryTime.value;
-              endTime = order.value.endDeliveryTime.value;
-              break;
-          }
+                  switch (snap.data) {
+                    case OrderMode.asap:
+                      startTime = DateTime.now();
+                      endTime = order.value.endDeliveryTime.value == null
+                          ? startTime.add(Duration(minutes: 90))
+                          : order.value.endDeliveryTime.value;
+                      break;
+                    case OrderMode.scheduled:
+                      startTime = order.value.startDeliveryTime.value;
+                      endTime = order.value.endDeliveryTime.value;
+                      break;
+                  }
 
-          if (startTime == null || endTime == null) return Offstage();
+                  if (startTime == null || endTime == null) return Offstage();
 
-          if (startTime.isBefore(endTime) && endTime.isBefore(DateTime.now()))
+                  if (startTime.isBefore(endTime) &&
+                      endTime.isBefore(DateTime.now()))
+                    return Text(
+                      "Expired",
+                      style: FontHelper.semiBoldgrey14TextStyle,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        DateTimeHelper.convertDoubleTimeToDisplayString(
+                            startTime, endTime),
+                        style: FontHelper.semiBoldgrey14TextStyle,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    ],
+                  );
+                });
+          else
             return Text(
-              "Expired",
+              DateTimeHelper.convertTimeToDisplayString(snap.data),
               style: FontHelper.semiBoldgrey14TextStyle,
               overflow: TextOverflow.ellipsis,
             );
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                DateTimeHelper.convertDoubleTimeToDisplayString(
-                    startTime, endTime),
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              )
-            ],
-          );
         });
   }
 
@@ -470,13 +518,13 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                 overflow: TextOverflow.ellipsis,
               ),
               StreamBuilder<bool>(
-                stream: Rxdart.Observable.combineLatest2<String, User, bool>(
+                stream: Rxdart.Observable.combineLatest2<String, String, bool>(
                     order.delivererID,
-                    ConfigHelper.instance.currentUserProperty.producer,
-                    (userID, currentUser) {
-                  if (userID == null || currentUser == null) return null;
+                    widget.channel.deliverer,
+                    (userID, channelDELIVERER) {
+                  if (userID == null || channelDELIVERER == null) return null;
 
-                  return userID == currentUser.uid;
+                  return userID == channelDELIVERER;
                 }),
                 builder: (BuildContext context, imDeliveryingSnap) {
                   return Text(

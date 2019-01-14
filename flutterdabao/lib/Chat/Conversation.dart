@@ -709,8 +709,7 @@ class ConversationState extends State<Conversation>
                         await FirebaseCloudFunctions.acceptOrder(
                             deliveryFee: snapshot.data.price,
                             orderID: order.value.uid,
-                            acceptorID: ConfigHelper
-                                .instance.currentUserProperty.value.uid,
+                            acceptorID: snapshot.data.offererID,
                             deliveryTime:
                                 DateTimeHelper.convertDateTimeToString(
                               snapshot.data.deliveryTime,

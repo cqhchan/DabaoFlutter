@@ -192,7 +192,7 @@ class CounterOffer {
     }
 
     if (offerData.containsKey(offererIDKey)) {
-      offererIDKey = offerData[offererIDKey];
+      offererID = offerData[offererIDKey];
     }
   }
 }

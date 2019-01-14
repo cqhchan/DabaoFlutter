@@ -244,16 +244,16 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
                     if (snapshot.data) {
                       return Column(
                         children: <Widget>[
-                          Flex(
-                            direction: Axis.horizontal,
+                          Row(
                             children: <Widget>[
                               Expanded(
                                 flex: 4,
                                 child: _buildUser(widget.order),
                               ),
-                              Expanded(
-                                  flex: 2,
-                                  child: _buildChatButton(widget.order)),
+                               _buildChatButton(widget.order),
+                               SizedBox(
+                              width: 8,
+                            ),
                             ],
                           ),
                           SizedBox(
@@ -270,16 +270,16 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
                           ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 8, 0, 5),
-                            child: Flex(
-                              direction: Axis.horizontal,
+                            child: Row(
                               children: <Widget>[
                                 Expanded(
                                   flex: 4,
                                   child: _buildUser(widget.order),
                                 ),
-                                Expanded(
-                                    flex: 2,
-                                    child: _buildChatButton(widget.order)),
+                                _buildChatButton(widget.order),
+                                SizedBox(
+                              width: 8,
+                            ),
                               ],
                             ),
                           ),
@@ -728,30 +728,17 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
     );
   }
 
-  Widget _buildChatButton(Order order) {
-    return Container(
-      height: 30,
-      child: RaisedButton(
-        elevation: 6,
-        color: ColorHelper.dabaoOrange,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: Align(
-                child: Text(
-                  "Chat",
-                  style: FontHelper.semiBold14Black,
-                ),
-              ),
-            ),
-          ],
-        ),
-        onPressed: () async {
-          _toChat(order);
-        },
-      ),
+Widget _buildChatButton(Order order) {
+    return GestureDetector(
+      onTap: () {
+        _toChat(order);
+      },
+      child: Container(
+          height: 30,
+          child: Icon(
+            Icons.chat,
+            size: 30,
+          )),
     );
   }
 

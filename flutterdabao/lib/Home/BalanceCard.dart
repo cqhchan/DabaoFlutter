@@ -107,6 +107,7 @@ class BalanceCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Image.asset("assets/icons/cash_out.png"),
+            SizedBox(height: 5,),
             Text("Cash Out", style: FontHelper.regular12Black)
           ],
         ),
@@ -135,11 +136,7 @@ class BalanceCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            // Transform(
-            //   transform: new Matrix4.rotationZ(-0.5),
-            //   alignment: FractionalOffset.center,
-            //   child: ,
-            // ),
+      
             Image.asset("assets/icons/wallet_voucher.png"),
             Text("Your Vouchers", style: FontHelper.regular12Black)
           ],
