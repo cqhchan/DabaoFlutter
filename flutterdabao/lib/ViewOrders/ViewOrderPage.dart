@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
+import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
@@ -19,6 +20,7 @@ import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrders/CancelOverlay.dart';
 import 'package:flutterdabao/ViewOrders/CompleteOverlay.dart';
+import 'package:flutterdabao/ViewOrders/ConfirmationProofPage.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -83,7 +85,7 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text('Your Order', style: FontHelper.header3TextStyle),
+        title: Text('Details', style: FontHelper.header3TextStyle),
         actions: <Widget>[
           ChatNavigationButton(),
         ],
@@ -94,6 +96,13 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                padding: EdgeInsets.only(bottom: 20.0, left: 5.0),
+                child: buildConfirmationProofIcon(),
+              ),
+            ),
             Container(
               padding: EdgeInsets.only(bottom: 20.0),
               child: _DeliveryTime(order: widget.order),
@@ -149,64 +158,102 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
             Container(
                 padding: EdgeInsets.only(top: 5.0, bottom: 10.0),
                 child: buildFinalDeliveryFee(widget.order)),
-            StreamBuilder<bool>(
-              stream: Observable.combineLatest3<String, String, User, bool>(
-                  widget.order.status,
-                  widget.order.delivererID,
-                  ConfigHelper.instance.currentUserProperty.producer,
-                  (status, delivererID, currentUser) {
-                print(status);
-                if (status == null || status != orderStatus_Accepted)
-                  return false;
-                if (delivererID == null || currentUser == null) return false;
-                return delivererID == currentUser.uid;
-              }),
-              builder: (BuildContext context, snapshot) {
-                if (!snapshot.hasData || !snapshot.data) return Offstage();
-
-                return Row(
-                  children: <Widget>[
-                    FlatButton(
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            side: BorderSide(color: ColorHelper.dabaoErrorRed),
-                            borderRadius: BorderRadius.circular(8.0)),
-                        child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "Cancel Delivery",
-                              style: FontHelper.semiBold(Colors.black, 14.0),
-                            )),
-                        onPressed: () async {
-                          showCancel(widget.order);
-                        }),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      child: RaisedButton(
-                          elevation: 4.0,
-                          color: ColorHelper.dabaoOrange,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0)),
-                          child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                "Complete Delivery",
-                                textAlign: TextAlign.center,
-                                style: FontHelper.semiBold(Colors.black, 14.0),
-                              )),
-                          onPressed: () async {
-                            showComplete(widget.order);
-                          }),
-                    ),
-                  ],
-                );
-              },
-            ),
+            builBottomButtons(),
           ],
         ),
       ),
+    );
+  }
+
+  StreamBuilder<bool> builBottomButtons() {
+    return StreamBuilder<bool>(
+      stream: Observable.combineLatest3<String, String, User, bool>(
+          widget.order.status,
+          widget.order.delivererID,
+          ConfigHelper.instance.currentUserProperty.producer,
+          (status, delivererID, currentUser) {
+        print(status);
+        if (status == null || status != orderStatus_Accepted) return false;
+        if (delivererID == null || currentUser == null) return false;
+        return delivererID == currentUser.uid;
+      }),
+      builder: (BuildContext context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data) return Offstage();
+
+        return Row(
+          children: <Widget>[
+            FlatButton(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    side: BorderSide(color: ColorHelper.dabaoErrorRed),
+                    borderRadius: BorderRadius.circular(8.0)),
+                child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Cancel Delivery",
+                      style: FontHelper.semiBold(Colors.black, 14.0),
+                    )),
+                onPressed: () async {
+                  showCancel(widget.order);
+                }),
+            SizedBox(
+              width: 20,
+            ),
+            Expanded(
+              child: RaisedButton(
+                  elevation: 4.0,
+                  color: ColorHelper.dabaoOrange,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Complete Delivery",
+                        textAlign: TextAlign.center,
+                        style: FontHelper.semiBold(Colors.black, 14.0),
+                      )),
+                  onPressed: () async {
+                    showComplete(widget.order);
+                  }),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  StreamBuilder<bool> buildConfirmationProofIcon() {
+    return StreamBuilder<bool>(
+      stream: Observable.combineLatest3<String, String, User, bool>(
+          widget.order.status,
+          widget.order.delivererID,
+          ConfigHelper.instance.currentUserProperty.producer,
+          (status, delivererID, currentUser) {
+        print(status);
+        if (status == null || status != orderStatus_Accepted) return false;
+        if (delivererID == null || currentUser == null) return false;
+        return delivererID == currentUser.uid;
+      }),
+      builder: (BuildContext context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data) return Offstage();
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context)
+                .push(FadeRoute(widget: ConfirmationProofPage()));
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Image.asset("assets/images/InAppIcon.png"),
+              Text(
+                "Tap icon to go to confirmation proof page",
+                style: FontHelper.regular(Colors.black, 12.0),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -751,10 +798,20 @@ class _DeliveryTime extends StatelessWidget {
         if (!snapshot.hasData || snapshot.data == null) {
           return Offstage();
         }
-        return Text(
-          snapshot.data,
-          style: FontHelper.regular(Colors.black, 14.0),
-          textAlign: TextAlign.center,
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text(
+              "Deliver To:",
+              style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 14.0),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              snapshot.data,
+              style: FontHelper.regular(Colors.black, 14.0),
+              textAlign: TextAlign.center,
+            ),
+          ],
         );
       },
     );

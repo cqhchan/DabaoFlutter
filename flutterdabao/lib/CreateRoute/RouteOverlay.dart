@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Buttons/ArrowButton.dart';
+import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Headers/DoubleLineHeader.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
@@ -156,7 +157,7 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
                   Navigator.popUntil(context, ModalRoute.withName(Navigator.defaultRouteName));
 
                   Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => TabBarPage()));
+                      SlideUpRoute(widget:TabBarPage()));
                 } else {
                   Navigator.of(context).pop();
                   // TODO bug it doessnt show

@@ -211,10 +211,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             Positioned(
               left: 50,
               bottom: (MediaQuery.of(context).size.height - 150) * 0.1,
-              child: Image.asset(
-                'assets/images/LoginAppIcon.png',
-                fit: BoxFit.cover,
-                alignment: Alignment.bottomLeft,
+              child: Container(
+                height: 100,
+                width: 100,
+                child: Image.asset(
+                  'assets/images/InAppIcon.png',
+                  fit: BoxFit.cover,
+                  alignment: Alignment.bottomLeft,
+                ),
               ),
             )
           ],

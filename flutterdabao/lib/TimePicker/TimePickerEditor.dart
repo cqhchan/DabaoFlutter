@@ -346,7 +346,7 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Container(
-                      width: 135,
+                      width: 140,
                       child: Align(
                           alignment: Alignment.center,
                           child: Text(
@@ -458,7 +458,7 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Container(
-                      width: 135,
+                      width: 140,
                       child: Align(
                           alignment: Alignment.center,
                           child: Text(
@@ -836,7 +836,7 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Container(
-                      width: 135,
+                      width: 140,
                       child: Align(
                           alignment: Alignment.center,
                           child: Text(

@@ -216,31 +216,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
             else
               return GestureDetector(
                 onTap: () {
-                  Navigator.of(context).push(PageRouteBuilder(
-                    pageBuilder: (BuildContext context,
-                        Animation<double> animation,
-                        Animation<double> secondaryAnimation) {
-                      return TabBarPage();
-                    },
-                    transitionsBuilder: (BuildContext context,
-                        Animation<double> animation,
-                        Animation<double> secondaryAnimation,
-                        Widget child) {
-                      return SlideTransition(
-                        position: new Tween<Offset>(
-                          begin: const Offset(0.0, 1.0),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: new SlideTransition(
-                          position: new Tween<Offset>(
-                            begin: Offset.zero,
-                            end: const Offset(0.0, 1.0),
-                          ).animate(secondaryAnimation),
-                          child: child,
-                        ),
-                      );
-                    },
-                  ));
+                  Navigator.of(context).push(SlideUpRoute(widget: TabBarPage()));
                 },
                 child: Align(
                   alignment: Alignment.bottomCenter,

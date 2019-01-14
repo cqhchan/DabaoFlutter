@@ -384,82 +384,83 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
   }
 
   Widget _buildOrderItem(BuildContext context, OrderItem orderItem) {
-    return Center(
-      child: Container(
-        constraints: BoxConstraints(maxHeight: 50),
-        padding: EdgeInsets.all(6),
-        color: Color(0xFFF5F5F5),
-        child: Flex(
-          direction: Axis.horizontal,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(3, 0, 8, 0),
-              child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Image.asset('assets/icons/icon_menu_orange.png')),
+    return GestureDetector(
+        onTap: () {
+          orderItem.updateBought(widget.order, !orderItem.isBought.value);
+        },
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: 45),
+          child: Container(
+            padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+            color: ColorHelper.dabaoOffWhiteF5,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: 30.0,
+                  margin: EdgeInsets.only(top: 5),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: StreamBuilder<bool>(
+                      stream: orderItem.isBought,
+                      builder: (BuildContext context, snapshot) {
+                        if (!snapshot.hasData ||
+                            snapshot.data == null ||
+                            !snapshot.data)
+                          return Container(
+                            height: 18,
+                            width: 18,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: ColorHelper.dabaoOrange,
+                                width: 1.5,
+                              ),
+                            ),
+                          );
+                        else
+                          return Icon(
+                            Icons.check_circle,
+                            color: ColorHelper.dabaoOrange,
+                            size: 18,
+                          );
+                      },
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        orderItem.name.value,
+                        style: FontHelper.semiBold12Black,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        orderItem.description.value,
+                        style: FontHelper.semiBold(
+                            ColorHelper.dabaoOffBlack4A, 10),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 10.0,
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Text(
+                      "Max: ${StringHelper.doubleToPriceString(orderItem.price.value)}",
+                      style: FontHelper.regular12Black),
+                )
+              ],
             ),
-            Expanded(
-                flex: 6,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    StreamBuilder(
-                      stream: orderItem.name,
-                      builder: (context, item) {
-                        if (!item.hasData) return Offstage();
-                        return Text(
-                          '${item.data}',
-                          style: FontHelper.bold12Black,
-                        );
-                      },
-                    ),
-                    StreamBuilder(
-                      stream: orderItem.description,
-                      builder: (context, item) {
-                        if (!item.hasData) return Offstage();
-                        return Text(
-                          '${item.data}',
-                          maxLines: 2,
-                          style: FontHelper.medium10greyTextStyle,
-                          overflow: TextOverflow.ellipsis,
-                        );
-                      },
-                    ),
-                  ],
-                )),
-            Expanded(
-              flex: 3,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  StreamBuilder(
-                    stream: orderItem.price,
-                    builder: (context, item) {
-                      if (!item.hasData) return Offstage();
-                      return Text(
-                        'Max: ' + StringHelper.doubleToPriceString(item.data),
-                        style: FontHelper.regular10Black,
-                      );
-                    },
-                  ),
-                  StreamBuilder(
-                    stream: orderItem.quantity,
-                    builder: (context, item) {
-                      if (!item.hasData) return Offstage();
-                      return Text(
-                        'X${item.data}',
-                        style: FontHelper.bold12Black,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            )
-          ],
+          ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildLocationDescription(Order order) {

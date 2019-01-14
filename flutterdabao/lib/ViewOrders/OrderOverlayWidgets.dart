@@ -191,7 +191,7 @@ class _DateTimePickerState extends State<DateTimePicker>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Container(
-                      width: 135,
+                      width: 140,
                       child: Align(
                           alignment: Alignment.center,
                           child: Text(

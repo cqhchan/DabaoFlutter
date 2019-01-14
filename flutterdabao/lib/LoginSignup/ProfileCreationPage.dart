@@ -9,6 +9,7 @@ import 'package:image/image.dart' as Resize;
 import 'package:path_provider/path_provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:random_string/random_string.dart';
 
 class ProfileCreationPage extends StatefulWidget {
   final VoidCallback onCompleteCallback;
@@ -30,6 +31,12 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   bool _autoValidate = false;
 
   @override
+    void initState() {
+      print("testing");
+      super.initState();
+    }
+
+  @override
   void dispose() {
     _nameController.dispose();
     super.dispose();
@@ -37,12 +44,19 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return ModalProgressHUD(
+        key: key2,
         child: buildWidget(context), inAsyncCall: _inProgress);
   }
 
+  final Key key = Key(randomString(20));
+  final Key key2 = Key(randomString(20));
+
   Widget buildWidget(BuildContext context) {
     return Scaffold(
+        key: key,
         body: SafeArea(
       child: Form(
         autovalidate: _autoValidate,

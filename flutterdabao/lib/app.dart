@@ -105,18 +105,18 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
         primarySwatch: ColorHelper.dabaoOrangeMaterial,
         brightness: Brightness.light,
       ),
-      home: Builder(
-        builder: (context) {
-          return MediaQuery(
-            child: _handleCurrentScreen(),
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-          );
-        },
-      ),
+      builder: (context, child) {
+        return MediaQuery(
+          child: child,
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        );
+      },
+      home:  _handleCurrentScreen(),
     );
   }
 
   Key loginPageKey = Key("loginPageKey");
+  Key processingPageKey = Key("processingPageKey");
 
   Widget _handleCurrentScreen() {
     return StreamBuilder<FirebaseUser>(
@@ -130,7 +130,7 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
               User user = User.fromAuth(snapshot.data);
               //Check if its logged in
 
-              return ProcessingPage(user);
+              return ProcessingPage(user: user, key: processingPageKey);
             } else {
               return Navigator(onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(builder: (context) {

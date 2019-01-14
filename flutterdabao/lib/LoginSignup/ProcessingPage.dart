@@ -9,11 +9,12 @@ import 'package:flutterdabao/LoginSignup/AuthPages.dart';
 import 'package:flutterdabao/LoginSignup/ProfileCreationPage.dart';
 import 'package:flutterdabao/LoginSignup/WelcomePage.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:random_string/random_string.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ProcessingPage extends StatefulWidget {
   final User user;
-  ProcessingPage(this.user);
+  ProcessingPage({Key key, this.user}) : super(key: key);
 
   @override
   _ProcessingPageState createState() => new _ProcessingPageState();
@@ -22,6 +23,63 @@ class ProcessingPage extends StatefulWidget {
 class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
   List<Widget> listOfWidget;
   MutableProperty<int> currentPage = MutableProperty<int>(0);
+  Observable<List<Widget>> listOfWidgetProducer; 
+  @override
+    void initState() {
+
+      super.initState();
+
+      listOfWidgetProducer = Observable.combineLatest3<String, String, FirebaseUser,
+                List<Widget>>(widget.user.email, widget.user.profileImage,
+            FirebaseAuth.instance.currentUser().asStream(),
+            (email, profileImage, firebaseUser) {
+          List<Widget> list = List();
+
+          if (firebaseUser.phoneNumber == null)
+            list.add(Scaffold(
+                body: PhoneVerificationPage(
+              linkCredentials: true,
+              onCompleteCallback: nextPage,
+            )));
+
+          if (profileImage == null ||
+              firebaseUser.phoneNumber == null) if ((firebaseUser.email ==
+                  null ||
+              firebaseUser.email.isEmpty))
+            list.add(Scaffold(
+              key: scaffoldKey,
+                body: SafeArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Container(
+                      padding: EdgeInsets.only(top: 10.0),
+                      child: Text(
+                        "Add Email (Optional)",
+                        style: FontHelper.semiBold(Colors.black, 18.0),
+                      )),
+                  Flexible(
+                      child: EmailLoginPage(
+                    linkCredentials: true,
+                    onCompleteCallback: () {
+                      nextPage();
+                    },
+                  )),
+                ],
+              ),
+            )));                print("testing 2");
+
+          if (profileImage == null)
+            list.add(ProfileCreationPage(
+              key: profileKey,
+              onCompleteCallback: () {
+                nextPage();
+              },
+            ));
+
+          return list;
+        });
+    }
 
   @override
   // TODO: implement maxPage + 2 cause firstPage and HomePage
@@ -47,58 +105,16 @@ class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
   @override
   // TODO: implement pageNumberSubject
   BehaviorSubject<int> get pageNumberSubject => currentPage.producer;
+
+  Key profileKey = Key(randomString(20));
+  Key scaffoldKey = Key(randomString(20));
+
   @override
   Widget build(BuildContext context) {
     // There are 3 things that you check to see of it should go to ProfileCreation/Verification or Home
     // return true to go to home/ false to go to ProfileCreation
     return StreamBuilder<List<Widget>>(
-        stream: Observable.combineLatest3<String, String, FirebaseUser,
-                List<Widget>>(widget.user.email, widget.user.profileImage,
-            FirebaseAuth.instance.currentUser().asStream(),
-            (email, profileImage, firebaseUser) {
-          List<Widget> list = List();
-
-          if (firebaseUser.phoneNumber == null)
-            list.add(Scaffold(
-                body: PhoneVerificationPage(
-              linkCredentials: true,
-              onCompleteCallback: nextPage,
-            )));
-
-          if (profileImage == null ||
-              firebaseUser.phoneNumber == null) if ((firebaseUser.email ==
-                  null ||
-              firebaseUser.email.isEmpty))
-            list.add(Scaffold(
-                body: SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Container(
-                      padding: EdgeInsets.only(top: 10.0),
-                      child: Text(
-                        "Add Email (Optional)",
-                        style: FontHelper.semiBold(Colors.black, 18.0),
-                      )),
-                  Flexible(
-                      child: EmailLoginPage(
-                    linkCredentials: true,
-                    onCompleteCallback: () {
-                      nextPage();
-                    },
-                  )),
-                ],
-              ),
-            )));
-          if (profileImage == null)
-            list.add(ProfileCreationPage(
-              onCompleteCallback: () {
-                nextPage();
-              },
-            ));
-
-          return list;
-        }),
+        stream: listOfWidgetProducer,
         builder: (BuildContext context, snap) {
           // GO STRAIGHT TO HOME IN DEBUG
           // if (ConfigHelper.instance.isInDebugMode)

@@ -125,7 +125,7 @@ handleNotificationForResumeAndLaunch(map) async {
 
         case modeNewPotentialOrder:
           ConfigHelper.instance.navigatorKey.currentState
-              .push(FadeRoute(widget: TabBarPage()));
+              .push(SlideUpRoute(widget: TabBarPage()));
           break;
       }
     }

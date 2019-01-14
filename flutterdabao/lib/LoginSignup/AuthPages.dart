@@ -46,139 +46,141 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
 
   //sign up page that shows up after signup button is pressed
   Widget buildSignUpPage() {
-    return GestureDetector(
-      onTap: _focusNode.unfocus,
-      child: Container(
-        padding: EdgeInsets.fromLTRB(18.0, 40.0, 18.0, 0.0),
-        color: Colors.transparent,
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              buildHeader(),
-              SizedBox(
-                height: 15,
-              ),
-              buildNumberEnterArea(),
-              SizedBox(
-                height: 30,
-              ),
-              Container(
-                height: 60.0,
-                child: otpsent
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Center(
-                            child: Text(
-                              "Please enter the verification code sent to",
-                              style: FontHelper.semiBold(Color(0xFF454F63), 14),
+    return SingleChildScrollView(
+          child: GestureDetector(
+        onTap: _focusNode.unfocus,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(18.0, 40.0, 18.0, 0.0),
+          color: Colors.transparent,
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                buildHeader(),
+                SizedBox(
+                  height: 15,
+                ),
+                buildNumberEnterArea(),
+                SizedBox(
+                  height: 30,
+                ),
+                Container(
+                  height: 60.0,
+                  child: otpsent
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Center(
+                              child: Text(
+                                "Please enter the verification code sent to",
+                                style: FontHelper.semiBold(Color(0xFF454F63), 14),
+                              ),
                             ),
-                          ),
-                          Text(
-                            countryCode + phoneNumber,
-                            style: FontHelper.semiBold(Color(0xFF454F63), 14),
-                          )
-                        ],
-                      )
-                    : Container(
-                        height: 60,
-                      ),
-              ),
-              PinEntryTextField(
-                fieldHeight: 40.0,
-                fieldWidth: 30.0,
-                midGap: 15.0,
-                enableTextField: otpsent,
-                onSubmit: (String pin) async {
-                  this.smsCode = pin;
-                  showLoadingOverlay(context: context);
+                            Text(
+                              countryCode + phoneNumber,
+                              style: FontHelper.semiBold(Color(0xFF454F63), 14),
+                            )
+                          ],
+                        )
+                      : Container(
+                          height: 60,
+                        ),
+                ),
+                PinEntryTextField(
+                  fieldHeight: 40.0,
+                  fieldWidth: 30.0,
+                  midGap: 15.0,
+                  enableTextField: otpsent,
+                  onSubmit: (String pin) async {
+                    this.smsCode = pin;
+                    showLoadingOverlay(context: context);
 
-                  if (!widget.linkCredentials) {
-                    await signInWithPhone().then((FirebaseUser firebaseUser) {
-                      // Navigator.of(context).pop();
+                    if (!widget.linkCredentials) {
+                      await signInWithPhone().then((FirebaseUser firebaseUser) {
+                        // Navigator.of(context).pop();
 
-                      User.fromAuth(firebaseUser)
-                          .setPhoneNumber(firebaseUser.phoneNumber);
+                        User.fromAuth(firebaseUser)
+                            .setPhoneNumber(firebaseUser.phoneNumber);
 
-                      if (widget.onCompleteCallback != null)
-                        widget.onCompleteCallback();
-                    }).catchError((e) {
-                      Navigator.of(context).pop();
-                      _showSnackBar("Error incorrect wrong code");
-                    });
-                  } else {
-                    linkCredentialsWithPhone().then((firebaseUser) {
-                      Navigator.of(context).pop();
-                      User.fromAuth(firebaseUser)
-                          .setPhoneNumber(firebaseUser.phoneNumber);
-                      if (widget.onCompleteCallback != null)
-                        widget.onCompleteCallback();
-                    }).catchError((e) {
-                      Navigator.of(context).pop();
+                        if (widget.onCompleteCallback != null)
+                          widget.onCompleteCallback();
+                      }).catchError((e) {
+                        Navigator.of(context).pop();
+                        _showSnackBar("Error incorrect wrong code");
+                      });
+                    } else {
+                      linkCredentialsWithPhone().then((firebaseUser) {
+                        Navigator.of(context).pop();
+                        User.fromAuth(firebaseUser)
+                            .setPhoneNumber(firebaseUser.phoneNumber);
+                        if (widget.onCompleteCallback != null)
+                          widget.onCompleteCallback();
+                      }).catchError((e) {
+                        Navigator.of(context).pop();
 
-                      switch (e.code) {
-                        case "ERROR_REQUIRES_RECENT_LOGIN":
-                          FirebaseAuth.instance.signOut();
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: Text("Please Login Again"),
-                                  actions: <Widget>[
-                                    new FlatButton(
-                                      child: new Text(
-                                        "DISMISS",
-                                        style: FontHelper.regular(
-                                            Colors.black, 14.0),
+                        switch (e.code) {
+                          case "ERROR_REQUIRES_RECENT_LOGIN":
+                            FirebaseAuth.instance.signOut();
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Please Login Again"),
+                                    actions: <Widget>[
+                                      new FlatButton(
+                                        child: new Text(
+                                          "DISMISS",
+                                          style: FontHelper.regular(
+                                              Colors.black, 14.0),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
                                       ),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ],
-                                );
-                              });
-                          break;
+                                    ],
+                                  );
+                                });
+                            break;
 
-                        case "ERROR_INVALID_CREDENTIAL":
-                          _showSnackBar('Unknown Error');
+                          case "ERROR_INVALID_CREDENTIAL":
+                            _showSnackBar('Unknown Error');
 
-                          break;
+                            break;
 
-                        case "ERROR_WEAK_PASSWORD":
-                          _showSnackBar(
-                              'Weak Password. Must be more than 6 characters');
+                          case "ERROR_WEAK_PASSWORD":
+                            _showSnackBar(
+                                'Weak Password. Must be more than 6 characters');
 
-                          break;
+                            break;
 
-                        case "ERROR_CREDENTIAL_ALREADY_IN_USE":
-                          _showSnackBar('Phone Number already in use');
+                          case "ERROR_CREDENTIAL_ALREADY_IN_USE":
+                            _showSnackBar('Phone Number already in use');
 
-                          break;
+                            break;
 
-                        case "ERROR_USER_DISABLED":
-                          _showSnackBar('Unknown Error');
+                          case "ERROR_USER_DISABLED":
+                            _showSnackBar('Unknown Error');
 
-                          break;
+                            break;
 
-                        case "ERROR_PROVIDER_ALREADY_LINKED":
-                          _showSnackBar('Phone Number already linked');
+                          case "ERROR_PROVIDER_ALREADY_LINKED":
+                            _showSnackBar('Phone Number already linked');
 
-                          break;
+                            break;
 
-                        case "ERROR_OPERATION_NOT_ALLOWED":
-                          _showSnackBar('Check your network connectivity');
+                          case "ERROR_OPERATION_NOT_ALLOWED":
+                            _showSnackBar('Check your network connectivity');
 
-                          break;
+                            break;
 
-                        default:
-                          _showSnackBar(e.message);
-                      }
-                    });
-                  }
-                },
-              ),
-            ]),
+                          default:
+                            _showSnackBar(e.message);
+                        }
+                      });
+                    }
+                  },
+                ),
+              ]),
+        ),
       ),
     );
   }
