@@ -244,7 +244,7 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
                 child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      "Add To Basket",
+                      "Add To Cart",
                       style: FontHelper.semiBold(Colors.black, 14.0),
                     ))),
             Image.asset("assets/icons/arrow_right_white_circle.png")

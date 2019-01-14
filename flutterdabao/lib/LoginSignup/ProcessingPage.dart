@@ -67,7 +67,7 @@ class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
                   )),
                 ],
               ),
-            )));                print("testing 2");
+            )));              
 
           if (profileImage == null)
             list.add(ProfileCreationPage(

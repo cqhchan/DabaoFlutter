@@ -125,10 +125,10 @@ class ConfigHelper with HavingSubscriptionMixin {
     // get Current Routes TODO fix bug
     subscription.add(
         currentUserRoutesPastDayProperty.bindTo(currentUserRoutesPastDayProducer()));
- subscription.add(currentUserRoutesPastDayProperty.producer.listen((onData){
+//  subscription.add(currentUserRoutesPastDayProperty.producer.listen((onData){
 
-   print("testing data " + onData.length.toString());
- }));
+//    print("testing data " + onData.length.toString());
+//  }));
     subscription
         .add(currentDabaoerRewards.bindTo(currentDabaoerRewardsProducer()));
 

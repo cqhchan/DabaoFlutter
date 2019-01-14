@@ -137,7 +137,7 @@ class _SelectFoodTagPageState extends State<SelectFoodTagPage>
       children: <Widget>[
         Container(
           child: Text(
-            "Reccomended",
+            "Recommended",
             style: FontHelper.medium(ColorHelper.dabaoOffBlack4A, 12.0),
           ),
           padding: EdgeInsets.only(bottom: 5.0),

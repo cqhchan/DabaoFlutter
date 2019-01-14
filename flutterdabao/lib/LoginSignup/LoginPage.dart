@@ -64,7 +64,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 
   void initState() {
-    print("init");
     super.initState();
     _tabController = new TabController(vsync: this, initialIndex: 0, length: 2);
     _tabController.addListener(() {

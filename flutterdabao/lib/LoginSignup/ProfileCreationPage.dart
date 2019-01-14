@@ -32,7 +32,6 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
 
   @override
     void initState() {
-      print("testing");
       super.initState();
     }
 
@@ -155,8 +154,8 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       sourcePath: imageFile.path,
       ratioX: 1.0,
       ratioY: 1.0,
-      maxWidth: 300,
-      maxHeight: 300,
+      maxWidth: 2048,
+      maxHeight: 2048,
     );
     return croppedFile;
   }

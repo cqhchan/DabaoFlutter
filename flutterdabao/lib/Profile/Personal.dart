@@ -416,79 +416,89 @@ class _PersonalState extends State<Personal> {
               width: 1000,
               color: Color(0x11000000),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: Text(
-                'Phone Number',
-                style: FontHelper.regular10lightgrey,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: StreamBuilder<String>(
-                  stream: currentUser.producer.value.handPhone,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data == null)
-                      return Offstage();
-                    if (updateFlag) {
-                      _hpTextController.text = snapshot.data;
-                      return TextFormField(
-                        controller: _hpTextController,
-                        style: FontHelper.regular12Black,
-                        onSaved: (input) {
-                          _hpTextController.text = input;
-                        },
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.all(0),
-                        ),
-                      );
-                    }
-                    return Text(
-                      snapshot.data != null ? snapshot.data : '',
-                      style: FontHelper.regular12Black,
-                    );
-                  }),
-            ),
-            Container(
-              height: 1.0,
-              width: 1000,
-              color: Color(0x11000000),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: Text(
-                'Email Address',
-                style: FontHelper.regular10lightgrey,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: StreamBuilder<String>(
-                  stream: currentUser.producer.value.email,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data == null)
-                      return Offstage();
-                    if (updateFlag) {
-                      _emailTextController.text = snapshot.data;
-                      return TextFormField(
-                        controller: _emailTextController,
-                        style: FontHelper.regular12Black,
-                        onSaved: (input) {
-                          _emailTextController.text = input;
-                        },
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.all(0),
-                        ),
-                      );
-                    }
-                    return Text(
-                      snapshot.data != null ? snapshot.data : '',
-                      style: FontHelper.regular12Black,
-                    );
-                  }),
-            ),
+            updateFlag
+                ? Offstage()
+                : Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Text(
+                      'Phone Number',
+                      style: FontHelper.regular10lightgrey,
+                    ),
+                  ),
+            updateFlag
+                ? Offstage()
+                : Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: StreamBuilder<String>(
+                        stream: currentUser.producer.value.handPhone,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data == null)
+                            return Offstage();
+                          if (updateFlag) {
+                            _hpTextController.text = snapshot.data;
+                            return TextFormField(
+                              controller: _hpTextController,
+                              style: FontHelper.regular12Black,
+                              onSaved: (input) {
+                                _hpTextController.text = input;
+                              },
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.all(0),
+                              ),
+                            );
+                          }
+                          return Text(
+                            snapshot.data != null ? snapshot.data : '',
+                            style: FontHelper.regular12Black,
+                          );
+                        }),
+                  ),
+            updateFlag
+                ? Offstage()
+                : Container(
+                    height: 1.0,
+                    width: 1000,
+                    color: Color(0x11000000),
+                  ),
+            updateFlag
+                ? Offstage()
+                : Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Text(
+                      'Email Address',
+                      style: FontHelper.regular10lightgrey,
+                    ),
+                  ),
+            updateFlag
+                ? Offstage()
+                : Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: StreamBuilder<String>(
+                        stream: currentUser.producer.value.email,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data == null)
+                            return Offstage();
+                          if (updateFlag) {
+                            _emailTextController.text = snapshot.data;
+                            return TextFormField(
+                              controller: _emailTextController,
+                              style: FontHelper.regular12Black,
+                              onSaved: (input) {
+                                _emailTextController.text = input;
+                              },
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.all(0),
+                              ),
+                            );
+                          }
+                          return Text(
+                            snapshot.data != null ? snapshot.data : '',
+                            style: FontHelper.regular12Black,
+                          );
+                        }),
+                  ),
           ],
         ),
       ),
@@ -496,9 +506,7 @@ class _PersonalState extends State<Personal> {
   }
 
   Future _update(BuildContext context) async {
-    if (_emailTextController.text != '' &&
-        _nameTextController.text != '' &&
-        _hpTextController.text != '') {
+    if (_nameTextController.text != '') {
       final DocumentReference postRef =
           Firestore.instance.document('users/${currentUser.value.uid}');
       Firestore.instance.runTransaction((Transaction tx) async {
@@ -522,9 +530,9 @@ class _PersonalState extends State<Personal> {
     showModalBottomSheet(
         context: context,
         builder: (builder) {
-          return SafeArea(
-            child: Container(
-              color: Colors.white,
+          return Container(
+            color: Colors.white,
+            child: SafeArea(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
@@ -583,8 +591,8 @@ class _PersonalState extends State<Personal> {
       sourcePath: imageFile.path,
       ratioX: 1.0,
       ratioY: 1.0,
-      maxWidth: 300,
-      maxHeight: 300,
+      maxWidth: 2048,
+      maxHeight: 2048,
     );
     return croppedFile;
   }
