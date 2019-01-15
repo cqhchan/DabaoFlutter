@@ -22,7 +22,7 @@ class FadeRoute extends PageRouteBuilder {
         });
 }
 
-class SlideUpRoute extends PageRouteBuilder {
+class SlideUpRoute<T> extends PageRouteBuilder {
   final Widget widget;
   SlideUpRoute({this.widget})
       : super(

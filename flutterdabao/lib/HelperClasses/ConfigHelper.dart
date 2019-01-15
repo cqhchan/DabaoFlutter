@@ -211,9 +211,9 @@ class ConfigHelper with HavingSubscriptionMixin {
         : FirebaseCollectionReactive<DabaoRoute.Route>(Firestore.instance
                 .collection("routes")
                 // TODO disable time filer for now. solve it later
-                // .where(DabaoRoute.Route.deliveryTimeKey,
-                //     isGreaterThanOrEqualTo:
-                //         DateTime.now().add(Duration(days: -2)))
+                .where(DabaoRoute.Route.deliveryTimeKey,
+                    isGreaterThanOrEqualTo:
+                        DateTime.now().add(Duration(days: -2)))
                 .where(DabaoRoute.Route.creatorKey, isEqualTo: user.uid)
                 )
             .observable);

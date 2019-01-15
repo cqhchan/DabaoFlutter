@@ -219,7 +219,7 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
           handlePressButton(context, (location, description) {
             widget.holder.deliveryLocation.producer.add(location);
             widget.holder.deliveryLocationDescription.producer.add(description);
-          });
+          }, widget.holder.deliveryLocationDescription.value);
         },
       ),
     );

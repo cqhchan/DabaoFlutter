@@ -98,31 +98,40 @@ class _CheckoutPageState extends State<CheckoutPage>
     final ThemeData theme = Theme.of(context);
 
     return Container(
-        padding: EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
         color: ColorHelper.dabaoOffWhiteF5,
         child: SafeArea(
             child: Column(
           children: <Widget>[
             Container(
-                padding: EdgeInsets.only(bottom: 8.0),
+                padding: EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
                 child: OrderItemSummary(
                   holders: widget.holder,
                   showAddItem: false,
                   minHeight: 0.0,
                   showSummaryPrice: true,
                 )),
-            SizedBox(height: 50,),
-            buildPromoCode(),
-            Line(
-              margin: EdgeInsets.only(left: 8.0, right: 8.0),
+            SizedBox(
+              height: 50,
             ),
-            buildPrice(),
-            buildPriceSlider(theme),
-            Line(
-              margin: EdgeInsets.only(left: 8.0, right: 8.0),
-            ),
-            buildTotal(),
-            buildCompleteButton()
+            Container(
+              color: Colors.white,
+              padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
+              child: Column(
+                children: <Widget>[
+                  buildPromoCode(),
+                  Line(
+                    margin: EdgeInsets.only(left: 8.0, right: 8.0),
+                  ),
+                  buildPrice(),
+                  buildPriceSlider(theme),
+                  Line(
+                    margin: EdgeInsets.only(left: 8.0, right: 8.0),
+                  ),
+                  buildTotal(),
+                  buildCompleteButton()
+                ],
+              ),
+            )
           ],
         )));
   }
@@ -346,68 +355,83 @@ class _CheckoutPageState extends State<CheckoutPage>
       ),
     );
   }
-  //TODO P1 change to new design $0.00 - reccomended - $ max
 
-  Container buildPriceSlider(ThemeData theme) {
-    return Container(
-      height: 50.0,
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: <Widget>[
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: EdgeInsets.only(bottom: 5.0, left: 8.0, right: 8.0),
-              height: 35,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("😔",
-                          style: FontHelper.bold(Colors.black, 25.0)),
-                    ),
+  Widget buildPriceSlider(ThemeData theme) {
+    return StreamBuilder<double>(
+        stream: suggestedDeliveryFeeProperty.producer,
+        builder: (context, snap) {
+          if (snap.data == null) return Offstage();
+          return Container(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  color: Color(0xFFF3F3F3),
+                  child: Slider(
+                    activeColor: Color(0xFFBCE0FD),
+                    inactiveColor: Colors.white,
+                    divisions: (snap.data ~/ 0.5) * 2,
+                    max: 2.0,
+                    min: 0.0,
+                    value: chosenPercentage.value,
+                    onChanged: (double value) {
+                      setState(() {
+                        chosenPercentage.value = value;
+                      });
+                    },
                   ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                    ),
-                  ),
-                  Text("😃", style: FontHelper.bold(Colors.black, 25.0)),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text("😍",
-                          style: FontHelper.bold(Colors.black, 25.0)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            height: 20,
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: SliderTheme(
-                child: Slider(
-                  onChanged: (double value) {
-                    setState(() {
-                      chosenPercentage.value = value;
-                    });
-                  },
-                  divisions: 15,
-                  value: chosenPercentage.value,
-                  max: 1.5,
                 ),
-                data: theme.sliderTheme
-                    .copyWith(thumbShape: RoundSliderThumbShape()),
-              ),
+
+                Container(
+                  padding: EdgeInsets.only(bottom: 5.0, left: 8.0, right: 8.0),
+                  height: 35,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text("\$0.00",
+                              style: FontHelper.bold(Colors.black, 12.0)),
+                        ),
+                      ),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child:  Text("Recommended", style: FontHelper.bold(Colors.black, 12.0)),
+                        ),
+                      ),
+                     
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(StringHelper.doubleToPriceString(snap.data * 2),
+                              style: FontHelper.bold(Colors.black, 12.0)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Container(
+                //   height: 20,
+                //   child: Align(
+                //     alignment: Alignment.topCenter,
+                //     child: SliderTheme(
+                //       child: Slider(
+                //         onChanged: (double value) {
+
+                //         },
+                //         divisions: 20,
+                //         value: chosenPercentage  FGXC.value,
+                //         max: 2.0,
+                //       ),
+                //       data: theme.sliderTheme
+                //           .copyWith(thumbShape: RoundSliderThumbShape()),
+                //     ),
+                //   ),
+                // ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
+        });
   }
 }

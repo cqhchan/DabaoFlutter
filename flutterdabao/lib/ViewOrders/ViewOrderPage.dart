@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
+import 'package:flutterdabao/Chat/Conversation.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
@@ -15,6 +17,7 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
+import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
@@ -25,6 +28,15 @@ import 'package:flutterdabao/ViewOrders/ConfirmationProofPage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+_makePhoneCall(String url) async {
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
+  }
+}
 
 class DabaoerViewOrderListPage extends StatefulWidget {
   final Order order;
@@ -246,7 +258,9 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Image.asset("assets/images/InAppIcon.png"),
-              SizedBox(height: 10,),
+              SizedBox(
+                height: 10,
+              ),
               Text(
                 "Tap icon to go to confirmation proof page",
                 style: FontHelper.regular(Colors.black, 12.0),
@@ -337,12 +351,23 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                       );
                     },
                   ),
-                  Container(
-                    padding: EdgeInsets.only(left: 10.0),
-                    child: Icon(
-                      Icons.phone,
-                      size: 25,
-                    ),
+                  StreamBuilder<String>(
+                    stream: user.handPhone,
+                    builder: (context, snapshot) {
+                      if (snapshot.data == null) return Offstage();
+                      return Container(
+                        padding: EdgeInsets.only(left: 10.0),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.phone,
+                            size: 25,
+                          ),
+                          onPressed: () {
+                            _makePhoneCall('tel:' + snapshot.data);
+                          },
+                        ),
+                      );
+                    },
                   )
                 ],
               ),
@@ -420,7 +445,7 @@ class DabaoeeViewOrderListPage extends StatefulWidget {
     return _DabaoeeViewOrderListPageState();
   }
 }
-//TODO p1 show chat and Message
+
 class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
     with HavingSubscriptionMixin {
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
@@ -518,7 +543,7 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
       ),
     );
   }
-//TODO p1 are you sure you want to cancel
+
   StreamBuilder<String> buildCancelButton(BuildContext context) {
     return StreamBuilder(
       stream: widget.order.status,
@@ -527,7 +552,7 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
           return FlatButton(
               color: Colors.transparent,
               shape: RoundedRectangleBorder(
-                side: BorderSide(color: ColorHelper.dabaoErrorRed),
+                  side: BorderSide(color: ColorHelper.dabaoErrorRed),
                   borderRadius: BorderRadius.circular(8.0)),
               child: Row(
                 children: <Widget>[
@@ -541,40 +566,72 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
                 ],
               ),
               onPressed: () async {
-                showLoadingOverlay(context: context);
-
-                await FirebaseCloudFunctions.cancelCurrentUserOrder(
-                        orderID: widget.order.uid)
-                    .then((isSuccessful) {
-                  if (isSuccessful) {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                  } else {
-                    Navigator.of(context).pop();
-                    final snackBar = SnackBar(
-                        content: Text(
-                            'An Error has occured. Please check your network connectivity'));
-                    Scaffold.of(context).showSnackBar(snackBar);
-                  }
-                }).catchError((error) {
-                  if (error is PlatformException) {
-                    PlatformException e = error;
-                    Navigator.of(context).pop();
-                    final snackBar = SnackBar(content: Text(e.message));
-                    Scaffold.of(context).showSnackBar(snackBar);
-                  } else {
-                    Navigator.of(context).pop();
-                    final snackBar = SnackBar(
-                        content: Text(
-                            'An Error has occured. Please check your network connectivity'));
-                    Scaffold.of(context).showSnackBar(snackBar);
-                  }
-                });
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text("Cancel Order"),
+                        content: Text("Are you sure you want to cancel?"),
+                        actions: <Widget>[
+                          new FlatButton(
+                            child: new Text(
+                              "Yes, cancel",
+                              style: FontHelper.regular(Colors.black, 14.0),
+                            ),
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                              cancelOrder();
+                            },
+                          ),
+                          new FlatButton(
+                            child: new Text(
+                              "No",
+                              style: FontHelper.regular(Colors.black, 14.0),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    });
               });
         else
           return Offstage();
       },
     );
+  }
+
+  cancelOrder() async {
+    showLoadingOverlay(context: context);
+
+    await FirebaseCloudFunctions.cancelCurrentUserOrder(
+            orderID: widget.order.uid)
+        .then((isSuccessful) {
+      if (isSuccessful) {
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      } else {
+        Navigator.of(context).pop();
+        final snackBar = SnackBar(
+            content: Text(
+                'An Error has occured. Please check your network connectivity'));
+        Scaffold.of(context).showSnackBar(snackBar);
+      }
+    }).catchError((error) {
+      if (error is PlatformException) {
+        PlatformException e = error;
+        Navigator.of(context).pop();
+        final snackBar = SnackBar(content: Text(e.message));
+        Scaffold.of(context).showSnackBar(snackBar);
+      } else {
+        Navigator.of(context).pop();
+        final snackBar = SnackBar(
+            content: Text(
+                'An Error has occured. Please check your network connectivity'));
+        Scaffold.of(context).showSnackBar(snackBar);
+      }
+    });
   }
 
   Widget buildTotal(Order order) {
@@ -683,16 +740,60 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
                       );
                     },
                   ),
-                  Container(
-                    padding: EdgeInsets.only(left: 10.0),
-                    child: Icon(
-                      Icons.phone,
-                      size: 25,
-                    ),
+                  StreamBuilder<String>(
+                    stream: user.handPhone,
+                    builder: (context, snapshot) {
+                      if (snapshot.data == null) return Offstage();
+                      return Container(
+                        padding: EdgeInsets.only(left: 10.0),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.phone,
+                            size: 25,
+                          ),
+                          onPressed: () {
+                            _makePhoneCall('tel:' + snapshot.data);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      _toChat(widget.order, user);
+                    },
+                    icon: Icon(Icons.chat),
                   )
                 ],
               ),
       ],
+    );
+  }
+
+  _toChat(Order order, User deliverer) {
+    Channel channel = Channel.fromUID(order.uid + deliverer.uid);
+    Firestore.instance.collection("channels").document(channel.uid).setData(
+      {
+        "O": order.uid,
+        "P": [
+          ConfigHelper.instance.currentUserProperty.value.uid,
+          deliverer.uid,
+        ],
+        "D": deliverer.uid
+      },
+      merge: true,
+    );
+    GlobalKey<ConversationState> key =
+        GlobalKey<ConversationState>(debugLabel: channel.uid);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) => Conversation(
+              channel: channel,
+              key: key,
+            ),
+      ),
     );
   }
 

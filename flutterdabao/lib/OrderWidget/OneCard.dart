@@ -235,7 +235,8 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                                               "Tap Card for Order Summary",
                                               textAlign: TextAlign.center,
                                               style: FontHelper.medium(
-                                                  ColorHelper.dabaoOffBlack9B, 12),
+                                                  ColorHelper.dabaoOffBlack9B,
+                                                  12),
                                             ),
                                             Icon(Icons.keyboard_arrow_down),
                                           ],
@@ -243,7 +244,6 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                                   },
                                 ),
                               ),
-                              
                             ],
                           ),
                           children: <Widget>[
@@ -529,8 +529,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
               ),
               StreamBuilder<bool>(
                 stream: Rxdart.Observable.combineLatest2<String, String, bool>(
-                    order.delivererID,
-                    widget.channel.deliverer,
+                    order.delivererID, widget.channel.deliverer,
                     (userID, channelDELIVERER) {
                   if (userID == null || channelDELIVERER == null) return null;
 
@@ -688,27 +687,47 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
-                  child: RaisedButton(
-                    textColor: Colors.white,
-                    disabledColor: ColorHelper.disableColor,
-                    disabledTextColor: ColorHelper.disableTextColor,
-                    color: ColorHelper.counterOfferColor,
-                    onPressed: snapshot.data == orderStatus_Requested
-                        ? () {
-                            showCounter(order.value);
-                          }
-                        : null,
-                    child: Container(
-                      //TODO p1 add in Cancel counter offer
-                      child: Text(
-                        'COUNTER-OFFER',
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                      ),
-                    ),
-                  ),
-                ),
+                    padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                    child: StreamBuilder<CounterOffer>(
+                        stream: widget.channel.counterOffer,
+                        builder: (context, snap) {
+                          return RaisedButton(
+                            textColor: Colors.white,
+                            disabledColor: ColorHelper.disableColor,
+                            disabledTextColor: ColorHelper.disableTextColor,
+                            color: ColorHelper.counterOfferColor,
+                            onPressed: snap.data == null ||
+                                    snap.data.status !=
+                                        CounterOffer.counterOffStatus_Open
+                                ? () {
+                                    showCounter(order.value);
+                                  }
+                                : () {
+                                    widget.channel.reject();
+                                    widget.channel.addMessage(
+                                        ConfigHelper
+                                                .instance
+                                                .currentUserProperty
+                                                .value
+                                                .name
+                                                .value +
+                                            " has cancelled the offer.",
+                                        ConfigHelper.instance
+                                            .currentUserProperty.value.uid,
+                                        null);
+                                  },
+                            child: Container(
+                              child: Text( snap.data == null ||
+                                    snap.data.status !=
+                                        CounterOffer.counterOffStatus_Open
+                                ?
+                                'COUNTER-OFFER': "CANCEL OFFER",
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                              ),
+                            ),
+                          );
+                        })),
               ),
             ],
           );

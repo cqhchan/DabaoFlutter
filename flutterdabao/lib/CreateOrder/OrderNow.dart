@@ -8,6 +8,8 @@ import 'package:flutterdabao/CustomWidget/Buttons/CustomizedBackButton.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
+import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
+import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/Order.dart';
@@ -81,8 +83,43 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin {
             selectedlocation: holder.deliveryLocation,
             selectedlocationDescription: holder.deliveryLocationDescription,
           ),
-          //TODO p1 dialog asking are you sure you want to leave
-          CustomizedBackButton(),
+          CustomizedBackButton(
+            onBack: () {
+              if (checkout.value) {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: Text("Leave?"),
+                          content:
+                              Text("Your current Order has not been created"),
+                          actions: <Widget>[
+                            new FlatButton(
+                              child: new Text(
+                                "Leave",
+                                style: FontHelper.bold(
+                                    ColorHelper.dabaoOrange, 16.0),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                checkout.value = false;
+                              },
+                            ),
+                            new FlatButton(
+                              child: new Text(
+                                "Stay",
+                                style: FontHelper.regular(Colors.black, 14.0),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ));
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
           StreamBuilder<bool>(
             stream: checkout.producer,
             builder: (context, snap) {

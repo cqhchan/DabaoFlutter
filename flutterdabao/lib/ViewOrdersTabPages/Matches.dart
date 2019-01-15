@@ -9,8 +9,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Matches extends StatefulWidget {
   final DabaoRoute.Route route;
+  final VoidCallback moveToConfirmCallback;
 
-  Matches({Key key, @required this.route}) : super(key: key);
+  Matches({Key key, @required this.route, this.moveToConfirmCallback})
+      : super(key: key);
 
   @override
   MatchesState createState() {
@@ -26,7 +28,7 @@ class MatchesState extends State<Matches> with HavingSubscriptionMixin {
     // TODO: implement initState
     super.initState();
 
-  listOfPotentialMatches =widget.route.listOfPotentialOrders;
+    listOfPotentialMatches = widget.route.listOfPotentialOrders;
   }
 
   @override
@@ -47,6 +49,39 @@ class MatchesState extends State<Matches> with HavingSubscriptionMixin {
         ),
       ),
       body: OrderList(
+        onCompleteCallBack: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text("Order Accepted!"),
+                  content: Text("Continue browsing matches?"),
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "No",
+                        style: FontHelper.regular(Colors.black, 14.0),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                        widget.moveToConfirmCallback();
+                      },
+                    ),
+                    new FlatButton(
+                      child: new Text(
+                        "Yes, stay",
+                        style: FontHelper.regular(Colors.black, 14.0),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              });
+
+        },
         context: context,
         route: widget.route,
         input: listOfPotentialMatches.producer,

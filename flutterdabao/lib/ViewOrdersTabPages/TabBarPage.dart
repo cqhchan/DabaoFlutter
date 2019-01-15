@@ -12,18 +12,35 @@ import 'package:flutterdabao/ViewOrdersTabPages/ConfirmedTab.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/MyRouteTab.dart';
 
 class TabBarPage extends StatefulWidget {
+
+  final int initialPage;
+
+  const TabBarPage({Key key, this.initialPage = 2}) : super(key: key);
+
   @override
   TabBarPageState createState() {
     return new TabBarPageState();
   }
 }
 
-class TabBarPageState extends State<TabBarPage> {
+class TabBarPageState extends State<TabBarPage> with SingleTickerProviderStateMixin {
+
+
+    TabController _tabController;
+
   void initState() {
     super.initState();
     // Request permission and start listening to current location
     startListeningToCurrentLocation();
+        _tabController = new TabController(initialIndex: widget.initialPage, vsync: this, length:3);
+
   }
+
+  @override
+    void dispose() {
+      _tabController.dispose();
+      super.dispose();
+    }
 
   //Ask for permission and start listening to current location
   void startListeningToCurrentLocation() async {
@@ -33,6 +50,13 @@ class TabBarPageState extends State<TabBarPage> {
             Text("Please Enable Location"),
             Text(
                 "Dabao needs your location to verify your Orders/Deliveries")));
+  }
+  
+
+
+  moveToTab(int tab){
+    print("called move to ${tab}");
+    _tabController.animateTo(tab);
   }
 
   @override
@@ -79,10 +103,7 @@ class TabBarPageState extends State<TabBarPage> {
           },
         ),
       ),
-      body: DefaultTabController(
-        length: 3,
-        initialIndex: 2,
-        child: Column(
+      body:Column(
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(bottom: 2.0),
@@ -92,6 +113,7 @@ class TabBarPageState extends State<TabBarPage> {
               child: Material(
                 color: Colors.white,
                 child: TabBar(
+                  controller:_tabController,
                   labelStyle: FontHelper.normal2TextStyle,
                   labelColor: ColorHelper.dabaoOrange,
                   unselectedLabelColor: ColorHelper.dabaoOffGrey70,
@@ -123,16 +145,16 @@ class TabBarPageState extends State<TabBarPage> {
             ),
             Expanded(
               child: TabBarView(
+                controller: _tabController,
                 children: [
-                  BrowseOrderTabView(),
+                  BrowseOrderTabView(moveToTab: moveToTab),
                   ConfirmedTabView(),
-                  MyRouteTabView(),
+                  MyRouteTabView(moveToTab: moveToTab),
                 ],
               ),
             ),
           ],
         ),
-      ),
     );
   }
 }

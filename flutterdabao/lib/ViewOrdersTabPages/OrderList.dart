@@ -31,9 +31,10 @@ class OrderList extends StatefulWidget {
   final LatLng location;
   final DabaoRoute.Route route;
   final context;
+  final VoidCallback onCompleteCallBack;
 
   OrderList(
-      {Key key, this.context, @required this.input, this.location, this.route})
+      {Key key, this.context, @required this.input, this.location, this.route, this.onCompleteCallBack})
       : super(key: key);
 
   _OrderListState createState() => _OrderListState();
@@ -70,6 +71,7 @@ class _OrderListState extends State<OrderList> with HavingSubscriptionMixin {
           padding: const EdgeInsets.only(bottom: 30.0),
           children: snapshot.data
               .map((data) => _OrderItemCell(
+                    onCompleteAcceptCallback: widget.onCompleteCallBack,
                     order: data,
                     location: widget.location,
                     route: widget.route,
@@ -85,8 +87,8 @@ class _OrderItemCell extends StatefulWidget {
   final DabaoRoute.Route route;
   final Order order;
   final LatLng location;
-
-  _OrderItemCell({this.route, @required this.order, this.location});
+  final VoidCallback onCompleteAcceptCallback;
+  _OrderItemCell({this.route, @required this.order, this.location, this.onCompleteAcceptCallback});
 
   @override
   State<StatefulWidget> createState() {
@@ -728,6 +730,7 @@ class _OrderItemCellState extends State<_OrderItemCell>
         context: context,
         builder: (builder) {
           return ConfirmationOverlay(
+            onCompletionCallback: widget.onCompleteAcceptCallback,
             order: order,
             route: widget.route,
           );

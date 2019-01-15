@@ -1,9 +1,8 @@
-import 'dart:io';
 import 'dart:math' as math;
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/Balance/Transaction.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 import 'package:flutterdabao/Chat/Inbox.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
@@ -20,7 +19,6 @@ import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
-import 'package:flutterdabao/Model/DabaoerReward.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
@@ -30,6 +28,7 @@ import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrders/ViewOrderListPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -216,7 +215,8 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
             else
               return GestureDetector(
                 onTap: () {
-                  Navigator.of(context).push(SlideUpRoute(widget: TabBarPage()));
+                  Navigator.of(context)
+                      .push(SlideUpRoute(widget: TabBarPage()));
                 },
                 child: Align(
                   alignment: Alignment.bottomCenter,
@@ -250,12 +250,14 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                                       snapshot.data.length == 0)
                                     return Text(
                                       "View Active Deliveries",
-                                      style: FontHelper.semiBold(Colors.black, 14),
+                                      style:
+                                          FontHelper.semiBold(Colors.black, 14),
                                     );
 
                                   return Text(
                                     "View Active Deliveries (${snapshot.data.length})",
-                                      style: FontHelper.semiBold(Colors.black, 14),
+                                    style:
+                                        FontHelper.semiBold(Colors.black, 14),
                                   );
                                 },
                               ),
@@ -356,15 +358,15 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                   Color(0xFFF9C15A),
                   Color(0xFFFBD184),
                   Color(0xFFFDE3B4),
-                  Color(0xFFFEEFD3),
-                  Color(0xFFFFFCF8)
+                  // Color(0xFFFEEFD3),
+                  // Color(0xFFFFFCF8)
                 ]),
               ),
             ),
             ListTile(
               title: Text(
                 'History',
-                style: FontHelper.regular12Black,
+                style: FontHelper.regular14Black,
               ),
               onTap: () {
                 // Go to history page
@@ -377,62 +379,57 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
             ListTile(
               title: Text(
                 'Dabao Balance',
-                style: FontHelper.regular12Black,
+                style: FontHelper.regular14Black,
               ),
               onTap: () {
-                // Go to dabaoBalance
-                // Update the state of the app
-                // ...
-                // Then close the drawer
                 Navigator.pop(context);
+                Navigator.push(context, FadeRoute(widget: TransactionsPage()));
               },
             ),
             ListTile(
               title: Text(
                 'DabaoRewards',
-                style: FontHelper.regular12Black,
+                style: FontHelper.regular14Black,
               ),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
                 Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    FadeRoute(
+                        widget: RewardsTabBarPage(
+                      initalIndex: 1,
+                    )));
               },
             ),
-            // ListTile(
-            //   title: Text(
-            //     'Notifications',
-            //     style: FontHelper.regular12Black,
-            //   ),
-            //   onTap: () {
-            //     //TODO p2 NotificationsPAge
-            //     // Update the state of the app
-            //     // ...
-            //     // Then close the drawer
-            //     Navigator.pop(context);
-            //   },
-            // ),
             SizedBox(height: 20),
             ListTile(
               title: Text(
-                'About Dabao',
-                style: FontHelper.regular12Black,
+                'Terms & Conditions',
+                style: FontHelper.regular14Black,
               ),
-              onTap: () {
-                //TODO p1 open to web app
-                // Update the state of the app
-                // ...
-                // Then close the drawer
+              onTap: () async {
                 Navigator.pop(context);
+                Navigator.of(context).push(FadeRoute(
+                  widget: WebviewScaffold(
+                    url: "https://www.dabaoapp.sg/termsandconditions",
+                    appBar: new AppBar(
+                      title: new Text("Terms & Conditions"),
+                    ),
+                  ),
+                ));
               },
             ),
             ListTile(
               title: Text(
                 'Contact Us',
-                style: FontHelper.regular12Black,
+                style: FontHelper.regular14Black,
               ),
-              onTap: () {
-                //TODO p1 open email app
+              onTap: () async {
+                await launch(
+                    "mailto:admin@dabaoapp.sg?subject=Contact Dabao&body=Hello Dabao Team");
                 // Update the state of the app
                 // ...
                 // Then close the drawer
@@ -443,7 +440,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
             ListTile(
               title: Text(
                 'Log Out',
-                style: FontHelper.regular12Black,
+                style: FontHelper.regular14Black,
               ),
               onTap: () {
                 FirebaseAuth.instance.signOut();
@@ -556,27 +553,36 @@ class _ActiveOrderCard extends StatefulWidget {
     return _ActiveOrderCardState();
   }
 }
-//TODO p1 add anyorders in the past 60 mins. 
+
 class _ActiveOrderCardState extends State<_ActiveOrderCard> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Order>>(
-        stream:
-            Observable.combineLatest2<List<Order>, List<Order>, List<Order>>(
-                ConfigHelper
-                    .instance.currentUserAcceptedOrdersProperty.producer,
-                ConfigHelper.instance.currentUserRequestedOrdersProperty
-                    .producer, (accepted, requested) {
-          print(requested.length);
-
+        stream: Observable.combineLatest3<List<Order>, List<Order>, List<Order>,
+                List<Order>>(
+            ConfigHelper.instance.currentUserAcceptedOrdersProperty.producer,
+            ConfigHelper.instance.currentUserRequestedOrdersProperty.producer,
+            ConfigHelper.instance.currentUserPastWeekCompletedOrdersProperty
+                .producer, (accepted, requested, completed) {
           List<Order> tempAccepted = List.from(accepted);
           List<Order> tempRequested = List.from(requested);
+          List<Order> tempCompleted = List.from(completed);
+
           tempAccepted.sort((lhs, rhs) =>
               rhs.deliveryTime.value.compareTo(lhs.deliveryTime.value));
           tempRequested.sort((lhs, rhs) => rhs.startDeliveryTime.value
               .compareTo(lhs.startDeliveryTime.value));
 
+          tempCompleted.sort((lhs, rhs) =>
+              rhs.completedTime.value.compareTo(lhs.completedTime.value));
+
+          tempCompleted.removeWhere((order) {
+            return order.completedTime.value
+                .isBefore(DateTime.now().subtract(Duration(hours: 1)));
+          });
+
           tempAccepted.addAll(tempRequested);
+          tempAccepted.addAll(tempCompleted);
 
           return tempAccepted;
         }),
@@ -586,7 +592,11 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
 
           // creating the list of widgets
           List<Widget> listOfWidget = List();
-          listOfWidget.add(headerWidget(snap.data));
+
+          listOfWidget.add(headerWidget(ConfigHelper
+                  .instance.currentUserAcceptedOrdersProperty.value.length +
+              ConfigHelper
+                  .instance.currentUserRequestedOrdersProperty.value.length));
           listOfWidget.add(Line(
             color: ColorHelper.dabaoOrange,
             size: 2.0,
@@ -610,12 +620,12 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
         });
   }
 
-  Widget headerWidget(List<Order> orders) {
+  Widget headerWidget(int numberOfActiveOrder) {
     return Center(
       child: Container(
         padding: EdgeInsets.only(top: 10.0, bottom: 5.0),
         child: Text(
-          "Active Orders (${orders.length})",
+          "Active Orders (${numberOfActiveOrder})",
           style: FontHelper.bold(Colors.black, 14),
         ),
       ),
@@ -773,6 +783,16 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
                         style: FontHelper.semiBold(Colors.white, 12.0)),
                   ),
                 );
+              case orderStatus_Completed:
+                return Container(
+                  height: 19,
+                  width: 60,
+                  child: Center(
+                    child: Text("Delivered",
+                        style: FontHelper.semiBold(
+                            ColorHelper.dabaoOffGreyD3, 12.0)),
+                  ),
+                );
               default:
                 return Offstage();
             }
@@ -807,6 +827,10 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
                   });
               }
             });
+          case orderStatus_Completed:
+            return order.completedTime.map((date) => date == null
+                ? "Error"
+                : DateTimeHelper.convertTimeToDisplayString(date));
 
           default:
             return BehaviorSubject(seedValue: null);

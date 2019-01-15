@@ -22,8 +22,6 @@ import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/OrderWidget/StatusColor.dart';
 import 'package:flutterdabao/Profile/ViewProfile.dart';
 import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/CompletedOverlay.dart';
-import 'package:flutterdabao/ViewOrdersTabPages/ConfirmedSummary.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';

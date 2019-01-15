@@ -94,23 +94,21 @@ class _DoubleLineHeaderState extends State<DoubleLineHeader> {
     if (widget.rightButton != null)
       listOfWidget.add(
           Align(alignment: Alignment.centerRight, child: widget.rightButton));
-      //TODO P1 replace with a bar
     return Container(
-        height: 120,
+        height: 80,
         width: MediaQuery.of(context).size.width,
         child: Column(
           children: <Widget>[
             Align(
-              alignment: Alignment.bottomRight,
-              child: GestureDetector(
-                child: Container(
-                  color: Colors.transparent,
-                  height: 54.0,
-                  width: 54.0,
-                  padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 18.0),
-                  child: Image.asset('assets/icons/circle_close_icon.png'),
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3.0),
+                  color: ColorHelper.dabaoOffGreyD8,
                 ),
-                onTap: widget.closeTapped,
+                height: 6.0,
+                width: 54.0,
+                margin: EdgeInsets.only(bottom: 8),
               ),
             ),
             Container(

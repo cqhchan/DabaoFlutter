@@ -72,76 +72,79 @@ class _CancelOverlayState extends State<CancelOverlay>
           builder: (BuildContext context) {
             return Align(
               alignment: Alignment.bottomCenter,
-              child: Container(
-                color: Colors.white,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          child: _buildTitle(),
-                        ),
-                        Container(
-                          child: _buildHeader(widget.order),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(bottom: 20.0),
-                          child: StreamBuilder<User>(
-                            stream: widget.order.creator.map(
-                                (id) => id == null ? null : User.fromUID(id)),
-                            builder: (BuildContext context, snapshot) {
-                              return _buildUser(snapshot.data);
-                            },
+              child: SingleChildScrollView(
+                child: Container(
+                  color: Colors.white,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            child: _buildTitle(),
                           ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(bottom: 20.0),
-                          child: _buildOrderCode(widget.order),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 20.0),
-                          child: Line(),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 20.0),
-                          child: Container(
-                            child: _buildReasons(),
+                          Container(
+                            child: _buildHeader(widget.order),
                           ),
-                        ),
-                        Container(
-                          child: Flex(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            verticalDirection: VerticalDirection.up,
-                            direction: Axis.horizontal,
-                            children: <Widget>[
-                              Expanded(
-                                flex: 1,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: _buildBackButton(),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Container(
+                            padding: EdgeInsets.only(bottom: 20.0),
+                            child: StreamBuilder<User>(
+                              stream: widget.order.creator.map(
+                                  (id) => id == null ? null : User.fromUID(id)),
+                              builder: (BuildContext context, snapshot) {
+                                return _buildUser(snapshot.data);
+                              },
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.only(bottom: 20.0),
+                            child: _buildOrderCode(widget.order),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 20.0),
+                            child: Line(),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 20.0),
+                            child: Container(
+                              child: _buildReasons(),
+                            ),
+                          ),
+                          Container(
+                            child: Flex(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              verticalDirection: VerticalDirection.up,
+                              direction: Axis.horizontal,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 1,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: _buildBackButton(),
+                                  ),
                                 ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: _buildCancelButton(widget.order,context),
+                                Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: _buildCancelButton(
+                                        widget.order, context),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -194,11 +197,11 @@ class _CancelOverlayState extends State<CancelOverlay>
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
 
-              return Text(
-                DateTimeHelper.convertTimeToDisplayString(snap.data),
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              );
+            return Text(
+              DateTimeHelper.convertTimeToDisplayString(snap.data),
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
+            );
           },
         ),
       ],
@@ -388,10 +391,9 @@ class _CancelOverlayState extends State<CancelOverlay>
     return OutlineButton(
       color: Colors.transparent,
       borderSide: BorderSide(color: Colors.black),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Container(
-        height:40,
+        height: 40,
         child: Center(
           child: Text(
             "Back",
@@ -451,7 +453,7 @@ class _CancelOverlayState extends State<CancelOverlay>
       ],
     );
   }
-//TODO p1 test on small phone
+
   Widget _buildReasonCell(String reason, int index) {
     return GestureDetector(
       onTap: () {

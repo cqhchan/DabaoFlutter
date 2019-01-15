@@ -148,7 +148,6 @@ class _SelectOrderItemState extends State<SelectOrderItem>
     );
   }
 }
-//TODO P1 increase hit area
 
 class _OrderItemSuggestedCell extends StatelessWidget {
   final OrderItem orderItem;
@@ -160,66 +159,67 @@ class _OrderItemSuggestedCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 32.0,
-      margin: EdgeInsets.only(top: 4.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              child: Row(
-                children: <Widget>[
-                  //menu Icon
-                  Align(
+    return GestureDetector(
+      onTap: () {
+        onAddTapped(orderItem);
+      },
+      child: Container(
+        color: Colors.transparent,
+        height: 32.0,
+        margin: EdgeInsets.only(top: 4.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                child: Row(
+                  children: <Widget>[
+                    //menu Icon
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                            padding: EdgeInsets.only(bottom: 3.0, left: 4.0),
+                            child: Image.asset(
+                                'assets/icons/icon_menu_orange.png'))),
+                    //Name
+                    Expanded(
+                        child: Align(
                       alignment: Alignment.centerLeft,
                       child: Container(
-                          padding: EdgeInsets.only(bottom: 3.0, left: 4.0),
-                          child: Image.asset(
-                              'assets/icons/icon_menu_orange.png'))),
-                  //Name
-                  Expanded(
-                      child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      margin: EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        StringHelper.upperCaseWords(orderItem.name.value),
-                        overflow: TextOverflow.ellipsis,
-                        style: FontHelper.bold(Colors.black, 12.0),
+                        margin: EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          StringHelper.upperCaseWords(orderItem.name.value),
+                          overflow: TextOverflow.ellipsis,
+                          style: FontHelper.bold(Colors.black, 12.0),
+                        ),
                       ),
-                    ),
-                  )),
-                  //Price
-                  Align(
+                    )),
+                    //Price
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          margin: EdgeInsets.only(left: 8.0, right: 8.0),
+                          child: Text(
+                            'Max: ${formatCurrency.format(orderItem.price.value)}',
+                            style: FontHelper.regular(Colors.black, 12.0),
+                          ),
+                        )),
+                    Align(
                       alignment: Alignment.centerRight,
                       child: Container(
-                        margin: EdgeInsets.only(left: 8.0, right: 8.0),
-                        child: Text(
-                          'Max: ${formatCurrency.format(orderItem.price.value)}',
-                          style: FontHelper.regular(Colors.black, 12.0),
-                        ),
-                      )),
-                  Align(
-                      alignment: Alignment.centerRight,
-                      child: ScaleGestureDetector(
-                        minScale: 0.8,
-                        child: Container(
-                            margin: EdgeInsets.only(right: 4.0),
-                            height: 20.0,
-                            width: 20.0,
-                            child: Image.asset(
-                                'assets/icons/add_icon_orange.png')),
-                        onTap: () {
-                          onAddTapped(orderItem);
-                        },
-                      ))
-                ],
+                          margin: EdgeInsets.only(right: 4.0),
+                          height: 20.0,
+                          width: 20.0,
+                          child:
+                              Image.asset('assets/icons/add_icon_orange.png')),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Line(),
-        ],
+            Line(),
+          ],
+        ),
       ),
     );
   }

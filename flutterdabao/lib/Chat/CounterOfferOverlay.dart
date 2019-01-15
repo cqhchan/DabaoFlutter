@@ -103,7 +103,8 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
                               startTime.value = start;
                             },
                           ),
-                          //TODO p1 add in foodTag and total items
+                          // build food tag
+                          _buildFoodTag(widget.order),
                           SizedBox(
                             height: 15,
                           ),
@@ -167,6 +168,83 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
     return Text(
       'Counter-Offer Deliver Fee',
       style: FontHelper.semiBold16Black,
+    );
+  }
+
+  Widget _buildFoodTag(Order order) {
+    return Flex(
+      direction: Axis.horizontal,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Align(
+                alignment: Alignment.topLeft,
+                child: StreamBuilder<String>(
+                  stream: widget.order.foodTag,
+                  builder: (context, snap) {
+                    if (!snap.hasData) return Offstage();
+                    return Text(
+                      StringHelper.upperCaseWords(snap.data),
+                      style: FontHelper.semiBold16Black,
+                    );
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 11.0,
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              StreamBuilder<double>(
+                stream: widget.order.deliveryFee,
+                builder: (context, snap) {
+                  if (!snap.hasData) return Offstage();
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      Text(
+                        StringHelper.doubleToPriceString(
+                          snap.data,
+                        ),
+                        style: FontHelper.bold14Black,
+                        textAlign: TextAlign.right,
+                      ),
+                      SizedBox(
+                        width: 2.0,
+                      ),
+                      Image.asset('assets/icons/question_mark.png'),
+                    ],
+                  );
+                },
+              ),
+              StreamBuilder<List<OrderItem>>(
+                stream: listOfOrderItems.producer,
+                builder: (context, snap) {
+                  if (!snap.hasData) return Offstage();
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 26.0),
+                      child: Text(
+                        snap.hasData ? '${snap.data.length} Item(s)' : "Error",
+                        style: FontHelper.medium14TextStyle,
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -356,7 +434,6 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
         ),
       ),
       onPressed: () async {
-
         if (selectedDateTime.value
                 .isAfter(startTime.value.subtract(Duration(minutes: 9))) &&
             selectedDateTime.value
@@ -393,10 +470,9 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
     return OutlineButton(
       color: Colors.transparent,
       borderSide: BorderSide(color: Colors.black),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Container(
-        height:40,
+        height: 40,
         child: Center(
           child: Text(
             "Back",
@@ -410,4 +486,3 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
     );
   }
 }
-

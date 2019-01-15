@@ -126,24 +126,27 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
         highlightElevation: 0.0,
         padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 9.0),
         color: ColorHelper.dabaoOrange,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: <Widget>[
-            //TODO p1 center
-            Image.asset(
-              'assets/icons/bike.png',
-              color: Colors.black,
-            ),
-            Flexible(
-              child: Center(
-                child: Text(
-                  'Proceed',
-                  style: FontHelper.bold(Colors.black, 16.0),
-                  textAlign: TextAlign.start,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                height: 30,
+                width: 30,
+                margin: EdgeInsets.only(left: 15),
+                child: Image.asset(
+                  'assets/icons/bike.png',
+                  color: Colors.black,
                 ),
               ),
             ),
-
+            Center(
+              child: Text(
+                'Proceed',
+                style: FontHelper.bold(Colors.black, 16.0),
+                textAlign: TextAlign.start,
+              ),
+            ),
           ],
         ),
         onPressed: () {
@@ -236,13 +239,12 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
     );
   }
 
-  Future<void> _handlePressButton(
-      MutableProperty<LatLng> locationProperty,
+  Future<void> _handlePressButton(MutableProperty<LatLng> locationProperty,
       MutableProperty<String> locationDescriptionProperty) async {
     await handlePressButton(context, (location, description) {
       locationProperty.producer.add(location);
       locationDescriptionProperty.producer.add(description);
-    });
+    }, locationDescriptionProperty.value);
   }
 
   void onError(PlacesAutocompleteResponse response) {

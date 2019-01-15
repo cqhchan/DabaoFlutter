@@ -31,9 +31,9 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   bool _autoValidate = false;
 
   @override
-    void initState() {
-      super.initState();
-    }
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -43,11 +43,9 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return ModalProgressHUD(
-        key: key2,
-        child: buildWidget(context), inAsyncCall: _inProgress);
+      progressIndicator: CircularProgressIndicator(strokeWidth: 8.0,),
+        key: key2, child: buildWidget(context), inAsyncCall: _inProgress);
   }
 
   final Key key = Key(randomString(20));
@@ -57,86 +55,86 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     return Scaffold(
         key: key,
         body: SafeArea(
-      child: Form(
-        autovalidate: _autoValidate,
-        child: ListView(
-          children: [
-            GestureDetector(
-              onTap: _showModalSheet,
-              child: _image == null
-                  ? Container(
-                      height: MediaQuery.of(context).size.width,
-                      width: MediaQuery.of(context).size.width,
-                      child: Center(
-                        child: Icon(Icons.add_a_photo, size: 100.0),
-                      ),
-                      color: ColorHelper.dabaoGreyE0,
-                    )
-                  : Image.file(
-                      _image,
-                      height: MediaQuery.of(context).size.width,
-                      width: MediaQuery.of(context).size.width,
-                      fit: BoxFit.fill,
-                    ),
-            ),
-            SizedBox(height: 50.0),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(children: <Widget>[
-                TextFormField(
-                  textCapitalization: TextCapitalization.words,
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Name',
-                  ),
-                  validator: _validateName,
+          child: Form(
+            autovalidate: _autoValidate,
+            child: ListView(
+              children: [
+                GestureDetector(
+                  onTap: _showModalSheet,
+                  child: _image == null
+                      ? Container(
+                          height: MediaQuery.of(context).size.width,
+                          width: MediaQuery.of(context).size.width,
+                          child: Center(
+                            child: Icon(Icons.add_a_photo, size: 100.0),
+                          ),
+                          color: ColorHelper.dabaoGreyE0,
+                        )
+                      : Image.file(
+                          _image,
+                          height: MediaQuery.of(context).size.width,
+                          width: MediaQuery.of(context).size.width,
+                          fit: BoxFit.fill,
+                        ),
                 ),
                 SizedBox(height: 50.0),
-                Builder(builder: (BuildContext context) {
-                  return RaisedButton(
-                    child: Container(
-                      height: 40,
-                      child: Center(
-                        child: Text('Create Profile'),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(children: <Widget>[
+                    TextFormField(
+                      textCapitalization: TextCapitalization.words,
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Name',
                       ),
+                      validator: _validateName,
                     ),
-                    color: ColorHelper.dabaoOrange,
-                    elevation: 5.0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                    ),
-                    onPressed: () {
-                      createProfile(context);
-                    },
-                  );
-                })
-              ]),
+                    SizedBox(height: 50.0),
+                    Builder(builder: (BuildContext context) {
+                      return RaisedButton(
+                        child: Container(
+                          height: 40,
+                          child: Center(
+                            child: Text('Create Profile'),
+                          ),
+                        ),
+                        color: ColorHelper.dabaoOrange,
+                        elevation: 5.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        onPressed: () {
+                          createProfile(context);
+                        },
+                      );
+                    })
+                  ]),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
-        //TODO P1 fix spinner issue
+  //TODO P2 fix spinner issue Unable to fix some parts
 
   //Pre-condition: Called only when _image has been set
-  void creatingThumbnail(File image) async {
-    print("Creating Thumbnail");
-    await getTemporaryDirectory().then((tempDir) async {
-      print("tempDir " + tempDir.path);
-      String tempPath = tempDir.path;
-
-      List<int> data = await image.readAsBytes();
+  Future<void> creatingThumbnail(File image) {
+    String tempPath;
+    return getTemporaryDirectory().then((tempDir) {
+      tempPath = tempDir.path;
       print("imaged readAsBytes ");
 
-      Resize.Image resizedImage = Resize.decodeImage(data);
+      return image.readAsBytes();
+    }).then((data) {
+      return Resize.decodeImage(data);
+    }).then((resizedImage) {
+      // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
+      print("thumbnail Resized ");
+      return Resize.copyResize(resizedImage, 100, 100);
+    }).then((thumbnail) {
+      // Save the thumbnail as a PNG.
       print("imaged Resized ");
 
-      // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
-      Resize.Image thumbnail = Resize.copyResize(resizedImage, 100, 100);
-      print("thumbnail Resized ");
-
-      // Save the thumbnail as a PNG.
       var thumbnailImage = new File(tempPath + 'thumbnailImage.png')
         ..writeAsBytesSync(Resize.encodePng(thumbnail));
 
@@ -162,37 +160,33 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   }
 
   //get image
-  void getImage(ImageSource imageSource) async {
+  void getImage(ImageSource imageSource) {
     setState(() {
       _inProgress = true;
     });
 
-    await ImagePicker.pickImage(source: imageSource).then((image) async {
+    ImagePicker.pickImage(source: imageSource).then((image) {
       if (image == null) {
         setState(() {
           _inProgress = false;
         });
       } else {
         //give user the cropping option
-        var croppedImage = await _cropImage(image);
-
-        if (croppedImage == null) {
-          setState(() {
-            _inProgress = false;
-          });
-        } else {
-          creatingThumbnail(croppedImage);
-        }
+        return _cropImage(image);
+      }
+    }).then((croppedImage) {
+      if (croppedImage == null) {
+        setState(() {
+          _inProgress = false;
+        });
+      } else {
+        return creatingThumbnail(croppedImage);
       }
     }).catchError((e) {
       print(e);
       setState(() {
         _inProgress = false;
       });
-    });
-    // regardless what happens, _inprogess will be false at the end of this
-    setState(() {
-      _inProgress = false;
     });
   }
 
@@ -295,7 +289,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
           return Container(
             color: Colors.white,
             child: SafeArea(
-                          child: Column(
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ListTile(

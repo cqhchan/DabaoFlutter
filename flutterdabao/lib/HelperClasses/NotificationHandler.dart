@@ -13,6 +13,7 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
+import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:settings/settings.dart';
@@ -29,7 +30,7 @@ const String modeCompletedOrder = "ORDERCOMPLETED";
 const String modeCancelledOrder = "ORDERCANCELLED";
 
 const String modeNewPotentialOrder = "POTENTIALORDER";
-//TODO p1 add notification for voucher added when dabaoee rewards
+const String modeNewDabaoeeReward = "DABAOEEREWARD";
 
 handleNotificationForResumeAndLaunch(map) async {
   ConfigHelper.instance.currentUserProperty.producer
@@ -64,6 +65,15 @@ handleNotificationForResumeAndLaunch(map) async {
               }));
             }
           }
+          break;
+
+        case modeNewDabaoeeReward:
+          ConfigHelper.instance.navigatorKey.currentState
+              .push(MaterialPageRoute(builder: (context) {
+            return RewardsTabBarPage(
+              initalIndex: 0,
+            );
+          }));
           break;
 
         case modeCancelledOrder:
@@ -188,6 +198,37 @@ handleNotificationForOnMessage(map) async {
                             );
                           }));
                         }
+                      },
+                    ),
+                  ],
+                );
+              }))));
+
+          break;
+
+        case modeNewDabaoeeReward:
+          ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
+              barrierColor: Colors.black.withOpacity(0.5),
+              child: SafeArea(child: Builder(builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("New Voucher"),
+                  content: const Text(
+                      "You have received a new voucher! Thank you for supporting Dabao!"),
+                  actions: <Widget>[
+                    new FlatButton(
+                      child: new Text(
+                        "View",
+                        style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
+                      ),
+                      onPressed: () async {
+                        ConfigHelper.instance.navigatorKey.currentState.pop();
+
+                        ConfigHelper.instance.navigatorKey.currentState
+                            .push(MaterialPageRoute(builder: (context) {
+                          return RewardsTabBarPage(
+                            initalIndex: 0,
+                          );
+                        }));
                       },
                     ),
                   ],

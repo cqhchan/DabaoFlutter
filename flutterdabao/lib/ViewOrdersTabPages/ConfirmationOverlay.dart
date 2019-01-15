@@ -19,8 +19,10 @@ import 'package:rxdart/rxdart.dart';
 class ConfirmationOverlay extends StatefulWidget {
   final Order order;
   final DabaoRoute.Route route;
+  final VoidCallback onCompletionCallback;
 
-  const ConfirmationOverlay({Key key, @required this.order, this.route})
+  const ConfirmationOverlay(
+      {Key key, @required this.order, this.route, this.onCompletionCallback})
       : super(key: key);
   _ConfirmationOverlayState createState() => _ConfirmationOverlayState();
 }
@@ -59,6 +61,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     disposeAndReset();
     super.dispose();
   }
+
   //TODO p2 add succcess dialog
   @override
   Widget build(BuildContext context) {
@@ -88,6 +91,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                               startTime.value = start;
                             },
                           ),
+                          // this is the food tag
                           _buildHeader(widget.order),
                           SizedBox(
                             height: 15,
@@ -217,7 +221,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
       ],
     );
   }
-  //TODO p1 move to confirm tab immediatelu
+
   Widget _buildPickUpButton(Order order, BuildContext context) {
     return RaisedButton(
       elevation: 12,
@@ -233,7 +237,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
         ),
       ),
       onPressed: () async {
-        print(selectedDateTime);
         if (selectedDateTime.value
                 .isAfter(startTime.value.subtract(Duration(minutes: 9))) &&
             selectedDateTime.value
@@ -250,6 +253,9 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
           if (isSuccessful) {
             Navigator.of(context).pop();
             Navigator.of(context).pop();
+
+            if (widget.onCompletionCallback != null)
+              widget.onCompletionCallback();
           } else {
             Navigator.of(context).pop();
             final snackBar = SnackBar(
@@ -271,10 +277,9 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     return OutlineButton(
       color: Colors.transparent,
       borderSide: BorderSide(color: Colors.black),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Container(
-        height:40,
+        height: 40,
         child: Center(
           child: Text(
             "Back",

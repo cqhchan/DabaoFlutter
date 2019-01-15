@@ -18,7 +18,8 @@ import 'package:random_string/random_string.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyRouteTabView extends StatefulWidget {
-  const MyRouteTabView({Key key}) : super(key: key);
+  final Function(int t) moveToTab;
+  const MyRouteTabView({Key key, this.moveToTab}) : super(key: key);
 
   _MyRouteTabViewState createState() => _MyRouteTabViewState();
 }
@@ -89,7 +90,15 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
     return ListView(
       padding: const EdgeInsets.only(bottom: 30.0),
       children: snapshot.map((data) {
-        if (data is DabaoRoute.Route) return _RouteCell(route: data);
+        if (data is DabaoRoute.Route)
+          return _RouteCell(
+              moveToConfirmCallback: () {
+                
+                if (widget.moveToTab != null) {
+                  widget.moveToTab(1);
+                }
+              },
+              route: data);
         if (data is List<Order>) return _OrdersCell(orders: data);
         return Container();
       }).toList(),
@@ -98,9 +107,11 @@ class _MyRouteTabViewState extends State<MyRouteTabView>
 }
 
 class _RouteCell extends StatefulWidget {
+  final VoidCallback moveToConfirmCallback;
   final DabaoRoute.Route route;
 
-  const _RouteCell({Key key, @required this.route}) : super(key: key);
+  const _RouteCell({Key key, @required this.route, this.moveToConfirmCallback})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -181,6 +192,7 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
                       context,
                       MaterialPageRoute(
                           builder: (context) => Matches(
+                                moveToConfirmCallback: widget.moveToConfirmCallback ,
                                 route: widget.route,
                               )));
                 }

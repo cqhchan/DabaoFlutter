@@ -15,7 +15,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class BrowseOrderTabView extends StatefulWidget {
-  const BrowseOrderTabView({Key key}) : super(key: key);
+
+  final Function(int tab) moveToTab;
+  const BrowseOrderTabView({Key key, this.moveToTab}) : super(key: key);
 
   _BrowseOrderTabViewState createState() => _BrowseOrderTabViewState();
 }
@@ -96,7 +98,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                       setState(() {
                         searchText = description;
                       });
-                    });
+                    },searchText == "Current Location" ? "" : searchText);
                   },
                   child: Container(
                     height: 30.0,
@@ -122,43 +124,48 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                     ),
                   ),
                 )),
-                Container(
-                  height: 30.0,
-                  margin: EdgeInsets.only(left: 3.0),
-                  width: 155,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 1.0,
-                          color: ColorHelper.rgbo(0xD0, 0xD0, 0xD0)),
-                      color: ColorHelper.rgbo(0xF5, 0xE4, 0xC6),
-                      borderRadius: BorderRadius.circular(5.0)),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.only(left: 7.0),
-                          child: Text(
-                            "Distance from Location",
-                            style: FontHelper.regular(
-                                ColorHelper.dabaoOffGrey70, 12.0),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                      Container(
-                          padding: EdgeInsets.only(left: 5, right: 7.0),
-                          child: Image.asset(
-                            "assets/icons/filter_icon.png",
-                            color: ColorHelper.dabaoOffBlack9B,
-                          )),
-                    ],
-                  ),
-                )
+                // Container(
+                //   height: 30.0,
+                //   margin: EdgeInsets.only(left: 3.0),
+                //   width: 155,
+                //   decoration: BoxDecoration(
+                //       border: Border.all(
+                //           width: 1.0,
+                //           color: ColorHelper.rgbo(0xD0, 0xD0, 0xD0)),
+                //       color: ColorHelper.rgbo(0xF5, 0xE4, 0xC6),
+                //       borderRadius: BorderRadius.circular(5.0)),
+                //   child: Row(
+                //     children: <Widget>[
+                //       Expanded(
+                //         child: Container(
+                //           padding: EdgeInsets.only(left: 7.0),
+                //           child: Text(
+                //             "Distance from Location",
+                //             style: FontHelper.regular(
+                //                 ColorHelper.dabaoOffGrey70, 12.0),
+                //             overflow: TextOverflow.ellipsis,
+                //           ),
+                //         ),
+                //       ),
+                //       Container(
+                //           padding: EdgeInsets.only(left: 5, right: 7.0),
+                //           child: Image.asset(
+                //             "assets/icons/filter_icon.png",
+                //             color: ColorHelper.dabaoOffBlack9B,
+                //           )),
+                //     ],
+                //   ),
+                // )
               ],
             ),
           ),
           Expanded(
             child: OrderList(
+              onCompleteCallBack: (){
+                if (widget.moveToTab != null){
+                  widget.moveToTab(1);
+                }
+              },
               context: context,
               input: searchOrders.producer,
               location: ConfigHelper.instance.currentLocationProperty.value,

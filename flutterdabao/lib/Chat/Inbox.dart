@@ -23,49 +23,112 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   MutableProperty<List<Channel>> currentUserChannels;
 
   String otherUser;
+  TabController _tabController;
 
   @override
   void initState() {
     super.initState();
 
     currentUserChannels = ConfigHelper.instance.currentUserChannelProperty;
+    _tabController = new TabController(initialIndex: 0, vsync: this, length: 2);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: ColorHelper.dabaoOffWhiteF5,
-      //TODO p1 Split into Your orders and deliveries
       appBar: AppBar(
+        elevation: 0.0,
         backgroundColor: Colors.white,
         leading: GestureDetector(
-          onTap: (){
-            Navigator.of(context).pop();
-          },
-          child: Icon(Icons.close,)),
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Icon(
+              Icons.close,
+            )),
         centerTitle: true,
         title: Text('Your Inbox', style: FontHelper.header3TextStyle),
       ),
-      body: _buildChatPage(),
+      body: Column(
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(bottom: 2.0),
+            decoration: BoxDecoration(
+                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 1.5)]),
+            constraints: BoxConstraints(maxHeight: 45.0),
+            child: Material(
+              color: Colors.white,
+              child: TabBar(
+                controller: _tabController,
+                labelStyle: FontHelper.normal2TextStyle,
+                labelColor: ColorHelper.dabaoOrange,
+                unselectedLabelColor: ColorHelper.dabaoOffGrey70,
+                tabs: [
+                  Tab(
+                    child: Text(
+                      "Your Orders",
+                      style: FontHelper.semiBold(null, 12.0),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
+                      "Your Delivery",
+                      style: FontHelper.semiBold(null, 12.0),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildChatPage(currentUserChannels.producer.map((channels) {
+                  List<Channel> temp = List.from(channels);
+
+                  temp.removeWhere((channel) => channel.lastSent.value == null || channel.deliverer.value == ConfigHelper.instance.currentUserProperty.value.uid);
+
+                  temp.sort((lhs, rhs) =>
+                      rhs.lastSent.value.compareTo(lhs.lastSent.value));
+
+                  return temp;
+                })),
+                _buildChatPage(currentUserChannels.producer.map((channels) {
+                  List<Channel> temp = List.from(channels);
+
+                  temp.removeWhere((channel) => channel.lastSent.value == null  || channel.deliverer.value != ConfigHelper.instance.currentUserProperty.value.uid);
+
+                  temp.sort((lhs, rhs) =>
+                      rhs.lastSent.value.compareTo(lhs.lastSent.value));
+
+                  return temp;
+                })),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildChatPage() {
+  Widget _buildChatPage(Stream<List<Channel>> stream) {
     return StreamBuilder<List<Channel>>(
-      stream: currentUserChannels.producer.map((channels) {
-        List<Channel> temp = List.from(channels);
-
-        temp.removeWhere((channel) => channel.lastSent.value == null);
-
-        temp.sort(
-            (lhs, rhs) => rhs.lastSent.value.compareTo(lhs.lastSent.value));
-
-        return temp;
-      }),
+      stream: stream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Offstage();
         if (snapshot.hasData) return _buildChatList(context, snapshot.data);
@@ -76,7 +139,6 @@ class _ChatPageState extends State<ChatPage>
   ListView _buildChatList(BuildContext context, List<Channel> snapshot) {
     return ListView(
       // key: new Key(randomString(20)),
-
       cacheExtent: 500.0 * snapshot.length,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 30.0),
