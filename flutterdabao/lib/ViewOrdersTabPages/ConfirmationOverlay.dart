@@ -59,7 +59,7 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     disposeAndReset();
     super.dispose();
   }
-
+  //TODO p2 add succcess dialog
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -217,16 +217,19 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
       ],
     );
   }
-
+  //TODO p1 move to confirm tab immediatelu
   Widget _buildPickUpButton(Order order, BuildContext context) {
     return RaisedButton(
       elevation: 12,
       color: ColorHelper.dabaoOffPaleBlue,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Center(
-        child: Text(
-          "Confirm",
-          style: FontHelper.semiBold14White,
+      child: Container(
+        height: 40,
+        child: Center(
+          child: Text(
+            "Confirm",
+            style: FontHelper.semiBold14White,
+          ),
         ),
       ),
       onPressed: () async {
@@ -265,14 +268,18 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
   }
 
   Widget _buildBackButton() {
-    return RaisedButton(
-      elevation: 12,
-      color: ColorHelper.dabaoOffWhiteF5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Center(
-        child: Text(
-          "Back",
-          style: FontHelper.semiBold14Black2,
+    return OutlineButton(
+      color: Colors.transparent,
+      borderSide: BorderSide(color: Colors.black),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0)),
+      child: Container(
+        height:40,
+        child: Center(
+          child: Text(
+            "Back",
+            style: FontHelper.semiBold14Black2,
+          ),
         ),
       ),
       onPressed: () {

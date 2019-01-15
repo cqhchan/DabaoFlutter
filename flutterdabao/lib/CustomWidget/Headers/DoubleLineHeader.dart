@@ -94,7 +94,7 @@ class _DoubleLineHeaderState extends State<DoubleLineHeader> {
     if (widget.rightButton != null)
       listOfWidget.add(
           Align(alignment: Alignment.centerRight, child: widget.rightButton));
-
+      //TODO P1 replace with a bar
     return Container(
         height: 120,
         width: MediaQuery.of(context).size.width,

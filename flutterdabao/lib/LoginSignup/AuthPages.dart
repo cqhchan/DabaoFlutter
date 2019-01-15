@@ -198,6 +198,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
               border: Border.all(color: Color(0xFF707070)),
             ),
             child: TextFormField(
+              autocorrect: false,
               focusNode: _focusNode,
               controller: _phoneNumberController,
               inputFormatters: [

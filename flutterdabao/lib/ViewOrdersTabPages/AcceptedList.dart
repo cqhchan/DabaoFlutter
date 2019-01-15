@@ -250,10 +250,10 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
                                 flex: 4,
                                 child: _buildUser(widget.order),
                               ),
-                               _buildChatButton(widget.order),
-                               SizedBox(
-                              width: 8,
-                            ),
+                              _buildChatButton(widget.order),
+                              SizedBox(
+                                width: 8,
+                              ),
                             ],
                           ),
                           SizedBox(
@@ -278,8 +278,8 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
                                 ),
                                 _buildChatButton(widget.order),
                                 SizedBox(
-                              width: 8,
-                            ),
+                                  width: 8,
+                                ),
                               ],
                             ),
                           ),
@@ -728,7 +728,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
     );
   }
 
-Widget _buildChatButton(Order order) {
+  Widget _buildChatButton(Order order) {
     return GestureDetector(
       onTap: () {
         _toChat(order);
@@ -755,20 +755,19 @@ Widget _buildChatButton(Order order) {
         "D": ConfigHelper.instance.currentUserProperty.value.uid
       },
       merge: true,
-    ).then((_) {
-      GlobalKey<ConversationState> key =
-          GlobalKey<ConversationState>(debugLabel: channel.uid);
+    );
+    GlobalKey<ConversationState> key =
+        GlobalKey<ConversationState>(debugLabel: channel.uid);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (BuildContext context) => Conversation(
-                channel: channel,
-                location: widget.location,
-                key: key,
-              ),
-        ),
-      );
-    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) => Conversation(
+              channel: channel,
+              location: widget.location,
+              key: key,
+            ),
+      ),
+    );
   }
 }

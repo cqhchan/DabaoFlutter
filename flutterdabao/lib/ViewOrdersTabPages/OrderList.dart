@@ -747,20 +747,19 @@ class _OrderItemCellState extends State<_OrderItemCell>
         "D": ConfigHelper.instance.currentUserProperty.value.uid
       },
       merge: true,
-    ).then((_) {
-      GlobalKey<ConversationState> key =
-          GlobalKey<ConversationState>(debugLabel: channel.uid);
+    );
+    GlobalKey<ConversationState> key =
+        GlobalKey<ConversationState>(debugLabel: channel.uid);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (BuildContext context) => Conversation(
-                channel: channel,
-                location: widget.location,
-                key: key,
-              ),
-        ),
-      );
-    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) => Conversation(
+              channel: channel,
+              location: widget.location,
+              key: key,
+            ),
+      ),
+    );
   }
 }

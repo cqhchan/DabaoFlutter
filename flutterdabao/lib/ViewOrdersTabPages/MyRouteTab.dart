@@ -509,7 +509,7 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
                           child: ConstrainedBox(
                         child: DropdownButton<String>(
                           iconSize: 0.0,
-                          items: <String>['Edit Tags', 'Close']
+                          items: <String>['Edit', 'Close Route']
                               .map((String value) {
                             return new DropdownMenuItem<String>(
                               value: value,
@@ -520,7 +520,7 @@ class _RouteCellState extends State<_RouteCell> with HavingSubscriptionMixin {
                             );
                           }).toList(),
                           onChanged: (chosen) {
-                            if (chosen == "Edit Tags") {
+                            if (chosen == "Edit") {
                               showOverlay();
                             } else {
                               widget.route.closeRoute();

@@ -281,39 +281,63 @@ class ConversationState extends State<Conversation>
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        StreamBuilder<bool>(
-          stream: order.producer.switchMap((order) {
-            if (order == null) return null;
-            return Rxdart.Observable.combineLatest2<User, String, bool>(
-                ConfigHelper.instance.currentUserProperty.producer,
-                order.creator, (user, creatorID) {
-              if (user == null || creatorID == null) {
-                return null;
-              }
+        StreamBuilder<bool>(stream: order.producer.switchMap((order) {
+          if (order == null) return null;
+          return Rxdart.Observable.combineLatest2<User, String, bool>(
+              ConfigHelper.instance.currentUserProperty.producer, order.creator,
+              (user, creatorID) {
+            if (user == null || creatorID == null) {
+              return null;
+            }
 
-              return user.uid == creatorID;
-            });
-          }),
-          builder: (BuildContext context, snapshot) {
-            if (!snapshot.hasData || snapshot.data == null) return Offstage();
-            if (snapshot.data)
-              return Padding(
+            return user.uid == creatorID;
+          });
+        }), builder: (BuildContext context, snapshot) {
+          if (!snapshot.hasData || snapshot.data == null) return Offstage();
+          if (snapshot.data)
+            return Padding(
+              padding: const EdgeInsets.all(11.0),
+              child: Text(
+                'You are chatting about your order:',
+                style: FontHelper.regular15LightGrey,
+              ),
+            );
+          else
+            return Padding(
                 padding: const EdgeInsets.all(11.0),
-                child: Text(
-                  'You are chatting about your order:',
-                  style: FontHelper.regular15LightGrey,
-                ),
-              );
-            else
-              return Padding(
-                padding: const EdgeInsets.all(11.0),
-                child: Text(
-                  'You are chatting about the other party order:',
-                  style: FontHelper.regular15LightGrey,
-                ),
-              );
-          },
-        ),
+                child: StreamBuilder<User>(
+                  stream: Rxdart.Observable.combineLatest2<List<String>, User,
+                          User>(widget.channel.participantsID,
+                      ConfigHelper.instance.currentUserProperty.producer,
+                      (participantsID, currentUser) {
+                    List tempID = List.from(participantsID);
+                    if (tempID == null || currentUser == null) {
+                      return null;
+                    }
+                    tempID.remove(currentUser.uid);
+
+                    if (tempID.length == 0) {
+                      return null;
+                    }
+
+                    return User.fromUID(tempID.first);
+                  }),
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.data == null) return Offstage();
+
+                    return StreamBuilder(
+                      stream: snapshot.data.name,
+                      builder: (context, snap) {
+                        if (snapshot.data == null) return Offstage();
+                        return Text(
+                          'You are chatting about ${snap.data}\'s order:',
+                          style: FontHelper.regular15LightGrey,
+                        );
+                      },
+                    );
+                  },
+                ));
+        }),
         OneCard(
           expandFlag: expandFlag || forceCloseFlag,
           channel: widget.channel,
@@ -521,11 +545,17 @@ class ConversationState extends State<Conversation>
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => HeroPhotoViewWrapper(
-                          tag: data.imageUrl.value,
-                          imageProvider: NetworkImage(data.imageUrl.value),
-                        ),
-                  ));
+                      builder: (context) => Scaffold(
+                            appBar: AppBar(
+                              title: Text("Photo"),
+                            ),
+                            body: HeroPhotoViewWrapper(
+                              backgroundDecoration: BoxDecoration(
+                                  color: ColorHelper.dabaoOffWhiteF5),
+                              tag: data.imageUrl.value,
+                              imageProvider: NetworkImage(data.imageUrl.value),
+                            ),
+                          )));
             },
           ),
           Text(

@@ -122,6 +122,8 @@ class _TransactionsState extends State<TransactionsPage>
       ),
     );
   }
+//(Solved)TODO p1 check week make sure its the same as server
+//TODO p2 update transactions types
 
   Widget _buildEarnedThisWeek() {
     return Expanded(
@@ -131,7 +133,7 @@ class _TransactionsState extends State<TransactionsPage>
           child: StreamBuilder<double>(
             stream: currentUserWallet.producer.switchMap((wallet) {
               if (wallet == null) return Observable.just(null);
-              return wallet.totalAmountEarnedThisWeek;
+              return wallet.totalAmountEarnedThisWeek.producer;
             }),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
@@ -172,7 +174,7 @@ class _TransactionsState extends State<TransactionsPage>
     return Expanded(
       child: StreamBuilder<List<Transact>>(
           stream: currentUserWallet.producer.switchMap(
-              (wallet) => wallet == null ? null : wallet.listOfTransactions),
+              (wallet) => wallet == null ? null : wallet.listOfTransactions.producer),
           builder: (context, snapshot) {
             if (!snapshot.hasData)
               return Center(child: Text('Please Check Your Connection'));

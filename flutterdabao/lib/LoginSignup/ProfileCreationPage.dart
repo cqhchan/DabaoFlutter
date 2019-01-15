@@ -117,6 +117,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
       ),
     ));
   }
+        //TODO P1 fix spinner issue
 
   //Pre-condition: Called only when _image has been set
   void creatingThumbnail(File image) async {
@@ -293,27 +294,29 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         builder: (builder) {
           return Container(
             color: Colors.white,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListTile(
-                  leading: Icon(Icons.camera),
-                  title: Text('Camera'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    getImage(ImageSource.camera);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.photo_album),
-                  title: Text('Photos'),
-                  onTap: () {
-                    Navigator.of(context).pop();
+            child: SafeArea(
+                          child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.camera),
+                    title: Text('Camera'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      getImage(ImageSource.camera);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.photo_album),
+                    title: Text('Photos'),
+                    onTap: () {
+                      Navigator.of(context).pop();
 
-                    getImage(ImageSource.gallery);
-                  },
-                ),
-              ],
+                      getImage(ImageSource.gallery);
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         });

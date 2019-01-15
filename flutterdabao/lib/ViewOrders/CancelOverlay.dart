@@ -340,10 +340,13 @@ class _CancelOverlayState extends State<CancelOverlay>
       elevation: 12,
       color: Color(0xFFCC0000),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Center(
-        child: Text(
-          "Yes, Cancel",
-          style: FontHelper.semiBold14White,
+      child: Container(
+        height: 40.0,
+        child: Center(
+          child: Text(
+            "Yes, Cancel",
+            style: FontHelper.semiBold14White,
+          ),
         ),
       ),
       onPressed: () async {
@@ -382,14 +385,18 @@ class _CancelOverlayState extends State<CancelOverlay>
   }
 
   Widget _buildBackButton() {
-    return RaisedButton(
-      elevation: 12,
-      color: ColorHelper.dabaoOffWhiteF5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Center(
-        child: Text(
-          "Back",
-          style: FontHelper.semiBold14Black,
+    return OutlineButton(
+      color: Colors.transparent,
+      borderSide: BorderSide(color: Colors.black),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0)),
+      child: Container(
+        height:40,
+        child: Center(
+          child: Text(
+            "Back",
+            style: FontHelper.semiBold14Black2,
+          ),
         ),
       ),
       onPressed: () {
@@ -444,7 +451,7 @@ class _CancelOverlayState extends State<CancelOverlay>
       ],
     );
   }
-
+//TODO p1 test on small phone
   Widget _buildReasonCell(String reason, int index) {
     return GestureDetector(
       onTap: () {
@@ -457,7 +464,8 @@ class _CancelOverlayState extends State<CancelOverlay>
         storeReason = reasons[index];
         print(storeReason);
       },
-      child: Padding(
+      child: Container(
+        color: Colors.transparent,
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

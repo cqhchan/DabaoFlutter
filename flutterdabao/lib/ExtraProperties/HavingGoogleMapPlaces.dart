@@ -26,6 +26,7 @@ abstract class HavingGoogleMapPlaces {
     Future<void> handlePressButton(BuildContext context,Function(LatLng,String) onCompleteCallback) async {
     // show input autocomplete with selected mode
     // then get the Prediction selected
+    //TODO p1 come up from bottom
     Prediction p = await PlacesAutocomplete.show(
       context: context,
       apiKey: kGoogleApiKey,

@@ -103,6 +103,7 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
                               startTime.value = start;
                             },
                           ),
+                          //TODO p1 add in foodTag and total items
                           SizedBox(
                             height: 15,
                           ),
@@ -345,10 +346,13 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
       elevation: 12,
       color: Color(0xFF959DAD),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Center(
-        child: Text(
-          "Offer",
-          style: FontHelper.semiBold14White,
+      child: Container(
+        height: 40,
+        child: Center(
+          child: Text(
+            "Confirm",
+            style: FontHelper.semiBold14White,
+          ),
         ),
       ),
       onPressed: () async {
@@ -386,14 +390,18 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
   }
 
   Widget _buildBackButton() {
-    return RaisedButton(
-      elevation: 12,
-      color: ColorHelper.dabaoOffWhiteF5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Center(
-        child: Text(
-          "Back",
-          style: FontHelper.semiBold14Black,
+    return OutlineButton(
+      color: Colors.transparent,
+      borderSide: BorderSide(color: Colors.black),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0)),
+      child: Container(
+        height:40,
+        child: Center(
+          child: Text(
+            "Back",
+            style: FontHelper.semiBold14Black2,
+          ),
         ),
       ),
       onPressed: () {
@@ -403,4 +411,3 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
   }
 }
 
-class _DeliveryLocation {}

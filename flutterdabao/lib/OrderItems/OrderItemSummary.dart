@@ -20,7 +20,7 @@ class OrderItemSummary extends StatefulWidget {
     @required this.holders,
     this.showAddItem = true,
     this.showSummaryPrice = false,
-    this.minHeight = 150.0,
+    this.minHeight = 175.0,
   }) : super(key: key);
 
   @override

@@ -57,12 +57,15 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 buildHeader(),
+                SizedBox(
+                  height: 15.0,
+                ),
                 Text(
-                  "Im Buying from",
+                  "I\'m buying from..",
                   style: FontHelper.semiBold(ColorHelper.dabaoOffGrey70, 14),
                 ),
                 SizedBox(
-                  height: 5.0,
+                  height: 10.0,
                 ),
                 buildSelectedlocationWidget(
                     true,
@@ -126,9 +129,7 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            ConstrainedBox(
-              constraints: BoxConstraints(minWidth: 15.0, maxWidth: 22.0),
-            ),
+            //TODO p1 center
             Image.asset(
               'assets/icons/bike.png',
               color: Colors.black,
@@ -136,15 +137,13 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
             Flexible(
               child: Center(
                 child: Text(
-                  'Set Route',
+                  'Proceed',
                   style: FontHelper.bold(Colors.black, 16.0),
                   textAlign: TextAlign.start,
                 ),
               ),
             ),
-            ConstrainedBox(
-              constraints: BoxConstraints(minWidth: 30.0, maxWidth: 40.0),
-            ),
+
           ],
         ),
         onPressed: () {

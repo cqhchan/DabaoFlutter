@@ -347,10 +347,13 @@ class _CompleteOverlayState extends State<CompleteOverlay>
       elevation: 12,
       color: ColorHelper.dabaoOrange,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Center(
-        child: Text(
-          "Confirm",
-          style: FontHelper.semiBold14Black,
+      child: Container(
+        height: 40.0,
+        child: Center(
+          child: Text(
+            "Confirm",
+            style: FontHelper.semiBold14Black,
+          ),
         ),
       ),
       onPressed: () async {
@@ -377,14 +380,18 @@ class _CompleteOverlayState extends State<CompleteOverlay>
   }
 
   Widget _buildBackButton() {
-    return RaisedButton(
-      elevation: 12,
-      color: ColorHelper.dabaoOffWhiteF5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: Center(
-        child: Text(
-          "Back",
-          style: FontHelper.semiBold14Black,
+    return OutlineButton(
+      color: Colors.transparent,
+      borderSide: BorderSide(color: Colors.black),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0)),
+      child: Container(
+        height:40,
+        child: Center(
+          child: Text(
+            "Back",
+            style: FontHelper.semiBold14Black2,
+          ),
         ),
       ),
       onPressed: () {

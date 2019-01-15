@@ -28,7 +28,9 @@ class ChatNavigationButtonState extends State<ChatNavigationButton> {
           FadeRoute(widget: ChatPage()),
         );
       },
+      //TODO P1 increase hit area
       child: Container(
+        color: Colors.transparent,
           child: Stack(
         children: <Widget>[
           Align(

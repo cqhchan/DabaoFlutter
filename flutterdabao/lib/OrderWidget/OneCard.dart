@@ -229,16 +229,21 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
 
                                     return Align(
                                         alignment: Alignment.center,
-                                        child: Text(
-                                          "Tap Card for Order Summary",
-                                          textAlign: TextAlign.center,
-                                          style: FontHelper.medium(
-                                              ColorHelper.dabaoOffBlack9B, 12),
+                                        child: Column(
+                                          children: <Widget>[
+                                            Text(
+                                              "Tap Card for Order Summary",
+                                              textAlign: TextAlign.center,
+                                              style: FontHelper.medium(
+                                                  ColorHelper.dabaoOffBlack9B, 12),
+                                            ),
+                                            Icon(Icons.keyboard_arrow_down),
+                                          ],
                                         ));
                                   },
                                 ),
                               ),
-                              Icon(Icons.keyboard_arrow_down),
+                              
                             ],
                           ),
                           children: <Widget>[
@@ -253,10 +258,15 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                                         snapshot.data == null ||
                                         !snapshot.data) return Offstage();
 
-                                    return Text(
-                                      "Tap to minimize",
-                                      style: FontHelper.medium(
-                                          ColorHelper.dabaoOffBlack9B, 12),
+                                    return Column(
+                                      children: <Widget>[
+                                        Text(
+                                          "Tap to minimize",
+                                          style: FontHelper.medium(
+                                              ColorHelper.dabaoOffBlack9B, 12),
+                                        ),
+                                        Icon(Icons.keyboard_arrow_up),
+                                      ],
                                     );
                                   },
                                 ),
@@ -690,9 +700,9 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                           }
                         : null,
                     child: Container(
+                      //TODO p1 add in Cancel counter offer
                       child: Text(
                         'COUNTER-OFFER',
-                        // style: FontHelper.semiBold12White,
                         textAlign: TextAlign.center,
                         maxLines: 2,
                       ),

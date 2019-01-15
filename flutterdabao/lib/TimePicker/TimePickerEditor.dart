@@ -154,7 +154,7 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
               .add(Duration(minutes: widget.minsGapBetweenStartAndEndTime)))) {
         return "";
       } else {
-        return "Minimim time period is 30 minutes and at least 1 hour from now.";
+        return "Error: Time Selected must be \n - At least 1 hour from now\n - 30 minutes apart";
       }
     }).listen((error) {
       setState(() {
@@ -493,7 +493,7 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
         child: Text(
           errorMessage,
           style: FontHelper.semiBold(ColorHelper.dabaoErrorRed, 12.0),
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.start,
         ),
       ),
     );
@@ -534,7 +534,7 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
             print('wrong end: ${selectedEndDate.value}');
             setState(() {
               errorMessage =
-                  "Minimim time period is 30 minutes and at least 1 hour from now.";
+                  "Error: Time Selected must be \n - At least 1 hour from now\n - 30 minutes apart";
             });
           }
         },

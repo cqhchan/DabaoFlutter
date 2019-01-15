@@ -111,12 +111,13 @@ class _CheckoutPageState extends State<CheckoutPage>
                   minHeight: 0.0,
                   showSummaryPrice: true,
                 )),
-            buildPrice(),
-            buildPriceSlider(theme),
+            SizedBox(height: 50,),
+            buildPromoCode(),
             Line(
               margin: EdgeInsets.only(left: 8.0, right: 8.0),
             ),
-            buildPromoCode(),
+            buildPrice(),
+            buildPriceSlider(theme),
             Line(
               margin: EdgeInsets.only(left: 8.0, right: 8.0),
             ),
@@ -244,7 +245,8 @@ class _CheckoutPageState extends State<CheckoutPage>
                             children: <Widget>[
                               Text(
                                 "Error:",
-                                style: FontHelper.medium(ColorHelper.dabaoErrorRed, 12.0),
+                                style: FontHelper.medium(
+                                    ColorHelper.dabaoErrorRed, 12.0),
                               ),
                               Expanded(
                                   child: Align(
@@ -344,6 +346,7 @@ class _CheckoutPageState extends State<CheckoutPage>
       ),
     );
   }
+  //TODO P1 change to new design $0.00 - reccomended - $ max
 
   Container buildPriceSlider(ThemeData theme) {
     return Container(

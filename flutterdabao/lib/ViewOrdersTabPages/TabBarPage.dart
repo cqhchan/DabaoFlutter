@@ -69,12 +69,12 @@ class TabBarPageState extends State<TabBarPage> {
             if (!snapshot.hasData || snapshot.data.length == 0)
               return Text(
                 "Your Active Deliveries",
-                style: FontHelper.regular(Colors.black, 16),
+                style: FontHelper.semiBold(Colors.black, 16),
               );
 
             return Text(
               "Your Active Deliveries (${snapshot.data.length})",
-              style: FontHelper.regular(Colors.black, 16),
+              style: FontHelper.semiBold(Colors.black, 16),
             );
           },
         ),

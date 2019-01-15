@@ -12,6 +12,7 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
+import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:flutterdabao/Home/HomePage.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
@@ -43,7 +44,7 @@ class _EditFoodTagOverlayState extends State<EditFoodTagOverlay> {
           closeTapped: () {
             Navigator.of(context).pop();
           },
-          title: "Edit FoodTags",
+          title: "Edit",
         ),
         Flexible(
           child: _SelectFoodTagPage(
@@ -158,7 +159,7 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
                       child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                            "Set FoodTags",
+                            "Confirm",
                             style: FontHelper.semiBold(Colors.black, 14.0),
                           ))),
                 ],
@@ -191,7 +192,7 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
                       style: BorderStyle.solid)),
               backgroundColor: ColorHelper.dabaoOrange,
               label: Text(
-                foodTagTitle,
+                StringHelper.upperCaseWords(foodTagTitle),
                 style: FontHelper.semiBold(Colors.black, 12),
               ),
               onPressed: () {},
@@ -234,13 +235,6 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Container(
-          child: Text(
-            "Places near you",
-            style: FontHelper.medium(ColorHelper.dabaoOffBlack4A, 12.0),
-          ),
-          padding: EdgeInsets.only(bottom: 5.0),
-        ),
         GestureDetector(
           onTap: () {
             moveToSearch(context);
@@ -272,6 +266,13 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
             ),
           ),
         ),
+        Container(
+          child: Text(
+            "Places near you",
+            style: FontHelper.medium(ColorHelper.dabaoOffBlack4A, 12.0),
+          ),
+          padding: EdgeInsets.only(bottom: 5.0),
+        ),
         StreamBuilder(
           stream: reccomendedFoodTags.producer,
           builder: (context, snap) {
@@ -287,10 +288,33 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
             }
           },
         ),
+        Container(
+          margin: EdgeInsets.only(right: 20.0),
+          child: Align(
+              alignment: Alignment.bottomRight,
+              child: InputChip(
+                pressElevation: 0.0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                    side: BorderSide(
+                        color: ColorHelper.dabaoOrange,
+                        style: BorderStyle.solid)),
+                backgroundColor: ColorHelper.dabaoOrange,
+                label: Image.asset(
+                  'assets/icons/plus_icon.png',
+                ),
+                onPressed: () {
+                  moveToSearch(context);
+                },
+              )),
+        ),
+        Line(
+              margin: EdgeInsets.only(
+                  right: 10.0, top: 10.0, bottom: 15.0, left: 10.0),
+            ),
       ],
     );
   }
-
   moveToSearch(BuildContext context) => Navigator.push(context,
           new PageRouteBuilder(pageBuilder: (BuildContext context, _, __) {
         return new FoodTypeSearch(
@@ -304,13 +328,14 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
     return StreamBuilder<List<FoodTag>>(
       stream: userFoodTags.producer,
       builder: (context, snap) {
+        if (snap.data == null || snap.data.length == 0)
+          return SizedBox(
+            height: 30,
+          );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Line(
-              margin: EdgeInsets.only(
-                  right: 10.0, top: 10.0, bottom: 15.0, left: 10.0),
-            ),
+            
             Container(
               child: Text(
                 "Your recent places",
@@ -322,26 +347,6 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
               selectedCallBack: callback,
               taggables: userFoodTags,
             ),
-            Container(
-              margin: EdgeInsets.only(right: 20.0),
-              child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: InputChip(
-                    pressElevation: 0.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                        side: BorderSide(
-                            color: ColorHelper.dabaoOrange,
-                            style: BorderStyle.solid)),
-                    backgroundColor: ColorHelper.dabaoOrange,
-                    label: Image.asset(
-                      'assets/icons/plus_icon.png',
-                    ),
-                    onPressed: () {
-                      moveToSearch(context);
-                    },
-                  )),
-            )
           ],
         );
       },

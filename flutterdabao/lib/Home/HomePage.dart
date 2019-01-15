@@ -250,12 +250,12 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                                       snapshot.data.length == 0)
                                     return Text(
                                       "View Active Deliveries",
-                                      style: FontHelper.semiBold14Black,
+                                      style: FontHelper.semiBold(Colors.black, 14),
                                     );
 
                                   return Text(
-                                    "Track Active Deliveries (${snapshot.data.length})",
-                                    style: FontHelper.semiBold14Black,
+                                    "View Active Deliveries (${snapshot.data.length})",
+                                      style: FontHelper.semiBold(Colors.black, 14),
                                   );
                                 },
                               ),
@@ -363,22 +363,11 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
             ),
             ListTile(
               title: Text(
-                'Active',
-                style: FontHelper.regular12Black,
-              ),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text(
                 'History',
                 style: FontHelper.regular12Black,
               ),
               onTap: () {
+                // Go to history page
                 // Update the state of the app
                 // ...
                 // Then close the drawer
@@ -387,10 +376,11 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
             ),
             ListTile(
               title: Text(
-                'DabaoPay',
+                'Dabao Balance',
                 style: FontHelper.regular12Black,
               ),
               onTap: () {
+                // Go to dabaoBalance
                 // Update the state of the app
                 // ...
                 // Then close the drawer
@@ -409,30 +399,19 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 Navigator.pop(context);
               },
             ),
-            ListTile(
-              title: Text(
-                'Payment Methods',
-                style: FontHelper.regular12Black,
-              ),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Notifications',
-                style: FontHelper.regular12Black,
-              ),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
+            // ListTile(
+            //   title: Text(
+            //     'Notifications',
+            //     style: FontHelper.regular12Black,
+            //   ),
+            //   onTap: () {
+            //     //TODO p2 NotificationsPAge
+            //     // Update the state of the app
+            //     // ...
+            //     // Then close the drawer
+            //     Navigator.pop(context);
+            //   },
+            // ),
             SizedBox(height: 20),
             ListTile(
               title: Text(
@@ -440,6 +419,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 style: FontHelper.regular12Black,
               ),
               onTap: () {
+                //TODO p1 open to web app
                 // Update the state of the app
                 // ...
                 // Then close the drawer
@@ -452,6 +432,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 style: FontHelper.regular12Black,
               ),
               onTap: () {
+                //TODO p1 open email app
                 // Update the state of the app
                 // ...
                 // Then close the drawer
@@ -575,7 +556,7 @@ class _ActiveOrderCard extends StatefulWidget {
     return _ActiveOrderCardState();
   }
 }
-
+//TODO p1 add anyorders in the past 60 mins. 
 class _ActiveOrderCardState extends State<_ActiveOrderCard> {
   @override
   Widget build(BuildContext context) {

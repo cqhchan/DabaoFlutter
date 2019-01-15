@@ -113,9 +113,9 @@ class _SelectOrderItemState extends State<SelectOrderItem>
       stream: suggestedOrderItems.producer,
       builder: (context, snap) {
         //return an empty container if no suggested Orders
-        if (!snap.hasData ) return CircularProgressIndicator();
+        if (!snap.hasData) return CircularProgressIndicator();
         if (snap.data.isEmpty) return Container();
-        
+
         List<Widget> suggestOrdersWidget = List();
 
         suggestOrdersWidget.add(Text(
@@ -148,6 +148,7 @@ class _SelectOrderItemState extends State<SelectOrderItem>
     );
   }
 }
+//TODO P1 increase hit area
 
 class _OrderItemSuggestedCell extends StatelessWidget {
   final OrderItem orderItem;

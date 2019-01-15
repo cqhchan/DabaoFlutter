@@ -29,6 +29,7 @@ const String modeCompletedOrder = "ORDERCOMPLETED";
 const String modeCancelledOrder = "ORDERCANCELLED";
 
 const String modeNewPotentialOrder = "POTENTIALORDER";
+//TODO p1 add notification for voucher added when dabaoee rewards
 
 handleNotificationForResumeAndLaunch(map) async {
   ConfigHelper.instance.currentUserProperty.producer
@@ -202,7 +203,7 @@ handleNotificationForOnMessage(map) async {
                 return AlertDialog(
                   title: const Text("Order Cancelled"),
                   content: const Text(
-                      "Your Order has been cancelle =( Would you like to reorder?"),
+                      "Oh No! Your Order has been cancelled. Would you like to reorder?"),
                   actions: <Widget>[
                     new FlatButton(
                       child: new Text(

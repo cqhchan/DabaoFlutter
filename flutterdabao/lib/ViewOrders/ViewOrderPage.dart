@@ -246,6 +246,7 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Image.asset("assets/images/InAppIcon.png"),
+              SizedBox(height: 10,),
               Text(
                 "Tap icon to go to confirmation proof page",
                 style: FontHelper.regular(Colors.black, 12.0),
@@ -419,7 +420,7 @@ class DabaoeeViewOrderListPage extends StatefulWidget {
     return _DabaoeeViewOrderListPageState();
   }
 }
-
+//TODO p1 show chat and Message
 class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
     with HavingSubscriptionMixin {
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
@@ -517,16 +518,17 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
       ),
     );
   }
-
+//TODO p1 are you sure you want to cancel
   StreamBuilder<String> buildCancelButton(BuildContext context) {
     return StreamBuilder(
       stream: widget.order.status,
       builder: (contexts, snap) {
         if (snap.hasData && snap.data == orderStatus_Requested)
           return FlatButton(
-              color: ColorHelper.dabaoOrange,
+              color: Colors.transparent,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3.0)),
+                side: BorderSide(color: ColorHelper.dabaoErrorRed),
+                  borderRadius: BorderRadius.circular(8.0)),
               child: Row(
                 children: <Widget>[
                   Expanded(

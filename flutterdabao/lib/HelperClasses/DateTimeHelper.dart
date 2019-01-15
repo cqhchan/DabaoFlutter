@@ -6,7 +6,8 @@ class DateTimeHelper {
 
   // to tell what week it is
   static String convertDateTimeToWeek(DateTime datetime) {
-    return formatDate(datetime, [yyyy, '_WEEK_', WW]);
+    DateTime newDate = DateTime.utc(datetime.toUtc().year, datetime.toUtc().month,datetime.toUtc().day);
+    return formatDate(newDate, [yyyy, '_WEEK_', WW]);
   }
 
   // returns 3 hours ago/ years ago etc

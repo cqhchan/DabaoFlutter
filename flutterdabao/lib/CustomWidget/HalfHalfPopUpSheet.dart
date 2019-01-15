@@ -138,7 +138,7 @@ class _HalfBottomSheetLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
+      minHeight: 15.0/16.0,
       //Set Max height 
       maxHeight: constraints.maxHeight * 15.0 / 16.0
     );
