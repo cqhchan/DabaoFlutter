@@ -42,6 +42,10 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<Order>> currentUserPastWeekCompletedOrdersProperty =
       MutableProperty<List<Order>>(List());
 
+  // A users Orders from the past week
+  MutableProperty<List<Order>> currentUserPastWeekCanceledOrdersProperty =
+      MutableProperty<List<Order>>(List());
+
   MutableProperty<List<Order>> currentUserDeliveredCompletedOrdersProperty =
       MutableProperty<List<Order>>(List());
 
@@ -51,7 +55,6 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   MutableProperty<List<DabaoRoute.Route>> currentUserRoutesPastDayProperty =
       MutableProperty<List<DabaoRoute.Route>>(List());
-
 
   MutableProperty<List<Voucher>> currentUserOpenVouchersProperty =
       MutableProperty<List<Voucher>>(List());
@@ -116,6 +119,9 @@ class ConfigHelper with HavingSubscriptionMixin {
     subscription.add(currentUserDeliveredCompletedOrdersProperty
         .bindTo(currentUserDeliveredCompletedOrdersProducer()));
 
+    subscription.add(currentUserPastWeekCanceledOrdersProperty
+        .bindTo(currentUserCancelledOrders()));
+
     subscription.add(currentUserPastWeekCompletedOrdersProperty
         .bindTo(currentUserCompletedOrdersProducer()));
 
@@ -123,8 +129,8 @@ class ConfigHelper with HavingSubscriptionMixin {
         .add(currentUserWalletProperty.bindTo(currentUserWalletProducer()));
 
     // get Current Routes TODO fix bug
-    subscription.add(
-        currentUserRoutesPastDayProperty.bindTo(currentUserRoutesPastDayProducer()));
+    subscription.add(currentUserRoutesPastDayProperty
+        .bindTo(currentUserRoutesPastDayProducer()));
 //  subscription.add(currentUserRoutesPastDayProperty.producer.listen((onData){
 
 //    print("testing data " + onData.length.toString());
@@ -204,7 +210,6 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
-
   Stream<List<DabaoRoute.Route>> currentUserRoutesPastDayProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? Observable.just(List<DabaoRoute.Route>())
@@ -213,8 +218,7 @@ class ConfigHelper with HavingSubscriptionMixin {
                 .where(DabaoRoute.Route.deliveryTimeKey,
                     isGreaterThanOrEqualTo:
                         DateTime.now().add(Duration(days: -1)))
-                .where(DabaoRoute.Route.creatorKey, isEqualTo: user.uid)
-                )
+                .where(DabaoRoute.Route.creatorKey, isEqualTo: user.uid))
             .observable);
   }
 
@@ -230,7 +234,7 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   Stream<List<Order>> currentUserDeliveryingOrdersProducer() {
     return currentUserProperty.producer.switchMap((user) => user == null
-        ? BehaviorSubject(seedValue:List<Order>())
+        ? BehaviorSubject(seedValue: List<Order>())
         : FirebaseCollectionReactive<Order>(Firestore.instance
                 .collection("orders")
                 .where(Order.statusKey, isEqualTo: orderStatus_Accepted)
@@ -264,6 +268,19 @@ class ConfigHelper with HavingSubscriptionMixin {
             .observable);
   }
 
+  Stream<List<Order>> currentUserCancelledOrders() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? List<Order>()
+        : FirebaseCollectionReactive<Order>(Firestore.instance
+                .collection("orders")
+                .where(Order.startTimeKey,
+                    isGreaterThanOrEqualTo:
+                        DateTime.now().add(Duration(days: -7)))
+                .where(Order.statusKey, isEqualTo: orderStatus_Cancelled)
+                .where(Order.creatorKey, isEqualTo: user.uid))
+            .observable);
+  }
+
   Observable<Map<String, dynamic>> globalConfigSettingsData() {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? Map()
@@ -280,13 +297,13 @@ class ConfigHelper with HavingSubscriptionMixin {
     location?.cancel();
     bool successful = await askForPermission;
 
-    if (successful != null && successful){
-    var lastLocation =
-        await LocationHelper.instance.location.getLastKnownPosition();
+    if (successful != null && successful) {
+      var lastLocation =
+          await LocationHelper.instance.location.getLastKnownPosition();
 
-    if (lastLocation != null)
-      currentLocationProperty.value =
-          LatLng(lastLocation.latitude, lastLocation.longitude);
+      if (lastLocation != null)
+        currentLocationProperty.value =
+            LatLng(lastLocation.latitude, lastLocation.longitude);
     }
 
     location = currentLocationProperty

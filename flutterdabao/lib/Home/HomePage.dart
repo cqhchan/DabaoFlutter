@@ -624,15 +624,18 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Order>>(
-        stream: Observable.combineLatest3<List<Order>, List<Order>, List<Order>,
-                List<Order>>(
+        stream: Observable.combineLatest4<List<Order>, List<Order>, List<Order>,
+                List<Order>, List<Order>>(
             ConfigHelper.instance.currentUserAcceptedOrdersProperty.producer,
             ConfigHelper.instance.currentUserRequestedOrdersProperty.producer,
-            ConfigHelper.instance.currentUserPastWeekCompletedOrdersProperty
-                .producer, (accepted, requested, completed) {
+            ConfigHelper
+                .instance.currentUserPastWeekCompletedOrdersProperty.producer,
+            ConfigHelper.instance.currentUserPastWeekCanceledOrdersProperty
+                .producer, (accepted, requested, completed, cancelled) {
           List<Order> tempAccepted = List.from(accepted);
           List<Order> tempRequested = List.from(requested);
           List<Order> tempCompleted = List.from(completed);
+          List<Order> tempCancelled = List.from(cancelled);
 
           tempAccepted.sort((lhs, rhs) =>
               rhs.deliveryTime.value.compareTo(lhs.deliveryTime.value));
@@ -644,11 +647,18 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
 
           tempCompleted.removeWhere((order) {
             return order.completedTime.value
-                .isBefore(DateTime.now().subtract(Duration(hours: 1)));
+                .isBefore(DateTime.now().subtract(Duration(hours: 5)));
           });
+
+          tempCancelled.removeWhere((order) {
+            return order.startDeliveryTime.value
+                .isBefore(DateTime.now().subtract(Duration(hours: 8)));
+          });
+
 
           tempAccepted.addAll(tempRequested);
           tempAccepted.addAll(tempCompleted);
+          tempAccepted.addAll(tempCancelled);
 
           return tempAccepted;
         }),
@@ -871,6 +881,16 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
                             ColorHelper.dabaoOffGreyD3, 12.0)),
                   ),
                 );
+              case orderStatus_Cancelled:
+                return Container(
+                  height: 19,
+                  width: 60,
+                  child: Center(
+                    child: Text("Cancelled",
+                        style: FontHelper.semiBold(
+                            ColorHelper.dabaoOffGreyD3, 12.0)),
+                  ),
+                );
               default:
                 return Offstage();
             }
@@ -883,6 +903,7 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
   StreamBuilder<String> deliveryTime(Order order) {
     return StreamBuilder<String>(
       stream: order.status.switchMap((status) {
+
         switch (status) {
           case orderStatus_Accepted:
             return order.deliveryTime.map((date) => date == null
@@ -905,6 +926,9 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
                   });
               }
             });
+
+          case orderStatus_Cancelled:
+            return BehaviorSubject(seedValue: "");
           case orderStatus_Completed:
             return order.completedTime.map((date) => date == null
                 ? "Error"

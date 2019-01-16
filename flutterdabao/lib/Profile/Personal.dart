@@ -62,7 +62,7 @@ class _PersonalState extends State<Personal> {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     updateFlag ? 'Save' : 'Edit Profile',
-                    style: FontHelper.regular14Black,
+                    style: FontHelper.semiBold14Black,
                   ),
                 ),
                 onTap: () {

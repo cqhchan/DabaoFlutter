@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
+import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -9,6 +10,7 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
+import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
@@ -38,17 +40,20 @@ class ViewOrdersPageState extends State<ViewOrderListPage> {
       ),
       body: Container(
         child: StreamBuilder(
-          stream: Observable.combineLatest3<List<Order>, List<Order>,
-                  List<Order>, List<Object>>(
+          stream: Observable.combineLatest4<List<Order>, List<Order>,
+                  List<Order>, List<Object>, List<Object>>(
               ConfigHelper.instance.currentUserAcceptedOrdersProperty.producer,
               ConfigHelper.instance.currentUserRequestedOrdersProperty.producer,
-              ConfigHelper.instance.currentUserPastWeekCompletedOrdersProperty
-                  .producer, (accepted, requested, completed) {
+              ConfigHelper
+                  .instance.currentUserPastWeekCompletedOrdersProperty.producer,
+              ConfigHelper.instance.currentUserPastWeekCanceledOrdersProperty
+                  .producer, (accepted, requested, completed, cancelled) {
             List<Object> objectsList = List();
 
             List<Order> tempAccepted = List.from(accepted);
             List<Order> tempRequested = List.from(requested);
             List<Order> tempCompleted = List.from(completed);
+            List<Order> tempCancelled = List.from(cancelled);
 
             tempAccepted.sort((lhs, rhs) =>
                 rhs.deliveryTime.value.compareTo(lhs.deliveryTime.value));
@@ -58,6 +63,9 @@ class ViewOrdersPageState extends State<ViewOrderListPage> {
             tempCompleted.sort((lhs, rhs) =>
                 rhs.completedTime.value.compareTo(lhs.completedTime.value));
 
+            tempCancelled.sort((lhs, rhs) => rhs.startDeliveryTime.value
+                .compareTo(lhs.startDeliveryTime.value));
+
             objectsList.add(
                 "CURRENT ORDERS (${tempAccepted.length + tempRequested.length})");
             // objectsList.addAll(tempAccepted);
@@ -65,10 +73,13 @@ class ViewOrdersPageState extends State<ViewOrderListPage> {
 
             objectsList.addAll(tempRequested);
 
-            if (tempCompleted.length > 0) {
+            if (tempCompleted.length > 0 || tempCancelled.length > 0) {
+              print("testing it came here");
               objectsList.add(null);
-              objectsList.add("COMPLETED ORDERS (${tempCompleted.length})");
+              objectsList.add(
+                  "PAST ORDERS (${tempCompleted.length + tempCancelled.length})");
               objectsList.addAll(tempCompleted);
+              objectsList.addAll(tempCancelled);
             }
 
             return objectsList;
@@ -156,8 +167,8 @@ class _ViewOrderCellState extends State<_ViewOrderCell>
           Navigator.of(context).push(
             MaterialPageRoute(builder: (BuildContext context) {
               return DabaoeeViewOrderListPage(
-            order: Order.fromUID(widget.order.uid),
-          );
+                order: Order.fromUID(widget.order.uid),
+              );
             }),
           );
         },
@@ -192,22 +203,64 @@ class _ViewOrderCellState extends State<_ViewOrderCell>
                   ),
                 ),
                 Container(
-                  width: 120,
+                  width: 140,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
                       deliveryTime(order),
                       Expanded(
-                        child: Container(
-                            width: 40,
-                            color: Colors.transparent,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Icon(
-                                Icons.arrow_forward_ios,
-                                color: ColorHelper.dabaoOffGrey70,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: () async {
+                                OrderHolder holder = OrderHolder.fromOrder(
+                                    order: order, items: order.orderItem.value);
+                                Navigator.of(context)
+                                    .push(MaterialPageRoute(builder: (context) {
+                                  return OrderNow(
+                                    holder: holder,
+                                  );
+                                }));
+                              },
+                              child: StreamBuilder(
+                                stream: order.status,
+                                builder: (context, snap) {
+                                  if (snap.data == orderStatus_Cancelled ||
+                                      snap.data == orderStatus_Completed)
+                                    return Container(
+                                      margin: EdgeInsets.only(
+                                          top: 20, bottom: 20, left: 20),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: ColorHelper.dabaoOffGrey70,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(5.0)),
+                                      padding: EdgeInsets.only(
+                                          left: 5.0, right: 5.0),
+                                      child: Text(
+                                        "Reorder",
+                                        style: FontHelper.semiBold12Black,
+                                      ),
+                                    );
+
+                                  return Offstage();
+                                },
                               ),
-                            )),
+                            ),
+                            Container(
+                                padding: EdgeInsets.only(right: 10),
+                                color: Colors.transparent,
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: ColorHelper.dabaoOffGrey70,
+                                  ),
+                                )),
+                          ],
+                        ),
                       )
                     ],
                   ),
@@ -267,6 +320,18 @@ class _ViewOrderCellState extends State<_ViewOrderCell>
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text("Delivered",
+                      style: FontHelper.semiBold(
+                          ColorHelper.dabaoOffGreyD3, 12.0)),
+                ),
+              );
+            case orderStatus_Cancelled:
+              return Container(
+                padding: EdgeInsets.only(left: 2.0),
+                height: 19,
+                width: 60,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("Cancelled",
                       style: FontHelper.semiBold(
                           ColorHelper.dabaoOffGreyD3, 12.0)),
                 ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 import 'package:flutterdabao/Chat/Conversation.dart';
+import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
@@ -17,6 +18,7 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
+import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
@@ -596,8 +598,37 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
                       );
                     });
               });
-        else
-          return Offstage();
+        if (snap.hasData &&
+            (snap.data == orderStatus_Cancelled ||
+                snap.data == orderStatus_Completed))
+          return FlatButton(
+              color: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                  side: BorderSide(color: ColorHelper.dabaoOrange),
+                  borderRadius: BorderRadius.circular(8.0)),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Reorder",
+                            style: FontHelper.semiBold(Colors.black, 14.0),
+                          ))),
+                ],
+              ),
+              onPressed: () async {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return OrderNow(
+                    holder: OrderHolder.fromOrder(
+                        order: widget.order,
+                        items: widget.order.orderItem.value),
+                  );
+                }));
+              });
+
+        return Offstage();
       },
     );
   }
@@ -684,20 +715,28 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
           textAlign: TextAlign.center,
         ),
         user == null
-            ? Row(
-                children: <Widget>[
-                  Text("Searching for Dabaoer",
-                      style:
-                          FontHelper.semiBold(ColorHelper.dabaoOffGreyD3, 12)),
-                  Container(
-                    margin: EdgeInsets.only(left: 10),
-                    height: 15,
-                    width: 15,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                    ),
-                  ),
-                ],
+            ? StreamBuilder(
+                stream: widget.order.status,
+                builder: (context, snap) {
+                  if (snap.hasData && snap.data == orderStatus_Requested)
+                    return Row(
+                      children: <Widget>[
+                        Text("Searching for Dabaoer",
+                            style: FontHelper.semiBold(
+                                ColorHelper.dabaoOffGreyD3, 12)),
+                        Container(
+                          margin: EdgeInsets.only(left: 10),
+                          height: 15,
+                          width: 15,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                          ),
+                        ),
+                      ],
+                    );
+                  else
+                    return Offstage();
+                },
               )
             : Row(
                 children: <Widget>[

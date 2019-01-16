@@ -14,6 +14,7 @@ import 'package:rxdart/rxdart.dart';
 const String orderStatus_Requested = "Requested";
 const String orderStatus_Accepted = "Accepted";
 const String orderStatus_Completed = "Completed";
+const String orderStatus_Cancelled = "Cancelled";
 
 class Order extends FirebaseType with Selectable {
   static final String createdTimeKey = "CT";
@@ -157,17 +158,7 @@ class Order extends FirebaseType with Selectable {
     }
 
     if (data.containsKey(statusKey)) {
-      switch (data[statusKey]) {
-        case "Completed":
-          status.add(data[statusKey]);
-          break;
-        case "Accepted":
-          status.add(data[statusKey]);
-          break;
-        case "Requested":
-          status.add(data[statusKey]);
-          break;
-      }
+      status.add(data[statusKey]);
     } else {
       status.add(null);
     }
