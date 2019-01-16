@@ -292,161 +292,225 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.8,
       child: Drawer(
-        child: ListView(
-          shrinkWrap: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
                 children: <Widget>[
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        FadeRoute(widget: Personal()),
-                      );
-                    },
-                    child: StreamBuilder<String>(
-                      stream: ConfigHelper
-                          .instance.currentUserProperty.value.thumbnailImage,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == null) {
-                          return Container(
-                            height: 35,
-                            width: 35,
-                            child: Image.asset(
-                              'assets/icons/profile_icon.png',
-                            ),
+                  Container(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Image.asset("assets/images/side_bar_splash.png",
+                          fit: BoxFit.fill)),
+                  SafeArea(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 20, left: 20),
+                      color: Colors.transparent,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Personal()),
                           );
-                        }
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(snapshot.data),
-                          radius: 35,
-                        );
-                      },
-                    ),
-                  ),
-                  StreamBuilder<String>(
-                    stream: ConfigHelper.instance.currentUserProperty.producer
-                        .switchMap((user) {
-                      if (user == null) return Observable.just("");
-                      return user.name;
-                    }),
-                    builder: (context, snap) {
-                      if (!snap.hasData) return Offstage();
-                      return Container(
-                        padding: EdgeInsets.only(top: 10.0, left: 10.0),
-                        child: Text(
-                          "${snap.data}",
-                          overflow: TextOverflow.ellipsis,
-                          style: FontHelper.regular(
-                              ColorHelper.dabaoOffGrey70, 14),
+                        },
+                        child: Column(
+                          children: <Widget>[
+                            StreamBuilder<String>(
+                              stream: ConfigHelper.instance.currentUserProperty
+                                  .value.thumbnailImage,
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData ||
+                                    snapshot.data == null) {
+                                  return Container(
+                                    height: 62,
+                                    width: 62,
+                                    child: Image.asset(
+                                      'assets/icons/profile_icon.png',
+                                    ),
+                                  );
+                                }
+                                return Container(
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: ColorHelper.dabaoOrange)),
+                                  child: CircleAvatar(
+                                    backgroundImage:
+                                        NetworkImage(snapshot.data),
+                                    radius: 60,
+                                  ),
+                                );
+                              },
+                            ),
+                            StreamBuilder<String>(
+                              stream: ConfigHelper
+                                  .instance.currentUserProperty.producer
+                                  .switchMap((user) {
+                                if (user == null) return Observable.just("");
+                                return user.name;
+                              }),
+                              builder: (context, snap) {
+                                if (!snap.hasData) return Offstage();
+                                return Container(
+                                  padding:
+                                      EdgeInsets.only(top: 10.0, left: 10.0),
+                                  child: Text(
+                                    "${snap.data}",
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: FontHelper.semiBold(
+                                        ColorHelper.dabaoOffBlack4A, 14),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ],
               ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  Color(0xFFF6A818),
-                  Color(0xFFF6AC23),
-                  Color(0xFFF7B131),
-                  Color(0xFFF9C15A),
-                  Color(0xFFFBD184),
-                  Color(0xFFFDE3B4),
-                  // Color(0xFFFEEFD3),
-                  // Color(0xFFFFFCF8)
-                ]),
-              ),
             ),
-            ListTile(
-              title: Text(
-                'History',
-                style: FontHelper.regular14Black,
-              ),
-              onTap: () {
-                // Go to history page
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Dabao Balance',
-                style: FontHelper.regular14Black,
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return TransactionsPage();
-                }));
-              },
-            ),
-            ListTile(
-              title: Text(
-                'DabaoRewards',
-                style: FontHelper.regular14Black,
-              ),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    FadeRoute(
-                        widget: RewardsTabBarPage(
-                      initalIndex: 1,
-                    )));
-              },
-            ),
-            SizedBox(height: 20),
-            ListTile(
-              title: Text(
-                'Terms & Conditions',
-                style: FontHelper.regular14Black,
-              ),
-              onTap: () async {
-                Navigator.pop(context);
-                Navigator.of(context).push(FadeRoute(
-                  widget: WebviewScaffold(
-                    url: "https://www.dabaoapp.sg/termsandconditions",
-                    appBar: new AppBar(
-                      title: new Text("Terms & Conditions"),
+            Container(
+              padding: EdgeInsets.only(left: 40),
+              child: SingleChildScrollView(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  GestureDetector(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 20),
+                      height: 40,
+                      child: Text(
+                        'Inbox',
+                        style: FontHelper.semiBold12Black,
+                      ),
                     ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, SlideUpRoute(widget: ChatPage()));
+                    },
                   ),
-                ));
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Contact Us',
-                style: FontHelper.regular14Black,
-              ),
-              onTap: () async {
-                await launch(
-                    "mailto:admin@dabaoapp.sg?subject=Contact Dabao&body=Hello Dabao Team");
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            SizedBox(height: 20),
-            ListTile(
-              title: Text(
-                'Log Out',
-                style: FontHelper.regular14Black,
-              ),
-              onTap: () {
-                FirebaseAuth.instance.signOut();
-              },
+                  GestureDetector(
+                    child: Container(
+                      height: 40,
+                      child: Text(
+                        'History',
+                        style: FontHelper.semiBold12Black,
+                      ),
+                    ),
+                    onTap: () {},
+                  ),
+                  GestureDetector(
+                    child: Container(
+                      height: 40,
+                      child: Text(
+                        'Dabao Balance',
+                        style: FontHelper.semiBold12Black,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return TransactionsPage();
+                      }));
+                    },
+                  ),
+                  GestureDetector(
+                    child: Container(
+                      height: 40,
+                      child: Text(
+                        'DabaoRewards',
+                        style: FontHelper.semiBold12Black,
+                      ),
+                    ),
+                    onTap: () {
+                      // Then close the drawer
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          FadeRoute(
+                              widget: RewardsTabBarPage(
+                            initalIndex: 1,
+                          )));
+                    },
+                  ),
+                  GestureDetector(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 20),
+                      height: 40,
+                      child: Text(
+                        'About Dabao',
+                        style: FontHelper.semiBold12Black,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(FadeRoute(
+                        widget: WebviewScaffold(
+                          url: "https://www.dabaoapp.sg/termsandconditions",
+                          appBar: new AppBar(
+                            title: new Text("Terms & Conditions"),
+                          ),
+                        ),
+                      ));
+                    },
+                  ),
+                  GestureDetector(
+                    child: Container(
+                      height: 40,
+                      child: Text(
+                        'FAQs',
+                        style: FontHelper.semiBold12Black,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(FadeRoute(
+                        widget: WebviewScaffold(
+                          url: "https://www.dabaoapp.sg/termsandconditions",
+                          appBar: new AppBar(
+                            title: new Text("Terms & Conditions"),
+                          ),
+                        ),
+                      ));
+                    },
+                  ),
+                  GestureDetector(
+                    child: Container(
+                      height: 40,
+                      child: Text(
+                        'Contact Us',
+                        style: FontHelper.semiBold12Black,
+                      ),
+                    ),
+                    onTap: () async {
+                      await launch(
+                          "mailto:admin@dabaoapp.sg?subject=Contact Dabao&body=Hello Dabao Team");
+                      // Update the state of the app
+                      // ...
+                      // Then close the drawer
+                      Navigator.pop(context);
+                    },
+                  ),
+                  GestureDetector(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 40),
+                      height: 40,
+                      child: Text(
+                        'Log Out',
+                        style: FontHelper.semiBold12Black,
+                      ),
+                    ),
+                    onTap: () {
+                      FirebaseAuth.instance.signOut();
+                    },
+                  ),
+                ],
+              )),
             ),
           ],
         ),
@@ -709,12 +773,12 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
 
   Widget orderCell(Order order) {
     return GestureDetector(
-      onTap: (){
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (BuildContext context) {
-              return ViewOrderListPage();
-            }),
-          );
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (BuildContext context) {
+            return ViewOrderListPage();
+          }),
+        );
       },
       child: Container(
         color: Colors.transparent,
