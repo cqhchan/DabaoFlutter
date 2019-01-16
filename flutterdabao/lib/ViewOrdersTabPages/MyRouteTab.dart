@@ -629,13 +629,6 @@ class _OrderCellState extends State<_OrdersCell> {
           child: Text("${widget.orders.length} Locations(s)",
               style: FontHelper.regular(ColorHelper.dabaoOffBlack9B, 12.0)),
         ),
-        Expanded(
-            child: Align(
-                alignment: Alignment.bottomRight,
-                child: Container(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child:
-                        Image.asset("assets/icons/dotted_line_circular.png"))))
       ],
     );
   }

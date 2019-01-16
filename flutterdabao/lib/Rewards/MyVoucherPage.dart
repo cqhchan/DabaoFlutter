@@ -163,7 +163,7 @@ class _MyVoucherPageState extends State<MyVoucherPage>
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Text(
-                      "Need more PromoCodes?\nInvite your friends with your Referal Code!",
+                      "Need more PromoCodes?\nInvite your friends with your Referral Code!",
                       style: FontHelper.bold(ColorHelper.dabaoOffBlack9B, 14),
                       textAlign: TextAlign.center,
                     ),

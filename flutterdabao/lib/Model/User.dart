@@ -160,7 +160,13 @@ class User extends FirebaseType {
     if (data.containsKey(thumbnailImageKey)) {
       thumbnailImage.add(data[thumbnailImageKey]);
     } else {
-      thumbnailImage.add(null);
+      if (data.containsKey(profileImageKey)) {
+        thumbnailImage.add(data[profileImageKey]);
+        //print("PI added");
+      } else {
+        thumbnailImage.add(null);
+        //print("PI null");
+      }
     }
 
     if (data.containsKey(nameKey)) {
@@ -214,6 +220,14 @@ class User extends FirebaseType {
           .setData({emailKey: email}, merge: true);
   }
 
+    void setName(String name) {
+    if (name != null)
+      Firestore.instance
+          .collection(className)
+          .document(uid)
+          .setData({nameKey: name}, merge: true);
+  }
+
   void setToken(String token) {
     Firestore.instance
         .collection(className)
@@ -232,14 +246,21 @@ class User extends FirebaseType {
 
   //last login date
   //creation date
-  void setUser(String pi, String name, DateTime creationTime,
-      DateTime lastLoginTime, String tn) {
+  void setUser(
+      String pi, String name, DateTime creationTime, DateTime lastLoginTime) {
     Firestore.instance.collection('/users').document(uid).setData({
       profileImageKey: pi,
-      thumbnailImageKey: tn,
       nameKey: name,
       "CT": creationTime,
       'LLT': lastLoginTime,
+    }, merge: true);
+  }
+
+
+  void setProfileImage(
+      String pi) {
+    Firestore.instance.collection('/users').document(uid).setData({
+      profileImageKey: pi,
     }, merge: true);
   }
 

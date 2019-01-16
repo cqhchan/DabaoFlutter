@@ -5,8 +5,6 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
-import 'package:image/image.dart' as Resize;
-import 'package:path_provider/path_provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:random_string/random_string.dart';
@@ -23,7 +21,7 @@ class ProfileCreationPage extends StatefulWidget {
 class _ProfileCreationPageState extends State<ProfileCreationPage> {
   final _nameController = TextEditingController();
   File _image;
-  File _thumbnail;
+  // File _thumbnail;
 
   //for loading spinner, appears if true, hidden if false
   //to activate for loading spinner
@@ -44,8 +42,12 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
   @override
   Widget build(BuildContext context) {
     return ModalProgressHUD(
-      progressIndicator: CircularProgressIndicator(strokeWidth: 8.0,),
-        key: key2, child: buildWidget(context), inAsyncCall: _inProgress);
+        progressIndicator: CircularProgressIndicator(
+          strokeWidth: 8.0,
+        ),
+        key: key2,
+        child: buildWidget(context),
+        inAsyncCall: _inProgress);
   }
 
   final Key key = Key(randomString(20));
@@ -115,38 +117,37 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
           ),
         ));
   }
-  //TODO P2 move resizing to backend
 
   //Pre-condition: Called only when _image has been set
-  Future<void> creatingThumbnail(File image) {
-    String tempPath;
-    return getTemporaryDirectory().then((tempDir) {
-      tempPath = tempDir.path;
-      print("imaged readAsBytes ");
+  // Future<void> creatingThumbnail(File image) {
+  //   String tempPath;
+  //   return getTemporaryDirectory().then((tempDir) {
+  //     tempPath = tempDir.path;
+  //     print("imaged readAsBytes ");
 
-      return image.readAsBytes();
-    }).then((data) {
-      return Resize.decodeImage(data);
-    }).then((resizedImage) {
-      // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
-      print("thumbnail Resized ");
-      return Resize.copyResize(resizedImage, 100, 100);
-    }).then((thumbnail) {
-      // Save the thumbnail as a PNG.
-      print("imaged Resized ");
+  //     return image.readAsBytes();
+  //   }).then((data) {
+  //     return Resize.decodeImage(data);
+  //   }).then((resizedImage) {
+  //     // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
+  //     print("thumbnail Resized ");
+  //     return Resize.copyResize(resizedImage, 100, 100);
+  //   }).then((thumbnail) {
+  //     // Save the thumbnail as a PNG.
+  //     print("imaged Resized ");
 
-      var thumbnailImage = new File(tempPath + 'thumbnailImage.png')
-        ..writeAsBytesSync(Resize.encodePng(thumbnail));
+  //     var thumbnailImage = new File(tempPath + 'thumbnailImage.png')
+  //       ..writeAsBytesSync(Resize.encodePng(thumbnail));
 
-      print("thumbnail saved ");
+  //     print("thumbnail saved ");
 
-      _thumbnail = thumbnailImage;
-      setState(() {
-        _image = image;
-        _inProgress = false;
-      });
-    });
-  }
+  //     _thumbnail = thumbnailImage;
+  //     setState(() {
+  //       _image = image;
+  //       _inProgress = false;
+  //     });
+  //   });
+  // }
 
   Future<File> _cropImage(File imageFile) async {
     File croppedFile = await ImageCropper.cropImage(
@@ -175,13 +176,12 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         return _cropImage(image);
       }
     }).then((croppedImage) {
-      if (croppedImage == null) {
-        setState(() {
-          _inProgress = false;
-        });
-      } else {
-        return creatingThumbnail(croppedImage);
-      }
+      setState(() {
+        _inProgress = false;
+        if (croppedImage != null) {
+          _image = croppedImage;
+        }
+      });
     }).catchError((e) {
       print(e);
       setState(() {
@@ -218,50 +218,21 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
     FirebaseAuth.instance.currentUser().then((user) {
       uid = user.uid;
       final StorageReference profileRef =
-          FirebaseStorage.instance.ref().child('user/$uid/profileImage.jpg');
-      final StorageReference thumbnailRef =
-          FirebaseStorage.instance.ref().child('user/$uid/thumbnailImage.jpg');
-
-      final StorageUploadTask profileTask = profileRef.putFile(_image);
-      final StorageUploadTask thumbnailTask = thumbnailRef.putFile(_thumbnail);
-      profileTask.onComplete.then((profVal) {
-        profVal.ref.getDownloadURL().then((profileLink) {
-          thumbnailTask.onComplete.then((thumbnailRef) {
-            thumbnailRef.ref.getDownloadURL().then((thumbnailLink) {
-              FirebaseAuth.instance.currentUser().then((user) {
-                ConfigHelper.instance.currentUserProperty.value.setUser(
-                  profileLink,
-                  _nameController.text,
-                  DateTime.fromMillisecondsSinceEpoch(
-                      user.metadata.creationTimestamp),
-                  DateTime.fromMillisecondsSinceEpoch(
-                      user.metadata.lastSignInTimestamp),
-                  thumbnailLink,
-                );
-                widget.onCompleteCallback();
-              }).catchError((e) {
-                setState(() {
-                  _inProgress = false;
-                });
-                print(e);
-              });
-            }).catchError((e) {
-              setState(() {
-                _inProgress = false;
-              });
-              print(e);
-            });
-          }).catchError((e) {
-            setState(() {
-              _inProgress = false;
-            });
-            print(e);
-          });
-        }).catchError((e) {
-          setState(() {
-            _inProgress = false;
-          });
-          print(e);
+          FirebaseStorage.instance.ref().child('users/$uid/profileImage.jpg');
+      final StorageUploadTask profileTask = profileRef.putFile(_image, StorageMetadata(contentType: 'image/jpeg') );
+      return profileTask.onComplete.then((complete) {
+        return complete.ref.getDownloadURL();
+      }).then((profileLink) {
+        return FirebaseAuth.instance.currentUser().then((user) {
+          ConfigHelper.instance.currentUserProperty.value.setUser(
+            profileLink,
+            _nameController.text,
+            DateTime.fromMillisecondsSinceEpoch(
+                user.metadata.creationTimestamp),
+            DateTime.fromMillisecondsSinceEpoch(
+                user.metadata.lastSignInTimestamp),
+          );
+          widget.onCompleteCallback();
         });
       }).catchError((e) {
         setState(() {
@@ -269,12 +240,8 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         });
         print(e);
       });
-    }).catchError((e) {
-      setState(() {
-        _inProgress = false;
-      });
-      print(e);
     });
+
   }
 
   void _showSnackBar(BuildContext context, message) {

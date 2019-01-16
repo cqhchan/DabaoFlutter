@@ -93,7 +93,7 @@ class BalanceCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          FadeRoute(widget: SelectAccountPage()),
+          MaterialPageRoute(builder: (context) =>SelectAccountPage()),
         );
       },
       child: Container(

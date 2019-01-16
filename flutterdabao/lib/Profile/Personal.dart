@@ -13,7 +13,6 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:progress_indicators/progress_indicators.dart';
-import 'package:image/image.dart' as Resize;
 
 class Personal extends StatefulWidget {
   @override
@@ -27,14 +26,12 @@ class _PersonalState extends State<Personal> {
   File _image;
 
   //temp thumbnail
-  File _thumbnail;
 
   //Toggle between TextFormField and Text
   bool updateFlag;
 
   final _nameTextController = TextEditingController();
-  final _hpTextController = TextEditingController();
-  final _emailTextController = TextEditingController();
+
   final _scrollController = ScrollController();
 
   void initState() {
@@ -44,11 +41,9 @@ class _PersonalState extends State<Personal> {
 
   @override
   void dispose() {
-    _thumbnail = null;
     _image = null;
     _nameTextController.dispose();
-    _hpTextController.dispose();
-    _emailTextController.dispose();
+
     _scrollController.dispose();
     super.dispose();
   }
@@ -434,20 +429,7 @@ class _PersonalState extends State<Personal> {
                         builder: (context, snapshot) {
                           if (!snapshot.hasData || snapshot.data == null)
                             return Offstage();
-                          if (updateFlag) {
-                            _hpTextController.text = snapshot.data;
-                            return TextFormField(
-                              controller: _hpTextController,
-                              style: FontHelper.regular12Black,
-                              onSaved: (input) {
-                                _hpTextController.text = input;
-                              },
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.all(0),
-                              ),
-                            );
-                          }
+
                           return Text(
                             snapshot.data != null ? snapshot.data : '',
                             style: FontHelper.regular12Black,
@@ -479,20 +461,6 @@ class _PersonalState extends State<Personal> {
                         builder: (context, snapshot) {
                           if (!snapshot.hasData || snapshot.data == null)
                             return Offstage();
-                          if (updateFlag) {
-                            _emailTextController.text = snapshot.data;
-                            return TextFormField(
-                              controller: _emailTextController,
-                              style: FontHelper.regular12Black,
-                              onSaved: (input) {
-                                _emailTextController.text = input;
-                              },
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.all(0),
-                              ),
-                            );
-                          }
                           return Text(
                             snapshot.data != null ? snapshot.data : '',
                             style: FontHelper.regular12Black,
@@ -507,18 +475,9 @@ class _PersonalState extends State<Personal> {
 
   Future _update(BuildContext context) async {
     if (_nameTextController.text != '') {
-      final DocumentReference postRef =
-          Firestore.instance.document('users/${currentUser.value.uid}');
-      Firestore.instance.runTransaction((Transaction tx) async {
-        DocumentSnapshot postSnapshot = await tx.get(postRef);
-        if (postSnapshot.exists) {
-          await tx.update(postRef, <String, String>{
-            'N': _nameTextController.text,
-            'E': _emailTextController.text,
-            'HP': _hpTextController.text
-          });
-        }
-      });
+
+      ConfigHelper.instance.currentUserProperty.value.setName(_nameTextController.text);
+      
     } else {
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text('Please fill in the blank(s)'),
@@ -541,7 +500,7 @@ class _PersonalState extends State<Personal> {
                     title: Text('Camera'),
                     onTap: () {
                       Navigator.of(context).pop();
-                      getImageFromCamera();
+                      getImage(ImageSource.camera);
                     },
                   ),
                   ListTile(
@@ -549,7 +508,7 @@ class _PersonalState extends State<Personal> {
                     title: Text('Photos'),
                     onTap: () {
                       Navigator.of(context).pop();
-                      getImageFromGallery();
+                      getImage(ImageSource.gallery);
                     },
                   ),
                 ],
@@ -559,27 +518,20 @@ class _PersonalState extends State<Personal> {
         });
   }
 
-  void getImageFromCamera() async {
-    ImagePicker.pickImage(source: ImageSource.camera).then((image) async {
-      if (image != null) {
-        var croppedImage = await _cropImage(image);
-        setState(() {
-          _image = croppedImage;
-        });
-        creatingThumbnail();
+  //get image
+  void getImage(ImageSource imageSource) {
+    ImagePicker.pickImage(source: imageSource).then((image) {
+      if (image == null) {
+      } else {
+        //give user the cropping option
+        return _cropImage(image);
       }
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  void getImageFromGallery() async {
-    ImagePicker.pickImage(source: ImageSource.gallery).then((image) async {
-      var croppedImage = await _cropImage(image);
+    }).then((croppedImage) {
       setState(() {
-        _image = croppedImage;
+        if (croppedImage != null) {
+          _image = croppedImage;
+        }
       });
-      creatingThumbnail();
     }).catchError((e) {
       print(e);
     });
@@ -597,56 +549,35 @@ class _PersonalState extends State<Personal> {
     return croppedFile;
   }
 
-  void creatingThumbnail() {
-    getTemporaryDirectory().then((tempDir) {
-      String tempPath = tempDir.path;
-      Resize.Image resizedImage = Resize.decodeImage(_image.readAsBytesSync());
-      Resize.Image thumbnail = Resize.copyResize(resizedImage, 100, 100);
-      var thumbnailImage = new File(tempPath + 'thumbnailImage.png')
-        ..writeAsBytesSync(Resize.encodePng(thumbnail));
-      _thumbnail = thumbnailImage;
-    });
-  }
+  // void creatingThumbnail() {
+  //   getTemporaryDirectory().then((tempDir) {
+  //     String tempPath = tempDir.path;
+  //     Resize.Image resizedImage = Resize.decodeImage(_image.readAsBytesSync());
+  //     Resize.Image thumbnail = Resize.copyResize(resizedImage, 100, 100);
+  //     var thumbnailImage = new File(tempPath + 'thumbnailImage.png')
+  //       ..writeAsBytesSync(Resize.encodePng(thumbnail));
+  //     _thumbnail = thumbnailImage;
+  //   });
+  // }
 
   //Uploading profileImage and thumbnailImage to firebase storage and updating user database
   Future _uploadImages(context) async {
-    if (_image != null && _thumbnail != null) {
+    if (_image != null) {
       final StorageReference profileRef = FirebaseStorage.instance
           .ref()
-          .child('user/${currentUser.value.uid}/profileImage.jpg');
-      final StorageReference thumbnailRef = FirebaseStorage.instance
-          .ref()
-          .child('user/${currentUser.value.uid}/thumbnailImage.jpg');
+          .child('users/${currentUser.value.uid}/profileImage.jpg');
 
-      final StorageUploadTask profileTask = profileRef.putFile(_image);
-      final StorageUploadTask thumbnailTask = thumbnailRef.putFile(_thumbnail);
+      final StorageUploadTask profileTask = profileRef.putFile(_image,StorageMetadata(contentType: 'image/jpeg'));
 
       profileTask.onComplete.then((profVal) {
         profVal.ref.getDownloadURL().then((profileLink) {
-          thumbnailTask.onComplete.then((thumbnailRef) {
-            thumbnailRef.ref.getDownloadURL().then((thumbnailLink) {
-              if (thumbnailLink != null &&
-                  profileLink != null &&
-                  thumbnailLink != '' &&
-                  profileLink != '') {
-                final DocumentReference postRef = Firestore.instance
-                    .document('users/${currentUser.value.uid}');
-                Firestore.instance.runTransaction((Transaction tx) async {
-                  DocumentSnapshot postSnapshot = await tx.get(postRef);
-                  if (postSnapshot.exists) {
-                    await tx.update(postRef, <String, String>{
-                      'PI': profileLink,
-                      'TI': thumbnailLink,
-                    });
-                  }
-                });
-              } else {
-                Scaffold.of(context).showSnackBar(SnackBar(
-                  content: Text('Please try again'),
-                ));
-              }
-            });
-          });
+          if (profileLink != null && profileLink != '') {
+            ConfigHelper.instance.currentUserProperty.value.setProfileImage(profileLink);
+          } else {
+            Scaffold.of(context).showSnackBar(SnackBar(
+              content: Text('Please try again'),
+            ));
+          }
         });
       });
     }

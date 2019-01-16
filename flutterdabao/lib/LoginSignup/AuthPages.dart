@@ -43,12 +43,12 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
   Widget build(BuildContext context) {
     return buildSignUpPage();
   }
-//TODO p2 fix delay add loading page 
-//TODO p2 on back can remove 
+
+//TODO p2 on back can remove pin backburner too difficult
   //sign up page that shows up after signup button is pressed
   Widget buildSignUpPage() {
     return SingleChildScrollView(
-          child: GestureDetector(
+      child: GestureDetector(
         onTap: _focusNode.unfocus,
         child: Container(
           padding: EdgeInsets.fromLTRB(18.0, 40.0, 18.0, 0.0),
@@ -73,7 +73,8 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
                             Center(
                               child: Text(
                                 "Please enter the verification code sent to",
-                                style: FontHelper.semiBold(Color(0xFF454F63), 14),
+                                style:
+                                    FontHelper.semiBold(Color(0xFF454F63), 14),
                               ),
                             ),
                             Text(
@@ -91,6 +92,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
                   fieldWidth: 30.0,
                   midGap: 15.0,
                   enableTextField: otpsent,
+                  showFieldAsBox: true,
                   onSubmit: (String pin) async {
                     this.smsCode = pin;
                     showLoadingOverlay(context: context);
@@ -230,7 +232,8 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
                   ? Container(
                       child: Text('RESEND OTP',
                           maxLines: 1,
-                          style: FontHelper.semiBold(ColorHelper.dabaoErrorRed, null)))
+                          style: FontHelper.semiBold(
+                              ColorHelper.dabaoErrorRed, null)))
                   : Container(
                       child: Text('SEND OTP',
                           maxLines: 1,
@@ -255,16 +258,19 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
   void _validate() {
     if (StringHelper.validatePhoneNumber(_phoneNumberController.text)) {
       // Text forms was validated.
+      showLoadingOverlay(context: context);
       verifyPhone(
           linkCredentials: widget.linkCredentials,
           phoneNumber: countryCode + _phoneNumberController.text,
           smsSent: () {
+            Navigator.of(context).pop();
             setState(() {
               phoneNumber = _phoneNumberController.text;
               otpsent = true;
             });
           },
           success: (sucess) async {
+            Navigator.of(context).pop();
             await FirebaseAuth.instance.currentUser().then((firebaseUser) {
               User.fromAuth(firebaseUser)
                   .setPhoneNumber(firebaseUser.phoneNumber);
@@ -273,6 +279,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
             if (widget.onCompleteCallback != null) widget.onCompleteCallback();
           },
           failed: (failed) {
+            Navigator.of(context).pop();
             setState(() {
               otpsent = false;
             });

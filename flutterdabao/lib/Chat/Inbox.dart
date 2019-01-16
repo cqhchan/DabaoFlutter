@@ -60,7 +60,7 @@ class _ChatPageState extends State<ChatPage>
           },
         ),
         centerTitle: true,
-        title: Text('Your Inbox', style: FontHelper.semiBold(Colors.black, 18)),
+        title: Text('Inbox', style: FontHelper.semiBold(Colors.black, 18)),
       ),
       body: Column(
         children: <Widget>[
@@ -80,14 +80,14 @@ class _ChatPageState extends State<ChatPage>
                   Tab(
                     child: Text(
                       "Your Orders",
-                      style: FontHelper.semiBold(null, 12.0),
+                      style: FontHelper.semiBold(null, 14.0),
                       textAlign: TextAlign.center,
                     ),
                   ),
                   Tab(
                     child: Text(
                       "Your Delivery",
-                      style: FontHelper.semiBold(null, 12.0),
+                      style: FontHelper.semiBold(null, 14.0),
                       textAlign: TextAlign.center,
                     ),
                   ),

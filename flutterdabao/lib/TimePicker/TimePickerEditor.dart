@@ -172,45 +172,57 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: 450, maxWidth: 240),
-        child: Card(
-          elevation: 0.0,
-          margin: EdgeInsets.all(0),
-          color: Colors.transparent,
-          child: Column(
-            children: <Widget>[
-              buildHeader(),
-              Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10)),
-                    color: Colors.white),
-                child: Column(
-                  children: <Widget>[
-                    buildSizedBox(),
-                    buildDateSelector(),
-                    buildSizedBox(),
-                    buildStartDeliverSelector(),
-                    buildSizedBox(),
-                    buildTomorrow(),
-                    buildSizedBox(),
-                    buildEndDeliverSelector(),
-                    buildSizedBox(),
-                    buildErrorMessage(),
-                    buildSizedBox(),
-                    buildBottomButton(context)
-                  ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Card(
+              elevation: 0.0,
+              color: Colors.transparent,
+              child: Align(
+                alignment: Alignment.center,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 240),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      buildHeader(),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(10),
+                                bottomRight: Radius.circular(10)),
+                            color: Colors.white),
+                        child: Column(
+                          children: <Widget>[
+                            buildSizedBox(),
+                            buildDateSelector(),
+                            buildSizedBox(),
+                            buildStartDeliverSelector(),
+                            buildSizedBox(),
+                            buildTomorrow(),
+                            buildSizedBox(),
+                            buildEndDeliverSelector(),
+                            buildSizedBox(),
+                            buildErrorMessage(),
+                            buildSizedBox(),
+                            buildBottomButton(context)
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                // ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ),
+      ],
     );
   }
 
@@ -223,7 +235,6 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
       },
     );
   }
-//TODO p2 center text header and confirm
 //TODO p2 Enlarge time picker font
 
   Widget buildHeader() {
@@ -233,27 +244,28 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(10), topRight: Radius.circular(10)),
       ),
-      child: Row(
+      child: Stack(
         children: <Widget>[
           buildClearButton(),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Schedule Your Order',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: 4.0,
-                ),
-                Text(
-                  'Deliver my food between...',
-                  style: TextStyle(
-                    fontSize: 10,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              padding: EdgeInsets.only(top: 10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Schedule Your Order',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                )
-              ],
+                  Text(
+                    'Deliver my food between...',
+                    style: TextStyle(
+                      fontSize: 10,
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ],
@@ -510,15 +522,17 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
         color: ColorHelper.dabaoOrange,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        child: Row(
+        child: Stack(
+          alignment: Alignment(0.0, 0.0),
           children: <Widget>[
-            Icon(Icons.access_time),
-            Expanded(
-              child: Align(
-                child: Text(
-                  "Confirm",
-                  style: FontHelper.semiBold(Colors.black, 14.0),
-                ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(Icons.access_time)),
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                "Confirm",
+                style: FontHelper.semiBold(Colors.black, 14.0),
               ),
             ),
           ],
@@ -644,52 +658,58 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
       selectedStartDate = MutableProperty(widget.startTime);
   }
 
-  //TODO p2 realign card is now abit off
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: 450, maxWidth: 240),
-        child: Card(
-          elevation: 0.0,
-          margin: EdgeInsets.all(0),
-          color: Colors.transparent,
-          child: Column(
-            children: <Widget>[
-              buildHeader(),
-              Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10)),
-                    color: Colors.white),
-                child: Column(
-                  children: <Widget>[
-                    buildSizedBox(),
-                    buildDateSelector(),
-                    buildSizedBox(),
-                    buildSizedBox(),
-                    buildSizedBox(),
-                    buildSizedBox(),
-                    buildSizedBox(),
-                    buildStartDeliverSelector(),
-                    buildSizedBox(),
-                    buildSizedBox(),
-                    buildSizedBox(),
-                    buildSizedBox(),
-                    buildSizedBox(),
-                    buildErrorMessage(),
-                    buildBottomButton(context)
-                  ],
+    return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            Align(
+              alignment: Alignment.center,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 240),
+                child: Card(
+                  elevation: 0.0,
+                  margin: EdgeInsets.all(0),
+                  color: Colors.transparent,
+                  child: Column(
+                    children: <Widget>[
+                      buildHeader(),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(10),
+                                bottomRight: Radius.circular(10)),
+                            color: Colors.white),
+                        child: Column(
+                          children: <Widget>[
+                            buildSizedBox(),
+                            buildDateSelector(),
+                            buildSizedBox(),
+                            buildSizedBox(),
+                            buildSizedBox(),
+                            buildSizedBox(),
+                            buildSizedBox(),
+                            buildStartDeliverSelector(),
+                            buildSizedBox(),
+                            buildSizedBox(),
+                            buildSizedBox(),
+                            buildSizedBox(),
+                            buildSizedBox(),
+                            buildErrorMessage(),
+                            buildBottomButton(context)
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
+            )
+          ])
+        ]);
   }
 
   IconButton buildClearButton() {
@@ -895,15 +915,17 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
         color: ColorHelper.dabaoOrange,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        child: Row(
+        child: Stack(
+          alignment: Alignment(0.0, 0.0),
           children: <Widget>[
-            Icon(Icons.access_time),
-            Expanded(
-              child: Align(
-                child: Text(
-                  "Confirm",
-                  style: FontHelper.semiBold(Colors.black, 14.0),
-                ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(Icons.access_time)),
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                "Confirm",
+                style: FontHelper.semiBold(Colors.black, 14.0),
               ),
             ),
           ],

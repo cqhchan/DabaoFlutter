@@ -103,7 +103,6 @@ class LocationCardState extends State<LocationCard> with HavingGoogleMapPlaces {
               SizedBox(
                 width: 5.0,
               ),
-              //Todo p2 center
               Flexible(
                 child: Center(
                   child: Text(

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/InputFormatter/CurrencyInputFormatter.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
@@ -97,8 +96,8 @@ class _SelectAccountPageState extends State<SelectAccountPage>
 
                         return GestureDetector(
                           onTap: () {
-                            Navigator.of(context).push(FadeRoute(
-                                widget: AddBankAccountPage(
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder:(context)=> AddBankAccountPage(
                               wallet: snap.data,
                             )));
                           },
@@ -143,8 +142,8 @@ class _SelectAccountPageState extends State<SelectAccountPage>
                           ),
                           onPressed: () {
                             Selectable.deselectAll(listOfAccounts.value);
-                            Navigator.of(context).push(FadeRoute(
-                                widget: WithdrawalPage(
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder:(context)=> WithdrawalPage(
                               account: selectedWithdrawalAccount,
                             )));
                           },
@@ -183,7 +182,7 @@ class _SelectAccountPageState extends State<SelectAccountPage>
                   children: <Widget>[
                     Image.asset("assets/icons/dabao_piggy.png"),
                     Text(
-                      "You current have no accounts to transfer to.\nDabao Piggy is feeling lonely :(",
+                      "You currently have no accounts to transfer to.\nDabao Piggy is feeling lonely :(",
                       style:
                           FontHelper.regular(ColorHelper.dabaoOffBlack9B, 14),
                       textAlign: TextAlign.center,
@@ -547,7 +546,7 @@ class WithdrawalPageState extends State<WithdrawalPage> {
             },
           ),
           SizedBox(
-            height: 5,
+            height: 10,
           ),
           StreamBuilder<String>(
             stream: account.accountHoldername,

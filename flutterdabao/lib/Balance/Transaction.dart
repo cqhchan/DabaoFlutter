@@ -30,7 +30,11 @@ class _TransactionsState extends State<TransactionsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: <Widget>[ChatNavigationButton(bgColor: ColorHelper.dabaoOrange,)],
+        actions: <Widget>[
+          ChatNavigationButton(
+            bgColor: ColorHelper.dabaoOrange,
+          )
+        ],
         centerTitle: true,
         title: Text('Dabao Balance', style: FontHelper.header3TextStyle),
       ),
@@ -52,7 +56,7 @@ class _TransactionsState extends State<TransactionsPage>
               width: 1.0,
               color: Color(0x11000000),
             ),
-            _buildEarnedThisWeek(),
+            _buildInWithdrawalThisWeek(),
           ],
         ),
         Divider(
@@ -124,46 +128,45 @@ class _TransactionsState extends State<TransactionsPage>
   }
 //TODO p2 update transactions types
 
-  Widget _buildEarnedThisWeek() {
+  Widget _buildInWithdrawalThisWeek() {
     return Expanded(
       child: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: StreamBuilder<double>(
-            stream: currentUserWallet.producer.switchMap((wallet) {
-              if (wallet == null) return Observable.just(null);
-              return wallet.totalAmountEarnedThisWeek.producer;
-            }),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Column(
-                  children: <Widget>[
-                    Text(
-                      "\$0.00",
-                      style: FontHelper.semiBold14Black,
-                    ),
-                    Text(
-                      'This Week',
-                      style: FontHelper.semiBold14Black,
-                    ),
-                  ],
-                );
-              }
-              print('Earned this week: ${snapshot.data}');
+        // padding: const EdgeInsets.all(20.0),
+        child: StreamBuilder<double>(
+          stream: currentUserWallet.producer.switchMap((wallet) {
+            if (wallet == null) return Observable.just(null);
+            return wallet.inWithdrawal;
+          }),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    '+' + StringHelper.doubleToPriceString(snapshot.data),
+                    "\$0.00",
                     style: FontHelper.semiBold14Black,
                   ),
                   Text(
-                    'This Week',
+                    'Pending Withdrawal',
                     style: FontHelper.semiBold14Black,
+                    textAlign: TextAlign.center,
                   ),
                 ],
               );
-            },
-          ),
+            }
+            return Column(
+              children: <Widget>[
+                Text(
+                  StringHelper.doubleToPriceString(snapshot.data),
+                  style: FontHelper.semiBold14Black,
+                ),
+                Text(
+                  'Pending Withdrawal',
+                  style: FontHelper.semiBold14Black,
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -172,20 +175,21 @@ class _TransactionsState extends State<TransactionsPage>
   Widget _buildTransactionList() {
     return Expanded(
       child: StreamBuilder<List<Transact>>(
-          stream: currentUserWallet.producer.switchMap(
-              (wallet) => wallet == null ? null : wallet.listOfTransactions.producer),
+          stream: currentUserWallet.producer.switchMap((wallet) =>
+              wallet == null ? null : wallet.listOfTransactions.producer),
           builder: (context, snapshot) {
             if (!snapshot.hasData)
               return Center(child: Text('Please Check Your Connection'));
-              List<Transact> temp = List.from( snapshot.data);
-              temp.sort((lhs,rhs) => rhs.createdDate.value.compareTo(lhs.createdDate.value));
+            List<Transact> temp = List.from(snapshot.data);
+            temp.sort((lhs, rhs) =>
+                rhs.createdDate.value.compareTo(lhs.createdDate.value));
             if (snapshot.hasData) {
               return _buildTransactList(temp);
             }
           }),
     );
   }
-  //TODO p1 remove this week add in withdrawal 
+  //TODO p2 change name
 
   Widget _buildTransactList(List<Transact> list) {
     return ListView(
@@ -434,23 +438,24 @@ class _TransactionsState extends State<TransactionsPage>
           child: StreamBuilder<String>(
             stream: user.data.thumbnailImage,
             builder: (BuildContext context, snapshot) {
-              if (!snapshot.hasData || snapshot.data == null) return GlowingProgressIndicator(
-                child: Icon(
-                  Icons.image,
-                  size: 50,
-                ),
-              );
+              if (!snapshot.hasData || snapshot.data == null)
+                return GlowingProgressIndicator(
+                  child: Icon(
+                    Icons.image,
+                    size: 50,
+                  ),
+                );
 
               return CachedNetworkImage(
-              imageUrl: user.data.thumbnailImage.value,
-              placeholder: GlowingProgressIndicator(
-                child: Icon(
-                  Icons.image,
-                  size: 50,
+                imageUrl: user.data.thumbnailImage.value,
+                placeholder: GlowingProgressIndicator(
+                  child: Icon(
+                    Icons.image,
+                    size: 50,
+                  ),
                 ),
-              ),
-              errorWidget: Icon(Icons.error),
-            );
+                errorWidget: Icon(Icons.error),
+              );
             },
           ),
         ),

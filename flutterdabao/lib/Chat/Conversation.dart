@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
@@ -98,10 +99,24 @@ class ConversationState extends State<Conversation>
     // isTouchDown = false;
     sendButtonFlag = false;
   }
+  KeyboardVisibilityNotification _keyboardVisibility =
+      new KeyboardVisibilityNotification();
+  int _keyboardVisibilitySubscriberId;
 
   @override
   void initState() {
     super.initState();
+
+    _keyboardVisibilitySubscriberId = _keyboardVisibility.addNewListener(
+      onChange: (bool visible) {
+        print("testing keyboard");
+        setState(() {
+          forceCloseFlag = visible;
+          expandFlag = false;
+
+        });
+      },
+    );
 
     _myFocusNode = FocusNode();
     _myFocusNode.addListener(_keyboardListener);
@@ -118,6 +133,7 @@ class ConversationState extends State<Conversation>
   @override
   void dispose() {
     disposeAndReset();
+    _keyboardVisibility.removeListener(_keyboardVisibilitySubscriberId);
     widget.channel.markAsRead();
     currentKey = null;
     _myFocusNode.dispose();
@@ -165,25 +181,33 @@ class ConversationState extends State<Conversation>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Icon(
-            Icons.arrow_back,
-            size: 26,
-            color: Colors.black,
+    return WillPopScope(
+        onWillPop: () async {
+          print("testing it came here ");
+          setState(() {
+            forceCloseFlag = false;
+          });
+          return true;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            automaticallyImplyLeading: false,
+            leading: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Icon(
+                Icons.arrow_back,
+                size: 26,
+                color: Colors.black,
+              ),
+            ),
+            elevation: 0.0,
+            title: _buildU(),
           ),
-        ),
-        elevation: 0.0,
-        title: _buildU(),
-      ),
-      body: _buildB(),
-    );
+          body: _buildB(),
+        ));
   }
 
   Widget _buildU() {

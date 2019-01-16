@@ -85,7 +85,7 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin {
           ),
           CustomizedBackButton(
             onBack: () {
-              //TOdo p2 try to flash edit button
+              //TOdo p3 try to flash edit button
               if (checkout.value) {
                 showDialog(
                     context: context,
