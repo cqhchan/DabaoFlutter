@@ -250,6 +250,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                             Column(
                               children: <Widget>[
                                 _buildOrderItems(),
+                                _buildMessage(order.value),
                                 StreamBuilder<bool>(
                                   stream:
                                       order.value.isSelectedProperty.producer,
@@ -289,6 +290,29 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
     );
   }
 
+  Widget _buildMessage(Order order) {
+    return Container(
+      margin: EdgeInsets.only(top: 2),
+      padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
+      color: ColorHelper.dabaoOffWhiteF5,
+      child: StreamBuilder<String>(
+        stream: order.message,
+        builder: (context, snap) {
+          if (!snap.hasData) return Offstage();
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text("Message to Dabaoer", style: FontHelper.bold12Black),
+              SizedBox(
+                height: 3,
+              ),
+              Text(snap.data, style: FontHelper.medium(Colors.black, 10))
+            ],
+          );
+        },
+      ),
+    );
+  }
   Widget _buildHeader() {
     return Container(
       constraints:

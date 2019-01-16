@@ -214,6 +214,7 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
                     Column(
                       children: <Widget>[
                         _buildOrderItems(widget.order),
+                        _buildMessage(widget.order),
                         StreamBuilder<bool>(
                           stream: widget.order.isSelectedProperty.producer,
                           builder: (BuildContext context, snapshot) {
@@ -368,6 +369,29 @@ class _AcceptedOrderCellState extends State<_AcceptedOrderCell>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMessage(Order order) {
+    return StreamBuilder<String>(
+      stream: order.message,
+      builder: (context, snap) {
+        if (!snap.hasData) return Offstage();
+        return Container(
+            margin: EdgeInsets.only(top: 2),
+            padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
+            color: ColorHelper.dabaoOffWhiteF5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text("Message to Dabaoer", style: FontHelper.bold12Black),
+                SizedBox(
+                  height: 3,
+                ),
+                Text(snap.data, style: FontHelper.medium(Colors.black, 10))
+              ],
+            ));
+      },
     );
   }
 

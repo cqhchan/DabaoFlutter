@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutterdabao/Balance/Transaction.dart';
+import 'package:flutterdabao/Balance/Withdrawal.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/ScaleGestureDetector.dart';
@@ -93,9 +94,7 @@ class BalanceCard extends StatelessWidget {
         Navigator.push(
           context,
           FadeRoute(
-              widget: RewardsTabBarPage(
-            initalIndex: 1,
-          )),
+              widget: SelectAccountPage()),
         );
       },
       child: Container(

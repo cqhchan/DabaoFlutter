@@ -34,7 +34,12 @@ class OrderList extends StatefulWidget {
   final VoidCallback onCompleteCallBack;
 
   OrderList(
-      {Key key, this.context, @required this.input, this.location, this.route, this.onCompleteCallBack})
+      {Key key,
+      this.context,
+      @required this.input,
+      this.location,
+      this.route,
+      this.onCompleteCallBack})
       : super(key: key);
 
   _OrderListState createState() => _OrderListState();
@@ -88,7 +93,11 @@ class _OrderItemCell extends StatefulWidget {
   final Order order;
   final LatLng location;
   final VoidCallback onCompleteAcceptCallback;
-  _OrderItemCell({this.route, @required this.order, this.location, this.onCompleteAcceptCallback});
+  _OrderItemCell(
+      {this.route,
+      @required this.order,
+      this.location,
+      this.onCompleteAcceptCallback});
 
   @override
   State<StatefulWidget> createState() {
@@ -220,6 +229,7 @@ class _OrderItemCellState extends State<_OrderItemCell>
                 Column(
                   children: <Widget>[
                     _buildOrderItems(order),
+                    _buildMessage(order),
                     StreamBuilder<bool>(
                       stream: widget.order.isSelectedProperty.producer,
                       builder: (BuildContext context, snapshot) {
@@ -433,6 +443,30 @@ class _OrderItemCellState extends State<_OrderItemCell>
     );
   }
 
+  Widget _buildMessage(Order order) {
+    return Container(
+      margin: EdgeInsets.only(top: 2),
+      padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
+      color: ColorHelper.dabaoOffWhiteF5,
+      child: StreamBuilder<String>(
+        stream: order.message,
+        builder: (context, snap) {
+          if (!snap.hasData) return Offstage();
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text("Message to Dabaoer", style: FontHelper.bold12Black),
+              SizedBox(
+                height: 3,
+              ),
+              Text(snap.data, style: FontHelper.medium(Colors.black, 10))
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildOrderItemList(BuildContext context, List<OrderItem> snapshot) {
     return Wrap(
       children: snapshot.map((data) => _buildOrderItem(context, data)).toList(),
@@ -444,7 +478,7 @@ class _OrderItemCellState extends State<_OrderItemCell>
       child: Container(
         constraints: BoxConstraints(maxHeight: 50),
         padding: EdgeInsets.all(6),
-        color: Color(0xFFF5F5F5),
+        color: ColorHelper.dabaoOffWhiteF5,
         child: Flex(
           direction: Axis.horizontal,
           children: <Widget>[

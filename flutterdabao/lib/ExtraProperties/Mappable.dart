@@ -40,7 +40,6 @@ abstract class Mappable extends Identifiable {
   Mappable.fromMap(String uid, Map<String, dynamic> data) : super(uid) {
     setUpVariables();
     map(data);
-
   }
 
   // All classes which intends to use MAPPING must implement their Mappable functions here.
@@ -103,6 +102,10 @@ abstract class Mappable extends Identifiable {
 
     if (T == Rating) {
       return new Rating.fromDocument(doc) as T;
+    }
+
+    if (T == WithdrawalAccount) {
+      return new WithdrawalAccount.fromDocument(doc) as T;
     }
 
     throw FatalError("Mappable Not Declared");

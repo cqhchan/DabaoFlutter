@@ -6,6 +6,7 @@ import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:flutterdabao/Model/Wallet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class FirebaseCloudFunctions {
@@ -298,6 +299,7 @@ class FirebaseCloudFunctions {
   static Future<bool> requestWithdrawal({
     @required double amount,
     @required String userID,
+    @required WithdrawalAccount account
   }) async {
     Map<dynamic, dynamic> results = Map();
     try {
@@ -305,6 +307,7 @@ class FirebaseCloudFunctions {
       data["mode"] = 1;
       data["amount"] = amount;
       data["userID"] = userID;
+      data["accountData"] = account.data;
 
       results = await CloudFunctions.instance
           .call(functionName: 'addRequests', parameters: data);

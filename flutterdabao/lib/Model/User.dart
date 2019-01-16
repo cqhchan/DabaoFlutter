@@ -199,17 +199,19 @@ class User extends FirebaseType {
   }
 
   void setPhoneNumber(String phoneNumber) {
-    Firestore.instance
-        .collection(className)
-        .document(uid)
-        .setData({handPhoneKey: phoneNumber}, merge: true);
+    if (phoneNumber != null)
+      Firestore.instance
+          .collection(className)
+          .document(uid)
+          .setData({handPhoneKey: phoneNumber}, merge: true);
   }
 
   void setEmail(String email) {
-    Firestore.instance
-        .collection(className)
-        .document(uid)
-        .setData({emailKey: email}, merge: true);
+    if (email != null)
+      Firestore.instance
+          .collection(className)
+          .document(uid)
+          .setData({emailKey: email}, merge: true);
   }
 
   void setToken(String token) {

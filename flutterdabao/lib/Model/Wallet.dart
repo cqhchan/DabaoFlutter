@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutterdabao/ExtraProperties/Selectable.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
 import 'package:flutterdabao/Firebase/FirebaseType.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -30,6 +31,20 @@ class Wallet extends FirebaseType {
       ).observable);
     }
     return _listOfTransactions;
+  }
+
+  MutableProperty<List<WithdrawalAccount>> _listOfWithdrawalAccount;
+  MutableProperty<List<WithdrawalAccount>> get listOfWithdrawalAccount {
+    if (_listOfWithdrawalAccount == null) {
+      _listOfWithdrawalAccount = MutableProperty(null);
+      _listOfWithdrawalAccount.bindTo(
+          FirebaseCollectionReactive<WithdrawalAccount>(Firestore.instance
+                  .collection(className)
+                  .document(this.uid)
+                  .collection("withdrawalAccounts"))
+              .observable);
+    }
+    return _listOfWithdrawalAccount;
   }
 
   MutableProperty<double> _totalAmountEarnedThisWeek;
@@ -89,7 +104,72 @@ class Wallet extends FirebaseType {
     currentValue = BehaviorSubject();
     inWithdrawal = BehaviorSubject();
     createdDate = BehaviorSubject();
-
-    ;
   }
+
+  addWithdrawalAccount(
+    String accountNumber,
+    String bankName,
+    String accountHoldername,
+    String accountNickname,
+  ) {
+    Map<String,dynamic> data = Map();
+    data[WithdrawalAccount.accountNumberKey] = accountNumber;
+
+    data[WithdrawalAccount.bankKey] = bankName;
+
+    if(accountNickname != null && accountNickname.isNotEmpty)
+    data[WithdrawalAccount.accountNicknameKey] = accountNickname;
+
+    data[WithdrawalAccount.accountHolderNameKey] = accountHoldername;
+
+
+    Firestore.instance
+        .collection(className)
+        .document(this.uid)
+        .collection("withdrawalAccounts")
+        .add(data);
+  }
+}
+
+class WithdrawalAccount extends FirebaseType with Selectable{
+  static String accountNumberKey = "AccountNumber"; 
+  static String bankKey  = "Bank";
+  static String accountHolderNameKey  = "AccountHoldername";
+  //optional
+  static String accountNicknameKey =  "AccountNickname";
+
+  BehaviorSubject<String> accountNumber = BehaviorSubject();
+  BehaviorSubject<String> bankName = BehaviorSubject();
+  BehaviorSubject<String> accountHoldername = BehaviorSubject();
+  BehaviorSubject<String> accountNickname = BehaviorSubject();
+
+  WithdrawalAccount.fromDocument(DocumentSnapshot doc)
+      : super.fromDocument(doc);
+
+  @override
+  void map(Map<String, dynamic> data) {
+    if (data.containsKey(accountNumberKey)) {
+      accountNumber.add(data[accountNumberKey]);
+    } else {
+      accountNumber.add(null);
+    }
+
+    if (data.containsKey(bankKey)) {
+      bankName.add(data[bankKey]);
+    } else {
+      bankName.add(null);
+    }
+    if (data.containsKey(accountHolderNameKey)) {
+      accountHoldername.add(data[accountHolderNameKey]);
+    } else {
+      accountHoldername.add(null);
+    }
+    if (data.containsKey(accountNicknameKey)) {
+      accountNickname.add(data[accountNicknameKey]);
+    } else {
+      accountNickname.add(null);
+    }
+  }
+  @override
+  void setUpVariables() {}
 }

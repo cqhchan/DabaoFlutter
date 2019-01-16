@@ -306,7 +306,7 @@ class _CheckoutPageState extends State<CheckoutPage>
 
   Container buildPrice() {
     return Container(
-      padding: EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
+      padding: EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 5.0),
       child: Row(
         children: <Widget>[
           Expanded(
@@ -391,13 +391,13 @@ class _CheckoutPageState extends State<CheckoutPage>
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text("\$0.00",
-                              style: FontHelper.bold(Colors.black, 12.0)),
+                              style: FontHelper.medium(Colors.black, 12.0)),
                         ),
                       ),
                       Expanded(
                         child: Align(
                           alignment: Alignment.center,
-                          child:  Text("Recommended", style: FontHelper.bold(Colors.black, 12.0)),
+                          child:  Text("Recommended", style: FontHelper.medium(Colors.black, 12.0)),
                         ),
                       ),
                      
@@ -405,7 +405,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: Text(StringHelper.doubleToPriceString(snap.data * 2),
-                              style: FontHelper.bold(Colors.black, 12.0)),
+                              style: FontHelper.medium(Colors.black, 12.0)),
                         ),
                       ),
                     ],

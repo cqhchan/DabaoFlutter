@@ -63,7 +63,7 @@ class _ChatPageState extends State<ChatPage>
       ),
       body: Column(
         children: <Widget>[
-          Container(
+           Container(
             margin: EdgeInsets.only(bottom: 2.0),
             decoration: BoxDecoration(
                 boxShadow: [BoxShadow(color: Colors.black, blurRadius: 1.5)]),
