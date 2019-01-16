@@ -383,7 +383,9 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
               ),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, FadeRoute(widget: TransactionsPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return TransactionsPage();
+                }));
               },
             ),
             ListTile(
@@ -458,7 +460,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
       backgroundColor: Colors.white,
       title: Text(
         "D A B A O",
-        style: FontHelper.regular(Colors.black, 20.0),
+        style: FontHelper.bold(Colors.black, 20.0),
       ),
       actions: <Widget>[ChatNavigationButton()],
     );
@@ -638,7 +640,9 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).push(
-            FadeRoute(widget: ViewOrderListPage()),
+            MaterialPageRoute(builder: (BuildContext context) {
+              return ViewOrderListPage();
+            }),
           );
         },
         child: Container(
@@ -648,7 +652,7 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Text(
-                "VIEW ALL",
+                "View",
                 style: TextStyle(
                     decoration: TextDecoration.underline,
                     color: ColorHelper.dabaoOffGrey70),
@@ -704,29 +708,39 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
   }
 
   Widget orderCell(Order order) {
-    return Container(
-      margin: EdgeInsets.only(left: 10, right: 5, top: 5),
-      height: 55,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                foodTagHeader(order),
-                orderItemAndPrice(order)
-              ],
+    return GestureDetector(
+      onTap: (){
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (BuildContext context) {
+              return ViewOrderListPage();
+            }),
+          );
+      },
+      child: Container(
+        color: Colors.transparent,
+        margin: EdgeInsets.only(left: 10, right: 5, top: 5),
+        height: 55,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  foodTagHeader(order),
+                  orderItemAndPrice(order)
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: 120,
-            child: Column(
-              children: <Widget>[deliveryTime(order), status(order)],
+            Container(
+              width: 120,
+              child: Column(
+                children: <Widget>[deliveryTime(order), status(order)],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

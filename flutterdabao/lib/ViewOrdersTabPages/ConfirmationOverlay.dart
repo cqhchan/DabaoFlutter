@@ -62,7 +62,6 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
     super.dispose();
   }
 
-  //TODO p2 add succcess dialog
   @override
   Widget build(BuildContext context) {
     return Scaffold(

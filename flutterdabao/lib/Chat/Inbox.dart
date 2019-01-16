@@ -51,19 +51,20 @@ class _ChatPageState extends State<ChatPage>
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.white,
-        leading: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Icon(
-              Icons.close,
-            )),
+        leading: IconButton(
+          icon: Icon(
+            Icons.close,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         centerTitle: true,
-        title: Text('Your Inbox', style: FontHelper.header3TextStyle),
+        title: Text('Your Inbox', style: FontHelper.semiBold(Colors.black, 18)),
       ),
       body: Column(
         children: <Widget>[
-           Container(
+          Container(
             margin: EdgeInsets.only(bottom: 2.0),
             decoration: BoxDecoration(
                 boxShadow: [BoxShadow(color: Colors.black, blurRadius: 1.5)]),
@@ -101,7 +102,10 @@ class _ChatPageState extends State<ChatPage>
                 _buildChatPage(currentUserChannels.producer.map((channels) {
                   List<Channel> temp = List.from(channels);
 
-                  temp.removeWhere((channel) => channel.lastSent.value == null || channel.deliverer.value == ConfigHelper.instance.currentUserProperty.value.uid);
+                  temp.removeWhere((channel) =>
+                      channel.lastSent.value == null ||
+                      channel.deliverer.value ==
+                          ConfigHelper.instance.currentUserProperty.value.uid);
 
                   temp.sort((lhs, rhs) =>
                       rhs.lastSent.value.compareTo(lhs.lastSent.value));
@@ -111,7 +115,10 @@ class _ChatPageState extends State<ChatPage>
                 _buildChatPage(currentUserChannels.producer.map((channels) {
                   List<Channel> temp = List.from(channels);
 
-                  temp.removeWhere((channel) => channel.lastSent.value == null  || channel.deliverer.value != ConfigHelper.instance.currentUserProperty.value.uid);
+                  temp.removeWhere((channel) =>
+                      channel.lastSent.value == null ||
+                      channel.deliverer.value !=
+                          ConfigHelper.instance.currentUserProperty.value.uid);
 
                   temp.sort((lhs, rhs) =>
                       rhs.lastSent.value.compareTo(lhs.lastSent.value));

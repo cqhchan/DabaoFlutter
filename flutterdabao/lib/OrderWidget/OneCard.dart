@@ -57,13 +57,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Colors.white, boxShadow: [
-        BoxShadow(
-          color: const Color(0x11000000),
-          offset: new Offset(0.0, 5.0),
-          blurRadius: 8.0,
-        ),
-      ]),
+      decoration: BoxDecoration(color: Colors.white, ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.65),
@@ -115,7 +109,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
       children: <Widget>[
         Card(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0)),
           margin: EdgeInsets.fromLTRB(11, 0, 11, 11),
           color: Colors.white,
           elevation: 6.0,
@@ -128,6 +122,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return Offstage();
                     return StatusColor(
+                      borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight:Radius.circular(6.0)),
                       color: snapshot.data == orderStatus_Requested
                           ? ColorHelper.availableColor
                           : widget.channel.deliverer.value ==
@@ -137,7 +132,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                     );
                   }),
               Container(
-                margin: EdgeInsets.fromLTRB(10, 16, 10, 10),
+                margin: EdgeInsets.fromLTRB(10, 16, 10, 5),
                 child: Wrap(
                   children: <Widget>[
                     StreamBuilder(
@@ -261,6 +256,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
 
                                     return Column(
                                       children: <Widget>[
+                                        SizedBox(height: 5,),
                                         Text(
                                           "Tap to minimize",
                                           style: FontHelper.medium(
@@ -272,7 +268,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                                   },
                                 ),
                                 SizedBox(
-                                  height: 8,
+                                  height: 0,
                                 ),
                               ],
                             )
@@ -291,15 +287,15 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   }
 
   Widget _buildMessage(Order order) {
-    return Container(
-      margin: EdgeInsets.only(top: 2),
-      padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
-      color: ColorHelper.dabaoOffWhiteF5,
-      child: StreamBuilder<String>(
+    return StreamBuilder<String>(
         stream: order.message,
         builder: (context, snap) {
           if (!snap.hasData) return Offstage();
-          return Column(
+          return Container(
+      margin: EdgeInsets.only(top: 2),
+      padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
+      color: ColorHelper.dabaoOffWhiteF5,
+      child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text("Message to Dabaoer", style: FontHelper.bold12Black),
@@ -308,9 +304,9 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
               ),
               Text(snap.data, style: FontHelper.medium(Colors.black, 10))
             ],
-          );
+          ));
         },
-      ),
+      
     );
   }
   Widget _buildHeader() {

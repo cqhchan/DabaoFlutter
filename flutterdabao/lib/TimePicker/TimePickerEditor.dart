@@ -16,7 +16,7 @@ typedef DateSelectedCallback = Function(DateTime);
 
 Future<T> showTimeCreator<T>({
   @required BuildContext context,
-  bool barrierDismissible = false,
+  bool barrierDismissible = true,
   @required DoubleDateSelectedCallback onCompleteCallBack,
   int startTimeBeforeLimitInMins = 60,
   int minsGapBetweenStartAndEndTime = 30,
@@ -46,7 +46,7 @@ Future<T> showOneTimeCreator<T>({
   @required BuildContext context,
   @required String headerTitle,
   @required String subTitle,
-  bool barrierDismissible = false,
+  bool barrierDismissible = true,
   @required DateSelectedCallback onCompleteCallback,
   DateTime startTime,
 }) {
@@ -172,15 +172,14 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-      ),
-      body: Align(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 450, maxWidth: 240),
+    return Align(
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: 450, maxWidth: 240),
+        child: Card(
+          elevation: 0.0,
+          margin: EdgeInsets.all(0),
+          color: Colors.transparent,
           child: Column(
             children: <Widget>[
               buildHeader(),
@@ -224,6 +223,8 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
       },
     );
   }
+//TODO p2 center text header and confirm
+//TODO p2 Enlarge time picker font
 
   Widget buildHeader() {
     return Container(
@@ -350,10 +351,12 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
                       child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                              snap.data != null
-                                  ? DateTimeHelper.hourAndMin12Hour(snap.data)
-                                  : "00:00",
-                              style: FontHelper.semiBold(Colors.black, 45),textAlign: TextAlign.center,))),
+                            snap.data != null
+                                ? DateTimeHelper.hourAndMin12Hour(snap.data)
+                                : "00:00",
+                            style: FontHelper.semiBold(Colors.black, 45),
+                            textAlign: TextAlign.center,
+                          ))),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -462,10 +465,11 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
                       child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                              snap.data != null
-                                  ? DateTimeHelper.hourAndMin12Hour(snap.data)
-                                  : "00:00",
-                              style: FontHelper.semiBold(Colors.black, 45),))),
+                            snap.data != null
+                                ? DateTimeHelper.hourAndMin12Hour(snap.data)
+                                : "00:00",
+                            style: FontHelper.semiBold(Colors.black, 45),
+                          ))),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -634,20 +638,23 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
     super.initState();
 
     _currentStartTime = DateTime.now().add(Duration(hours: 1));
-    selectedStartDate = MutableProperty(_currentStartTime);
+    if (widget.startTime == null)
+      selectedStartDate = MutableProperty(_currentStartTime);
+    else
+      selectedStartDate = MutableProperty(widget.startTime);
   }
 
+  //TODO p2 realign card is now abit off
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-      ),
-      body: Align(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 450, maxWidth: 240),
+    return Align(
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: 450, maxWidth: 240),
+        child: Card(
+          elevation: 0.0,
+          margin: EdgeInsets.all(0),
+          color: Colors.transparent,
           child: Column(
             children: <Widget>[
               buildHeader(),
@@ -802,6 +809,10 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
                     onDateTimeChanged: (DateTime newDateTime) {
                       if (newDateTime.isBefore(_currentStartTime)) {
                         newDateTime = newDateTime.add(Duration(days: 1));
+                      }
+                      if (newDateTime
+                          .isAfter(_currentStartTime.add(Duration(days: 1)))) {
+                        newDateTime = newDateTime.subtract(Duration(days: 1));
                       }
                       selectedStartDate.value = newDateTime;
                     },

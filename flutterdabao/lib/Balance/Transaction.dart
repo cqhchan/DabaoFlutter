@@ -122,7 +122,6 @@ class _TransactionsState extends State<TransactionsPage>
       ),
     );
   }
-//(Solved)TODO p1 check week make sure its the same as server
 //TODO p2 update transactions types
 
   Widget _buildEarnedThisWeek() {
@@ -178,12 +177,15 @@ class _TransactionsState extends State<TransactionsPage>
           builder: (context, snapshot) {
             if (!snapshot.hasData)
               return Center(child: Text('Please Check Your Connection'));
+              List<Transact> temp = List.from( snapshot.data);
+              temp.sort((lhs,rhs) => rhs.createdDate.value.compareTo(lhs.createdDate.value));
             if (snapshot.hasData) {
-              return _buildTransactList(snapshot.data);
+              return _buildTransactList(temp);
             }
           }),
     );
   }
+  //TODO p1 remove this week add in withdrawal 
 
   Widget _buildTransactList(List<Transact> list) {
     return ListView(

@@ -51,7 +51,8 @@ class _SelectAccountPageState extends State<SelectAccountPage>
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
+    return WillPopScope(
+      child: Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
           elevation: 0.0,
@@ -141,6 +142,7 @@ class _SelectAccountPageState extends State<SelectAccountPage>
                                 style: FontHelper.semiBold(Colors.black, 14.0)),
                           ),
                           onPressed: () {
+                            Selectable.deselectAll(listOfAccounts.value);
                             Navigator.of(context).push(FadeRoute(
                                 widget: WithdrawalPage(
                               account: selectedWithdrawalAccount,
@@ -156,7 +158,11 @@ class _SelectAccountPageState extends State<SelectAccountPage>
           )
         ],
       ),
-    );
+    ),
+    onWillPop: (){
+      Selectable.deselectAll(listOfAccounts.value);        
+        return Future.value(true);
+    },);
   }
 
   Expanded buildAccounts() {
@@ -177,7 +183,7 @@ class _SelectAccountPageState extends State<SelectAccountPage>
                   children: <Widget>[
                     Image.asset("assets/icons/dabao_piggy.png"),
                     Text(
-                      "You current have no accounts to transfer to.\nDabao Piggy is feeling lonely =(",
+                      "You current have no accounts to transfer to.\nDabao Piggy is feeling lonely :(",
                       style:
                           FontHelper.regular(ColorHelper.dabaoOffBlack9B, 14),
                       textAlign: TextAlign.center,
@@ -437,7 +443,7 @@ class WithdrawalPageState extends State<WithdrawalPage> {
                                         horizontal: 0.0, vertical: 9.0),
                                     color: ColorHelper.dabaoOrange,
                                     child: Center(
-                                      child: Text("Withdrawal",
+                                      child: Text("Confirm",
                                           style: FontHelper.semiBold(
                                               Colors.black, 14.0)),
                                     ),
@@ -468,11 +474,17 @@ class WithdrawalPageState extends State<WithdrawalPage> {
                                                     account: widget.account)
                                             .then((isSuccessful) {
                                           if (isSuccessful) {
-                                            ConfigHelper.instance.navigatorKey
-                                                .currentState
-                                                .popUntil(ModalRoute.withName(
-                                                    Navigator
-                                                        .defaultRouteName));
+                                            Navigator.of(context).pop();
+                                            Navigator.of(context).pop();
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return AlertDialog(
+                                                    title: Text("Success"),
+                                                    content: Text(
+                                                        "Your Dabao Balance has been updated"),
+                                                  );
+                                                });
                                           } else {
                                             Navigator.of(context).pop();
                                             final snackBar = SnackBar(
@@ -686,6 +698,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage>
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     color: ColorHelper.dabaoGreyE0),
                 child: TextField(
+                  textCapitalization: TextCapitalization.words,
                   controller: accountNickName,
                   style: FontHelper.regular(Colors.black, 14),
                   decoration: InputDecoration(
@@ -705,6 +718,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage>
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     color: ColorHelper.dabaoGreyE0),
                 child: TextField(
+                  textCapitalization: TextCapitalization.words,
                   controller: accountHolderName,
                   style: FontHelper.regular(Colors.black, 14),
                   decoration: InputDecoration(
@@ -721,6 +735,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage>
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     color: ColorHelper.dabaoGreyE0),
                 child: TextField(
+                  textCapitalization: TextCapitalization.words,
                   controller: bank,
                   style: FontHelper.regular(Colors.black, 14),
                   decoration: InputDecoration(
@@ -740,6 +755,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage>
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     color: ColorHelper.dabaoGreyE0),
                 child: TextField(
+                  textCapitalization: TextCapitalization.words,
                   controller: accountNumber,
                   style: FontHelper.regular(Colors.black, 14),
                   decoration: InputDecoration(

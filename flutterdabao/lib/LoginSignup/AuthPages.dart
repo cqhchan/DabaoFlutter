@@ -43,7 +43,8 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
   Widget build(BuildContext context) {
     return buildSignUpPage();
   }
-
+//TODO p2 fix delay add loading page 
+//TODO p2 on back can remove 
   //sign up page that shows up after signup button is pressed
   Widget buildSignUpPage() {
     return SingleChildScrollView(

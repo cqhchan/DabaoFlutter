@@ -444,15 +444,15 @@ class _OrderItemCellState extends State<_OrderItemCell>
   }
 
   Widget _buildMessage(Order order) {
-    return Container(
-      margin: EdgeInsets.only(top: 2),
-      padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
-      color: ColorHelper.dabaoOffWhiteF5,
-      child: StreamBuilder<String>(
+    return StreamBuilder<String>(
         stream: order.message,
         builder: (context, snap) {
           if (!snap.hasData) return Offstage();
-          return Column(
+          return Container(
+      margin: EdgeInsets.only(top: 2),
+      padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
+      color: ColorHelper.dabaoOffWhiteF5,
+      child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text("Message to Dabaoer", style: FontHelper.bold12Black),
@@ -461,9 +461,9 @@ class _OrderItemCellState extends State<_OrderItemCell>
               ),
               Text(snap.data, style: FontHelper.medium(Colors.black, 10))
             ],
-          );
+          ));
         },
-      ),
+      
     );
   }
 

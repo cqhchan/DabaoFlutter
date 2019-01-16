@@ -513,7 +513,7 @@ class _OrderCheckoutState extends State<OrderCheckout>
   Future<void> _handleTapLocation() async {
     // show input autocomplete with selected mode
     // then get the Prediction selected
-    Prediction p = await PlacesAutocomplete.show(
+    Prediction p = await CustomPlacesAutocomplete.show(
       context: context,
       apiKey: kGoogleApiKey,
       onError: onError,

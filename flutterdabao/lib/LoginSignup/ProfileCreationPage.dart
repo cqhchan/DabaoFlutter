@@ -115,7 +115,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
           ),
         ));
   }
-  //TODO P2 fix spinner issue Unable to fix some parts
+  //TODO P2 move resizing to backend
 
   //Pre-condition: Called only when _image has been set
   Future<void> creatingThumbnail(File image) {

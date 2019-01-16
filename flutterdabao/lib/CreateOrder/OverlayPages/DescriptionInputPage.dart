@@ -39,6 +39,7 @@ class _MessageInputPageState extends State<MessageInputPage> {
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white,
           centerTitle: true,
           title: Text(
             "Message",
@@ -55,8 +56,8 @@ class _MessageInputPageState extends State<MessageInputPage> {
             autocorrect: false,
             textInputAction: TextInputAction.done,
             textCapitalization: TextCapitalization.sentences,
-            onFieldSubmitted: (text){
-               widget.textCallBack(text);
+            onFieldSubmitted: (text) {
+              widget.textCallBack(text);
               Navigator.of(context).pop();
             },
             style: FontHelper.medium(Colors.black, 12.0),
@@ -73,7 +74,7 @@ class _MessageInputPageState extends State<MessageInputPage> {
         ),
       ),
       onWillPop: () {
-        _myFocusNode.unfocus();
+        FocusScope.of(context).requestFocus(new FocusNode());
         widget.textCallBack(controller.text);
         // Navigator.of(context).pop();
         return Future.value(true);

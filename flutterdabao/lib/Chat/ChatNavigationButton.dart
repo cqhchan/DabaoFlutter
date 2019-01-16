@@ -25,7 +25,7 @@ class ChatNavigationButtonState extends State<ChatNavigationButton> {
         GestureDetector(
       onTap: () {
         Navigator.of(context).push(
-          FadeRoute(widget: ChatPage()),
+          SlideUpRoute(widget: ChatPage()),
         );
       },
       child: Container(

@@ -93,8 +93,7 @@ class BalanceCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          FadeRoute(
-              widget: SelectAccountPage()),
+          FadeRoute(widget: SelectAccountPage()),
         );
       },
       child: Container(
@@ -106,7 +105,9 @@ class BalanceCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Image.asset("assets/icons/cash_out.png"),
-            SizedBox(height: 5,),
+            SizedBox(
+              height: 5,
+            ),
             Text("Cash Out", style: FontHelper.regular12Black)
           ],
         ),
@@ -135,7 +136,6 @@ class BalanceCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-      
             Image.asset("assets/icons/wallet_voucher.png"),
             Text("Your Vouchers", style: FontHelper.regular12Black)
           ],
@@ -159,7 +159,9 @@ class BalanceCard extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  FadeRoute(widget: TransactionsPage()),
+                  MaterialPageRoute(builder: (context) {
+                    return TransactionsPage();
+                  }),
                 );
               },
               child: Align(
@@ -197,7 +199,9 @@ class BalanceCard extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                FadeRoute(widget: TransactionsPage()),
+                MaterialPageRoute(builder: (context) {
+                  return TransactionsPage();
+                }),
               );
             },
             child: Container(

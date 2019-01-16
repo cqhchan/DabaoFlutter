@@ -85,13 +85,14 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin {
           ),
           CustomizedBackButton(
             onBack: () {
+              //TOdo p2 try to flash edit button
               if (checkout.value) {
                 showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
                           title: Text("Leave?"),
                           content:
-                              Text("Your current Order has not been created"),
+                              Text("Your Order has not been created. Are you sure you want to leave?"),
                           actions: <Widget>[
                             new FlatButton(
                               child: new Text(

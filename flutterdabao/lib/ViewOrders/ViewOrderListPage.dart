@@ -153,10 +153,13 @@ class _ViewOrderCellState extends State<_ViewOrderCell>
     // TODO: implement build
     return GestureDetector(
         onTap: () {
-          Navigator.of(context).push(FadeRoute(
-              widget: DabaoeeViewOrderListPage(
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (BuildContext context) {
+              return DabaoeeViewOrderListPage(
             order: Order.fromUID(widget.order.uid),
-          )));
+          );
+            }),
+          );
         },
         child: Container(
           color: Colors.transparent,

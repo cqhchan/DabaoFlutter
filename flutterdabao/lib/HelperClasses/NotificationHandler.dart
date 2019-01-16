@@ -25,6 +25,7 @@ const String orderIDkey = "orderID";
 
 const String modeAcceptedOrder = "ORDERACCEPTED";
 const String modeNewTransaction = "NEWTRANSACTION";
+const String modeWithdrawalCompleted = "WITHDRAWALCOMPLETED";
 
 const String modeCompletedOrder = "ORDERCOMPLETED";
 const String modeCancelledOrder = "ORDERCANCELLED";
@@ -94,7 +95,7 @@ handleNotificationForResumeAndLaunch(map) async {
                   return AlertDialog(
                     title: const Text("Order Cancelled"),
                     content: const Text(
-                        "Your Order has been cancelle =( Would you like to reorder?"),
+                        "Oh No! Your Order has been cancelled. Would you like to reorder?"),
                     actions: <Widget>[
                       new FlatButton(
                         child: new Text(
@@ -120,6 +121,13 @@ handleNotificationForResumeAndLaunch(map) async {
           }
           break;
 
+        case modeNewTransaction:
+          ConfigHelper.instance.navigatorKey.currentState
+              .push(MaterialPageRoute(builder: (context) {
+            return TransactionsPage();
+          }));
+          break;
+
         case modeAcceptedOrder:
           if (map.containsKey(orderIDkey)) {
             String orderID = map[orderIDkey];
@@ -132,6 +140,21 @@ handleNotificationForResumeAndLaunch(map) async {
               );
             }));
           }
+          break;
+
+        case modeCompletedOrder:
+          if (map.containsKey(orderIDkey)) {
+            String orderID = map[orderIDkey];
+            Order order = Order.fromUID(orderID);
+
+            ConfigHelper.instance.navigatorKey.currentState
+                .push(MaterialPageRoute(builder: (context) {
+              return DabaoeeViewOrderListPage(
+                order: order,
+              );
+            }));
+          }
+
           break;
 
         case modeNewPotentialOrder:
