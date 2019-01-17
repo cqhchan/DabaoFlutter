@@ -812,7 +812,7 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
             Container(
               width: 120,
               child: Column(
-                children: <Widget>[deliveryTime(order), status(order)],
+                children: <Widget>[Container(padding: EdgeInsets.only(top: 3), child: deliveryTime(order)), status(order)],
               ),
             ),
           ],
@@ -838,65 +838,68 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
     return Expanded(
       child: Align(
         alignment: Alignment.center,
-        child: StreamBuilder<String>(
-          stream: order.status,
-          builder: (BuildContext context, snapshot) {
-            if (!snapshot.hasData || snapshot.data == null) {
-              return Offstage();
-            }
-
-            switch (snapshot.data) {
-              case orderStatus_Accepted:
-                return Container(
-                  height: 19,
-                  width: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5.0),
-                    color: ColorHelper.dabaoOrange,
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Enroute",
-                      style: FontHelper.semiBold12Black,
-                    ),
-                  ),
-                );
-              case orderStatus_Requested:
-                return Container(
-                  height: 19,
-                  width: 60,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color.fromRGBO(0x95, 0x9D, 0xAD, 1.0)),
-                  child: Center(
-                    child: Text("Pending",
-                        style: FontHelper.semiBold(Colors.white, 12.0)),
-                  ),
-                );
-              case orderStatus_Completed:
-                return Container(
-                  height: 19,
-                  width: 60,
-                  child: Center(
-                    child: Text("Delivered",
-                        style: FontHelper.semiBold(
-                            ColorHelper.dabaoOffGreyD3, 12.0)),
-                  ),
-                );
-              case orderStatus_Cancelled:
-                return Container(
-                  height: 19,
-                  width: 60,
-                  child: Center(
-                    child: Text("Cancelled",
-                        style: FontHelper.semiBold(
-                            ColorHelper.dabaoOffGreyD3, 12.0)),
-                  ),
-                );
-              default:
+        child: Container(
+          padding: EdgeInsets.only(bottom: 3),
+          child: StreamBuilder<String>(
+            stream: order.status,
+            builder: (BuildContext context, snapshot) {
+              if (!snapshot.hasData || snapshot.data == null) {
                 return Offstage();
-            }
-          },
+              }
+
+              switch (snapshot.data) {
+                case orderStatus_Accepted:
+                  return Container(
+                    height: 19,
+                    width: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                      color: ColorHelper.dabaoOrange,
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Enroute",
+                        style: FontHelper.semiBold12Black,
+                      ),
+                    ),
+                  );
+                case orderStatus_Requested:
+                  return Container(
+                    height: 19,
+                    width: 60,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        color: Color.fromRGBO(0x95, 0x9D, 0xAD, 1.0)),
+                    child: Center(
+                      child: Text("Pending",
+                          style: FontHelper.semiBold(Colors.white, 12.0)),
+                    ),
+                  );
+                case orderStatus_Completed:
+                  return Container(
+                    height: 19,
+                    width: 60,
+                    child: Center(
+                      child: Text("Delivered",
+                          style: FontHelper.semiBold(
+                              ColorHelper.dabaoOffGreyD3, 12.0)),
+                    ),
+                  );
+                case orderStatus_Cancelled:
+                  return Container(
+                    height: 19,
+                    width: 60,
+                    child: Center(
+                      child: Text("Cancelled",
+                          style: FontHelper.semiBold(
+                              ColorHelper.dabaoOffGreyD3, 12.0)),
+                    ),
+                  );
+                default:
+                  return Offstage();
+              }
+            },
+          ),
         ),
       ),
     );

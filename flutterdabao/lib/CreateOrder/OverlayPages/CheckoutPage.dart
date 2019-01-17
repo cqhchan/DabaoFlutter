@@ -348,7 +348,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                 snapshot.hasData && snapshot.data != null
                     ? StringHelper.doubleToPriceString(snapshot.data)
                     : "\$0.00",
-                style: FontHelper.regular(Colors.black, 14.0),
+                style: FontHelper.bold(Colors.black, 14.0),
               );
             },
           )
@@ -374,7 +374,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                 snapshot.hasData && snapshot.data != null
                     ? StringHelper.doubleToPriceString(snapshot.data)
                     : "\$0.00",
-                style: FontHelper.regular(Colors.black, 14.0),
+                style: FontHelper.bold(Colors.black, 14.0),
               );
             },
           )
