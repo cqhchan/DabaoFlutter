@@ -1,3 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_notification_channel_id">Dabao</string>
+    <string name="channel_name">Dabao Channel</string>
+    <string name="channel_description">Dabao Description</string>
+</resources>
 
-<string name="default_notification_channel_id">Channel ID</string>

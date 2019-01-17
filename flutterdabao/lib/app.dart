@@ -44,6 +44,7 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
     disposeAndReset();
     if (Platform.isIOS) iOS_Permission();
     firebaseCloudMessagingListeners();
+
   }
 
   void iOS_Permission() {

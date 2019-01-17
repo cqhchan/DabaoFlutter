@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CustomWidget/CustomDialogs.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
@@ -35,7 +36,8 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
   MutableProperty<DateTime> startTime = MutableProperty(null);
   MutableProperty<DateTime> endTime = MutableProperty(null);
   String errorMessage = "";
-
+  double tapPositionX;
+  double tapPositionY;
   @override
   void initState() {
     super.initState();
@@ -179,21 +181,31 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                 stream: widget.order.deliveryFee,
                 builder: (context, snap) {
                   if (!snap.hasData) return Offstage();
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      Text(
-                        StringHelper.doubleToPriceString(
-                          snap.data,
+                  return GestureDetector(
+                    onTapDown: (details) {
+                      tapPositionX = details.globalPosition.dx;
+                      tapPositionY = details.globalPosition.dy;
+                    },
+                    onTap: () {
+
+                      showInfomationDialog(x: tapPositionX, y: tapPositionY, context: context, subTitle: "This is the delivery fee you will be receiving for this order!", title: "What is this");
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        Text(
+                          StringHelper.doubleToPriceString(
+                            snap.data,
+                          ),
+                          style: FontHelper.bold14Black,
+                          textAlign: TextAlign.right,
                         ),
-                        style: FontHelper.bold14Black,
-                        textAlign: TextAlign.right,
-                      ),
-                      SizedBox(
-                        width: 2.0,
-                      ),
-                      Image.asset('assets/icons/question_mark.png'),
-                    ],
+                        SizedBox(
+                          width: 2.0,
+                        ),
+                        Image.asset('assets/icons/question_mark.png'),
+                      ],
+                    ),
                   );
                 },
               ),

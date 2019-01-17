@@ -43,7 +43,7 @@ class OrderItem extends FirebaseType {
     if (map.containsKey(priceKey)) {
       price.add(map[priceKey] + .0);
     } else {
-      price.add(0.0);
+      price.add(null);
     }
 
     if (map.containsKey(boughtKey)) {

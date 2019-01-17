@@ -52,116 +52,118 @@ class _SelectAccountPageState extends State<SelectAccountPage>
     // TODO: implement build
     return WillPopScope(
       child: Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: ColorHelper.dabaoOffWhiteF5,
-          title: Text(
-            "Dabao Credits",
-            style: FontHelper.regular(Colors.black, 18.0),
-          )),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Balance(
-            bgColor: ColorHelper.dabaoOffWhiteF5,
-          ),
-          Expanded(
-            child: Stack(
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                          padding: EdgeInsets.only(
-                              top: 20.0, bottom: 5.0, left: 10, right: 10),
-                          child: Text(
-                              "Select a bank account to transfer your balance to:",
-                              style: FontHelper.regular14Black)),
-                    ),
-                    Line(
-                        color: ColorHelper.rgbo(0xD0, 0xD0, 0xD0),
-                        margin: EdgeInsets.only(
-                          left: 8.0,
-                          right: 8.0,
-                        )),
-                    StreamBuilder<Wallet>(
-                      stream: ConfigHelper
-                          .instance.currentUserWalletProperty.producer,
-                      builder: (context, snap) {
-                        if (snap == null) return Offstage();
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+            elevation: 0.0,
+            backgroundColor: ColorHelper.dabaoOffWhiteF5,
+            title: Text(
+              "Dabao Credits",
+              style: FontHelper.regular(Colors.black, 18.0),
+            )),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Balance(
+              bgColor: ColorHelper.dabaoOffWhiteF5,
+            ),
+            Expanded(
+              child: Stack(
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                            padding: EdgeInsets.only(
+                                top: 20.0, bottom: 5.0, left: 10, right: 10),
+                            child: Text(
+                                "Select a bank account to transfer your balance to:",
+                                style: FontHelper.regular14Black)),
+                      ),
+                      Line(
+                          color: ColorHelper.rgbo(0xD0, 0xD0, 0xD0),
+                          margin: EdgeInsets.only(
+                            left: 8.0,
+                            right: 8.0,
+                          )),
+                      StreamBuilder<Wallet>(
+                        stream: ConfigHelper
+                            .instance.currentUserWalletProperty.producer,
+                        builder: (context, snap) {
+                          if (snap == null) return Offstage();
 
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder:(context)=> AddBankAccountPage(
-                              wallet: snap.data,
-                            )));
-                          },
-                          child: Container(
-                            color: Colors.transparent,
-                            padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
-                            child: Text("+ Add an account",
-                                style: FontHelper.regular(
-                                    ColorHelper.dabaoOffBlack9B, 14.0)),
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => AddBankAccountPage(
+                                        wallet: snap.data,
+                                      )));
+                            },
+                            child: Container(
+                              color: Colors.transparent,
+                              padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                              child: Text("+ Add an account",
+                                  style: FontHelper.regular(
+                                      ColorHelper.dabaoOffBlack9B, 14.0)),
+                            ),
+                          );
+                        },
+                      ),
+                      Line(
+                        margin: EdgeInsets.only(left: 15, right: 15),
+                      ),
+                      buildAccounts()
+                    ],
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Offstage(
+                      offstage: !showSelectButton ||
+                          selectedWithdrawalAccount == null,
+                      child: SafeArea(
+                        child: Container(
+                          margin: EdgeInsets.all(20),
+                          height: 40,
+                          child: RaisedButton(
+                            disabledElevation: 0.0,
+                            disabledColor: ColorHelper.dabaoOffGreyD0,
+                            elevation: 4.0,
+                            highlightElevation: 0.0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0)),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 0.0, vertical: 9.0),
+                            color: ColorHelper.dabaoOrange,
+                            child: Center(
+                              child: Text("Select",
+                                  style:
+                                      FontHelper.semiBold(Colors.black, 14.0)),
+                            ),
+                            onPressed: () {
+                              Selectable.deselectAll(listOfAccounts.value);
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => WithdrawalPage(
+                                        account: selectedWithdrawalAccount,
+                                      )));
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    Line(
-                      margin: EdgeInsets.only(left: 15, right: 15),
-                    ),
-                    buildAccounts()
-                  ],
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Offstage(
-                    offstage:
-                        !showSelectButton || selectedWithdrawalAccount == null,
-                    child: SafeArea(
-                      child: Container(
-                        margin: EdgeInsets.all(20),
-                        height: 40,
-                        child: RaisedButton(
-                          disabledElevation: 0.0,
-                          disabledColor: ColorHelper.dabaoOffGreyD0,
-                          elevation: 4.0,
-                          highlightElevation: 0.0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 9.0),
-                          color: ColorHelper.dabaoOrange,
-                          child: Center(
-                            child: Text("Select",
-                                style: FontHelper.semiBold(Colors.black, 14.0)),
-                          ),
-                          onPressed: () {
-                            Selectable.deselectAll(listOfAccounts.value);
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder:(context)=> WithdrawalPage(
-                              account: selectedWithdrawalAccount,
-                            )));
-                          },
                         ),
                       ),
                     ),
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
-    ),
-    onWillPop: (){
-      Selectable.deselectAll(listOfAccounts.value);        
+      onWillPop: () {
+        Selectable.deselectAll(listOfAccounts.value);
         return Future.value(true);
-    },);
+      },
+    );
   }
 
   Expanded buildAccounts() {
@@ -795,6 +797,15 @@ class _AddBankAccountPageState extends State<AddBankAccountPage>
                         Navigator.of(context).pop();
                       }
                     : null,
+              ),
+              Text(
+                accountNameString.isNotEmpty &&
+                        accountNumberString.isNotEmpty &&
+                        bankString.isNotEmpty
+                    ? "Note: Please ensure that your bank account details are entered accurately and clearly. Dabao will not be liable for any erroneous transfers arising from incorrectly entered account details."
+                    : "Note: Dabao will only save your details so that you do not have to re-enter manually each time. This will not be linked to your bank account.",
+                style: FontHelper.regular12Black,
+                textAlign: TextAlign.center,
               )
             ],
           ),

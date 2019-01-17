@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdabao/CustomWidget/CustomDialogs.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -164,10 +165,34 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
                 ))));
   }
 
+  double tapPositionX;
+  double tapPositionY;
   Widget _buildHeader() {
-    return Text(
-      'Counter-Offer Deliver Fee',
-      style: FontHelper.semiBold16Black,
+    return Row(
+      children: <Widget>[
+        Text(
+          'Counter-Offer Deliver Fee',
+          style: FontHelper.semiBold16Black,
+        ),
+        GestureDetector(
+            onTapDown: (details) {
+              tapPositionX = details.globalPosition.dx;
+              tapPositionY = details.globalPosition.dy;
+            },
+            onTap: () {
+              showInfomationDialog(
+                  x: tapPositionX,
+                  y: tapPositionY,
+                  context: context,
+                  subTitle:
+                      "As prospective Dabaoer, you're free to propose a counter-offer to the current listed delivery fee displayed. Use the slider below to adjust to a  desired delivery fee and tap confirm. Your offer will be sent to the dabaoee via the chat. ",
+                  title: "How do I counter-offer?");
+            },
+            child: Container(
+                color: Colors.transparent,
+                padding: EdgeInsets.fromLTRB(10.0, 5.0, 5.0, 5.0),
+                child: Image.asset('assets/icons/question_mark.png'))),
+      ],
     );
   }
 

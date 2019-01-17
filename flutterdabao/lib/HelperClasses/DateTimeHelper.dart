@@ -79,13 +79,27 @@ class DateTimeHelper {
 
   // 12:12 no am even though its am/pm
   static String hourAndMin12Hour(DateTime date) {
-    return formatDate(date, [date.hour == 12 ? "12" : hh, ":", nn]);
+    return formatDate(date, [date.hour == 0 || date.hour == 12 ? "12" : hh, ":", nn]);
+  }
+
+    // 12:12 no am even though its am/pm
+  static String hourAndMinSecond12Hour(DateTime date) {
+    return formatDate(date, [date.hour == 0 || date.hour == 12 ? "12" : hh, ":", nn, ":", ss]);
   }
 
   // Today or 14 Jan
   static String convertDateTimeToDate(DateTime date) {
     if (isToday(date))
       return "Today";
+    else
+      return StringHelper.upperCaseWords(formatDate(date, [d, ' ', M]))  ;
+  }
+
+
+  // Today or 14 Jan
+  static String confirmationProofDate(DateTime date) {
+    if (isToday(date))
+      return "Today, " + StringHelper.upperCaseWords(formatDate(date, [d, ' ', M]));
     else
       return StringHelper.upperCaseWords(formatDate(date, [d, ' ', M]))  ;
   }

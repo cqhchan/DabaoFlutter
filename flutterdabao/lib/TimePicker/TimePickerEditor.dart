@@ -651,7 +651,7 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
   void initState() {
     super.initState();
 
-    _currentStartTime = DateTime.now().add(Duration(hours: 1));
+    _currentStartTime = DateTime.now().add(Duration(minutes: 30));
     if (widget.startTime == null)
       selectedStartDate = MutableProperty(_currentStartTime);
     else

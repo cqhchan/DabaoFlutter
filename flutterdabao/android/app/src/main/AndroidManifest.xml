@@ -16,12 +16,16 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
     <application
-    
+
         android:name="io.flutter.app.FlutterApplication"
         android:label="DABAO"
         android:icon="@mipmap/launcher_icon">
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAHPSELCnztmCUR-KTlMshk_l69R5kWojM"/>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
         <!-- <meta-data 
         android:name="com.google.firebase.messaging.default_notification_channel_id" 
         android:value="@strings/default_notification_channel_id"/> -->

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutterdabao/CustomWidget/CustomDialogs.dart';
 import 'package:flutterdabao/CustomWidget/InputFormatter/CurrencyInputFormatter.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/Route/OverlayRoute.dart';
@@ -114,7 +115,7 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
             : (widget.orderItemHolder.description.value);
 
     _priceController.text = widget.orderItemHolder.price.value == null
-        ? "\$0.00"
+        ? ""
         : "\$" + widget.orderItemHolder.price.value.toStringAsFixed(2);
 
     qty = widget.orderItemHolder.quantity.value == null
@@ -323,6 +324,8 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
     );
   }
 
+  double tapPositionX;
+  double tapPositionY;
   Container buildPrice() {
     return Container(
       margin: EdgeInsets.only(top: 10.0, bottom: 10.0),
@@ -332,6 +335,24 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
             "Max Price:",
             style: FontHelper.medium(Colors.black, 12.0),
           ),
+          GestureDetector(
+              onTapDown: (details) {
+                tapPositionX = details.globalPosition.dx;
+                tapPositionY = details.globalPosition.dy;
+              },
+              onTap: () {
+                showInfomationDialog(
+                    x: tapPositionX,
+                    y: tapPositionY,
+                    context: context,
+                    subTitle:
+                        "Max Price refers to the maximum estimated amount you're expecting to pay for this item. ",
+                    title: "What is Max Price?");
+              },
+              child: Container(
+                  color: Colors.transparent,
+                  padding: EdgeInsets.fromLTRB(10.0, 5.0, 5.0, 5.0),
+                  child: Image.asset('assets/icons/question_mark.png'))),
           Expanded(
             child: Align(
               alignment: Alignment.centerRight,

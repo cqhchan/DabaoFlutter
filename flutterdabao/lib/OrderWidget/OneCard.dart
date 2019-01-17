@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/CounterOfferOverlay.dart';
 import 'package:flutterdabao/CustomWidget/ExpansionTile.dart';
+import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMaps.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -17,9 +18,23 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/OrderWidget/StatusColor.dart';
+import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/ConfirmationOverlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart' as Rxdart;
+
+enum CardMode {
+  dabaoeeCancelled,
+  dabaoeeRequested,
+  dabaoeeAcceptedByOther,
+  dabaoeeAccepted,
+  dabaoeeCompleted,
+  dabaoerCancelled,
+  dabaoerRequested,
+  dabaoerAcceptedByOthers,
+  dabaoerAccepted,
+  dabaoerCompleted
+}
 
 class OneCard extends StatefulWidget {
   final Channel channel;
@@ -35,12 +50,68 @@ class OneCard extends StatefulWidget {
 class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   MutableProperty<Order> order = MutableProperty(null);
   MutableProperty<List<OrderItem>> listOfOrderItems = MutableProperty(List());
+  MutableProperty<CardMode> mode = MutableProperty(null);
 
   //expansion of whole card
 
   @override
   void initState() {
     super.initState();
+
+    subscription.add(mode.bindTo(Rxdart.Observable.combineLatest4<User, String,
+            String, String, CardMode>(
+        ConfigHelper.instance.currentUserProperty.producer,
+        order.producer
+            .switchMap((order) => order == null ? null : order.status),
+        order.producer
+            .switchMap((order) => order == null ? null : order.delivererID),
+        widget.channel.deliverer,
+        (currentUser, orderStatus, delivererID, channelCreatorID) {
+      if (orderStatus == null ||
+          currentUser == null ||
+          channelCreatorID == null) return null;
+      //Dabaoer
+      if (currentUser.uid == channelCreatorID) {
+        if (orderStatus == orderStatus_Requested) {
+          return CardMode.dabaoerRequested;
+        }
+        // Order has moved past requested
+        if (delivererID != null) {
+          // im the deliverer
+          if (delivererID == currentUser.uid) {
+            if (orderStatus == orderStatus_Cancelled)
+              return CardMode.dabaoerCancelled;
+            else if (orderStatus == orderStatus_Accepted)
+              return CardMode.dabaoerAccepted;
+            else
+              return CardMode.dabaoerCompleted;
+          } else {
+            return CardMode.dabaoerAcceptedByOthers;
+          }
+        }
+        return CardMode.dabaoerCancelled;
+        //Dabaoee
+      } else {
+        if (orderStatus == orderStatus_Requested) {
+          return CardMode.dabaoeeRequested;
+        }
+        // Order has moved past requested
+        if (delivererID != null) {
+          // im talking to the deliverer
+          if (delivererID == channelCreatorID) {
+            if (orderStatus == orderStatus_Cancelled)
+              return CardMode.dabaoeeCancelled;
+            else if (orderStatus == orderStatus_Accepted)
+              return CardMode.dabaoeeAccepted;
+            else
+              return CardMode.dabaoeeCompleted;
+          } else {
+            return CardMode.dabaoeeAcceptedByOther;
+          }
+        }
+        return CardMode.dabaoeeCancelled;
+      }
+    })));
 
     subscription.add(listOfOrderItems.bindTo(order.producer
         .where((uid) => uid != null)
@@ -57,7 +128,9 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Colors.white, ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+      ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.65),
@@ -71,29 +144,13 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                   offstage: widget.expandFlag,
                   child: _buildCard(),
                 ),
-                StreamBuilder<bool>(
-                  stream: Rxdart.Observable.combineLatest3<User, String, String,
-                          bool>(
-                      ConfigHelper.instance.currentUserProperty.producer,
-                      order.producer.switchMap((currentOrder) =>
-                          currentOrder == null ? null : currentOrder.creator),
-                      order.producer.switchMap((currentOrder) =>
-                          currentOrder == null ? null : currentOrder.status),
-                      (currentUser, orderUserID, status) {
-                    if (currentUser == null ||
-                        orderUserID == null ||
-                        status == null) {
-                      return false;
-                    }
-                    if (status != orderStatus_Requested) {
-                      return false;
-                    }
-
-                    return currentUser.uid != orderUserID;
-                  }),
+                StreamBuilder<CardMode>(
+                  stream: mode.producer,
                   builder: (BuildContext context, snapshot) {
-                    if (!snapshot.hasData || !snapshot.data) return Offstage();
-                    return _buildButtons();
+                    if (!snapshot.hasData || snapshot.data == null)
+                      return Offstage();
+
+                    return _buildButtons(snapshot.data);
                   },
                 ),
               ],
@@ -105,210 +162,237 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   }
 
   Widget _buildCard() {
-    return Column(
-      children: <Widget>[
-        Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0)),
-          margin: EdgeInsets.fromLTRB(11, 0, 11, 11),
-          color: Colors.white,
-          elevation: 6.0,
-          child: Stack(
-            children: <Widget>[
-              StreamBuilder<String>(
-                  stream: order.producer.switchMap((order) => order != null
-                      ? order.status
-                      : Rxdart.Observable.just(null)),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return Offstage();
-                    return StatusColor(
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight:Radius.circular(6.0)),
-                      color: snapshot.data == orderStatus_Requested
-                          ? ColorHelper.availableColor
-                          : widget.channel.deliverer.value ==
-                                  order.value.delivererID.value
-                              ? ColorHelper.dabaoOrange
-                              : ColorHelper.notAvailableColor,
-                    );
-                  }),
-              Container(
-                margin: EdgeInsets.fromLTRB(10, 16, 10, 5),
-                child: Wrap(
-                  children: <Widget>[
-                    StreamBuilder(
-                      stream: order.producer.switchMap((order) => order != null
-                          ? order.deliveryLocationDescription
-                          : Rxdart.Observable.just(null)),
-                      builder: (context, snap) {
-                        if (!snap.hasData || snap.data == null)
-                          return Offstage();
-                        return ConfigurableExpansionTile(
-                          selectable: order.value,
-                          initiallyExpanded: false,
-                          header: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              _buildHeader(),
-                              Container(
-                                constraints: BoxConstraints(
-                                    maxWidth:
-                                        MediaQuery.of(context).size.width - 50),
-                                child: Flex(
-                                  direction: Axis.horizontal,
-                                  children: <Widget>[
-                                    Expanded(
-                                      flex: 5,
-                                      child: _buildDeliveryPeriod(),
+    return StreamBuilder(
+      stream: mode.producer,
+      builder: (context, modeSnap) {
+        if (modeSnap.data == null) return Offstage();
+        return Column(
+          children: <Widget>[
+            Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.0)),
+              margin: EdgeInsets.fromLTRB(11, 0, 11, 11),
+              color: Colors.white,
+              elevation: 6.0,
+              child: Stack(
+                children: <Widget>[
+                  topBar(modeSnap.data),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10, 16, 10, 5),
+                    child: Wrap(
+                      children: <Widget>[
+                        StreamBuilder(
+                          stream: order.producer.switchMap((order) =>
+                              order != null
+                                  ? order.deliveryLocationDescription
+                                  : Rxdart.Observable.just(null)),
+                          builder: (context, snap) {
+                            if (!snap.hasData || snap.data == null)
+                              return Offstage();
+                            return ConfigurableExpansionTile(
+                              selectable: order.value,
+                              initiallyExpanded: false,
+                              header: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  _buildHeader(),
+                                  Container(
+                                    constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width -
+                                                50),
+                                    child: Flex(
+                                      direction: Axis.horizontal,
+                                      children: <Widget>[
+                                        Expanded(
+                                          flex: 5,
+                                          child: _buildDeliveryPeriod(),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 6.0),
+                                            child: _buildQuantity(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 6.0),
-                                        child: _buildQuantity(),
-                                      ),
+                                  ),
+                                  SizedBox(
+                                    height: 17.0,
+                                  ),
+                                  Container(
+                                    constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width -
+                                                50),
+                                    child: Flex(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      direction: Axis.horizontal,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 2,
+                                          ),
+                                          child: Container(
+                                            height: 30,
+                                            child: Image.asset(
+                                                "assets/icons/red_marker_icon.png"),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 4,
+                                          child: _buildLocationDescription(
+                                              order.value),
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 8.0),
+                                            child: _buildTapToLocation(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 17.0,
-                              ),
-                              Container(
-                                constraints: BoxConstraints(
-                                    maxWidth:
-                                        MediaQuery.of(context).size.width - 50),
-                                child: Flex(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  direction: Axis.horizontal,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 2,
-                                      ),
-                                      child: Container(
-                                        height: 30,
-                                        child: Image.asset(
-                                            "assets/icons/red_marker_icon.png"),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: _buildLocationDescription(
-                                          order.value),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 8.0),
-                                        child: _buildTapToLocation(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              _buildStatusReport(order.value),
-                              Align(
-                                alignment: Alignment.center,
-                                child: StreamBuilder<bool>(
-                                  stream:
-                                      order.value.isSelectedProperty.producer,
-                                  builder: (BuildContext context, snapshot) {
-                                    if (!snapshot.hasData ||
-                                        snapshot.data == null ||
-                                        snapshot.data) return Offstage();
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  _buildStatusReport(modeSnap.data),
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: StreamBuilder<bool>(
+                                      stream: order
+                                          .value.isSelectedProperty.producer,
+                                      builder:
+                                          (BuildContext context, snapshot) {
+                                        if (!snapshot.hasData ||
+                                            snapshot.data == null ||
+                                            snapshot.data) return Offstage();
 
-                                    return Align(
-                                        alignment: Alignment.center,
-                                        child: Column(
+                                        return Align(
+                                            alignment: Alignment.center,
+                                            child: Column(
+                                              children: <Widget>[
+                                                Text(
+                                                  "Tap Card for Order Summary",
+                                                  textAlign: TextAlign.center,
+                                                  style: FontHelper.medium(
+                                                      ColorHelper
+                                                          .dabaoOffBlack9B,
+                                                      12),
+                                                ),
+                                                Icon(Icons.keyboard_arrow_down),
+                                              ],
+                                            ));
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              children: <Widget>[
+                                Column(
+                                  children: <Widget>[
+                                    _buildOrderItems(),
+                                    _buildMessage(order.value),
+                                    StreamBuilder<bool>(
+                                      stream: order
+                                          .value.isSelectedProperty.producer,
+                                      builder:
+                                          (BuildContext context, snapshot) {
+                                        if (!snapshot.hasData ||
+                                            snapshot.data == null ||
+                                            !snapshot.data) return Offstage();
+
+                                        return Column(
                                           children: <Widget>[
+                                            SizedBox(
+                                              height: 5,
+                                            ),
                                             Text(
-                                              "Tap Card for Order Summary",
-                                              textAlign: TextAlign.center,
+                                              "Tap to minimize",
                                               style: FontHelper.medium(
                                                   ColorHelper.dabaoOffBlack9B,
                                                   12),
                                             ),
-                                            Icon(Icons.keyboard_arrow_down),
+                                            Icon(Icons.keyboard_arrow_up),
                                           ],
-                                        ));
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          children: <Widget>[
-                            Column(
-                              children: <Widget>[
-                                _buildOrderItems(),
-                                _buildMessage(order.value),
-                                StreamBuilder<bool>(
-                                  stream:
-                                      order.value.isSelectedProperty.producer,
-                                  builder: (BuildContext context, snapshot) {
-                                    if (!snapshot.hasData ||
-                                        snapshot.data == null ||
-                                        !snapshot.data) return Offstage();
-
-                                    return Column(
-                                      children: <Widget>[
-                                        SizedBox(height: 5,),
-                                        Text(
-                                          "Tap to minimize",
-                                          style: FontHelper.medium(
-                                              ColorHelper.dabaoOffBlack9B, 12),
-                                        ),
-                                        Icon(Icons.keyboard_arrow_up),
-                                      ],
-                                    );
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 0,
-                                ),
+                                        );
+                                      },
+                                    ),
+                                    SizedBox(
+                                      height: 0,
+                                    ),
+                                  ],
+                                )
                               ],
-                            )
-                          ],
-                        );
-                      },
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget topBar(CardMode mode) {
+    Color color;
+    switch (mode) {
+      case CardMode.dabaoerAccepted:
+        color = ColorHelper.dabaoOrange;
+        break;
+
+      case CardMode.dabaoerCompleted:
+        color = ColorHelper.dabaoOffPaleBlue;
+        break;
+
+      case CardMode.dabaoerRequested:
+        color = ColorHelper.availableColor;
+        break;
+
+      default:
+        color = ColorHelper.notAvailableColor;
+    }
+
+    return StatusColor(
+      borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
+      color: color,
     );
   }
 
   Widget _buildMessage(Order order) {
     return StreamBuilder<String>(
-        stream: order.message,
-        builder: (context, snap) {
-          if (!snap.hasData) return Offstage();
-          return Container(
-      margin: EdgeInsets.only(top: 2),
-      padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
-      color: ColorHelper.dabaoOffWhiteF5,
-      child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text("Message to Dabaoer", style: FontHelper.bold12Black),
-              SizedBox(
-                height: 3,
-              ),
-              Text(snap.data, style: FontHelper.medium(Colors.black, 10))
-            ],
-          ));
-        },
-      
+      stream: order.message,
+      builder: (context, snap) {
+        if (!snap.hasData) return Offstage();
+        return Container(
+            margin: EdgeInsets.only(top: 2),
+            padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
+            color: ColorHelper.dabaoOffWhiteF5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text("Message to Dabaoer", style: FontHelper.bold12Black),
+                SizedBox(
+                  height: 3,
+                ),
+                Text(snap.data, style: FontHelper.medium(Colors.black, 10))
+              ],
+            ));
+      },
     );
   }
+
   Widget _buildHeader() {
     return Container(
       constraints:
@@ -535,48 +619,51 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
     );
   }
 
-  Widget _buildStatusReport(Order order) {
-    return StreamBuilder<String>(
-        stream: order.status,
-        builder: (context, statusSnap) {
-          if (!statusSnap.hasData) return Offstage();
-          return Row(
-            children: <Widget>[
-              Text(
-                'Status: ',
-                style: FontHelper.semiBold14Black,
-                overflow: TextOverflow.ellipsis,
-              ),
-              StreamBuilder<bool>(
-                stream: Rxdart.Observable.combineLatest2<String, String, bool>(
-                    order.delivererID, widget.channel.deliverer,
-                    (userID, channelDELIVERER) {
-                  if (userID == null || channelDELIVERER == null) return null;
+  Widget _buildStatusReport(CardMode mode) {
+    Color color;
+    String status = "";
+    switch (mode) {
+      case CardMode.dabaoerAccepted:
+        status = "Picked Up";
+        color = ColorHelper.dabaoOrange;
+        break;
 
-                  return userID == channelDELIVERER;
-                }),
-                builder: (BuildContext context, imDeliveryingSnap) {
-                  return Text(
-                    statusSnap.data == orderStatus_Requested
-                        ? 'Available for Pick Up'
-                        : imDeliveryingSnap.data == true &&
-                                    statusSnap.data == orderStatus_Accepted ||
-                                statusSnap.data == orderStatus_Completed
-                            ? 'Picked Up'
-                            : "Order Picked up by someone else",
-                    style: statusSnap.data == orderStatus_Requested
-                        ? FontHelper.semiBold14Available
-                        : imDeliveryingSnap.data == true &&
-                                statusSnap.data == orderStatus_Accepted
-                            ? FontHelper.semiBold(ColorHelper.dabaoOrange, 14.0)
-                            : FontHelper.semiBold14NotAvailable,
-                    overflow: TextOverflow.ellipsis,
-                  );
-                },
-              )
-            ],
-          );
-        });
+      case CardMode.dabaoerCompleted:
+        status = "Delivery Completed";
+        color = ColorHelper.dabaoOffPaleBlue;
+        break;
+
+      case CardMode.dabaoerRequested:
+        color = ColorHelper.availableColor;
+        status = "Avaliable for Pick Up";
+        break;
+
+      case CardMode.dabaoerAcceptedByOthers:
+        color = ColorHelper.notAvailableColor;
+        status = "Order has been picked up by someone else";
+        break;
+
+      case CardMode.dabaoerCancelled:
+        color = ColorHelper.notAvailableColor;
+        status = "Order has been cancelled";
+        break;
+
+      default:
+        color = ColorHelper.notAvailableColor;
+    }
+
+    return Row(children: <Widget>[
+      Text(
+        'Status: ',
+        style: FontHelper.semiBold14Black,
+        overflow: TextOverflow.ellipsis,
+      ),
+      Text(
+        status,
+        style: FontHelper.semiBold(color, 14.0),
+        overflow: TextOverflow.ellipsis,
+      )
+    ]);
   }
 
   Widget _buildOrderItems() {
@@ -674,84 +761,137 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
     );
   }
 
-  Widget _buildButtons() {
-    return StreamBuilder(
-        stream: order.producer.value.status,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return Offstage();
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
-                  child: RaisedButton(
-                    textColor: Colors.black,
-                    disabledColor: ColorHelper.disableColor,
-                    disabledTextColor: ColorHelper.disableTextColor,
-                    color: ColorHelper.availableColor,
-                    onPressed: snapshot.data == orderStatus_Requested
-                        ? () {
-                            showConfirm(order.value);
-                          }
-                        : null,
-                    child: Container(
-                      child: Text(
-                        'PICK UP ORDER',
-                        textAlign: TextAlign.center,
-                      ),
+  Widget _buildButtons(CardMode mode) {
+    switch (mode) {
+      case CardMode.dabaoerRequested:
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                child: RaisedButton(
+                  textColor: Colors.black,
+                  disabledColor: ColorHelper.disableColor,
+                  disabledTextColor: ColorHelper.disableTextColor,
+                  color: ColorHelper.availableColor,
+                  onPressed: () {
+                    showConfirm(order.value);
+                  },
+                  child: Container(
+                    child: Text(
+                      'PICK UP ORDER',
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
               ),
-              Expanded(
-                child: Padding(
-                    padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
-                    child: StreamBuilder<CounterOffer>(
-                        stream: widget.channel.counterOffer,
-                        builder: (context, snap) {
-                          return RaisedButton(
-                            textColor: Colors.white,
-                            disabledColor: ColorHelper.disableColor,
-                            disabledTextColor: ColorHelper.disableTextColor,
-                            color: ColorHelper.counterOfferColor,
-                            onPressed: snap.data == null ||
-                                    snap.data.status !=
-                                        CounterOffer.counterOffStatus_Open
-                                ? () {
-                                    showCounter(order.value);
-                                  }
-                                : () {
-                                    widget.channel.reject();
-                                    widget.channel.addMessage(
-                                        ConfigHelper
-                                                .instance
-                                                .currentUserProperty
-                                                .value
-                                                .name
-                                                .value +
-                                            " has cancelled the offer.",
-                                        ConfigHelper.instance
-                                            .currentUserProperty.value.uid,
-                                        null);
-                                  },
-                            child: Container(
-                              child: Text( snap.data == null ||
-                                    snap.data.status !=
-                                        CounterOffer.counterOffStatus_Open
-                                ?
-                                'COUNTER-OFFER': "CANCEL OFFER",
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                              ),
+            ),
+            Expanded(
+              child: Padding(
+                  padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                  child: StreamBuilder<CounterOffer>(
+                      stream: widget.channel.counterOffer,
+                      builder: (context, snap) {
+                        return RaisedButton(
+                          textColor: Colors.white,
+                          disabledColor: ColorHelper.disableColor,
+                          disabledTextColor: ColorHelper.disableTextColor,
+                          color: ColorHelper.counterOfferColor,
+                          onPressed: snap.data == null ||
+                                  snap.data.status !=
+                                      CounterOffer.counterOffStatus_Open
+                              ? () {
+                                  showCounter(order.value);
+                                }
+                              : () {
+                                  widget.channel.reject();
+                                  widget.channel.addMessage(
+                                      ConfigHelper.instance.currentUserProperty
+                                              .value.name.value +
+                                          " has cancelled the offer.",
+                                      ConfigHelper.instance.currentUserProperty
+                                          .value.uid,
+                                      null);
+                                },
+                          child: Container(
+                            child: Text(
+                              snap.data == null ||
+                                      snap.data.status !=
+                                          CounterOffer.counterOffStatus_Open
+                                  ? 'COUNTER-OFFER'
+                                  : "CANCEL OFFER",
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
                             ),
-                          );
-                        })),
+                          ),
+                        );
+                      })),
+            ),
+          ],
+        );
+      case CardMode.dabaoerAccepted:
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                child: RaisedButton(
+                  textColor: Colors.black,
+                  color: ColorHelper.dabaoOrange,
+                  onPressed: () {
+                    Navigator.of(context).push(FadeRoute(
+                        widget: DabaoerViewOrderListPage(
+                      order: Order.fromUID(order.value.uid),
+                    )));
+                  },
+                  child: Container(
+                    child: Text(
+                      'Go to Order',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
               ),
-            ],
-          );
-        });
+            ),
+          ],
+        );
+      case CardMode.dabaoerCompleted:
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(11, 5, 11, 5),
+                child: RaisedButton(
+                  textColor: Colors.black,
+                  color: ColorHelper.dabaoOffPaleBlue,
+                  onPressed: () {
+                    Navigator.of(context).push(FadeRoute(
+                        widget: DabaoerViewOrderListPage(
+                      order: Order.fromUID(order.value.uid),
+                    )));
+                  },
+                  child: Container(
+                    child: Text(
+                      'Tap To View',
+                      textAlign: TextAlign.center,
+                      style: FontHelper.semiBold(Colors.white, 14.0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+
+      default:
+        return Offstage();
+    }
   }
 
   showConfirm(Order order) {

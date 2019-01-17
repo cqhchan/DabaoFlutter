@@ -160,59 +160,67 @@ class _DateTimePickerState extends State<DateTimePicker>
           width: 10.0,
         ),
         GestureDetector(
-          onTap: () async {
-            // if (Platform.isIOS) {
+            onTap: () async {
+              // if (Platform.isIOS) {
 
-            await showModalBottomSheet(
-                context: context,
-                builder: (context) {
-                  return CupertinoDatePicker(
-                    use24hFormat: true,
-                    initialDateTime: selectedDate.value.isBefore(startTime)
-                        ? startTime
-                        : selectedDate.value.isAfter(endTime)
-                            ? endTime
-                            : selectedDate.value,
-                    mode: CupertinoDatePickerMode.dateAndTime,
-                    onDateTimeChanged: (DateTime newDateTime) {
-                      selectedDate.value = newDateTime;
-                    },
-                    minimumDate: DateTimeHelper.sameDay(startTime, endTime)
-                        ? startTime
-                        : startTime.subtract(Duration(days: 1)),
-                    maximumDate: endTime,
-                  );
-                });
-          },
-          child: StreamBuilder<DateTime>(
-            stream: selectedDate.producer,
-            builder: (context, snap) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Container(
-                      width: 140,
-                      child: Align(
-                          alignment: Alignment.center,
+              await showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return CupertinoDatePicker(
+                      use24hFormat: true,
+                      initialDateTime: selectedDate.value.isBefore(startTime)
+                          ? startTime
+                          : selectedDate.value.isAfter(endTime)
+                              ? endTime
+                              : selectedDate.value,
+                      mode: CupertinoDatePickerMode.dateAndTime,
+                      onDateTimeChanged: (DateTime newDateTime) {
+                        selectedDate.value = newDateTime;
+                      },
+                      minimumDate: DateTimeHelper.sameDay(startTime, endTime)
+                          ? startTime
+                          : startTime.subtract(Duration(days: 1)),
+                      maximumDate: endTime,
+                    );
+                  });
+            },
+            child: Card(
+          color: ColorHelper.dabaoOffWhiteF5,
+          // decoration: BoxDecoration(color: ColorHelper.dabaoOffWhiteF5, borderRadius: BorderRadius.circular(8.0), boxShadow: [BoxShadow()]),
+          // padding: EdgeInsets.only(right: 5),
+          child: Container(
+              padding: EdgeInsets.only(right: 5.0),
+              child: StreamBuilder<DateTime>(
+                stream: selectedDate.producer,
+                builder: (context, snap) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      Container(
+                          width: 140,
+                          child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                  snap.data != null
+                                      ? DateTimeHelper.hourAndMin12Hour(snap.data)
+                                      : "12:00",
+                                  style: FontHelper.semiBold(Colors.black, 45)))),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          padding: EdgeInsets.only(bottom: 6),
                           child: Text(
                               snap.data != null
-                                  ? DateTimeHelper.hourAndMin12Hour(snap.data)
-                                  : "00:00",
-                              style: FontHelper.semiBold(Colors.black, 45)))),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      padding: EdgeInsets.only(bottom: 6),
-                      child: Text(
-                          snap.data != null
-                              ? formatDate(snap.data, [am])
-                              : "AM",
-                          style: FontHelper.semiBold(Colors.black, 22)),
-                    ),
-                  )
-                ],
-              );
-            },
+                                  ? formatDate(snap.data, [am])
+                                  : "AM",
+                              style: FontHelper.semiBold(Colors.black, 22)),
+                        ),
+                      )
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ],
@@ -238,12 +246,13 @@ class _DateTimePickerState extends State<DateTimePicker>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        _buildDeliveryPeriod(widget.order),
-        _buildArrivalTime(widget.order),
-      ],
+    return  Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _buildDeliveryPeriod(widget.order),
+          _buildArrivalTime(widget.order),
+        ],
+
     );
   }
 }

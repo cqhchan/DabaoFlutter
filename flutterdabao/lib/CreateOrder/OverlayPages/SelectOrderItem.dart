@@ -200,7 +200,7 @@ class _OrderItemSuggestedCell extends StatelessWidget {
                         child: Container(
                           margin: EdgeInsets.only(left: 8.0, right: 8.0),
                           child: Text(
-                            'Max: ${formatCurrency.format(orderItem.price.value)}',
+                            orderItem.price.value == null? 'Max: \$0.00' :'Max: ${formatCurrency.format(orderItem.price.value)}',
                             style: FontHelper.regular(Colors.black, 12.0),
                           ),
                         )),

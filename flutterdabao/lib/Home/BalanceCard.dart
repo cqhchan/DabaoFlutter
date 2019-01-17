@@ -78,7 +78,8 @@ class BalanceCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Image.asset("assets/icons/reward_gift.png"),
+            Container(
+                height: 40, child: Image.asset("assets/icons/reward_gift.png")),
             Text("DabaoRewards", style: FontHelper.regular12Black)
           ],
         ),
@@ -93,7 +94,7 @@ class BalanceCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>SelectAccountPage()),
+          MaterialPageRoute(builder: (context) => SelectAccountPage()),
         );
       },
       child: Container(
@@ -104,10 +105,8 @@ class BalanceCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Image.asset("assets/icons/cash_out.png"),
-            SizedBox(
-              height: 5,
-            ),
+            Container(
+                height: 40, child: Image.asset("assets/icons/cash_out.png")),
             Text("Cash Out", style: FontHelper.regular12Black)
           ],
         ),
@@ -136,7 +135,9 @@ class BalanceCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Image.asset("assets/icons/wallet_voucher.png"),
+            Container(
+                height: 40,
+                child: Image.asset("assets/icons/MyVouchersIcon.png")),
             Text("Your Vouchers", style: FontHelper.regular12Black)
           ],
         ),
@@ -145,74 +146,65 @@ class BalanceCard extends StatelessWidget {
   }
 
   Widget topWidget() {
-    return Container(
-      margin: EdgeInsets.fromLTRB(15.0, 15.0, 10.0, 10.0),
-      child: Center(
-          child: Row(
-        children: <Widget>[
-          Text(
-            "Dabao Balance",
-            style: FontHelper.semiBold16Black,
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) {
-                    return TransactionsPage();
-                  }),
-                );
-              },
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: StreamBuilder<double>(
-                    stream: ConfigHelper
-                        .instance.currentUserWalletProperty.producer
-                        .switchMap((wallet) => wallet == null
-                            ? null
-                            : Observable.combineLatest2<double, double, double>(
-                                (wallet.currentValue), (wallet.inWithdrawal),
-                                (currentValue, inWithdrawalValue) {
-                                if (currentValue != null &&
-                                    inWithdrawalValue != null) {
-                                  return currentValue - inWithdrawalValue;
-                                }
-                                return 0.0;
-                              })),
-                    builder: (context, snap) {
-                      if (!snap.hasData)
+    return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return TransactionsPage();
+            }),
+          );
+        },
+        child: Container(
+          color: Colors.transparent,
+          margin: EdgeInsets.fromLTRB(15.0, 15.0, 10.0, 10.0),
+          child: Center(
+              child: Row(
+            children: <Widget>[
+              Text(
+                "Dabao Balance",
+                style: FontHelper.semiBold16Black,
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: StreamBuilder<double>(
+                      stream: ConfigHelper
+                          .instance.currentUserWalletProperty.producer
+                          .switchMap((wallet) => wallet == null
+                              ? null
+                              : Observable.combineLatest2<double, double,
+                                      double>(
+                                  (wallet.currentValue), (wallet.inWithdrawal),
+                                  (currentValue, inWithdrawalValue) {
+                                  if (currentValue != null &&
+                                      inWithdrawalValue != null) {
+                                    return currentValue - inWithdrawalValue;
+                                  }
+                                  return 0.0;
+                                })),
+                      builder: (context, snap) {
+                        if (!snap.hasData)
+                          return Text(
+                            "\$0.00",
+                            style: FontHelper.semiBold16Black,
+                          );
+
                         return Text(
-                          "\$0.00",
+                          StringHelper.doubleToPriceString(snap.data),
                           style: FontHelper.semiBold16Black,
                         );
-
-                      return Text(
-                        StringHelper.doubleToPriceString(snap.data),
-                        style: FontHelper.semiBold16Black,
-                      );
-                    }),
+                      }),
+                ),
               ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) {
-                  return TransactionsPage();
-                }),
-              );
-            },
-            child: Container(
-                padding: EdgeInsets.only(right: 5.0, left: 5.0),
-                child: Icon(
-                  Icons.arrow_forward_ios,
-                  color: ColorHelper.dabaoOffGrey70,
-                )),
-          )
-        ],
-      )),
-    );
+              Container(
+                  padding: EdgeInsets.only(right: 5.0, left: 5.0),
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    color: ColorHelper.dabaoOffGrey70,
+                  )),
+            ],
+          )),
+        ));
   }
 }

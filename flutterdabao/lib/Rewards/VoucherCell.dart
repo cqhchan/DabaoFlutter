@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/CustomDecorations.dart';
+import 'package:flutterdabao/CustomWidget/CustomDialogs.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
@@ -27,6 +28,9 @@ class VoucherCell extends StatefulWidget {
     return VoucherCellState();
   }
 }
+
+double tapPositionX;
+double tapPositionY;
 
 class VoucherCellState extends State<VoucherCell> {
   @override
@@ -88,9 +92,35 @@ class VoucherCellState extends State<VoucherCell> {
                       child: StreamBuilder<String>(
                         stream: widget.voucher.type,
                         builder: (context, snap) {
-                          return Text(
-                              snap.hasData ? snap.data.toUpperCase() : "Error",
-                              style: FontHelper.bold(Colors.black, 12.0));
+                          return Row(
+                            children: <Widget>[
+                              Text(
+                                  snap.hasData
+                                      ? snap.data.toUpperCase()
+                                      : "Error",
+                                  style: FontHelper.bold(Colors.black, 12.0)),
+                              GestureDetector(
+                                  onTapDown: (details) {
+                                    tapPositionX = details.globalPosition.dx;
+                                    tapPositionY = details.globalPosition.dy;
+                                  },
+                                  onTap: () {
+                                    showInfomationDialog(
+                                        x: tapPositionX,
+                                        y: tapPositionY,
+                                        context: context,
+                                        subTitle:
+                                            "This is our estimated amount for you to pay to your Dabaoer, taking into consideration your promo code (if any) that are applied to delivery fee. ",
+                                        title: "What is this amount");
+                                  },
+                                  child: Container(
+                                      color: Colors.transparent,
+                                      padding: EdgeInsets.fromLTRB(
+                                          10.0, 0.0, 5.0, 0.0),
+                                      child: Image.asset(
+                                          'assets/icons/question_mark.png')))
+                            ],
+                          );
                         },
                       ),
                     ),

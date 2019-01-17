@@ -373,144 +373,146 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 ],
               ),
             ),
-            Container(
-              padding: EdgeInsets.only(left: 40),
-              child: SingleChildScrollView(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  GestureDetector(
-                    child: Container(
-                      margin: EdgeInsets.only(top: 20),
-                      height: 40,
-                      child: Text(
-                        'Inbox',
-                        style: FontHelper.semiBold12Black,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(context, SlideUpRoute(widget: ChatPage()));
-                    },
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      height: 40,
-                      child: Text(
-                        'History',
-                        style: FontHelper.semiBold12Black,
-                      ),
-                    ),
-                    onTap: () {},
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      height: 40,
-                      child: Text(
-                        'Dabao Balance',
-                        style: FontHelper.semiBold12Black,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return TransactionsPage();
-                      }));
-                    },
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      height: 40,
-                      child: Text(
-                        'DabaoRewards',
-                        style: FontHelper.semiBold12Black,
-                      ),
-                    ),
-                    onTap: () {
-                      // Then close the drawer
-                      Navigator.pop(context);
-                      Navigator.push(
-                          context,
-                          FadeRoute(
-                              widget: RewardsTabBarPage(
-                            initalIndex: 1,
-                          )));
-                    },
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      margin: EdgeInsets.only(top: 20),
-                      height: 40,
-                      child: Text(
-                        'About Dabao',
-                        style: FontHelper.semiBold12Black,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(FadeRoute(
-                        widget: WebviewScaffold(
-                          url: "https://www.dabaoapp.sg/termsandconditions",
-                          appBar: new AppBar(
-                            title: new Text("Terms & Conditions"),
-                          ),
+            Expanded(
+                          child: Container(
+                padding: EdgeInsets.only(left: 40),
+                child: SingleChildScrollView(
+                    child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    GestureDetector(
+                      child: Container(
+                        margin: EdgeInsets.only(top: 20),
+                        height: 40,
+                        child: Text(
+                          'Inbox',
+                          style: FontHelper.semiBold12Black,
                         ),
-                      ));
-                    },
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      height: 40,
-                      child: Text(
-                        'FAQs',
-                        style: FontHelper.semiBold12Black,
                       ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(context, SlideUpRoute(widget: ChatPage()));
+                      },
                     ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(FadeRoute(
-                        widget: WebviewScaffold(
-                          url: "https://www.dabaoapp.sg/termsandconditions",
-                          appBar: new AppBar(
-                            title: new Text("Terms & Conditions"),
-                          ),
+                    GestureDetector(
+                      child: Container(
+                        height: 40,
+                        child: Text(
+                          'History',
+                          style: FontHelper.semiBold12Black,
                         ),
-                      ));
-                    },
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      height: 40,
-                      child: Text(
-                        'Contact Us',
-                        style: FontHelper.semiBold12Black,
                       ),
+                      onTap: () {},
                     ),
-                    onTap: () async {
-                      await launch(
-                          "mailto:admin@dabaoapp.sg?subject=Contact Dabao&body=Hello Dabao Team");
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      margin: EdgeInsets.only(top: 40),
-                      height: 40,
-                      child: Text(
-                        'Log Out',
-                        style: FontHelper.semiBold12Black,
+                    GestureDetector(
+                      child: Container(
+                        height: 40,
+                        child: Text(
+                          'Dabao Balance',
+                          style: FontHelper.semiBold12Black,
+                        ),
                       ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return TransactionsPage();
+                        }));
+                      },
                     ),
-                    onTap: () {
-                      FirebaseAuth.instance.signOut();
-                    },
-                  ),
-                ],
-              )),
+                    GestureDetector(
+                      child: Container(
+                        height: 40,
+                        child: Text(
+                          'DabaoRewards',
+                          style: FontHelper.semiBold12Black,
+                        ),
+                      ),
+                      onTap: () {
+                        // Then close the drawer
+                        Navigator.pop(context);
+                        Navigator.push(
+                            context,
+                            FadeRoute(
+                                widget: RewardsTabBarPage(
+                              initalIndex: 1,
+                            )));
+                      },
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        margin: EdgeInsets.only(top: 20),
+                        height: 40,
+                        child: Text(
+                          'About Dabao',
+                          style: FontHelper.semiBold12Black,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(FadeRoute(
+                          widget: WebviewScaffold(
+                            url: "https://www.dabaoapp.sg/termsandconditions",
+                            appBar: new AppBar(
+                              title: new Text("Terms & Conditions"),
+                            ),
+                          ),
+                        ));
+                      },
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        height: 40,
+                        child: Text(
+                          'FAQs',
+                          style: FontHelper.semiBold12Black,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(FadeRoute(
+                          widget: WebviewScaffold(
+                            url: "https://www.dabaoapp.sg/termsandconditions",
+                            appBar: new AppBar(
+                              title: new Text("Terms & Conditions"),
+                            ),
+                          ),
+                        ));
+                      },
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        height: 40,
+                        child: Text(
+                          'Contact Us',
+                          style: FontHelper.semiBold12Black,
+                        ),
+                      ),
+                      onTap: () async {
+                        await launch(
+                            "mailto:admin@dabaoapp.sg?subject=Contact Dabao&body=Hello Dabao Team");
+                        // Update the state of the app
+                        // ...
+                        // Then close the drawer
+                        Navigator.pop(context);
+                      },
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        margin: EdgeInsets.only(top: 40),
+                        height: 40,
+                        child: Text(
+                          'Log Out',
+                          style: FontHelper.semiBold12Black,
+                        ),
+                      ),
+                      onTap: () {
+                        FirebaseAuth.instance.signOut();
+                      },
+                    ),
+                  ],
+                )),
+              ),
             ),
           ],
         ),

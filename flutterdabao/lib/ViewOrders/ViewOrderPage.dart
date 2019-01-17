@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 import 'package:flutterdabao/Chat/Conversation.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
+import 'package:flutterdabao/CustomWidget/CustomDialogs.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
 import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
@@ -236,6 +237,9 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
     );
   }
 
+  double tapPositionX;
+  double tapPositionY;
+
   StreamBuilder<bool> buildConfirmationProofIcon() {
     return StreamBuilder<bool>(
       stream: Observable.combineLatest3<String, String, User, bool>(
@@ -263,9 +267,32 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
               SizedBox(
                 height: 10,
               ),
-              Text(
-                "Tap icon to go to confirmation proof page",
-                style: FontHelper.regular(Colors.black, 12.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    "Tap icon to go to confirmation proof page",
+                    style: FontHelper.regular(Colors.black, 12.0),
+                  ),
+                  GestureDetector(
+                      onTapDown: (details) {
+                        tapPositionX = details.globalPosition.dx;
+                        tapPositionY = details.globalPosition.dy;
+                      },
+                      onTap: () {
+                        showInfomationDialog(
+                            x: tapPositionX,
+                            y: tapPositionY,
+                            context: context,
+                            subTitle:
+                                "Tapping on this icon will take you to the proof of confirmation page, which you will need to flash to the stall merchant to receive your reward for helping someone dabao food!",
+                            title: "What is this icon for?");
+                      },
+                      child: Container(
+                          color: Colors.transparent,
+                          padding: EdgeInsets.fromLTRB(10.0, 5.0, 5.0, 5.0),
+                          child: Image.asset('assets/icons/question_mark.png')))
+                ],
               ),
             ],
           ),
@@ -686,24 +713,48 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
       builder: (BuildContext context, snapshot) {
         if (!snapshot.hasData || snapshot.data == null) return Offstage();
         return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Text("Total", style: FontHelper.bold14Black),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("max.", style: FontHelper.regular12Black),
-                  SizedBox(
-                    width: 5.0,
-                  ),
-                  Text(StringHelper.doubleToPriceString(snapshot.data),
-                      style: FontHelper.bold14Black),
-                ],
+              Text("Pay to Dabaoer", style: FontHelper.bold14Black),
+              GestureDetector(
+                  onTapDown: (details) {
+                    tapPositionX = details.globalPosition.dx;
+                    tapPositionY = details.globalPosition.dy;
+                  },
+                  onTap: () {
+                    showInfomationDialog(
+                        x: tapPositionX,
+                        y: tapPositionY,
+                        context: context,
+                        subTitle:
+                            "This is our estimated amount for you to pay to your Dabaoer, taking into consideration your promo code (if any) that are applied to delivery fee. ",
+                        title: "What is this amount");
+                  },
+                  child: Container(
+                      color: Colors.transparent,
+                      padding: EdgeInsets.fromLTRB(10.0, 5.0, 5.0, 5.0),
+                      child: Image.asset('assets/icons/question_mark.png'))),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text("max.", style: FontHelper.regular12Black),
+                    SizedBox(
+                      width: 5.0,
+                    ),
+                    Text(StringHelper.doubleToPriceString(snapshot.data),
+                        style: FontHelper.bold14Black),
+                  ],
+                ),
               )
             ]);
       },
     );
   }
+
+  double tapPositionX;
+  double tapPositionY;
 
   Widget buildUser(User user) {
     return Row(

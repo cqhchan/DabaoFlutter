@@ -15,7 +15,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class BrowseOrderTabView extends StatefulWidget {
-
   final Function(int tab) moveToTab;
   const BrowseOrderTabView({Key key, this.moveToTab}) : super(key: key);
 
@@ -27,12 +26,11 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
         HavingGoogleMapPlaces,
         HavingSubscriptionMixin,
         AutomaticKeepAliveClientMixin<BrowseOrderTabView> {
-
   @override
   bool get wantKeepAlive => true;
 
   MutableProperty<List<Order>> searchOrders =
-      MutableProperty<List<Order>>(List());
+      MutableProperty<List<Order>>(null);
   BehaviorSubject<LatLng> searchLocation;
   BehaviorSubject<int> searchRadius;
 
@@ -64,10 +62,13 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
     }).switchMap((list) {
       return combineAndMerge<Order>(list);
     }).map((orders) {
-      orders.removeWhere((order) =>
+      List<Order> tempOrders = List.from(orders);
+      tempOrders.removeWhere((order) =>
           order.creator.value ==
           ConfigHelper.instance.currentUserProperty.value.uid);
-      return orders;
+      tempOrders.sort((lhs, rhs) => rhs.createdDeliveryTime.value
+          .compareTo(lhs.createdDeliveryTime.value));
+      return tempOrders;
     })));
   }
 
@@ -98,7 +99,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                       setState(() {
                         searchText = description;
                       });
-                    },searchText == "Current Location" ? "" : searchText);
+                    }, searchText == "Current Location" ? "" : searchText);
                   },
                   child: Container(
                     height: 30.0,
@@ -160,17 +161,23 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
             ),
           ),
           Expanded(
-            child: OrderList(
-              onCompleteCallBack: (){
-                if (widget.moveToTab != null){
-                  widget.moveToTab(1);
-                }
-              },
-              context: context,
-              input: searchOrders.producer,
-              location: ConfigHelper.instance.currentLocationProperty.value,
-            ),
-          ),
+              child: StreamBuilder(
+            stream: searchOrders.producer,
+            builder: (context, snap) {
+              if (!snap.hasData)
+                return Center(child: CircularProgressIndicator());
+              return OrderList(
+                onCompleteCallBack: () {
+                  if (widget.moveToTab != null) {
+                    widget.moveToTab(1);
+                  }
+                },
+                context: context,
+                input: searchOrders.producer,
+                location: ConfigHelper.instance.currentLocationProperty.value,
+              );
+            },
+          )),
         ],
       ),
     );

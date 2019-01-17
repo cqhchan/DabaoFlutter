@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 import 'package:flutterdabao/CustomWidget/Buttons/ArrowButton.dart';
+import 'package:flutterdabao/CustomWidget/CustomDialogs.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
@@ -304,15 +305,41 @@ class _CheckoutPageState extends State<CheckoutPage>
         });
   }
 
+  double tapPositionX;
+  double tapPositionY;
   Container buildPrice() {
     return Container(
       padding: EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 5.0),
       child: Row(
         children: <Widget>[
           Expanded(
-              child: Text(
-            "Delivery Fee",
-            style: FontHelper.bold(Colors.black, 14.0),
+              child: Row(
+            children: <Widget>[
+              Text(
+                "Delivery Fee",
+                style: FontHelper.bold(Colors.black, 14.0),
+              ),
+              GestureDetector(
+                  onTapDown: (details) {
+                    tapPositionX = details.globalPosition.dx;
+                    tapPositionY = details.globalPosition.dy;
+                  },
+                  onTap: () {
+                    showInfomationDialog(
+                        bgColor: ColorHelper.dabaoOrange,
+                        textColor: Colors.black,
+                        x: tapPositionX,
+                        y: tapPositionY,
+                        context: context,
+                        subTitle:
+                            "Delivery fee refers to the amount you're willing to pay the Dabaoer for picking up and delivering your order. We have recommended a fee based on the number of items you have in your order cart. Move the slider accordingly to adjust!",
+                        title: "What is Delivery Fee? ");
+                  },
+                  child: Container(
+                      color: Colors.transparent,
+                      padding: EdgeInsets.fromLTRB(10.0, 5.0, 5.0, 5.0),
+                      child: Image.asset('assets/icons/question_mark.png'))),
+            ],
           )),
           StreamBuilder<double>(
             stream: actualDeliveryFeeProperty.producer,
@@ -397,14 +424,15 @@ class _CheckoutPageState extends State<CheckoutPage>
                       Expanded(
                         child: Align(
                           alignment: Alignment.center,
-                          child:  Text("Recommended", style: FontHelper.medium(Colors.black, 12.0)),
+                          child: Text("Recommended",
+                              style: FontHelper.medium(Colors.black, 12.0)),
                         ),
                       ),
-                     
                       Expanded(
                         child: Align(
                           alignment: Alignment.centerRight,
-                          child: Text(StringHelper.doubleToPriceString(snap.data * 2),
+                          child: Text(
+                              StringHelper.doubleToPriceString(snap.data * 2),
                               style: FontHelper.medium(Colors.black, 12.0)),
                         ),
                       ),
