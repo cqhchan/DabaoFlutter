@@ -61,7 +61,7 @@ class User extends FirebaseType {
               .collection(this.className)
               .document(this.uid)
               .collection("vouchers")
-              .where(Voucher.statusKey, isEqualTo: voucher_Status_InUse))
+              .where(Voucher.statusKey, isEqualTo: voucher_Status_InUsed))
           .observable);
     }
     return _listOfInUsedVouchers;
@@ -220,7 +220,7 @@ class User extends FirebaseType {
           .setData({emailKey: email}, merge: true);
   }
 
-    void setName(String name) {
+  void setName(String name) {
     if (name != null)
       Firestore.instance
           .collection(className)
@@ -256,32 +256,37 @@ class User extends FirebaseType {
     }, merge: true);
   }
 
-
-  void setProfileImage(
-      String pi) {
+  void setProfileImage(String pi) {
     Firestore.instance.collection('/users').document(uid).setData({
       profileImageKey: pi,
     }, merge: true);
   }
 
-  Future<Uri> referalLink() async {
-    final DynamicLinkParameters parameters = DynamicLinkParameters(
-      dynamicLinkParametersOptions: DynamicLinkParametersOptions(
-          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short),
-      domain: 'dabaotest.page.link',
-      link: Uri.parse(
-          'https://www.dabaoapp.sg/?invitedby=${ConfigHelper.instance.currentUserProperty.value.uid}'),
-      androidParameters: AndroidParameters(
-        packageName: 'com.example.android',
-        minimumVersion: 125,
-      ),
-      iosParameters: IosParameters(
-        bundleId: 'com.example.ios',
-        minimumVersion: '1.0.1',
-        appStoreId: '123456789',
-      ),
-    );
-    final ShortDynamicLink shortDynamicLink = await parameters.buildShortLink();
-    return shortDynamicLink.shortUrl;
+  Uri _referalLink;
+
+  Future<Uri> get referalLink async {
+    if (_referalLink == null) {
+      final DynamicLinkParameters parameters = DynamicLinkParameters(
+        dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+            shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short),
+        domain: 'dabaotest.page.link',
+        link: Uri.parse(
+            'https://www.dabaoapp.sg/?invitedby=${ConfigHelper.instance.currentUserProperty.value.uid}'),
+        androidParameters: AndroidParameters(
+          packageName: 'com.example.android',
+          minimumVersion: 125,
+        ),
+        iosParameters: IosParameters(
+          bundleId: 'com.example.ios',
+          minimumVersion: '1.0.1',
+          appStoreId: '123456789',
+        ),
+      );
+      final ShortDynamicLink shortDynamicLink =
+          await parameters.buildShortLink();
+      _referalLink = shortDynamicLink.shortUrl;
+    }
+
+    return _referalLink;
   }
 }

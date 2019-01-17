@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
+import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
@@ -29,14 +30,13 @@ class _TransactionsState extends State<TransactionsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorHelper.dabaoOffWhiteF5,
       appBar: AppBar(
-        actions: <Widget>[
-          ChatNavigationButton(
-            bgColor: ColorHelper.dabaoOrange,
-          )
-        ],
+        backgroundColor: Colors.white,
+        actions: <Widget>[ChatNavigationButton(bgColor: Colors.white)],
         centerTitle: true,
-        title: Text('Dabao Balance', style: FontHelper.header3TextStyle),
+        title: Text('Dabao Balance (SGD)',
+            style: FontHelper.semiBold(Colors.black, 18.0)),
       ),
       body: _buildTransactionPage(),
     );
@@ -47,17 +47,24 @@ class _TransactionsState extends State<TransactionsPage>
       direction: Axis.vertical,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Flex(
-          direction: Axis.horizontal,
-          children: <Widget>[
-            _buildCurrentBalance(),
-            Container(
-              height: 60,
-              width: 1.0,
-              color: Color(0x11000000),
-            ),
-            _buildInWithdrawalThisWeek(),
-          ],
+        SizedBox(
+          height: 15,
+        ),
+        Line(),
+        Container(
+          color: Colors.white,
+          child: Flex(
+            direction: Axis.horizontal,
+            children: <Widget>[
+              _buildCurrentBalance(),
+              Container(
+                height: 60,
+                width: 1.0,
+                color: Color(0x11000000),
+              ),
+              _buildInWithdrawalThisWeek(),
+            ],
+          ),
         ),
         Divider(
           height: 0,
@@ -66,7 +73,7 @@ class _TransactionsState extends State<TransactionsPage>
           padding: const EdgeInsets.all(10.0),
           child: Text(
             'Transactions',
-            style: FontHelper.regular10Black,
+            style: FontHelper.regular14Black,
           ),
         ),
         Divider(
@@ -180,6 +187,10 @@ class _TransactionsState extends State<TransactionsPage>
           builder: (context, snapshot) {
             if (!snapshot.hasData)
               return Center(child: Text('Please Check Your Connection'));
+            if (snapshot.data.length == 0)
+              return Center(
+                child: Text("You have no transactions this week"),
+              );
             List<Transact> temp = List.from(snapshot.data);
             temp.sort((lhs, rhs) =>
                 rhs.createdDate.value.compareTo(lhs.createdDate.value));
@@ -220,342 +231,251 @@ class _TransactionsState extends State<TransactionsPage>
   Widget _buildReward(Transact data) {
     return Column(
       children: <Widget>[
-        ListTile(
-          isThreeLine: true,
-          leading: StreamBuilder<User>(
-            stream: currentUser.producer,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData)
-                return FittedBox(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(50.0),
-                    child: SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: Image.asset(
-                          'assets/icons/profile_icon.png',
-                          fit: BoxFit.fill,
-                        )),
-                  ),
-                );
-              return FittedBox(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50.0),
-                  child: SizedBox(
-                    height: 50,
-                    width: 50,
-                    child: CachedNetworkImage(
-                      imageUrl: snapshot.data.thumbnailImage.value,
-                      placeholder: GlowingProgressIndicator(
-                        child: Icon(
-                          Icons.image,
-                          size: 50,
-                        ),
-                      ),
-                      errorWidget: Icon(Icons.error),
-                    ),
-                  ),
+        Container(
+          color: Colors.white,
+          height: 80,
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: Row(children: <Widget>[
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text(
+                  "Dabao PTE LTD",
+                  style: FontHelper.regular10Black,
                 ),
-              );
-            },
-          ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  StreamBuilder<User>(
-                      stream: currentUser.producer,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return Text('Dabao Buddy');
-                        return Text(
-                          snapshot.data.name.value,
-                          style: FontHelper.regular10Black,
-                        );
-                      }),
-                  Text(
-                    DateTimeHelper.convertTimeToDisplayString(
-                        data.createdDate.value),
-                    style: FontHelper.semiBold10Grey,
-                  )
-                ],
-              ),
-            ],
-          ),
-          subtitle: Flex(
-            direction: Axis.horizontal,
-            children: <Widget>[
-              Expanded(
-                child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Reward Title: ' + data.rewardTitle.value,
-                      style: FontHelper.semiBold16Black,
-                    )),
-              ),
-              Expanded(
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '+S' +
-                          (StringHelper.doubleToPriceString(
-                              data.amount.value * 1.0)),
-                      style: FontHelper.semiBold14Black,
-                    )),
-              )
-            ],
-          ),
+                StreamBuilder(
+                  stream: data.rewardTitle,
+                  builder: (context, snap) {
+                    if (snap.data == null) return Offstage();
+                    return Text(
+                      "Reward:" + snap.data,
+                      style: FontHelper.semiBold(Colors.black, 16),
+                    );
+                  },
+                ),
+                Text(
+                  "",
+                  style: FontHelper.regular10Black,
+                ),
+              ],
+            )),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                StreamBuilder(
+                  stream: data.createdDate,
+                  builder: (context, snap) {
+                    if (snap.data == null) return Offstage();
+                    return Text(
+                      DateTimeHelper.convertTimeToDisplayString(snap.data),
+                      style: FontHelper.semiBold(Colors.black, 10),
+                    );
+                  },
+                ),
+                StreamBuilder(
+                  stream: data.amount,
+                  builder: (context, snap) {
+                    if (snap.data == null) return Offstage();
+                    return Text(
+                      "+" + StringHelper.doubleToPriceString(snap.data),
+                      style: FontHelper.semiBold(Colors.black, 14),
+                    );
+                  },
+                ),
+                Text(
+                  "",
+                  style: FontHelper.regular10Black,
+                ),
+              ],
+            ),
+          ]),
         ),
-        Divider(
-          height: 0,
-        )
+        Line()
       ],
     );
   }
 
   Widget _buildPayment(Transact data) {
-    return StreamBuilder<User>(
-        stream: data.orderID.switchMap(
-          (orderID) => orderID == null
-              ? null
-              : Order.fromUID(orderID)
-                  .creator
-                  .where((uid) => uid != null)
-                  .map((creatorID) {
-                  return creatorID == null ? null : User.fromUID(creatorID);
-                }),
-        ),
-        builder: (context, user) {
-          if (!user.hasData || user.data == null) {
-            return Offstage();
-          } else if (user.hasData)
-            return Column(
+    return Column(
+      children: <Widget>[
+        Container(
+          color: Colors.white,
+          height: 80,
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: Row(children: <Widget>[
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                ListTile(
-                  isThreeLine: true,
-                  leading: FittedBox(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50.0),
-                      child: SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: user.data.thumbnailImage.value == null
-                            ? Image.asset(
-                                'assets/icons/profile_icon.png',
-                                fit: BoxFit.fill,
-                              )
-                            : _buildAvatar(user),
-                      ),
+                StreamBuilder<String>(
+                    stream: data.orderID.switchMap(
+                      (orderID) => orderID == null
+                          ? null
+                          : Order.fromUID(orderID)
+                              .creator
+                              .where((uid) => uid != null)
+                              .switchMap((creatorID) {
+                              return creatorID == null
+                                  ? null
+                                  : User.fromUID(creatorID).name;
+                            }),
                     ),
-                  ),
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          StreamBuilder(
-                            stream: user.data.name,
-                            builder: (BuildContext context, snapshot) {
-                              return Text(
-                                !snapshot.hasData || snapshot.data == null
-                                    ? 'Please try again'
-                                    : snapshot.data,
-                                style: FontHelper.regular10Black,
-                              );
-                            },
-                          ),
-                          Text(
-                            DateTimeHelper.convertTimeToDisplayString(
-                                data.createdDate.value),
-                            style: FontHelper.semiBold10Grey,
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                  subtitle: Flex(
-                    direction: Axis.horizontal,
-                    children: <Widget>[
-                      Expanded(
-                        child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: StreamBuilder<Order>(
-                                stream: data.orderID
-                                    .map((uid) => Order.fromUID(uid)),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData ||
-                                      snapshot.data == null) return Offstage();
-                                  return Text(
-                                    snapshot.data.foodTag.value == null
-                                        ? ''
-                                        : StringHelper.upperCaseWords(
-                                            snapshot.data.foodTag.value),
-                                    style: FontHelper.semiBold16Black,
-                                  );
-                                })),
-                      ),
-                      Expanded(
-                        child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                Text(
-                                  user.data.uid == currentUser.value.uid
-                                      ? "-"
-                                      : "+",
-                                  style: FontHelper.semiBold14Black,
-                                ),
-                                Text(
-                                  'S' +
-                                      (StringHelper.doubleToPriceString(
-                                          data.amount.value * 1.0)),
-                                  style: FontHelper.semiBold14Black,
-                                ),
-                              ],
-                            )),
-                      )
-                    ],
-                  ),
+                    builder: (context, snap) {
+                      if (!snap.hasData) return Offstage();
+                      return Text(
+                        snap.data,
+                        style: FontHelper.regular10Black,
+                      );
+                    }),
+                Text(
+                  "Payment",
+                  style: FontHelper.semiBold(Colors.black, 16),
                 ),
-                Divider(
-                  height: 0,
-                )
+                Text(
+                  "",
+                  style: FontHelper.regular10Black,
+                ),
               ],
-            );
-        });
-  }
-
-  Widget _buildAvatar(user) {
-    return FittedBox(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(50.0),
-        child: SizedBox(
-          height: 50,
-          width: 50,
-          child: StreamBuilder<String>(
-            stream: user.data.thumbnailImage,
-            builder: (BuildContext context, snapshot) {
-              if (!snapshot.hasData || snapshot.data == null)
-                return GlowingProgressIndicator(
-                  child: Icon(
-                    Icons.image,
-                    size: 50,
-                  ),
-                );
-
-              return CachedNetworkImage(
-                imageUrl: user.data.thumbnailImage.value,
-                placeholder: GlowingProgressIndicator(
-                  child: Icon(
-                    Icons.image,
-                    size: 50,
-                  ),
+            )),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                StreamBuilder(
+                  stream: data.createdDate,
+                  builder: (context, snap) {
+                    if (snap.data == null) return Offstage();
+                    return Text(
+                      DateTimeHelper.convertTimeToDisplayString(snap.data),
+                      style: FontHelper.semiBold(Colors.black, 10),
+                    );
+                  },
                 ),
-                errorWidget: Icon(Icons.error),
-              );
-            },
-          ),
+                StreamBuilder(
+                  stream: data.amount,
+                  builder: (context, snap) {
+                    if (snap.data == null) return Offstage();
+                    return Text(
+                      "+" + StringHelper.doubleToPriceString(snap.data),
+                      style: FontHelper.semiBold(Colors.black, 14),
+                    );
+                  },
+                ),
+                Text(
+                  "",
+                  style: FontHelper.regular10Black,
+                ),
+              ],
+            ),
+          ]),
         ),
-      ),
+        Line()
+      ],
     );
   }
 
   Widget _buildWithdrawal(Transact data) {
     return Column(
       children: <Widget>[
-        ListTile(
-          isThreeLine: true,
-          leading: StreamBuilder<User>(
-            stream: currentUser.producer,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData)
-                return FittedBox(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(50.0),
-                    child: SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: Image.asset(
-                          'assets/icons/profile_icon.png',
-                          fit: BoxFit.fill,
-                        )),
-                  ),
-                );
-              return FittedBox(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50.0),
-                  child: SizedBox(
-                    height: 50,
-                    width: 50,
-                    child: CachedNetworkImage(
-                      imageUrl: snapshot.data.thumbnailImage.value,
-                      placeholder: GlowingProgressIndicator(
-                        child: Icon(
-                          Icons.image,
-                          size: 50,
-                        ),
-                      ),
-                      errorWidget: Icon(Icons.error),
-                    ),
-                  ),
+        Container(
+          color: Colors.white,
+          height: 80,
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: Row(children: <Widget>[
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                StreamBuilder<String>(
+                    stream: currentUser.producer
+                        .switchMap((user) => user == null ? null : user.name),
+                    builder: (context, snap) {
+                      if (!snap.hasData) return Offstage();
+                      return Text(
+                        snap.data,
+                        style: FontHelper.regular10Black,
+                      );
+                    }),
+                Text(
+                  "Withdrawal",
+                  style: FontHelper.semiBold(Colors.black, 16),
                 ),
-              );
-            },
-          ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  StreamBuilder<User>(
-                      stream: currentUser.producer,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return Text('Dabao Buddy');
+                StreamBuilder(
+                    stream: data.withdrawalStatus,
+                    builder: (context, snap) {
+                      if (!snap.hasData)
                         return Text(
-                          snapshot.data.name.value,
+                          "",
                           style: FontHelper.regular10Black,
                         );
-                      }),
-                  Text(
-                    DateTimeHelper.convertTimeToDisplayString(
-                        data.createdDate.value),
-                    style: FontHelper.semiBold10Grey,
-                  )
-                ],
-              ),
-            ],
-          ),
-          subtitle: Flex(
-            direction: Axis.horizontal,
-            children: <Widget>[
-              Expanded(
-                child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Withdrawal',
-                      style: FontHelper.semiBold16Black,
-                    )),
-              ),
-              Expanded(
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '-S' +
-                          (StringHelper.doubleToPriceString(
-                              data.amount.value * 1.0)),
-                      style: FontHelper.semiBold14Black,
-                    )),
-              )
-            ],
-          ),
+                      if (snap.data == Transact.pendingStatus)
+                        return Container(
+                          padding: EdgeInsets.only(left: 5, right: 5),
+                          decoration: BoxDecoration(
+                              color: Color.fromRGBO(0x95, 0x9D, 0xAD, 1.0),
+                              borderRadius: BorderRadius.circular(5)),
+                          child: Text(
+                            "Pending",
+                            style: FontHelper.semiBold(Colors.white, 12),
+                          ),
+                        );
+                      if (snap.data == Transact.pendingStatus)
+                        return Container(
+                          padding: EdgeInsets.only(left: 5, right: 5),
+                          decoration: BoxDecoration(
+                              color: ColorHelper.dabaoOffGreyD0,
+                              borderRadius: BorderRadius.circular(5)),
+                          child: Text(
+                            "Completed",
+                            style: FontHelper.semiBold(
+                                ColorHelper.dabaoOffBlack9B, 12),
+                          ),
+                        );
+                      return Text(
+                        "",
+                        style: FontHelper.regular10Black,
+                      );
+                    })
+              ],
+            )),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                StreamBuilder(
+                  stream: data.createdDate,
+                  builder: (context, snap) {
+                    if (snap.data == null) return Offstage();
+                    return Text(
+                      DateTimeHelper.convertTimeToDisplayString(snap.data),
+                      style: FontHelper.semiBold(Colors.black, 10),
+                    );
+                  },
+                ),
+                StreamBuilder(
+                  stream: data.amount,
+                  builder: (context, snap) {
+                    if (snap.data == null) return Offstage();
+                    return Text(
+                      "+" + StringHelper.doubleToPriceString(snap.data),
+                      style: FontHelper.semiBold(Colors.black, 14),
+                    );
+                  },
+                ),
+                Text(
+                  "",
+                  style: FontHelper.regular10Black,
+                ),
+              ],
+            ),
+          ]),
         ),
-        Divider(
-          height: 0,
-        )
+        Line()
       ],
     );
   }

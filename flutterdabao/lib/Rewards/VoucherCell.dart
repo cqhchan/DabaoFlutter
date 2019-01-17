@@ -14,7 +14,12 @@ class VoucherCell extends StatefulWidget {
   final Function(Voucher) mainButtonTapped;
   final Function(Voucher) secondaryButtonTapped;
 
-  const VoucherCell({Key key, @required this.voucher, @required this.mode, @required this.mainButtonTapped, this.secondaryButtonTapped})
+  const VoucherCell(
+      {Key key,
+      @required this.voucher,
+      @required this.mode,
+      @required this.mainButtonTapped,
+      this.secondaryButtonTapped})
       : super(key: key);
 
   @override
@@ -96,8 +101,9 @@ class VoucherCellState extends State<VoucherCell> {
                         builder: (context, snap) {
                           return Text(
                               snap.hasData
-                                  ? "Valid Until " + DateTimeHelper.convertDateTimeToDate(
-                                      snap.data)
+                                  ? "Valid Until " +
+                                      DateTimeHelper.convertDateTimeToDate(
+                                          snap.data)
                                   : "",
                               style: FontHelper.bold(Colors.black, 10.0));
                         },
@@ -107,74 +113,82 @@ class VoucherCellState extends State<VoucherCell> {
                       child: Container(
                         padding: EdgeInsets.only(left: 7.0, right: 7.0),
                         child: widget.mode == VoucherCellMode.redeem
-                            ? Row(
-                                children: <Widget>[
-                                    Expanded(
-                                      child: RaisedButton(
-                                        padding: EdgeInsets.all(0),
-                                        elevation: 3.0,
-                                        highlightElevation: 0.0,
-                                        color: ColorHelper.dabaoOrange,
-                                        child: Text(
-                                          'Redeem',
-                                          textAlign: TextAlign.center,
-                                          style: FontHelper.bold(
-                                              Colors.white, 12.0),
-                                        ),
-                                        onPressed: () {widget.mainButtonTapped(widget.voucher);},
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(4.0),
-                                        ),
-                                      ),
-                                    )
-                                  ])
+                            ? Row(children: <Widget>[
+                                Expanded(
+                                  child: RaisedButton(
+                                    padding: EdgeInsets.all(0),
+                                    elevation: 3.0,
+                                    highlightElevation: 0.0,
+                                    color: ColorHelper.dabaoOrange,
+                                    child: Text(
+                                      'Redeem',
+                                      textAlign: TextAlign.center,
+                                      style:
+                                          FontHelper.bold(Colors.white, 12.0),
+                                    ),
+                                    onPressed: () {
+                                      widget.mainButtonTapped(widget.voucher);
+                                    },
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4.0),
+                                    ),
+                                  ),
+                                )
+                              ])
                             : Row(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: <Widget>[
-                                  RaisedButton(
-                                    padding: EdgeInsets.all(0),
-                                    elevation: 0.0,
-                                    highlightElevation: 0.0,
-                                    color: Colors.white,
-                                    child: Text(
-                                      'Remove',
-                                      textAlign: TextAlign.center,
-                                      style:
-                                          FontHelper.bold(Colors.black, 12.0),
-                                    ),
-                                        onPressed: () {
-                                          ConfigHelper.instance.currentUserProperty.value.removeVoucher(widget.voucher);
-                                          if (widget.secondaryButtonTapped != null)
-                                          widget.secondaryButtonTapped(widget.voucher);},
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4.0),
-                                      side: BorderSide(
-                                          color: ColorHelper.dabaoOffBlack9B),
-                                    ),
-                                  ),
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(minWidth: 20.0),
-                                  ),
-                                  Expanded(
-                                    child: RaisedButton(
-                                      padding: EdgeInsets.all(0),
-                                      elevation: 3.0,
-                                      highlightElevation: 0.0,
-                                      color: ColorHelper.dabaoOrange,
-                                      child: Text(
-                                        'Apply Now',
-                                        textAlign: TextAlign.center,
-                                        style:
-                                            FontHelper.bold(Colors.white, 12.0),
-                                      ),
-                                        onPressed: () {widget.mainButtonTapped(widget.voucher);},
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(4.0),
-                                      ),
-                                    ),
-                                  ),
+                                  StreamBuilder(
+                                    stream: widget.voucher.status,
+                                    builder: (context, snap) {
+                                      if (snap.data == null) return Offstage();
+
+                                      if (snap.data == voucher_Status_Open)
+                                        return Expanded(
+                                          child: RaisedButton(
+                                            padding: EdgeInsets.all(0),
+                                            elevation: 3.0,
+                                            highlightElevation: 0.0,
+                                            color: ColorHelper.dabaoOrange,
+                                            child: Text(
+                                              'Apply Now',
+                                              textAlign: TextAlign.center,
+                                              style: FontHelper.bold(
+                                                  Colors.white, 12.0),
+                                            ),
+                                            onPressed: () {
+                                              widget.mainButtonTapped(
+                                                  widget.voucher);
+                                            },
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                            ),
+                                          ),
+                                        );
+
+                                      if (snap.data == voucher_Status_InUsed)
+                                        return Expanded(
+                                          child: RaisedButton(
+                                            padding: EdgeInsets.all(0),
+                                            elevation: 0.0,
+                                            highlightElevation: 0.0,
+                                            color: ColorHelper.dabaoOffGreyD0,
+                                            child: Text(
+                                              'Applied',
+                                              textAlign: TextAlign.center,
+                                              style: FontHelper.bold(
+                                                  Colors.black, 12.0),
+                                            ),
+                                            onPressed: () {},
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                            ),
+                                          ),
+                                        );
+                                    },
+                                  )
                                 ],
                               ),
                       ),

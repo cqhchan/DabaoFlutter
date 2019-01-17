@@ -11,6 +11,7 @@ import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:flutterdabao/Rewards/SearchPromoCodePage.dart';
 import 'package:flutterdabao/Rewards/VoucherCell.dart';
+import 'package:rxdart/rxdart.dart';
 
 class VoucherApplicationPage extends StatelessWidget {
   final MutableProperty<Voucher> voucherProperty;
@@ -128,8 +129,20 @@ class _MyVoucherPageState extends State<MyVoucherPage>
 
   StreamBuilder _buildBody(BuildContext context) {
     return StreamBuilder<List<Voucher>>(
-      stream: ConfigHelper
-          .instance.currentUserProperty.value.listOfAvalibleVouchers.producer,
+      stream: Observable.combineLatest2<List<Voucher>,List<Voucher>,List<Voucher>>(ConfigHelper
+          .instance.currentUserProperty.value.listOfAvalibleVouchers.producer, ConfigHelper
+          .instance.currentUserProperty.value.listOfInUsedVouchers.producer, (avaliableV,inuse){
+            List<Voucher> tempAvaliable = List.from(avaliableV);
+            List<Voucher> temopInUse = List.from(inuse);
+
+            tempAvaliable.sort((lhs,rhs) => rhs.expiryDate.value.compareTo(lhs.expiryDate.value));
+            temopInUse.sort((lhs,rhs) => rhs.expiryDate.value.compareTo(lhs.expiryDate.value));
+
+            tempAvaliable.addAll(temopInUse);
+
+            return tempAvaliable;
+
+          }) ,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Offstage();
         return _buildList(snapshot.data);
@@ -141,7 +154,8 @@ class _MyVoucherPageState extends State<MyVoucherPage>
     List<Object> listObject = List();
 
     listObject.addAll(listOfVouchers);
-    listObject.add(ConfigHelper.instance.currentUserProperty.value);
+    //TODO p1 add in referral code
+    // listObject.add(ConfigHelper.instance.currentUserProperty.value);
 
     return ListView.builder(
       shrinkWrap: true,
@@ -156,7 +170,7 @@ class _MyVoucherPageState extends State<MyVoucherPage>
             color: Colors.white,
             height: 100,
             child: FutureBuilder<Uri>(
-              future: user.referalLink(),
+              future: user.referalLink,
               builder: (BuildContext context, snapshot) {
                 if (!snapshot.hasData) return Offstage();
                 return Column(

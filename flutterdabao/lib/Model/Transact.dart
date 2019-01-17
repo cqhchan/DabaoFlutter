@@ -12,8 +12,11 @@ class Transact extends FirebaseType {
   static final String statementIDKey = "statementID";
   static final String orderIDKey = "orderID";
   static final String walletIDKey = "walletID";
+  static final String statusKey = "status";
+  static final String pendingStatus = "Pending";
+  static final String completed = "Completed";
 
-  BehaviorSubject<int> amount;
+  BehaviorSubject<double> amount;
   BehaviorSubject<DateTime> createdDate;
   BehaviorSubject<String> type;
   BehaviorSubject<String> rewardPath;
@@ -22,6 +25,7 @@ class Transact extends FirebaseType {
   BehaviorSubject<String> statementID;
   BehaviorSubject<String> orderID;
   BehaviorSubject<String> walletID;
+  BehaviorSubject<String> withdrawalStatus;
 
   Transact.fromUID(String uid) : super.fromUID(uid);
 
@@ -33,9 +37,9 @@ class Transact extends FirebaseType {
   @override
   void map(Map<String, dynamic> map) {
     if (data.containsKey(amountKey)) {
-      amount.add(data[amountKey]);
+      amount.add(data[amountKey] +0.0);
     } else {
-      amount.add(0);
+      amount.add(0.0);
     }
 
     if (data.containsKey(createdDateKey)) {
@@ -50,6 +54,12 @@ class Transact extends FirebaseType {
       type.add(data[typeKey]);
     } else {
       type.add(null);
+    }
+
+    if (data.containsKey(statusKey)) {
+      withdrawalStatus.add(data[statusKey]);
+    } else {
+      withdrawalStatus.add(null);
     }
 
     if (data.containsKey(rewardPathKey)) {
@@ -85,6 +95,7 @@ class Transact extends FirebaseType {
 
   @override
   void setUpVariables() {
+    withdrawalStatus = BehaviorSubject();
     amount = BehaviorSubject();
     createdDate = BehaviorSubject();
     type = BehaviorSubject();

@@ -5,7 +5,7 @@ import 'package:rxdart/subjects.dart';
 
 // These status are for user USER
 String voucher_Status_Open = "Open"; 
-String voucher_Status_InUse = "Inuse";
+String voucher_Status_InUsed = "InUsed";
 String voucher_Status_Used = "Used";
 
 // These Satus are for Global;

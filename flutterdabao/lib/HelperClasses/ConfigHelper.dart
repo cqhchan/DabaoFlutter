@@ -56,8 +56,8 @@ class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<List<DabaoRoute.Route>> currentUserRoutesPastDayProperty =
       MutableProperty<List<DabaoRoute.Route>>(List());
 
-  MutableProperty<List<Voucher>> currentUserOpenVouchersProperty =
-      MutableProperty<List<Voucher>>(List());
+
+
 
   MutableProperty<DabaoerReward> currentDabaoerRewards =
       MutableProperty<DabaoerReward>(null);
