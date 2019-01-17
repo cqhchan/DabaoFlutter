@@ -185,7 +185,7 @@ class _CounterOfferOverlayState extends State<CounterOfferOverlay>
                   y: tapPositionY,
                   context: context,
                   subTitle:
-                      "As prospective Dabaoer, you're free to propose a counter-offer to the current listed delivery fee displayed. Use the slider below to adjust to a  desired delivery fee and tap confirm. Your offer will be sent to the dabaoee via the chat. ",
+                      "As a prospective Dabaoer, you're free to propose a counter-offer to the current delivery fee displayed. Use the slider below to adjust to a desired delivery fee and tap confirm. Your offer will be sent to the dabaoee via the chat.",
                   title: "How do I counter-offer?");
             },
             child: Container(

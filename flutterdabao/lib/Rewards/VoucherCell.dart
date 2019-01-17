@@ -110,8 +110,8 @@ class VoucherCellState extends State<VoucherCell> {
                                         y: tapPositionY,
                                         context: context,
                                         subTitle:
-                                            "This is our estimated amount for you to pay to your Dabaoer, taking into consideration your promo code (if any) that are applied to delivery fee. ",
-                                        title: "What is this amount");
+                                            "A Discount Voucher from Dabao entitles you to a promotion that reduces your overall cost of ordering a meal through the Dabao. For one use only per voucher.",
+                                        title: "What is a Discount Voucher?");
                                   },
                                   child: Container(
                                       color: Colors.transparent,
