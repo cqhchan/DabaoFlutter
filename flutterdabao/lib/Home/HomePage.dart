@@ -490,7 +490,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                       ),
                       onTap: () async {
                         await launch(
-                            "mailto:admin@dabaoapp.sg?subject=Contact Dabao&body=Hello Dabao Team");
+                            "mailto:admin@dabaoapp.sg?subject=Contact%20Dabao&body=Hello%20Dabao%20Team,");
                         // Update the state of the app
                         // ...
                         // Then close the drawer
