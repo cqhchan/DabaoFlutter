@@ -6,6 +6,9 @@ class ColorHelper {
   static const Color availableColor = Color(0xFFA5DE40);
   static const Color notAvailableColor = Color(0xFFD0D0D0);
   static const Color acceptedByMeColor = Color(0xFFD0D0D0);
+  
+  static const Color dabaoYellow = Color(0xFFFFD103);
+
   static const Color cancellingColor = Color(0xFFCC0000);
   static const Color counterOfferColor = Color(0xFF959DAD);
   static Color disableColor = Colors.grey[100];

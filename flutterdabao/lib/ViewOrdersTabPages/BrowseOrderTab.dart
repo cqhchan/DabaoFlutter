@@ -29,21 +29,36 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
   @override
   bool get wantKeepAlive => true;
 
-  MutableProperty<List<Order>> searchOrders =
+  final MutableProperty<List<Order>> searchOrders =
+      MutableProperty<List<Order>>(null);
+  final MutableProperty<List<Order>> defaultOrders =
       MutableProperty<List<Order>>(null);
   BehaviorSubject<LatLng> searchLocation;
   BehaviorSubject<int> searchRadius;
 
-  String searchText = "Current Location";
+  final MutableProperty<bool> isSearchingLocation = MutableProperty(false);
+  final String searchLocationPlaceholder = "Select Location";
+  String searchText;
 
   @override
   void initState() {
     super.initState();
 
-    searchLocation = BehaviorSubject(
-        seedValue: ConfigHelper.instance.currentLocationProperty.value);
+    searchText = searchLocationPlaceholder;
+
+    searchLocation = BehaviorSubject(seedValue: null);
 
     searchRadius = BehaviorSubject(seedValue: 500);
+
+    subscription.add(defaultOrders.bindTo(FirebaseCollectionReactive<Order>(
+            Firestore.instance
+                .collection("orders")
+                .where(Order.startTimeKey,
+                    isGreaterThanOrEqualTo:
+                        DateTime.now().add(Duration(days: -7)))
+                .where(Order.statusKey, isEqualTo: orderStatus_Requested)
+                .limit(20))
+        .observable));
 
     subscription.add(searchOrders.bindTo(searchLocation
         .switchMap((latlng) => searchRadius.switchMap((radius) =>
@@ -61,14 +76,6 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
       }).toList();
     }).switchMap((list) {
       return combineAndMerge<Order>(list);
-    }).map((orders) {
-      List<Order> tempOrders = List.from(orders);
-      tempOrders.removeWhere((order) =>
-          order.creator.value ==
-          ConfigHelper.instance.currentUserProperty.value.uid);
-      tempOrders.sort((lhs, rhs) => rhs.createdDeliveryTime.value
-          .compareTo(lhs.createdDeliveryTime.value));
-      return tempOrders;
     })));
   }
 
@@ -89,6 +96,7 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
             margin: EdgeInsets.fromLTRB(7.0, 12.0, 7.0, 0.0),
             height: 30,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Expanded(
                     child: GestureDetector(
@@ -97,9 +105,13 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                     handlePressButton(context, (location, description) {
                       searchLocation.add(location);
                       setState(() {
+                        isSearchingLocation.value = true;
                         searchText = description;
                       });
-                    }, searchText == "Current Location" ? "" : searchText);
+                    },
+                        searchText == searchLocationPlaceholder
+                            ? ""
+                            : searchText);
                   },
                   child: Container(
                     height: 30.0,
@@ -125,47 +137,49 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                     ),
                   ),
                 )),
-                // Container(
-                //   height: 30.0,
-                //   margin: EdgeInsets.only(left: 3.0),
-                //   width: 155,
-                //   decoration: BoxDecoration(
-                //       border: Border.all(
-                //           width: 1.0,
-                //           color: ColorHelper.rgbo(0xD0, 0xD0, 0xD0)),
-                //       color: ColorHelper.rgbo(0xF5, 0xE4, 0xC6),
-                //       borderRadius: BorderRadius.circular(5.0)),
-                //   child: Row(
-                //     children: <Widget>[
-                //       Expanded(
-                //         child: Container(
-                //           padding: EdgeInsets.only(left: 7.0),
-                //           child: Text(
-                //             "Distance from Location",
-                //             style: FontHelper.regular(
-                //                 ColorHelper.dabaoOffGrey70, 12.0),
-                //             overflow: TextOverflow.ellipsis,
-                //           ),
-                //         ),
-                //       ),
-                //       Container(
-                //           padding: EdgeInsets.only(left: 5, right: 7.0),
-                //           child: Image.asset(
-                //             "assets/icons/filter_icon.png",
-                //             color: ColorHelper.dabaoOffBlack9B,
-                //           )),
-                //     ],
-                //   ),
-                // )
+                Offstage(
+                  offstage: !isSearchingLocation.value,
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        setState(() {
+                          isSearchingLocation.value = false;
+                          searchText = searchLocationPlaceholder;
+                          searchOrders.value = null;
+                        });
+                      },
+                    ),
+                  ),
+                )
               ],
             ),
           ),
           Expanded(
               child: StreamBuilder(
-            stream: searchOrders.producer,
+            stream: isSearchingLocation.producer
+                .switchMap((searchingLocation) => searchingLocation
+                    ? searchOrders.producer
+                    : defaultOrders.producer)
+                .map((orders) {
+              List<Order> tempOrders = List.from(orders);
+              tempOrders.removeWhere((order) =>
+                  order.creator.value ==
+                  ConfigHelper.instance.currentUserProperty.value.uid);
+
+              tempOrders.sort((lhs, rhs) => rhs.createdDeliveryTime.value
+                  .compareTo(lhs.createdDeliveryTime.value));
+
+              return tempOrders;
+            }),
             builder: (context, snap) {
               if (!snap.hasData)
                 return Center(child: CircularProgressIndicator());
+
+              print("testing order list" + snap.data.length.toString());
+
               return OrderList(
                 onCompleteCallBack: () {
                   if (widget.moveToTab != null) {
@@ -173,7 +187,21 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                   }
                 },
                 context: context,
-                input: searchOrders.producer,
+                input: isSearchingLocation.producer
+                    .switchMap((searchingLocation) => searchingLocation
+                        ? searchOrders.producer
+                        : defaultOrders.producer)
+                    .map((orders) {
+                  List<Order> tempOrders = List.from(orders);
+                  tempOrders.removeWhere((order) =>
+                      order.creator.value ==
+                      ConfigHelper.instance.currentUserProperty.value.uid);
+
+                  tempOrders.sort((lhs, rhs) => rhs.createdDeliveryTime.value
+                      .compareTo(lhs.createdDeliveryTime.value));
+
+                  return tempOrders;
+                }),
                 location: ConfigHelper.instance.currentLocationProperty.value,
               );
             },

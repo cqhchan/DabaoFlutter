@@ -359,6 +359,30 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
         color = ColorHelper.availableColor;
         break;
 
+      case CardMode.dabaoerAcceptedByOthers:
+        color = ColorHelper.notAvailableColor;
+        break;
+
+      case CardMode.dabaoerCancelled:
+        color = ColorHelper.dabaoErrorRed;
+        break;
+
+      case CardMode.dabaoeeAccepted:
+        color = ColorHelper.dabaoOrange;
+        break;
+
+      case CardMode.dabaoeeCompleted:
+        color = ColorHelper.dabaoOrange;
+        break;
+      case CardMode.dabaoeeAcceptedByOther:
+        color = ColorHelper.notAvailableColor;
+        break;
+      case CardMode.dabaoeeCancelled:
+        color = ColorHelper.dabaoErrorRed;
+        break;
+      case CardMode.dabaoeeRequested:
+        color = ColorHelper.dabaoYellow;
+        break;
       default:
         color = ColorHelper.notAvailableColor;
     }
@@ -644,10 +668,31 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
         break;
 
       case CardMode.dabaoerCancelled:
-        color = ColorHelper.notAvailableColor;
-        status = "Order has been cancelled";
+        color = ColorHelper.dabaoErrorRed;
+        status = "Cancelled";
         break;
 
+      case CardMode.dabaoeeAccepted:
+        status = "Picked Up";
+        color = ColorHelper.dabaoOrange;
+        break;
+
+      case CardMode.dabaoeeCompleted:
+        status = "Completed";
+        color = ColorHelper.dabaoOrange;
+        break;
+      case CardMode.dabaoeeAcceptedByOther:
+        status = "Picked Up";
+        color = ColorHelper.notAvailableColor;
+        break;
+      case CardMode.dabaoeeCancelled:
+        status = "Cancelled";
+        color = ColorHelper.dabaoErrorRed;
+        break;
+      case CardMode.dabaoeeRequested:
+        status = "Searching For Dabaoer";
+        color = ColorHelper.dabaoYellow;
+        break;
       default:
         color = ColorHelper.notAvailableColor;
     }
