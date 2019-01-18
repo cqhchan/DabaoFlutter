@@ -34,7 +34,7 @@ class _ChatPageState extends State<ChatPage>
     super.initState();
 
     currentUserChannels = ConfigHelper.instance.currentUserChannelProperty;
-    _tabController = new TabController(initialIndex: 0, vsync: this, length: 2);
+    _tabController = new TabController(initialIndex: 0, vsync: this, length: 3);
   }
 
   @override
@@ -79,6 +79,13 @@ class _ChatPageState extends State<ChatPage>
                 tabs: [
                   Tab(
                     child: Text(
+                      "All",
+                      style: FontHelper.semiBold(null, 14.0),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
                       "Your Orders",
                       style: FontHelper.semiBold(null, 14.0),
                       textAlign: TextAlign.center,
@@ -99,6 +106,7 @@ class _ChatPageState extends State<ChatPage>
             child: TabBarView(
               controller: _tabController,
               children: [
+                _buildChatPage(currentUserChannels.producer),
                 _buildChatPage(currentUserChannels.producer.map((channels) {
                   List<Channel> temp = List.from(channels);
 
