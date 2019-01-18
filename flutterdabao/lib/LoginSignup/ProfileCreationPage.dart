@@ -228,9 +228,9 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
             profileLink,
             _nameController.text,
             DateTime.fromMillisecondsSinceEpoch(
-                user.metadata.creationTimestamp),
+                user.metadata.creationTimestamp * 1000),
             DateTime.fromMillisecondsSinceEpoch(
-                user.metadata.lastSignInTimestamp),
+                user.metadata.lastSignInTimestamp * 1000),
           );
           widget.onCompleteCallback();
         });

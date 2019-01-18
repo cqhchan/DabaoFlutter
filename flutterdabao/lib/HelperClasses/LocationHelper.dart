@@ -102,6 +102,7 @@ class LocationHelper {
                         style: FontHelper.bold(ColorHelper.dabaoOrange, 16.0),
                       ),
                       onPressed: () async {
+
                         await Settings.openAppSettings();
                         Navigator.of(context).pop();
                       },
