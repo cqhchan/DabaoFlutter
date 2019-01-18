@@ -17,11 +17,9 @@ import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:settings/settings.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 const String modeChannel = "NEWMESSAGE";
-
-const String channelIDKey = "channelID";
-const String orderIDkey = "orderID";
 
 const String modeAcceptedOrder = "ORDERACCEPTED";
 const String modeNewTransaction = "NEWTRANSACTION";
@@ -32,6 +30,10 @@ const String modeCancelledOrder = "ORDERCANCELLED";
 
 const String modeNewPotentialOrder = "POTENTIALORDER";
 const String modeNewDabaoeeReward = "DABAOEEREWARD";
+
+const String channelIDKey = "channelID";
+const String orderIDkey = "orderID";
+const String senderNameKey = "senderName";
 
 handleNotificationForResumeAndLaunch(map) async {
   ConfigHelper.instance.currentUserProperty.producer
@@ -193,6 +195,68 @@ handleNotificationForOnMessage(map) async {
       String mode = data["mode"];
 
       switch (mode) {
+        case modeChannel:
+          if (data.containsKey(channelIDKey)) {
+            String channelID = data[channelIDKey];
+            Channel channel = Channel.fromUID(channelID);
+
+            GlobalKey<ConversationState> key = getCurrentKey();
+
+            if (key == null ||
+                key.currentState == null ||
+                key.currentState.widget == null ||
+                key.currentState.widget.channel.uid != channelID) {
+              String name = data.containsKey(senderNameKey)
+                  ? data[senderNameKey]
+                  : "Message";
+
+              Fluttertoast.instance
+                  .showToast(
+                msg: name + ": " + body,
+                toastLength: Toast.LENGTH_LONG,
+                gravity: ToastGravity.TOP,
+                timeInSecForIos: 5,
+                backgroundColor: ColorHelper.dabaoTealColor,
+                textColor: Colors.white,
+                fontSize: 12.0,
+              )
+                  .then((tapped) {
+                if (tapped) {
+                  GlobalKey<ConversationState> newKey =
+                      GlobalKey<ConversationState>(debugLabel: channelID);
+
+                  ConfigHelper.instance.navigatorKey.currentState
+                      .push(MaterialPageRoute(builder: (context) {
+                    return Conversation(
+                      key: newKey,
+                      channel: channel,
+                    );
+                  }));
+                }
+              });
+            }
+          }
+          break;
+
+        case modeNewPotentialOrder:
+          Fluttertoast.instance
+              .showToast(
+            msg: body,
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIos: 5,
+            backgroundColor: ColorHelper.dabaoTealColor,
+            textColor: Colors.white,
+            fontSize: 12.0,
+          )
+              .then((tapped) {
+            if (tapped) {
+              ConfigHelper.instance.navigatorKey.currentState
+                  .push(SlideUpRoute(widget: TabBarPage()));
+            }
+          });
+          break;
+
         case modeAcceptedOrder:
           ConfigHelper.instance.navigatorKey.currentState.push(DialogRoute(
               barrierColor: Colors.black.withOpacity(0.5),
