@@ -33,7 +33,7 @@ import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-_makePhoneCall(String url) async {
+makePhoneCall(String url) async {
   if (await canLaunch(url)) {
     await launch(url);
   } else {
@@ -392,7 +392,7 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
                             size: 25,
                           ),
                           onPressed: () {
-                            _makePhoneCall('tel:' + snapshot.data);
+                            makePhoneCall('tel:' + snapshot.data);
                           },
                         ),
                       );
@@ -842,7 +842,7 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
                             size: 25,
                           ),
                           onPressed: () {
-                            _makePhoneCall('tel:' + snapshot.data);
+                            makePhoneCall('tel:' + snapshot.data);
                           },
                         ),
                       );

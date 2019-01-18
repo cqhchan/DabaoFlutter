@@ -12,6 +12,9 @@ String voucher_Status_Used = "Used";
 String voucher_Status_Public = "Public"; 
 String voucher_Status_Private = "Private";
 
+String voucher_Type_Redemption = "REDEMPTION"; 
+String voucher_Type_Discount = "DISCOUNT";
+
 class Voucher extends FirebaseType {
   static final String expiryTimeKey = "ET";
   static final String titleKey = "T";

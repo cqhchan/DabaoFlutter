@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/CustomDecorations.dart';
 import 'package:flutterdabao/CustomWidget/CustomDialogs.dart';
@@ -6,6 +8,22 @@ import 'package:flutterdabao/HelperClasses/ConfigHelper.dart';
 import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+Future<void> _sendSMS(String phoneNumber, String message) async {
+  String url;
+  if (Platform.isIOS) {
+    url = 'sms:${phoneNumber}&body=${message.replaceAll('\ ', "%20")}';
+  } else {
+    url = 'sms:${phoneNumber}?body=${message.replaceAll('\ ', "%20")}';
+  }
+
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw Exception('Could not launch $url');
+  }
+}
 
 enum VoucherCellMode { redeem, apply }
 
@@ -92,6 +110,40 @@ class VoucherCellState extends State<VoucherCell> {
                       child: StreamBuilder<String>(
                         stream: widget.voucher.type,
                         builder: (context, snap) {
+                          if (!snap.hasData) return Offstage();
+
+                          if (snap.data == voucher_Type_Redemption)
+                            return Row(
+                              children: <Widget>[
+                                Text(
+                                    snap.hasData
+                                        ? snap.data.toUpperCase()
+                                        : "Error",
+                                    style: FontHelper.bold(Colors.black, 12.0)),
+                                GestureDetector(
+                                    onTapDown: (details) {
+                                      tapPositionX = details.globalPosition.dx;
+                                      tapPositionY = details.globalPosition.dy;
+                                    },
+                                    onTap: () {
+                                      showInfomationDialog(
+                                          x: tapPositionX,
+                                          y: tapPositionY,
+                                          context: context,
+                                          subTitle:
+                                              "A Redemption Voucher from Dabao entitles you to a prize. Tap collect to schedule a pick up",
+                                          title:
+                                              "What is a Redemption Voucher?");
+                                    },
+                                    child: Container(
+                                        color: Colors.transparent,
+                                        padding: EdgeInsets.fromLTRB(
+                                            10.0, 0.0, 5.0, 0.0),
+                                        child: Image.asset(
+                                            'assets/icons/question_mark.png')))
+                              ],
+                            );
+
                           return Row(
                             children: <Widget>[
                               Text(
@@ -168,27 +220,76 @@ class VoucherCellState extends State<VoucherCell> {
                             : Row(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: <Widget>[
-                                  StreamBuilder(
-                                    stream: widget.voucher.status,
+                                  StreamBuilder<String>(
+                                    stream: widget.voucher.type,
                                     builder: (context, snap) {
-                                      if (snap.data == null) return Offstage();
+                                      if (!snap.hasData) return Offstage();
 
-                                      if (snap.data == voucher_Status_Open)
+                                      if (snap.data ==
+                                          voucher_Type_Redemption) {
                                         return Expanded(
                                           child: RaisedButton(
                                             padding: EdgeInsets.all(0),
                                             elevation: 3.0,
                                             highlightElevation: 0.0,
-                                            color: ColorHelper.dabaoOrange,
+                                            color: ColorHelper.dabaoOffPaleBlue,
                                             child: Text(
-                                              'Apply Now',
+                                              'Claim',
                                               textAlign: TextAlign.center,
                                               style: FontHelper.bold(
                                                   Colors.white, 12.0),
                                             ),
                                             onPressed: () {
-                                              widget.mainButtonTapped(
-                                                  widget.voucher);
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return AlertDialog(
+                                                      title: Text(
+                                                          "Schedule a pick up"),
+                                                      content: Text(
+                                                          "Send us a message stating your pick up time"),
+                                                      actions: <Widget>[
+                                                        new FlatButton(
+                                                          child: new Text(
+                                                            "SMS",
+                                                            style: FontHelper.bold(
+                                                                ColorHelper
+                                                                    .dabaoOrange,
+                                                                16.0),
+                                                          ),
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+
+                                                            _sendSMS(
+                                                                    "+6597567098",
+                                                                    "Hi Dabao Team, I would like to collect " +
+                                                                        widget
+                                                                            .voucher
+                                                                            .title
+                                                                            .value +
+                                                                        " at [Date and Time]")
+                                                                .catchError(
+                                                                    (e) {
+                                                              showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  builder:
+                                                                      (context) {
+                                                                    return AlertDialog(
+                                                                      title: Text(
+                                                                          "Unable to sms"),
+                                                                      content: Text(
+                                                                          "Please contact support@dabaoapp.sg"),
+                                                                    );
+                                                                  });
+                                                            });
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  });
                                             },
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
@@ -196,27 +297,63 @@ class VoucherCellState extends State<VoucherCell> {
                                             ),
                                           ),
                                         );
+                                      }
+                                      return StreamBuilder(
+                                        stream: widget.voucher.status,
+                                        builder: (context, snap) {
+                                          if (snap.data == null)
+                                            return Offstage();
 
-                                      if (snap.data == voucher_Status_InUsed)
-                                        return Expanded(
-                                          child: RaisedButton(
-                                            padding: EdgeInsets.all(0),
-                                            elevation: 0.0,
-                                            highlightElevation: 0.0,
-                                            color: ColorHelper.dabaoOffGreyD0,
-                                            child: Text(
-                                              'Applied',
-                                              textAlign: TextAlign.center,
-                                              style: FontHelper.bold(
-                                                  Colors.black, 12.0),
-                                            ),
-                                            onPressed: () {},
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(4.0),
-                                            ),
-                                          ),
-                                        );
+                                          if (snap.data == voucher_Status_Open)
+                                            return Expanded(
+                                              child: RaisedButton(
+                                                padding: EdgeInsets.all(0),
+                                                elevation: 3.0,
+                                                highlightElevation: 0.0,
+                                                color: ColorHelper.dabaoOrange,
+                                                child: Text(
+                                                  'Apply Now',
+                                                  textAlign: TextAlign.center,
+                                                  style: FontHelper.bold(
+                                                      Colors.white, 12.0),
+                                                ),
+                                                onPressed: () {
+                                                  widget.mainButtonTapped(
+                                                      widget.voucher);
+                                                },
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          4.0),
+                                                ),
+                                              ),
+                                            );
+
+                                          if (snap.data ==
+                                              voucher_Status_InUsed)
+                                            return Expanded(
+                                              child: RaisedButton(
+                                                padding: EdgeInsets.all(0),
+                                                elevation: 0.0,
+                                                highlightElevation: 0.0,
+                                                color:
+                                                    ColorHelper.dabaoOffGreyD0,
+                                                child: Text(
+                                                  'Applied',
+                                                  textAlign: TextAlign.center,
+                                                  style: FontHelper.bold(
+                                                      Colors.black, 12.0),
+                                                ),
+                                                onPressed: () {},
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          4.0),
+                                                ),
+                                              ),
+                                            );
+                                        },
+                                      );
                                     },
                                   )
                                 ],

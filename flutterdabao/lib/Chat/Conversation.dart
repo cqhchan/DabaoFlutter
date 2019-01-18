@@ -354,6 +354,7 @@ class ConversationState extends State<Conversation>
                         if (snapshot.data == null) return Offstage();
                         return Text(
                           'You are chatting about ${snap.data}\'s order:',
+                          overflow: TextOverflow.ellipsis,
                           style: FontHelper.regular15LightGrey,
                         );
                       },

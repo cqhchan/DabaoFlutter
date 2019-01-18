@@ -6,6 +6,7 @@ import 'package:flutterdabao/HelperClasses/DateTimeHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/Model/Rating.dart';
 import 'package:flutterdabao/Model/User.dart';
+import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
@@ -112,7 +113,7 @@ class _ViewProfileState extends State<ViewProfile> {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return Offstage();
                   return GestureDetector(
-                      onTap: (){_makePhoneCall('tel:'+snapshot.data);},
+                      onTap: (){makePhoneCall('tel:'+snapshot.data);},
                       child: Icon(
                         Icons.phone,
                         color: Colors.black,
@@ -127,14 +128,6 @@ class _ViewProfileState extends State<ViewProfile> {
   }
 
   
-
-  Future<void> _makePhoneCall(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
 
   Widget _buildRatingCard() {
     return Card(
