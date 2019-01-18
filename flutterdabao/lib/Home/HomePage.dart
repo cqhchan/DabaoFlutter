@@ -374,16 +374,18 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
               ),
             ),
             Expanded(
-                          child: Container(
+              child: Container(
                 padding: EdgeInsets.only(left: 40),
                 child: SingleChildScrollView(
                     child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     GestureDetector(
                       child: Container(
-                        margin: EdgeInsets.only(top: 20),
                         height: 40,
+                        margin: EdgeInsets.only(top: 20),
+                        color: Colors.transparent,
+                        padding: EdgeInsets.only(top: 15),
                         child: Text(
                           'Inbox',
                           style: FontHelper.semiBold12Black,
@@ -391,22 +393,34 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                       ),
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.push(context, SlideUpRoute(widget: ChatPage()));
+                        Navigator.push(
+                            context, SlideUpRoute(widget: ChatPage()));
                       },
                     ),
                     GestureDetector(
                       child: Container(
                         height: 40,
+                        color: Colors.transparent,
+                        padding: EdgeInsets.only(top: 15),
                         child: Text(
                           'History',
                           style: FontHelper.semiBold12Black,
                         ),
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (BuildContext context) {
+                            return ViewOrderListPage();
+                          }),
+                        );
+                      },
                     ),
                     GestureDetector(
                       child: Container(
                         height: 40,
+                        color: Colors.transparent,
+                        padding: EdgeInsets.only(top: 15),
                         child: Text(
                           'Dabao Balance',
                           style: FontHelper.semiBold12Black,
@@ -423,6 +437,8 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                     GestureDetector(
                       child: Container(
                         height: 40,
+                        color: Colors.transparent,
+                        padding: EdgeInsets.only(top: 15),
                         child: Text(
                           'DabaoRewards',
                           style: FontHelper.semiBold12Black,
@@ -443,6 +459,8 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                       child: Container(
                         margin: EdgeInsets.only(top: 20),
                         height: 40,
+                        color: Colors.transparent,
+                        padding: EdgeInsets.only(top: 15),
                         child: Text(
                           'About Dabao',
                           style: FontHelper.semiBold12Black,
@@ -463,6 +481,8 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                     GestureDetector(
                       child: Container(
                         height: 40,
+                        color: Colors.transparent,
+                        padding: EdgeInsets.only(top: 15),
                         child: Text(
                           'FAQs',
                           style: FontHelper.semiBold12Black,
@@ -472,9 +492,9 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                         Navigator.pop(context);
                         Navigator.of(context).push(FadeRoute(
                           widget: WebviewScaffold(
-                            url: "https://www.dabaoapp.sg/termsandconditions",
+                            url: "https://www.dabaoapp.sg/faqs",
                             appBar: new AppBar(
-                              title: new Text("Terms & Conditions"),
+                              title: new Text("FAQS"),
                             ),
                           ),
                         ));
@@ -483,6 +503,8 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                     GestureDetector(
                       child: Container(
                         height: 40,
+                        color: Colors.transparent,
+                        padding: EdgeInsets.only(top: 15),
                         child: Text(
                           'Contact Us',
                           style: FontHelper.semiBold12Black,
@@ -501,6 +523,8 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                       child: Container(
                         margin: EdgeInsets.only(top: 40),
                         height: 40,
+                        color: Colors.transparent,
+                        padding: EdgeInsets.only(top: 15),
                         child: Text(
                           'Log Out',
                           style: FontHelper.semiBold12Black,
@@ -657,7 +681,6 @@ class _ActiveOrderCardState extends State<_ActiveOrderCard> {
                 .isBefore(DateTime.now().subtract(Duration(hours: 8)));
           });
 
-
           tempAccepted.addAll(tempRequested);
           tempAccepted.addAll(tempCompleted);
           tempAccepted.addAll(tempCancelled);
@@ -812,7 +835,12 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
             Container(
               width: 120,
               child: Column(
-                children: <Widget>[Container(padding: EdgeInsets.only(top: 3), child: deliveryTime(order)), status(order)],
+                children: <Widget>[
+                  Container(
+                      padding: EdgeInsets.only(top: 3),
+                      child: deliveryTime(order)),
+                  status(order)
+                ],
               ),
             ),
           ],
@@ -908,7 +936,6 @@ class _OrderCellState extends State<_OrderCell> with HavingSubscriptionMixin {
   StreamBuilder<String> deliveryTime(Order order) {
     return StreamBuilder<String>(
       stream: order.status.switchMap((status) {
-
         switch (status) {
           case orderStatus_Accepted:
             return order.deliveryTime.map((date) => date == null
