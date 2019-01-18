@@ -67,8 +67,49 @@ class User extends FirebaseType {
     return _listOfInUsedVouchers;
   }
 
-  Observable<int> currentDabaoerRewardsNumber;
-  Observable<int> currentDabaoeeRewardsNumber;
+  MutableProperty<int> get currentDabaoerRewardsNumber {
+    if (_currentDabaoerRewardsNumber == null) {
+      _currentDabaoerRewardsNumber = MutableProperty(null);
+      _currentDabaoerRewardsNumber.bindTo(ConfigHelper
+          .instance.currentDabaoerRewards.producer
+          .switchMap((reward) => reward == null
+              ? Observable.just(0)
+              : Observable<int>(Firestore.instance
+                  .collection(this.className)
+                  .document(this.uid)
+                  .collection(reward.className)
+                  .document(reward.uid)
+                  .snapshots()
+                  .map((doc) => !doc.exists
+                      ? 0
+                      : !doc.data.containsKey("QTY") ? 0 : doc.data["QTY"])).shareReplay(maxSize: 1)));
+    }
+    return _currentDabaoerRewardsNumber;
+  }
+
+  MutableProperty<int> _currentDabaoerRewardsNumber;
+
+  MutableProperty<int> _currentDabaoeeRewardsNumber;
+
+  MutableProperty<int> get currentDabaoeeRewardsNumber {
+    if (_currentDabaoeeRewardsNumber == null) {
+      _currentDabaoeeRewardsNumber = MutableProperty(null);
+      _currentDabaoeeRewardsNumber.bindTo(ConfigHelper
+          .instance.currentDabaoeeRewards.producer
+          .switchMap((reward) => reward == null
+              ? Observable.just(0)
+              : Observable<int>(Firestore.instance
+                  .collection(this.className)
+                  .document(this.uid)
+                  .collection(reward.className)
+                  .document(reward.uid)
+                  .snapshots()
+                  .map((doc) => !doc.exists
+                      ? 0
+                      : !doc.data.containsKey("QTY") ? 0 : doc.data["QTY"])).shareReplay(maxSize: 1)));
+    }
+    return _currentDabaoeeRewardsNumber;
+  }
 
   Observable<List<Rating>> listOfReviews;
 
@@ -78,38 +119,11 @@ class User extends FirebaseType {
   User.fromAuth(FirebaseUser user) : super.fromUID(user.uid) {
     if (ConfigHelper.instance.currentUserProperty.value != this)
       ConfigHelper.instance.currentUserProperty.value = this;
-
-    currentDabaoerRewardsNumber = ConfigHelper
-        .instance.currentDabaoerRewards.producer
-        .switchMap((reward) => reward == null
-            ? Observable.just(0)
-            : Observable(Firestore.instance
-                .collection(this.className)
-                .document(this.uid)
-                .collection(reward.className)
-                .document(reward.uid)
-                .snapshots()
-                .map((doc) => !doc.exists
-                    ? 0
-                    : !doc.data.containsKey("QTY") ? 0 : doc.data["QTY"])));
-
-    currentDabaoeeRewardsNumber = ConfigHelper
-        .instance.currentDabaoeeRewards.producer
-        .switchMap((reward) => reward == null
-            ? Observable.just(0)
-            : Observable(Firestore.instance
-                .collection(this.className)
-                .document(this.uid)
-                .collection(reward.className)
-                .document(reward.uid)
-                .snapshots()
-                .map((doc) => !doc.exists
-                    ? 0
-                    : !doc.data.containsKey("QTY") ? 0 : doc.data["QTY"])));
   }
 
   @override
   void setUpVariables() {
+
     email = BehaviorSubject();
     profileImage = BehaviorSubject();
     name = BehaviorSubject();
@@ -125,6 +139,7 @@ class User extends FirebaseType {
             .document(this.uid)
             .collection("ratings"))
         .observable;
+
   }
 
   @override

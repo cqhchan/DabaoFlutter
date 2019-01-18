@@ -77,26 +77,24 @@ class _BrowseRewardPageState extends State<BrowseRewardPage>
             child: TabBarView(
               children: <Widget>[
                 MilestonesList(
-                  milestones:
-                      Observable(dabaoeeMilestones.producer.switchMap((data) {
+                  milestones: dabaoeeMilestones.producer.switchMap((data) {
                     if (data != null) return data.milestones;
                     return null;
+                  }),
+                  points: currentUser.producer.switchMap((user) {
+                    if (user == null) return BehaviorSubject(seedValue:null);
+                    return user.currentDabaoeeRewardsNumber.producer;
                   })),
-                  points: Observable(currentUser.producer.switchMap((user) {
-                    if (user == null) return Observable.just(null);
-                    return Observable(user.currentDabaoeeRewardsNumber);
-                  })),
-                ),
+
                 MilestonesList(
-                  milestones:
-                      Observable(dabaoerMilestones.producer.switchMap((data) {
+                  milestones: dabaoerMilestones.producer.switchMap((data) {
                     if (data != null) return data.milestones;
                     return null;
-                  })),
-                  points: Observable(currentUser.producer.switchMap((user) {
-                    if (user == null) return Observable.just(null);
-                    return Observable(user.currentDabaoerRewardsNumber);
-                  })),
+                  }),
+                  points: currentUser.producer.switchMap((user) {
+                    if (user == null) return BehaviorSubject(seedValue:null);
+                    return user.currentDabaoerRewardsNumber.producer;
+                  }),
                 ),
               ],
             ),

@@ -108,7 +108,7 @@ class PhoneVerificationPageState extends State<PhoneVerificationPage>
                           widget.onCompleteCallback();
                       }).catchError((e) {
                         Navigator.of(context).pop();
-                        _showSnackBar("Error incorrect wrong code");
+                        _showSnackBar("Error: Incorrect OTP code entered");
                       });
                     } else {
                       linkCredentialsWithPhone().then((firebaseUser) {

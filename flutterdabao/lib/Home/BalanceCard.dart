@@ -26,7 +26,7 @@ class BalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
-      elevation: 4.0,
+      elevation: 1.5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
       child: user.hasData
           ? Column(
