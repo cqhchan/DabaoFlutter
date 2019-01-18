@@ -19,6 +19,7 @@ import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:flutterdabao/Model/Wallet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:vibrate/vibrate.dart';
 
 class ConfigHelper with HavingSubscriptionMixin {
   MutableProperty<User> currentUserProperty = MutableProperty<User>(null);
@@ -80,10 +81,13 @@ class ConfigHelper with HavingSubscriptionMixin {
   ConfigHelper._create() {
     _internal = this;
   }
-
+  bool canVibrate = false;
   // Called once when app loads.
   appDidLoad() {
     disposeAndReset();
+
+    Vibrate.canVibrate.then((canVibrate)=> this.canVibrate = canVibrate);
+
 
     subscription
         .add(currentUserFoodTagsProperty.bindTo(currentUserFoodTagProducer()));

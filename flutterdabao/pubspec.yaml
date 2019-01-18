@@ -66,6 +66,7 @@ dependencies:
   path_drawing: ^0.4.0
   flutter_webview_plugin: ^0.3.0+2
   keyboard_visibility: ^0.5.1
+  vibrate: ^0.0.4
   settings:
     git:
       url: https://github.com/cqhchan/settings

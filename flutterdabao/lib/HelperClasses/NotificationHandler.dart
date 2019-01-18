@@ -18,6 +18,7 @@ import 'package:flutterdabao/ViewOrders/ViewOrderPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:settings/settings.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:vibrate/vibrate.dart';
 
 const String modeChannel = "NEWMESSAGE";
 
@@ -210,6 +211,10 @@ handleNotificationForOnMessage(map) async {
                   ? data[senderNameKey]
                   : "Message";
 
+              if (ConfigHelper.instance.canVibrate) {
+                Vibrate.vibrate();
+              }
+
               Fluttertoast.instance
                   .showToast(
                 msg: name + ": " + body,
@@ -239,6 +244,9 @@ handleNotificationForOnMessage(map) async {
           break;
 
         case modeNewPotentialOrder:
+          if (ConfigHelper.instance.canVibrate) {
+            Vibrate.vibrate();
+          }
           Fluttertoast.instance
               .showToast(
             msg: body,
