@@ -250,7 +250,7 @@ class ConfigHelper with HavingSubscriptionMixin {
                 .collection("orders")
                 .where(Order.completedTimeKey,
                     isGreaterThanOrEqualTo:
-                        DateTime.now().add(Duration(days: -2)))
+                        DateTime.now().add(Duration(hours: -5)))
                 .where(Order.statusKey, isEqualTo: orderStatus_Completed)
                 .where(Order.delivererKey, isEqualTo: user.uid))
             .observable);
