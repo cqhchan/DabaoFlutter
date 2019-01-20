@@ -462,7 +462,7 @@ class _TransactionsState extends State<TransactionsPage>
                   builder: (context, snap) {
                     if (snap.data == null) return Offstage();
                     return Text(
-                      "+" + StringHelper.doubleToPriceString(snap.data),
+                      "-" + StringHelper.doubleToPriceString(snap.data),
                       style: FontHelper.semiBold(Colors.black, 14),
                     );
                   },
