@@ -262,12 +262,14 @@ class User extends FirebaseType {
   //last login date
   //creation date
   void setUser(
-      String pi, String name, DateTime creationTime, DateTime lastLoginTime) {
+      String pi, String name) {
+
+
     Firestore.instance.collection('/users').document(uid).setData({
       profileImageKey: pi,
       nameKey: name,
-      "CT": creationTime,
-      'LLT': lastLoginTime,
+      "CT": new DateTime.now(),
+      'LLT':  new DateTime.now(),
     }, merge: true);
   }
 

@@ -226,11 +226,7 @@ class _ProfileCreationPageState extends State<ProfileCreationPage> {
         return FirebaseAuth.instance.currentUser().then((user) {
           ConfigHelper.instance.currentUserProperty.value.setUser(
             profileLink,
-            _nameController.text,
-            DateTime.fromMillisecondsSinceEpoch(
-                user.metadata.creationTimestamp * 1000),
-            DateTime.fromMillisecondsSinceEpoch(
-                user.metadata.lastSignInTimestamp * 1000),
+            _nameController.text
           );
           widget.onCompleteCallback();
         });
