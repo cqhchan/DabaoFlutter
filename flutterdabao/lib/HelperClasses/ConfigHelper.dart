@@ -86,6 +86,7 @@ class ConfigHelper with HavingSubscriptionMixin {
   appDidLoad() {
     disposeAndReset();
 
+
     Vibrate.canVibrate.then((canVibrate)=> this.canVibrate = canVibrate);
 
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
@@ -80,7 +82,6 @@ class MatchesState extends State<Matches> with HavingSubscriptionMixin {
                   ],
                 );
               });
-
         },
         context: context,
         route: widget.route,
@@ -88,6 +89,35 @@ class MatchesState extends State<Matches> with HavingSubscriptionMixin {
         location: widget.route.deliveryLocation.value
             .map((geopoint) => LatLng(geopoint.latitude, geopoint.longitude))
             .first,
+        refresh: (context) async {
+          try {
+            final result = await InternetAddress.lookup('google.com');
+            if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+              setState(() {
+                listOfPotentialMatches = widget.route.refreshPotentialOrders();
+              });
+
+              return listOfPotentialMatches.producer
+                  .where((list) => list != null)
+                  .map((first) => null)
+                  .first;
+            }
+
+            print('not connected');
+            final snackBar = SnackBar(
+                content: Text(
+                    'An Error has occured. Please check your network connectivity'));
+            Scaffold.of(context).showSnackBar(snackBar);
+          } on SocketException catch (_) {
+            print('not connected');
+            final snackBar = SnackBar(
+                content: Text(
+                    'An Error has occured. Please check your network connectivity'));
+            Scaffold.of(context).showSnackBar(snackBar);
+          }
+
+          return Future.delayed(Duration(seconds: 1));
+        },
       ),
     );
   }

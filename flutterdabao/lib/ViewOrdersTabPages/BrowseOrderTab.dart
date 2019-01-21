@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/HavingGoogleMapPlaces.dart';
@@ -81,7 +83,13 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
 
   @override
   void dispose() {
+
+    if (searchOrders.value != null)
     Selectable.deselectAll(searchOrders.value);
+
+    if (defaultOrders.value != null)
+    Selectable.deselectAll(defaultOrders.value);
+
     super.dispose();
   }
 
@@ -203,6 +211,63 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                   return tempOrders;
                 }),
                 location: ConfigHelper.instance.currentLocationProperty.value,
+                refresh: (context) async {
+                  try {
+                    final result = await InternetAddress.lookup('google.com');
+                    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                      disposeAndReset();
+
+                      subscription.add(defaultOrders.bindTo(
+                          FirebaseCollectionReactive<Order>(Firestore.instance
+                                  .collection("orders")
+                                  .where(Order.startTimeKey,
+                                      isGreaterThanOrEqualTo: DateTime.now()
+                                          .add(Duration(days: -7)))
+                                  .where(Order.statusKey,
+                                      isEqualTo: orderStatus_Requested)
+                                  .limit(20))
+                              .observable));
+
+                      subscription.add(searchOrders.bindTo(searchLocation
+                          .switchMap((latlng) => searchRadius.switchMap(
+                              (radius) =>
+                                  FirebaseCloudFunctions.fetchProximityHash(
+                                          location: latlng, radius: radius)
+                                      .asStream()))
+                          .map((hashes) {
+                        return hashes.map((hash) {
+                          return FirebaseCollectionReactive<Order>(Firestore
+                                  .instance
+                                  .collection("orders")
+                                  .where(Order.geoHashKey,
+                                      isGreaterThanOrEqualTo: hash)
+                                  .where(Order.geoHashKey,
+                                      isLessThanOrEqualTo: hash + "zzzzzzzz")
+                                  .where(Order.statusKey,
+                                      isEqualTo: orderStatus_Requested))
+                              .observable;
+                        }).toList();
+                      }).switchMap((list) {
+                        return combineAndMerge<Order>(list);
+                      })));
+                      return Future.delayed(Duration(seconds: 2));
+                    }
+
+                    print('not connected');
+                    final snackBar = SnackBar(
+                        content: Text(
+                            'An Error has occured. Please check your network connectivity'));
+                    Scaffold.of(context).showSnackBar(snackBar);
+                  } on SocketException catch (_) {
+                    print('not connected');
+                    final snackBar = SnackBar(
+                        content: Text(
+                            'An Error has occured. Please check your network connectivity'));
+                    Scaffold.of(context).showSnackBar(snackBar);
+                  }
+
+                  return Future.delayed(Duration(seconds: 1));
+                },
               );
             },
           )),

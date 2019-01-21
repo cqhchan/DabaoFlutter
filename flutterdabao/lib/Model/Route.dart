@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutterdabao/Firebase/FirebaseCloudFunctions.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
@@ -41,10 +43,13 @@ class Route extends FirebaseType {
 
   MutableProperty<List<Order>> _listOfPotentialOrders;
 
+  StreamSubscription potentialOrderSubscription;
+
   MutableProperty<List<Order>> get listOfPotentialOrders {
     if (_listOfPotentialOrders == null) {
+      print("Called list Of potential Orders");
       _listOfPotentialOrders = MutableProperty(List());
-      _listOfPotentialOrders.bindTo(FirebaseCollectionReactive<Order>(Firestore
+      potentialOrderSubscription = _listOfPotentialOrders.bindTo(FirebaseCollectionReactive<Order>(Firestore
               .instance
               .collection("orders")
               .where(Order.statusKey, isEqualTo: orderStatus_Requested)
@@ -64,6 +69,18 @@ class Route extends FirebaseType {
           .observable);
     }
     return _listOfOrdersAccepted;
+  }
+
+  MutableProperty<List<Order>> refreshPotentialOrders() {
+    _listOfPotentialOrders = null;
+    potentialOrderSubscription.cancel();
+    
+    return listOfPotentialOrders;
+  }
+
+  MutableProperty<List<Order>> refreshAcceptedOrders() {
+    _listOfOrdersAccepted = null;
+    return listOfOrdersAccepted;
   }
 
   Route.fromDocument(DocumentSnapshot doc) : super.fromDocument(doc);

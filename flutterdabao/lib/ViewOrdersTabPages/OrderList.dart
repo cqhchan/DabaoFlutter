@@ -32,6 +32,7 @@ class OrderList extends StatefulWidget {
   final DabaoRoute.Route route;
   final context;
   final VoidCallback onCompleteCallBack;
+  final Future<void> Function(BuildContext context) refresh;
 
   OrderList(
       {Key key,
@@ -39,7 +40,8 @@ class OrderList extends StatefulWidget {
       @required this.input,
       this.location,
       this.route,
-      this.onCompleteCallBack})
+      this.onCompleteCallBack,
+      @required this.refresh})
       : super(key: key);
 
   _OrderListState createState() => _OrderListState();
@@ -60,28 +62,35 @@ class _OrderListState extends State<OrderList> with HavingSubscriptionMixin {
   // Current User Location
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildList(),
-    );
+    return Scaffold(body: Builder(
+      builder: (context) {
+        return _buildList(context);
+      },
+    ));
   }
 
-  Widget _buildList() {
+  Widget _buildList(BuildContext context) {
     return StreamBuilder<List<Order>>(
       stream: widget.input,
       builder: (BuildContext context, snapshot) {
         if (!snapshot.hasData) return Offstage();
-        return ListView(
-          key: new Key(random.randomString(20)),
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 30.0),
-          children: snapshot.data
-              .map((data) => _OrderItemCell(
-                    onCompleteAcceptCallback: widget.onCompleteCallBack,
-                    order: data,
-                    location: widget.location,
-                    route: widget.route,
-                  ))
-              .toList(),
+        return RefreshIndicator(
+          onRefresh: () {
+            return widget.refresh(context);
+          },
+          child: ListView(
+            key: new Key(random.randomString(20)),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 30.0),
+            children: snapshot.data
+                .map((data) => _OrderItemCell(
+                      onCompleteAcceptCallback: widget.onCompleteCallBack,
+                      order: data,
+                      location: widget.location,
+                      route: widget.route,
+                    ))
+                .toList(),
+          ),
         );
       },
     );
@@ -400,21 +409,6 @@ class _OrderItemCellState extends State<_OrderItemCell>
             );
           },
         ),
-        StreamBuilder<DateTime>(
-          stream: order.endDeliveryTime,
-          builder: (context, snap) {
-            if (!snap.hasData) return Offstage();
-            return Expanded(
-              child: Text(
-                snap.hasData
-                    ? '-' + DateTimeHelper.convertDateTimeToAMPM(snap.data)
-                    : '',
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              ),
-            );
-          },
-        ),
       ],
     );
   }
@@ -445,25 +439,24 @@ class _OrderItemCellState extends State<_OrderItemCell>
 
   Widget _buildMessage(Order order) {
     return StreamBuilder<String>(
-        stream: order.message,
-        builder: (context, snap) {
-          if (!snap.hasData) return Offstage();
-          return Container(
-      margin: EdgeInsets.only(top: 2),
-      padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
-      color: ColorHelper.dabaoOffWhiteF5,
-      child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text("Message to Dabaoer", style: FontHelper.bold12Black),
-              SizedBox(
-                height: 3,
-              ),
-              Text(snap.data, style: FontHelper.medium(Colors.black, 10))
-            ],
-          ));
-        },
-      
+      stream: order.message,
+      builder: (context, snap) {
+        if (!snap.hasData) return Offstage();
+        return Container(
+            margin: EdgeInsets.only(top: 2),
+            padding: EdgeInsets.fromLTRB(6.0, 15.0, 6.0, 15.0),
+            color: ColorHelper.dabaoOffWhiteF5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text("Message to Dabaoer", style: FontHelper.bold12Black),
+                SizedBox(
+                  height: 3,
+                ),
+                Text(snap.data, style: FontHelper.medium(Colors.black, 10))
+              ],
+            ));
+      },
     );
   }
 
