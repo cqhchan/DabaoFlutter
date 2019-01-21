@@ -470,7 +470,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                         Navigator.pop(context);
                         Navigator.of(context).push(FadeRoute(
                           widget: WebviewScaffold(
-                            url: "https://www.dabaoapp.sg/termsandconditions",
+                            url: "https://www.dabaoapp.sg/",
                             appBar: new AppBar(
                               title: new Text("Terms & Conditions"),
                             ),
