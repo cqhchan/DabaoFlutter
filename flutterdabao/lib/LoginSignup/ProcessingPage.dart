@@ -23,32 +23,43 @@ class ProcessingPage extends StatefulWidget {
 class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
   List<Widget> listOfWidget;
   MutableProperty<int> currentPage = MutableProperty<int>(0);
-  Observable<List<Widget>> listOfWidgetProducer; 
+  Observable<List<Widget>> listOfWidgetProducer;
   @override
-    void initState() {
+  void initState() {
+    super.initState();
 
-      super.initState();
-
-      listOfWidgetProducer = Observable.combineLatest3<String, String, FirebaseUser,
-                List<Widget>>(widget.user.email, widget.user.profileImage,
+    listOfWidgetProducer =
+        Observable.combineLatest3<String, String, FirebaseUser, List<Widget>>(
+            widget.user.email,
+            widget.user.profileImage,
             FirebaseAuth.instance.currentUser().asStream(),
             (email, profileImage, firebaseUser) {
-          List<Widget> list = List();
+      List<Widget> list = List();
 
-          if (firebaseUser.phoneNumber == null)
-            list.add(Scaffold(
-                body: PhoneVerificationPage(
+      if (firebaseUser.phoneNumber == null)
+        list.add(Scaffold(
+            body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            PhoneVerificationPage(
               linkCredentials: true,
               onCompleteCallback: nextPage,
-            )));
+            ),
+            GestureDetector(
+              onTap: (){
+                FirebaseAuth.instance.signOut();
+              },
+              child: Container(color: Colors.transparent, child: Text("Sign in with a Different Account"))),
+          ],
+        )));
 
-          if (profileImage == null ||
-              firebaseUser.phoneNumber == null) if ((firebaseUser.email ==
-                  null ||
-              firebaseUser.email.isEmpty))
-            list.add(Scaffold(
-              key: scaffoldKey,
-                body: SafeArea(
+      if (profileImage == null ||
+          firebaseUser.phoneNumber == null) if ((firebaseUser.email ==
+              null ||
+          firebaseUser.email.isEmpty))
+        list.add(Scaffold(
+            key: scaffoldKey,
+            body: SafeArea(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -67,19 +78,19 @@ class _ProcessingPageState extends State<ProcessingPage> with PageHandler {
                   )),
                 ],
               ),
-            )));              
+            )));
 
-          if (profileImage == null)
-            list.add(ProfileCreationPage(
-              key: profileKey,
-              onCompleteCallback: () {
-                nextPage();
-              },
-            ));
+      if (profileImage == null)
+        list.add(ProfileCreationPage(
+          key: profileKey,
+          onCompleteCallback: () {
+            nextPage();
+          },
+        ));
 
-          return list;
-        });
-    }
+      return list;
+    });
+  }
 
   @override
   // TODO: implement maxPage + 2 cause firstPage and HomePage

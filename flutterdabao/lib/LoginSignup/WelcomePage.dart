@@ -45,7 +45,7 @@ class WelcomePageState extends State<WelcomePage> {
                   Container(
                       padding: EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
                       child: Text(
-                        "We're glad to have you join our Dabao Community! \n Lets get you started in ${widget.numberOfSteps} steps",
+                        "We're glad to have you join our Dabao Community! \n Let's get you started in ${widget.numberOfSteps} steps",
                         style: FontHelper.medium(Colors.black, 14.0),
                         textAlign: TextAlign.center,
                       )),

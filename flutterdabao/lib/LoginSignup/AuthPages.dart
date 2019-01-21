@@ -405,6 +405,7 @@ class EmailLoginPageState extends State<EmailLoginPage> with AuthHandler {
                     ),
                     onPressed: () {
                       _focusNode.unfocus();
+                      showLoadingOverlay(context: context);
 
                       if (!widget.linkCredentials) {
                         FirebaseAuth.instance
@@ -446,6 +447,7 @@ class EmailLoginPageState extends State<EmailLoginPage> with AuthHandler {
                             default:
                               _showSnackBar(e.message);
                           }
+                          Navigator.of(context).pop();
                           print(e);
                         });
                       } else {
@@ -456,10 +458,15 @@ class EmailLoginPageState extends State<EmailLoginPage> with AuthHandler {
                             .then((firebaseUser) {
                           User.fromAuth(firebaseUser)
                               .setEmail(firebaseUser.email);
+                          Navigator.of(context).pop();
+
                           if (widget.onCompleteCallback != null)
                             widget.onCompleteCallback();
                         }).catchError((e) {
                           print(e);
+
+                          Navigator.of(context).pop();
+
                           switch (e.code) {
                             case "ERROR_REQUIRES_RECENT_LOGIN":
                               print("Logout");
