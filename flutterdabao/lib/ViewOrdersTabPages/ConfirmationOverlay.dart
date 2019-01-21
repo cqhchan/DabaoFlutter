@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterdabao/CustomWidget/CustomDialogs.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -187,8 +188,13 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                       tapPositionY = details.globalPosition.dy;
                     },
                     onTap: () {
-
-                      showInfomationDialog(x: tapPositionX, y: tapPositionY, context: context, subTitle: "This is the delivery fee you will be receiving for this order!", title: "What is this");
+                      showInfomationDialog(
+                          x: tapPositionX,
+                          y: tapPositionY,
+                          context: context,
+                          subTitle:
+                              "This is the delivery fee you will be receiving for this order!",
+                          title: "What is this");
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -254,26 +260,41 @@ class _ConfirmationOverlayState extends State<ConfirmationOverlay>
                 .isBefore(endTime.value.add(Duration(minutes: 9)))) {
           order.isSelectedProperty.value = false;
           showLoadingOverlay(context: context);
-          var isSuccessful = await FirebaseCloudFunctions.acceptOrder(
+
+          await FirebaseCloudFunctions.acceptOrder(
             routeID: widget.route == null ? null : widget.route.uid,
             orderID: widget.order.uid,
             acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
             deliveryTime:
                 DateTimeHelper.convertDateTimeToString(selectedDateTime.value),
-          );
-          if (isSuccessful) {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
+          ).then((isSuccessful) {
+            if (isSuccessful) {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
 
-            if (widget.onCompletionCallback != null)
-              widget.onCompletionCallback();
-          } else {
-            Navigator.of(context).pop();
-            final snackBar = SnackBar(
-                content: Text(
-                    'An Error has occured. Please check your network connectivity'));
-            Scaffold.of(context).showSnackBar(snackBar);
-          }
+              if (widget.onCompletionCallback != null)
+                widget.onCompletionCallback();
+            } else {
+              Navigator.of(context).pop();
+              final snackBar = SnackBar(
+                  content: Text(
+                      'An Error has occured. Please check your network connectivity'));
+              Scaffold.of(context).showSnackBar(snackBar);
+            }
+          }).catchError((error) {
+            if (error is PlatformException) {
+              PlatformException e = error;
+              Navigator.of(context).pop();
+              final snackBar = SnackBar(content: Text(e.message));
+              Scaffold.of(context).showSnackBar(snackBar);
+            } else {
+              Navigator.of(context).pop();
+              final snackBar = SnackBar(
+                  content: Text(
+                      'An Error has occured. Please check your network connectivity'));
+              Scaffold.of(context).showSnackBar(snackBar);
+            }
+          });
         } else {
           setState(() {
             errorMessage =

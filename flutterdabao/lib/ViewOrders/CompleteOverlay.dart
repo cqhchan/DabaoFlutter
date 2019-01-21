@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
@@ -107,7 +108,8 @@ class _CompleteOverlayState extends State<CompleteOverlay>
                                 flex: 2,
                                 child: Padding(
                                   padding: const EdgeInsets.all(4.0),
-                                  child: _buildPickUpButton(widget.order, context),
+                                  child:
+                                      _buildPickUpButton(widget.order, context),
                                 ),
                               ),
                             ],
@@ -158,10 +160,10 @@ class _CompleteOverlayState extends State<CompleteOverlay>
           builder: (context, snap) {
             if (!snap.hasData) return Offstage();
             return Text(
-                DateTimeHelper.convertTimeToDisplayString(snap.data),
-                style: FontHelper.semiBoldgrey14TextStyle,
-                overflow: TextOverflow.ellipsis,
-              );
+              DateTimeHelper.convertTimeToDisplayString(snap.data),
+              style: FontHelper.semiBoldgrey14TextStyle,
+              overflow: TextOverflow.ellipsis,
+            );
           },
         ),
       ],
@@ -358,23 +360,36 @@ class _CompleteOverlayState extends State<CompleteOverlay>
       ),
       onPressed: () async {
         showLoadingOverlay(context: context);
-        var isSuccessful = await FirebaseCloudFunctions.completeOrder(
+        await FirebaseCloudFunctions.completeOrder(
           orderID: widget.order.uid,
           acceptorID: ConfigHelper.instance.currentUserProperty.value.uid,
           completedTime: DateTimeHelper.convertDateTimeToString(DateTime.now()),
-        );
-
-        if (isSuccessful) {
-          order.isSelectedProperty.value = false;
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
-        } else {
-          Navigator.of(context).pop();
-          final snackBar = SnackBar(
-              content: Text(
-                  'An Error has occured. Please check your network connectivity'));
-          Scaffold.of(context).showSnackBar(snackBar);
-        }
+        ).then((isSuccessful) {
+          if (isSuccessful) {
+            order.isSelectedProperty.value = false;
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          } else {
+            Navigator.of(context).pop();
+            final snackBar = SnackBar(
+                content: Text(
+                    'An Error has occured. Please check your network connectivity'));
+            Scaffold.of(context).showSnackBar(snackBar);
+          }
+        }).catchError((error) {
+          if (error is PlatformException) {
+            PlatformException e = error;
+            Navigator.of(context).pop();
+            final snackBar = SnackBar(content: Text(e.message));
+            Scaffold.of(context).showSnackBar(snackBar);
+          } else {
+            Navigator.of(context).pop();
+            final snackBar = SnackBar(
+                content: Text(
+                    'An Error has occured. Please check your network connectivity'));
+            Scaffold.of(context).showSnackBar(snackBar);
+          }
+        });
       },
     );
   }
@@ -383,10 +398,9 @@ class _CompleteOverlayState extends State<CompleteOverlay>
     return OutlineButton(
       color: Colors.transparent,
       borderSide: BorderSide(color: Colors.black),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Container(
-        height:40,
+        height: 40,
         child: Center(
           child: Text(
             "Back",

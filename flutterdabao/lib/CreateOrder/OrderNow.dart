@@ -16,8 +16,6 @@ import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
 
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 Future<OrderHolder> generateHolderFromOrder(String orderID) async {
   DocumentSnapshot snap =
       await Firestore.instance.collection("orders").document(orderID).get();
@@ -38,31 +36,23 @@ Future<OrderHolder> generateHolderFromOrder(String orderID) async {
 }
 
 class OrderNow extends StatefulWidget {
-  final Voucher voucher;
   final OrderHolder holder;
 
-  OrderNow({Key key, this.voucher, this.holder}) : super(key: key);
+  OrderNow({Key key, @required this.holder}) : super(key: key);
 
-  _OrderNowState createState() => _OrderNowState(
-      holder: this.holder == null ? OrderHolder(voucher: voucher) : holder);
+  _OrderNowState createState() => _OrderNowState(holder: this.holder);
 }
 
 class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin {
   // String _address = '20 Heng Mui Keng xTerrace';
 
   // handle the progress through the application
-  MutableProperty<int> progress;
-
-  MutableProperty<bool> checkout = MutableProperty<bool>(false);
 
   final OrderHolder holder;
 
-  _OrderNowState({this.holder}) {
-    if (holder.foodTag.value != null)
-      progress = MutableProperty<int>(1);
-    else
-      progress = MutableProperty<int>(0);
-  }
+  bool showMap = true;
+
+  _OrderNowState({this.holder});
 
   void initState() {
     super.initState();
@@ -79,20 +69,29 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          CustomizedMap(
-            selectedlocation: holder.deliveryLocation,
-            selectedlocationDescription: holder.deliveryLocationDescription,
+          StreamBuilder(
+            stream: holder.checkout.producer,
+            builder: (context, snap) {
+              return IgnorePointer(
+                ignoring: snap.data == true,
+                child: CustomizedMap(
+                  selectedlocation: holder.deliveryLocation,
+                  selectedlocationDescription:
+                      holder.deliveryLocationDescription,
+                ),
+              );
+            },
           ),
           CustomizedBackButton(
             onBack: () {
               //TOdo p3 try to flash edit button
-              if (checkout.value) {
+              if (holder.checkout.value) {
                 showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
                           title: Text("Leave?"),
-                          content:
-                              Text("Your Order has not been created. Are you sure you want to leave?"),
+                          content: Text(
+                              "Your Order has not been created. Are you sure you want to leave?"),
                           actions: <Widget>[
                             new FlatButton(
                               child: new Text(
@@ -102,7 +101,7 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin {
                               ),
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                checkout.value = false;
+                                holder.checkout.value = false;
                               },
                             ),
                             new FlatButton(
@@ -122,7 +121,7 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin {
             },
           ),
           StreamBuilder<bool>(
-            stream: checkout.producer,
+            stream: holder.checkout.producer,
             builder: (context, snap) {
               if (snap.hasData && snap.data)
                 return OrderCheckout(
@@ -147,8 +146,8 @@ class _OrderNowState extends State<OrderNow> with HavingSubscriptionMixin {
         builder: (builder) {
           return OrderOverlay(
             holder: holder,
-            page: progress,
-            checkout: checkout,
+            page: holder.progress,
+            checkout: holder.checkout,
           );
         });
   }

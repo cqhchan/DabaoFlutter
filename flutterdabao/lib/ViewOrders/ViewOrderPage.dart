@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -330,55 +332,65 @@ class _DabaoerViewOrderListPageState extends State<DabaoerViewOrderListPage>
 
   Widget buildUser(User user) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Text(
-          "Dabaoee",
-          style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 14.0),
-          textAlign: TextAlign.center,
+        Container(
+          padding: EdgeInsets.only(top: 8),
+          child: Text(
+            "Dabaoee",
+            style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 14.0),
+            textAlign: TextAlign.center,
+          ),
         ),
         user == null
             ? Offstage()
-            : Row(
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  StreamBuilder<String>(
-                    stream: user.thumbnailImage,
-                    builder: (context, snap) {
-                      if (!snap.hasData || snap.data == null) return Offstage();
+                  Row(
+                    children: <Widget>[
+                      StreamBuilder<String>(
+                        stream: user.thumbnailImage,
+                        builder: (context, snap) {
+                          if (!snap.hasData || snap.data == null)
+                            return Offstage();
 
-                      return FittedBox(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30.0),
-                          child: SizedBox(
-                            height: 35,
-                            width: 35,
-                            child: CachedNetworkImage(
-                              imageUrl: snap.data,
-                              placeholder: GlowingProgressIndicator(
-                                child: Icon(
-                                  Icons.account_circle,
-                                  size: 35,
+                          return FittedBox(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30.0),
+                              child: SizedBox(
+                                height: 35,
+                                width: 35,
+                                child: CachedNetworkImage(
+                                  imageUrl: snap.data,
+                                  placeholder: GlowingProgressIndicator(
+                                    child: Icon(
+                                      Icons.account_circle,
+                                      size: 35,
+                                    ),
+                                  ),
+                                  errorWidget: Icon(Icons.error),
                                 ),
                               ),
-                              errorWidget: Icon(Icons.error),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  StreamBuilder<String>(
-                    stream: user.name,
-                    builder: (context, snap) {
-                      if (snap.data == null) return Offstage();
-                      return Container(
-                        padding: EdgeInsets.only(left: 10.0),
-                        child: Text(
-                          snap.data,
-                          style: FontHelper.regular14Black,
-                        ),
-                      );
-                    },
+                          );
+                        },
+                      ),
+                      StreamBuilder<String>(
+                        stream: user.name,
+                        builder: (context, snap) {
+                          if (snap.data == null) return Offstage();
+                          return Container(
+                            padding: EdgeInsets.only(left: 10.0),
+                            child: Text(
+                              snap.data,
+                              style: FontHelper.regular14Black,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   StreamBuilder<String>(
                     stream: user.handPhone,
@@ -645,14 +657,15 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
                 ],
               ),
               onPressed: () async {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return OrderNow(
-                    holder: OrderHolder.fromOrder(
-                        order: widget.order,
-                        items: widget.order.orderItem.value),
-                  );
-                }));
+                Navigator.of(context).push(MaterialPageRoute(
+                    maintainState: !Platform.isIOS,
+                    builder: (context) {
+                      return OrderNow(
+                        holder: OrderHolder.fromOrder(
+                            order: widget.order,
+                            items: widget.order.orderItem.value),
+                      );
+                    }));
               });
 
         return Offstage();
@@ -758,12 +771,16 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
 
   Widget buildUser(User user) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Text(
-          "Picked Up by:",
-          style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 14.0),
-          textAlign: TextAlign.center,
+        Container(
+          padding: EdgeInsets.only(top: 8.0),
+          child: Text(
+            "Picked Up by:",
+            style: FontHelper.semiBold(ColorHelper.dabaoOffBlack9B, 14.0),
+            textAlign: TextAlign.center,
+          ),
         ),
         user == null
             ? StreamBuilder(
@@ -771,10 +788,14 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
                 builder: (context, snap) {
                   if (snap.hasData && snap.data == orderStatus_Requested)
                     return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text("Searching for Dabaoer",
-                            style: FontHelper.semiBold(
-                                ColorHelper.dabaoOffGreyD3, 12)),
+                        Container(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Text("Searching for Dabaoer",
+                              style: FontHelper.semiBold(
+                                  ColorHelper.dabaoOffGreyD3, 12)),
+                        ),
                         Container(
                           margin: EdgeInsets.only(left: 10),
                           height: 15,
@@ -789,71 +810,81 @@ class _DabaoeeViewOrderListPageState extends State<DabaoeeViewOrderListPage>
                     return Offstage();
                 },
               )
-            : Row(
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  StreamBuilder<String>(
-                    stream: user.thumbnailImage,
-                    builder: (context, snap) {
-                      if (!snap.hasData || snap.data == null) return Offstage();
+                  Row(
+                    children: <Widget>[
+                      StreamBuilder<String>(
+                        stream: user.thumbnailImage,
+                        builder: (context, snap) {
+                          if (!snap.hasData || snap.data == null)
+                            return Offstage();
 
-                      return FittedBox(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30.0),
-                          child: SizedBox(
-                            height: 35,
-                            width: 35,
-                            child: CachedNetworkImage(
-                              imageUrl: snap.data,
-                              placeholder: GlowingProgressIndicator(
-                                child: Icon(
-                                  Icons.account_circle,
-                                  size: 35,
+                          return FittedBox(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30.0),
+                              child: SizedBox(
+                                height: 35,
+                                width: 35,
+                                child: CachedNetworkImage(
+                                  imageUrl: snap.data,
+                                  placeholder: GlowingProgressIndicator(
+                                    child: Icon(
+                                      Icons.account_circle,
+                                      size: 35,
+                                    ),
+                                  ),
+                                  errorWidget: Icon(Icons.error),
                                 ),
                               ),
-                              errorWidget: Icon(Icons.error),
                             ),
-                          ),
-                        ),
-                      );
-                    },
+                          );
+                        },
+                      ),
+                      StreamBuilder<String>(
+                        stream: user.name,
+                        builder: (context, snap) {
+                          if (snap.data == null) return Offstage();
+                          return Container(
+                            padding: EdgeInsets.only(left: 10.0),
+                            child: Text(
+                              snap.data,
+                              style: FontHelper.regular14Black,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  StreamBuilder<String>(
-                    stream: user.name,
-                    builder: (context, snap) {
-                      if (snap.data == null) return Offstage();
-                      return Container(
-                        padding: EdgeInsets.only(left: 10.0),
-                        child: Text(
-                          snap.data,
-                          style: FontHelper.regular14Black,
-                        ),
-                      );
-                    },
+                  Row(
+                    children: <Widget>[
+                      StreamBuilder<String>(
+                        stream: user.handPhone,
+                        builder: (context, snapshot) {
+                          if (snapshot.data == null) return Offstage();
+                          return Container(
+                            padding: EdgeInsets.only(left: 10.0),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.phone,
+                                size: 25,
+                              ),
+                              onPressed: () {
+                                makePhoneCall('tel:' + snapshot.data);
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          _toChat(widget.order, user);
+                        },
+                        icon: Icon(Icons.chat),
+                      )
+                    ],
                   ),
-                  StreamBuilder<String>(
-                    stream: user.handPhone,
-                    builder: (context, snapshot) {
-                      if (snapshot.data == null) return Offstage();
-                      return Container(
-                        padding: EdgeInsets.only(left: 10.0),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.phone,
-                            size: 25,
-                          ),
-                          onPressed: () {
-                            makePhoneCall('tel:' + snapshot.data);
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      _toChat(widget.order, user);
-                    },
-                    icon: Icon(Icons.chat),
-                  )
                 ],
               ),
       ],
@@ -1248,7 +1279,6 @@ class _OrderItemsState extends State<_OrderItems> {
                         orderItem.description.value,
                         style: FontHelper.semiBold(
                             ColorHelper.dabaoOffBlack4A, 10),
-
                       ),
                     ],
                   ),

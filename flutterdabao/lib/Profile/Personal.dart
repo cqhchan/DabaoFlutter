@@ -386,8 +386,11 @@ class _PersonalState extends State<Personal> {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData || snapshot.data == null)
                       return Offstage();
-                    if (updateFlag) {
+                    if (updateFlag ) {
+
+                      if (_nameTextController.text == null  || _nameTextController.text.isEmpty)
                       _nameTextController.text = snapshot.data;
+
                       return TextFormField(
                         controller: _nameTextController,
                         style: FontHelper.regular12Black,

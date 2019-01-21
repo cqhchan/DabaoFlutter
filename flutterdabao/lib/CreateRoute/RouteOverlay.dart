@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CustomWidget/Buttons/ArrowButton.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
+import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
 import 'package:flutterdabao/CustomWidget/Headers/DoubleLineHeader.dart';
 import 'package:flutterdabao/CustomWidget/Line.dart';
 import 'package:flutterdabao/CustomWidget/LoaderAnimator/LoadingWidget.dart';
@@ -320,14 +323,40 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
               )),
         ),
         Line(
-              margin: EdgeInsets.only(
-                  right: 10.0, top: 10.0, bottom: 15.0, left: 10.0),
-            ),
+          margin:
+              EdgeInsets.only(right: 10.0, top: 10.0, bottom: 15.0, left: 10.0),
+        ),
       ],
     );
   }
 
-  moveToSearch(BuildContext context) => Navigator.push(context,
+  moveToSearch(BuildContext context) =>
+      // Platform.isIOS
+      //     ? showFullBottomSheet(
+      //         context: context,
+      //         builder: (builder) {
+      //           return Container(
+      //             color: Colors.white,
+      //             child: Column(
+      //               children: <Widget>[
+      //                 SafeArea(
+      //                   child: Container(
+      //                     height: 20,
+      //                   ),
+      //                 ),
+      //                 Expanded(
+      //                   child: FoodTypeSearch(
+      //                     selectedCallback: (String tag) {
+      //                       callback(tag);
+      //                     },
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //           );
+      //         })
+      //     :
+      Navigator.push(context,
           new PageRouteBuilder(pageBuilder: (BuildContext context, _, __) {
         return new FoodTypeSearch(
           selectedCallback: (String tag) {
@@ -347,7 +376,6 @@ class _SelectFoodTagPageState extends State<_SelectFoodTagPage>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            
             Container(
               child: Text(
                 "Your recent places",

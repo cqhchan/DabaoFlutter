@@ -16,7 +16,14 @@ import 'package:flutterdabao/Holder/RouteHolder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RouteOverview extends StatefulWidget {
-  _RouteOverviewState createState() => _RouteOverviewState();
+
+  final RouteHolder holder;
+  
+
+  const RouteOverview({Key key, @required this.holder}) : super(key: key);
+  
+  
+  _RouteOverviewState createState() => _RouteOverviewState(this.holder);
 }
 
 class _RouteOverviewState extends State<RouteOverview>
@@ -24,7 +31,9 @@ class _RouteOverviewState extends State<RouteOverview>
 
   MutableProperty<bool> focusOnStart = MutableProperty<bool>(true);
 
-  final RouteHolder holder = RouteHolder();
+  final RouteHolder holder;
+
+  _RouteOverviewState(this.holder);
 
   void initState() {
     super.initState();

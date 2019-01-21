@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
 
 import 'package:flutterdabao/HelperClasses/ColorHelper.dart';
 import 'package:flutterdabao/HelperClasses/FontHelper.dart';
+import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
 import 'package:flutterdabao/Rewards/BrowseRewardPage.dart';
 import 'package:flutterdabao/Rewards/MyVoucherPage.dart';
@@ -85,10 +88,11 @@ class RewardsTabBarPageState extends State<RewardsTabBarPage> {
                     onCompletionCallback: (Voucher voucher) {
                       Navigator.popUntil(context,
                           ModalRoute.withName(Navigator.defaultRouteName));
-
+                      OrderHolder holder = OrderHolder(voucher: voucher);
                       Navigator.of(context).push(MaterialPageRoute(
+                          maintainState: !Platform.isIOS,
                           builder: (context) => OrderNow(
-                                voucher: voucher,
+                                holder: holder,
                               )));
                     },
                   ),

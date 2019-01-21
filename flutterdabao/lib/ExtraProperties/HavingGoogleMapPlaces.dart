@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutterdabao/CustomWidget/FadeRoute.dart';
+import 'package:flutterdabao/CustomWidget/HalfHalfPopUpSheet.dart';
+import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:rxdart/rxdart.dart';
@@ -20,23 +24,36 @@ abstract class HavingGoogleMapPlaces {
     return LatLng(lat, lng);
   }
 
-  Future<void> handlePressButton(BuildContext context,
-      Function(LatLng, String) onCompleteCallback, String startingText) async {
+  Future<void> handlePressButton(BuildContext context, MutableProperty<LatLng> location, MutableProperty<String> description, String startingText) async {
     // show input autocomplete with selected mode
     // then get the Prediction selected
-    Prediction p = await CustomPlacesAutocomplete.show(
-      startingText: startingText,
-      context: context,
-      apiKey: kGoogleApiKey,
-      onError: onError,
-      mode: Mode.fullscreen,
-      language: "en",
-      components: [Component(Component.country, "sg")],
-    );
+
+    Prediction p = 
+    // Platform.isIOS
+    //     ? await CustomPlacesIOSAutocomplete.show(
+    //         startingText: startingText,
+    //         context: context,
+    //         apiKey: kGoogleApiKey,
+    //         onError: onError,
+    //         mode: Mode.fullscreen,
+    //         language: "en",
+    //         components: [Component(Component.country, "sg")],
+    //       )
+    //     :
+         await CustomPlacesAutocomplete.show(
+            startingText: startingText,
+            context: context,
+            apiKey: kGoogleApiKey,
+            onError: onError,
+            mode: Mode.fullscreen,
+            language: "en",
+            components: [Component(Component.country, "sg")],
+          );
 
     if (p != null) {
       LatLng newLocation = await getLatLng(p);
-      onCompleteCallback(newLocation, p.description);
+      location.value = newLocation;
+      description.value =  p.description;
     }
   }
 
@@ -320,6 +337,62 @@ class CustomPlacesAutocomplete {
       return showDialog(context: context, builder: builder);
     }
     return Navigator.push(context, MyCustomRoute(builder: builder));
+  }
+}
+
+class CustomPlacesIOSAutocomplete {
+  static Future<Prediction> show(
+      {@required BuildContext context,
+      @required String apiKey,
+      Mode mode = Mode.fullscreen,
+      String hint = "Search",
+      num offset,
+      Location location,
+      num radius,
+      String language,
+      List<String> types,
+      List<Component> components,
+      bool strictbounds,
+      Widget logo,
+      String startingText,
+      ValueChanged<PlacesAutocompleteResponse> onError}) {
+    final builder = (BuildContext ctx) {
+      return Container(
+          color: Colors.white,
+          child: Column(
+            children: <Widget>[
+              SafeArea(
+                child: Container(
+                  height: 20,
+                ),
+              ),
+              Expanded(
+                  child: CustomPlacesAutocompleteWidget(
+                apiKey: apiKey,
+                mode: mode,
+                language: language,
+                components: components,
+                types: types,
+                location: location,
+                radius: radius,
+                strictbounds: strictbounds,
+                offset: offset,
+                hint: hint,
+                logo: logo,
+                onError: onError,
+                startingText: startingText,
+              )),
+            ],
+          ));
+    };
+
+    if (mode == Mode.overlay) {
+      return showDialog(context: context, builder: builder);
+    }
+    return showFullBottomSheet(
+      context: context,
+      builder: builder,
+    );
   }
 }
 

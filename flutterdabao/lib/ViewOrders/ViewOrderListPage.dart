@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/Chat/ChatNavigationButton.dart';
 import 'package:flutterdabao/CreateOrder/OrderNow.dart';
@@ -216,12 +218,13 @@ class _ViewOrderCellState extends State<_ViewOrderCell>
                               onTap: () async {
                                 OrderHolder holder = OrderHolder.fromOrder(
                                     order: order, items: order.orderItem.value);
-                                Navigator.of(context)
-                                    .push(MaterialPageRoute(builder: (context) {
-                                  return OrderNow(
-                                    holder: holder,
-                                  );
-                                }));
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    maintainState: !Platform.isIOS,
+                                    builder: (context) {
+                                      return OrderNow(
+                                        holder: holder,
+                                      );
+                                    }));
                               },
                               child: StreamBuilder(
                                 stream: order.status,

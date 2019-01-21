@@ -21,6 +21,22 @@ Future<T> showHalfBottomSheet<T>({
 }
 
 
+
+Future<T> showFullBottomSheet<T>({
+  @required BuildContext context,
+  @required WidgetBuilder builder,
+}) {
+  assert(context != null);
+  assert(builder != null);
+  assert(debugCheckHasMaterialLocalizations(context));
+  return Navigator.push(context, _FullPopUpRoute<T>(
+    builder: builder,
+    theme: Theme.of(context, shadowThemeOnly: true),
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+  ));
+}
+
+
 class _HalfHalfPopUpRoute<T> extends PopupRoute<T> {
   _HalfHalfPopUpRoute({
     this.builder,
@@ -155,6 +171,142 @@ class _HalfBottomSheetLayout extends SingleChildLayoutDelegate {
   }
 }
 
+
+
+
+class _FullPopUpRoute<T> extends PopupRoute<T> {
+  _FullPopUpRoute({
+    this.builder,
+    this.theme,
+    this.barrierLabel,
+    RouteSettings settings,
+  }) : super(settings: settings);
+
+  final WidgetBuilder builder;
+  final ThemeData theme;
+
+  @override
+  Color get barrierColor => Colors.black54;
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  final String barrierLabel;
+
+
+  @override
+  Duration get transitionDuration => _kBottomSheetDuration;
+
+  AnimationController _animationController;
+
+  @override
+  AnimationController createAnimationController() {
+    assert(_animationController == null);
+    _animationController =
+        BottomSheet.createAnimationController(navigator.overlay);
+    return _animationController;
+  }
+
+   @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    // By definition, the bottom sheet is aligned to the bottom of the page
+    // and isn't exposed to the top padding of the MediaQuery.
+    Widget bottomSheet = MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: _FullBottomSheet<T>(route: this),
+    );
+    if (theme != null)
+      bottomSheet = Theme(data: theme, child: bottomSheet);
+    return bottomSheet;
+  }
+
+}
+
+
+
+class _FullBottomSheet<T> extends StatefulWidget {
+  const _FullBottomSheet({ Key key, this.route }) : super(key: key);
+
+  final _FullPopUpRoute<T> route;
+
+  @override
+  _FullBottomSheetState<T> createState() => _FullBottomSheetState<T>();
+}
+
+class _FullBottomSheetState<T> extends State<_FullBottomSheet<T>> {
+  @override
+  Widget build(BuildContext context) {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    String routeLabel;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        routeLabel = '';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        routeLabel = localizations.dialogLabel;
+        break;
+    }
+
+    return GestureDetector(
+      excludeFromSemantics: true,
+      child: AnimatedBuilder(
+        animation: widget.route.animation,
+        builder: (BuildContext context, Widget child) {
+          // Disable the initial animation when accessible navigation is on so
+          // that the semantics are added to the tree at the correct time.
+          final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
+          return Semantics(
+            scopesRoute: true,
+            namesRoute: true,
+            label: routeLabel,
+            explicitChildNodes: true,
+            child: ClipRect(
+              child: CustomSingleChildLayout(
+                delegate: _FullBottomSheetLayout(animationValue),
+                child: InvisibleBottomSheet(
+                  animationController: widget.route._animationController,
+                  onClosing: () => Navigator.pop(context),
+                  builder: widget.route.builder,
+                ),
+              ),
+            ),
+          );
+        }
+      )
+    );
+  }
+}
+
+class _FullBottomSheetLayout extends SingleChildLayoutDelegate {
+  _FullBottomSheetLayout(this.progress);
+
+  final double progress;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return BoxConstraints(
+      minWidth: constraints.maxWidth,
+      maxWidth: constraints.maxWidth,
+      minHeight: 15.0/16.0,
+      //Set Max height 
+      maxHeight: constraints.maxHeight * 16.0 / 16.0
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    return Offset(0.0, size.height - childSize.height * progress);
+  }
+
+  @override
+  bool shouldRelayout(_FullBottomSheetLayout oldDelegate) {
+    return progress != oldDelegate.progress;
+  }
+}
 
 /// A material design bottom sheet.
 ///

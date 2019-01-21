@@ -10,12 +10,19 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class OrderHolder with HavingSubscriptionMixin {
+
+
+
   //Complusory
   MutableProperty<OrderMode> mode = MutableProperty(null);
   MutableProperty<LatLng> deliveryLocation;
   MutableProperty<String> deliveryLocationDescription;
   MutableProperty<String> foodTag;
   MutableProperty<String> status = MutableProperty(null);
+
+  MutableProperty<int> progress = MutableProperty<int>(1);
+
+  MutableProperty<bool> checkout = MutableProperty<bool>(false);
 
   MutableProperty<List<OrderItemHolder>> orderItems;
   MutableProperty<double> deliveryFee;
@@ -76,6 +83,11 @@ class OrderHolder with HavingSubscriptionMixin {
         .map((order) => order.quantity.value)
         .toList()
         .reduce((qty1, qty2) => qty1 + qty2)));
+
+    if (foodTag.value != null)
+      progress = MutableProperty<int>(1);
+    else
+      progress = MutableProperty<int>(0);
   }
 
   OrderHolder.fromOrder({Order order, List<OrderItem> items}) {
@@ -150,5 +162,10 @@ class OrderHolder with HavingSubscriptionMixin {
         .map((order) => order.quantity.value)
         .toList()
         .reduce((qty1, qty2) => qty1 + qty2)));
+
+    if (foodTag.value != null)
+      progress = MutableProperty<int>(1);
+    else
+      progress = MutableProperty<int>(0);
   }
 }

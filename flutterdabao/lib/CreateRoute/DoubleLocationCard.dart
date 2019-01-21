@@ -242,10 +242,7 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
 
   Future<void> _handlePressButton(MutableProperty<LatLng> locationProperty,
       MutableProperty<String> locationDescriptionProperty) async {
-    await handlePressButton(context, (location, description) {
-      locationProperty.producer.add(location);
-      locationDescriptionProperty.producer.add(description);
-    }, locationDescriptionProperty.value);
+    await handlePressButton(context,locationProperty,locationDescriptionProperty, locationDescriptionProperty.value);
   }
 
   void onError(PlacesAutocompleteResponse response) {

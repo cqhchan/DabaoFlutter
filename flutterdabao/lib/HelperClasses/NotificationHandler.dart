@@ -111,11 +111,13 @@ handleNotificationForResumeAndLaunch(map) async {
                           OrderHolder holder =
                               await generateHolderFromOrder(orderID);
                           ConfigHelper.instance.navigatorKey.currentState
-                              .push(MaterialPageRoute(builder: (context) {
-                            return OrderNow(
-                              holder: holder,
-                            );
-                          }));
+                              .push(MaterialPageRoute(
+                                  maintainState: !Platform.isIOS,
+                                  builder: (context) {
+                                    return OrderNow(
+                                      holder: holder,
+                                    );
+                                  }));
                         },
                       ),
                     ],
@@ -374,11 +376,13 @@ handleNotificationForOnMessage(map) async {
                           OrderHolder holder =
                               await generateHolderFromOrder(orderID);
                           ConfigHelper.instance.navigatorKey.currentState
-                              .push(MaterialPageRoute(builder: (context) {
-                            return OrderNow(
-                              holder: holder,
-                            );
-                          }));
+                              .push(MaterialPageRoute(
+                                  maintainState: !Platform.isIOS,
+                                  builder: (context) {
+                                    return OrderNow(
+                                      holder: holder,
+                                    );
+                                  }));
                         }
                       },
                     ),

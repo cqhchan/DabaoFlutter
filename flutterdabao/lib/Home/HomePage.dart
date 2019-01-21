@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,6 +19,7 @@ import 'package:flutterdabao/HelperClasses/FontHelper.dart';
 import 'package:flutterdabao/HelperClasses/LocationHelper.dart';
 import 'package:flutterdabao/HelperClasses/ReactiveHelpers/rx_helpers.dart';
 import 'package:flutterdabao/HelperClasses/StringHelper.dart';
+import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
@@ -29,6 +31,7 @@ import 'package:flutterdabao/ViewOrders/ViewOrderListPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutterdabao/Holder/RouteHolder.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -90,15 +93,30 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                   spacing: 25.0,
                   children: <Widget>[
                     //Dabaoee
+
                     squardCard(
                         'assets/images/dabaoee_splash.png',
                         'assets/icons/person.png',
                         'Dabaoee',
                         'I want to Order', () {
-                      Navigator.push(
-                        context,
-                        FadeRoute(widget: OrderNow()),
-                      );
+                      OrderHolder holder = OrderHolder();
+                      if (Platform.isIOS)
+                        Navigator.push(
+                            context,
+                            new MaterialPageRoute(
+                                builder: (_) => new OrderNow(
+                                      holder: holder,
+                                    ),
+                                maintainState: false));
+                      else {
+                        Navigator.push(
+                          context,
+                          FadeRoute(
+                              widget: OrderNow(
+                            holder: holder,
+                          )),
+                        );
+                      }
                     }),
                     //Dabaoer
                     squardCard(
@@ -106,10 +124,22 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                         'assets/icons/bike.png',
                         'Dabaoer',
                         'I want to Deliver', () {
-                      Navigator.push(
-                        context,
-                        FadeRoute(widget: RouteOverview()),
-                      );
+                      RouteHolder holder = RouteHolder();
+
+                      if (Platform.isIOS)
+                        Navigator.push(
+                            context,
+                            new MaterialPageRoute(
+                                builder: (_) => new RouteOverview(
+                                      holder: holder,
+                                    ),
+                                maintainState: false));
+                      else {
+                        Navigator.push(
+                          context,
+                          FadeRoute(widget: RouteOverview(holder: holder)),
+                        );
+                      }
                     }),
                   ],
                 ),

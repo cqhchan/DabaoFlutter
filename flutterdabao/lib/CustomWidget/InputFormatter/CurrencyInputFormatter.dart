@@ -11,7 +11,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
 
     if (newValue.text.isEmpty)
       return newValue.copyWith(
-          text: '\$0.00', selection: new TextSelection.collapsed(offset: 5));
+          text: '\$0.00', selection: new TextSelection.collapsed(offset: 6));
 
     if (oldValue.text.length > newValue.text.length) {
       int numberOfDeleted = oldValue.text.length - newValue.text.length;
@@ -40,6 +40,6 @@ class CurrencyInputFormatter extends TextInputFormatter {
 
     return newValue.copyWith(
         text: newprice,
-        selection: new TextSelection.collapsed(offset: newValue.text.length));
+        selection: new TextSelection.collapsed(offset: newprice.length));
   }
 }

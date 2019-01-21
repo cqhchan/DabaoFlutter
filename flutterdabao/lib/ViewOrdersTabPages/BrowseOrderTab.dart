@@ -35,8 +35,9 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
       MutableProperty<List<Order>>(null);
   final MutableProperty<List<Order>> defaultOrders =
       MutableProperty<List<Order>>(null);
-  BehaviorSubject<LatLng> searchLocation;
-  BehaviorSubject<int> searchRadius;
+  MutableProperty<LatLng> searchLocation;
+  MutableProperty<int> searchRadius;
+  MutableProperty<String> locationDescription = MutableProperty<String>(null);
 
   final MutableProperty<bool> isSearchingLocation = MutableProperty(false);
   final String searchLocationPlaceholder = "Select Location";
@@ -46,11 +47,17 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
   void initState() {
     super.initState();
 
+    subscription.add(locationDescription.producer.listen((location) {
+      setState(() {
+        searchText = location;
+      });
+    }));
+
     searchText = searchLocationPlaceholder;
 
-    searchLocation = BehaviorSubject(seedValue: null);
+    searchLocation = MutableProperty(null);
 
-    searchRadius = BehaviorSubject(seedValue: 500);
+    searchRadius = MutableProperty(500);
 
     subscription.add(defaultOrders.bindTo(FirebaseCollectionReactive<Order>(
             Firestore.instance
@@ -62,8 +69,8 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                 .limit(20))
         .observable));
 
-    subscription.add(searchOrders.bindTo(searchLocation
-        .switchMap((latlng) => searchRadius.switchMap((radius) =>
+    subscription.add(searchOrders.bindTo(searchLocation.producer
+        .switchMap((latlng) => searchRadius.producer.switchMap((radius) =>
             FirebaseCloudFunctions.fetchProximityHash(
                     location: latlng, radius: radius)
                 .asStream()))
@@ -83,12 +90,10 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
 
   @override
   void dispose() {
-
-    if (searchOrders.value != null)
-    Selectable.deselectAll(searchOrders.value);
+    if (searchOrders.value != null) Selectable.deselectAll(searchOrders.value);
 
     if (defaultOrders.value != null)
-    Selectable.deselectAll(defaultOrders.value);
+      Selectable.deselectAll(defaultOrders.value);
 
     super.dispose();
   }
@@ -110,13 +115,10 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                     child: GestureDetector(
                   onTap: () {
                     // test.add(List.generate(1, (i)=> 30));
-                    handlePressButton(context, (location, description) {
-                      searchLocation.add(location);
-                      setState(() {
-                        isSearchingLocation.value = true;
-                        searchText = description;
-                      });
-                    },
+                    handlePressButton(
+                        context,
+                        searchLocation,
+                        locationDescription,
                         searchText == searchLocationPlaceholder
                             ? ""
                             : searchText);
@@ -229,8 +231,9 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                               .observable));
 
                       subscription.add(searchOrders.bindTo(searchLocation
-                          .switchMap((latlng) => searchRadius.switchMap(
-                              (radius) =>
+                          .producer
+                          .switchMap((latlng) => searchRadius.producer
+                              .switchMap((radius) =>
                                   FirebaseCloudFunctions.fetchProximityHash(
                                           location: latlng, radius: radius)
                                       .asStream()))
