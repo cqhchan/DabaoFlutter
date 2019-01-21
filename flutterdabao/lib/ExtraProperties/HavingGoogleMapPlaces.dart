@@ -24,7 +24,7 @@ abstract class HavingGoogleMapPlaces {
     return LatLng(lat, lng);
   }
 
-  Future<void> handlePressButton(BuildContext context, MutableProperty<LatLng> location, MutableProperty<String> description, String startingText) async {
+  Future<void> handlePressButton(BuildContext context, MutableProperty<LatLng> location, MutableProperty<String> description, String startingText, [VoidCallback callback ]) async {
     // show input autocomplete with selected mode
     // then get the Prediction selected
 
@@ -54,6 +54,9 @@ abstract class HavingGoogleMapPlaces {
       LatLng newLocation = await getLatLng(p);
       location.value = newLocation;
       description.value =  p.description;
+      if (callback != null){
+        callback();
+      }
     }
   }
 

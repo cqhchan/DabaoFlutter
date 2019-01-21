@@ -121,7 +121,9 @@ class _BrowseOrderTabViewState extends State<BrowseOrderTabView>
                         locationDescription,
                         searchText == searchLocationPlaceholder
                             ? ""
-                            : searchText);
+                            : searchText, (){
+                              isSearchingLocation.value = true;
+                            });
                   },
                   child: Container(
                     height: 30.0,
