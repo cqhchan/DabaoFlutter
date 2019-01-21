@@ -153,6 +153,7 @@ class _DoubleLocationCardState extends State<DoubleLocationCard>
           if (widget.holder.startDeliveryLocation.value != null &&
               widget.holder.endDeliveryLocation.value != null)
             showOneTimeCreator(
+                minutes: 1,
                 context: context,
                 startTime: widget.holder.deliveryTime.value,
                 headerTitle: "Select Arrival Time",

@@ -46,6 +46,7 @@ Future<T> showOneTimeCreator<T>({
   @required BuildContext context,
   @required String headerTitle,
   @required String subTitle,
+  int minutes = 30,
   bool barrierDismissible = true,
   @required DateSelectedCallback onCompleteCallback,
   DateTime startTime,
@@ -60,6 +61,7 @@ Future<T> showOneTimeCreator<T>({
         headerTitle: headerTitle,
         subTitle: subTitle,
         onCompleteCallback: onCompleteCallback,
+        mintutes: minutes,
       );
     },
     theme: Theme.of(context, shadowThemeOnly: true),
@@ -526,8 +528,8 @@ class _TimePickerEditorState extends State<_TimePickerEditor>
           alignment: Alignment(0.0, 0.0),
           children: <Widget>[
             Align(
-              alignment: Alignment.centerLeft,
-              child: Icon(Icons.access_time)),
+                alignment: Alignment.centerLeft,
+                child: Icon(Icons.access_time)),
             Align(
               alignment: Alignment.center,
               child: Text(
@@ -630,6 +632,7 @@ class _OnetimePickerEditor extends StatefulWidget {
   final DateTime startTime;
   final String headerTitle;
   final String subTitle;
+  final int mintutes;
 
   const _OnetimePickerEditor({
     Key key,
@@ -637,6 +640,7 @@ class _OnetimePickerEditor extends StatefulWidget {
     this.startTime,
     this.headerTitle,
     this.subTitle,
+    @required this.mintutes,
   }) : super(key: key);
 
   __OneTimePickerEditorState createState() => __OneTimePickerEditorState();
@@ -651,9 +655,10 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
   void initState() {
     super.initState();
 
-    _currentStartTime = DateTime.now().add(Duration(minutes: 30));
+    _currentStartTime = DateTime.now().add(Duration(minutes: widget.mintutes));
     if (widget.startTime == null)
-      selectedStartDate = MutableProperty(_currentStartTime);
+      selectedStartDate =
+          MutableProperty(DateTime.now().add(Duration(minutes: 30)));
     else
       selectedStartDate = MutableProperty(widget.startTime);
   }
@@ -919,8 +924,8 @@ class __OneTimePickerEditorState extends State<_OnetimePickerEditor> {
           alignment: Alignment(0.0, 0.0),
           children: <Widget>[
             Align(
-              alignment: Alignment.centerLeft,
-              child: Icon(Icons.access_time)),
+                alignment: Alignment.centerLeft,
+                child: Icon(Icons.access_time)),
             Align(
               alignment: Alignment.center,
               child: Text(
