@@ -181,7 +181,7 @@ class FirebaseCloudFunctions {
   ///[limit] limit number of Suggested Food Type
   static Future<List<OrderItem>> fetchOrderItemForFoodTag({
     @required String foodTagTitle,
-    int limit = 5,
+    int limit = 8,
   }) async {
     return FirebaseCollectionReactiveOnce<OrderItem>(Firestore.instance
             .collection("foodTags")
