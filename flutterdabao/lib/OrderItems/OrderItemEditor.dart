@@ -384,7 +384,7 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
     return TextFormField(
       controller: _subTitleTextController,
       inputFormatters: [
-        new LengthLimitingTextInputFormatter(40),
+        new LengthLimitingTextInputFormatter(200),
       ],
       maxLines: 3,
       autocorrect: false,
@@ -405,7 +405,7 @@ class _OrderItemEditorState extends State<_OrderItemEditor> {
         textInputAction: TextInputAction.done,
         textCapitalization: TextCapitalization.words,
         inputFormatters: [
-          new LengthLimitingTextInputFormatter(20),
+          new LengthLimitingTextInputFormatter(50),
         ],
         controller: _titleTextController,
         autocorrect: false,

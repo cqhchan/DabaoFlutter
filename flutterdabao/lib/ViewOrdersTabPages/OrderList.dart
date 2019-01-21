@@ -469,10 +469,11 @@ class _OrderItemCellState extends State<_OrderItemCell>
   Widget _buildOrderItem(BuildContext context, OrderItem orderItem) {
     return Center(
       child: Container(
-        constraints: BoxConstraints(maxHeight: 50),
+        constraints: BoxConstraints(minHeight: 45),
         padding: EdgeInsets.all(6),
         color: ColorHelper.dabaoOffWhiteF5,
         child: Flex(
+          crossAxisAlignment: CrossAxisAlignment.start,
           direction: Axis.horizontal,
           children: <Widget>[
             Padding(
@@ -502,9 +503,7 @@ class _OrderItemCellState extends State<_OrderItemCell>
                         if (!item.hasData) return Offstage();
                         return Text(
                           '${item.data}',
-                          maxLines: 2,
                           style: FontHelper.medium10greyTextStyle,
-                          overflow: TextOverflow.ellipsis,
                         );
                       },
                     ),

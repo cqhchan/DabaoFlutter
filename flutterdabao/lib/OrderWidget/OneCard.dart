@@ -730,10 +730,11 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
   Widget _buildOrderItem(BuildContext context, OrderItem orderItem) {
     return Center(
       child: Container(
-        constraints: BoxConstraints(maxHeight: 50),
+        constraints: BoxConstraints(minHeight: 45),
         padding: EdgeInsets.all(6),
         color: Color(0xFFF5F5F5),
         child: Flex(
+          crossAxisAlignment: CrossAxisAlignment.start,
           direction: Axis.horizontal,
           children: <Widget>[
             Padding(
@@ -763,9 +764,7 @@ class _OneCardState extends State<OneCard> with HavingSubscriptionMixin {
                         if (!item.hasData) return Offstage();
                         return Text(
                           '${item.data}',
-                          maxLines: 2,
                           style: FontHelper.medium10greyTextStyle,
-                          overflow: TextOverflow.ellipsis,
                         );
                       },
                     ),

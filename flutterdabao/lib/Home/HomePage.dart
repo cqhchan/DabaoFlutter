@@ -472,7 +472,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                           widget: WebviewScaffold(
                             url: "https://www.dabaoapp.sg/",
                             appBar: new AppBar(
-                              title: new Text("Terms & Conditions"),
+                              title: new Text("About Dabao"),
                             ),
                           ),
                         ));

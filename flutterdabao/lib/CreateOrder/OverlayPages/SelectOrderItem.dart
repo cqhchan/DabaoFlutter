@@ -141,6 +141,7 @@ class _SelectOrderItemState extends State<SelectOrderItem>
             .forEach((cell) => suggestOrdersWidget.add(cell));
 
         return Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: suggestOrdersWidget,
         );
@@ -165,60 +166,64 @@ class _OrderItemSuggestedCell extends StatelessWidget {
       },
       child: Container(
         color: Colors.transparent,
-        height: 32.0,
         margin: EdgeInsets.only(top: 4.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                child: Row(
-                  children: <Widget>[
-                    //menu Icon
-                    Align(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: 32.0),
+                  child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Flexible(
+                child: Container(
+                  child: Row(
+                    
+                    children: <Widget>[
+                      //menu Icon
+                      Align(
+                          alignment: Alignment.topLeft,
+                          child: Container(
+                              padding: EdgeInsets.only(bottom: 3.0, left: 4.0),
+                              child: Image.asset(
+                                  'assets/icons/icon_menu_orange.png'))),
+                      //Name
+                      Expanded(
+                          child: Align(
                         alignment: Alignment.centerLeft,
                         child: Container(
-                            padding: EdgeInsets.only(bottom: 3.0, left: 4.0),
-                            child: Image.asset(
-                                'assets/icons/icon_menu_orange.png'))),
-                    //Name
-                    Expanded(
-                        child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        margin: EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          StringHelper.upperCaseWords(orderItem.name.value),
-                          overflow: TextOverflow.ellipsis,
-                          style: FontHelper.bold(Colors.black, 12.0),
+                          margin: EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            StringHelper.upperCaseWords(orderItem.name.value),
+
+                            style: FontHelper.bold(Colors.black, 12.0),
+                          ),
                         ),
-                      ),
-                    )),
-                    //Price
-                    Align(
+                      )),
+                      //Price
+                      Align(
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            margin: EdgeInsets.only(left: 8.0, right: 8.0),
+                            child: Text(
+                              orderItem.price.value == null? 'Max: \$0.00' :'Max: ${formatCurrency.format(orderItem.price.value)}',
+                              style: FontHelper.regular(Colors.black, 12.0),
+                            ),
+                          )),
+                      Align(
                         alignment: Alignment.centerRight,
                         child: Container(
-                          margin: EdgeInsets.only(left: 8.0, right: 8.0),
-                          child: Text(
-                            orderItem.price.value == null? 'Max: \$0.00' :'Max: ${formatCurrency.format(orderItem.price.value)}',
-                            style: FontHelper.regular(Colors.black, 12.0),
-                          ),
-                        )),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                          margin: EdgeInsets.only(right: 4.0),
-                          height: 20.0,
-                          width: 20.0,
-                          child:
-                              Image.asset('assets/icons/add_icon_orange.png')),
-                    ),
-                  ],
+                            margin: EdgeInsets.only(right: 4.0),
+                            height: 20.0,
+                            width: 20.0,
+                            child:
+                                Image.asset('assets/icons/add_icon_orange.png')),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Line(),
-          ],
+              Line(),
+            ],
+          ),
         ),
       ),
     );

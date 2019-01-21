@@ -1169,14 +1169,11 @@ class _OrderItemsState extends State<_OrderItems> {
                     Text(
                       orderItem.name.value,
                       style: FontHelper.semiBold12Black,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       orderItem.description.value,
                       style:
                           FontHelper.semiBold(ColorHelper.dabaoOffBlack4A, 10),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -1246,14 +1243,12 @@ class _OrderItemsState extends State<_OrderItems> {
                       Text(
                         orderItem.name.value,
                         style: FontHelper.semiBold12Black,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         orderItem.description.value,
                         style: FontHelper.semiBold(
                             ColorHelper.dabaoOffBlack4A, 10),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+
                       ),
                     ],
                   ),

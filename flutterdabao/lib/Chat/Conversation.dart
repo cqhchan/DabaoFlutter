@@ -26,7 +26,6 @@ import 'package:flutterdabao/HelperClasses/StringHelper.dart';
 import 'package:flutterdabao/Model/Channels.dart';
 import 'package:flutterdabao/Model/Message.dart';
 import 'package:flutterdabao/Model/Order.dart';
-import 'package:flutterdabao/Model/OrderItem.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/OrderWidget/OneCard.dart';
 import 'package:flutterdabao/OrderWidget/StatusColor.dart';
