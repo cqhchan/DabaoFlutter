@@ -72,6 +72,8 @@ class ConfigHelper with HavingSubscriptionMixin {
   final GlobalKey<NavigatorState> navigatorKey =
       new GlobalKey<NavigatorState>();
 
+  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
   String error;
 
   static ConfigHelper get instance =>
@@ -86,9 +88,7 @@ class ConfigHelper with HavingSubscriptionMixin {
   appDidLoad() {
     disposeAndReset();
 
-
-    Vibrate.canVibrate.then((canVibrate)=> this.canVibrate = canVibrate);
-
+    Vibrate.canVibrate.then((canVibrate) => this.canVibrate = canVibrate);
 
     subscription
         .add(currentUserFoodTagsProperty.bindTo(currentUserFoodTagProducer()));

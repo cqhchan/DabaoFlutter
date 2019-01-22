@@ -6,6 +6,7 @@ class DateTimeHelper {
 
   // to tell what week it is
   static String convertDateTimeToWeek(DateTime datetime) {
+    //TODO p1 check the transactions
     DateTime newDate = DateTime.utc(datetime.toUtc().year, datetime.toUtc().month,datetime.toUtc().day);
     return formatDate(newDate, [yyyy, '_WEEK_', WW]);
   }

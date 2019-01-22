@@ -66,6 +66,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
     super.build(context);
 
     return Scaffold(
+      key: ConfigHelper.instance.scaffoldKey,
       backgroundColor: ColorHelper.dabaoOffWhiteF5,
       appBar: buildAppBar(),
       drawer: buildDrawer(context),

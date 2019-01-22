@@ -25,7 +25,8 @@ class DabaoApp extends StatefulWidget {
   }
 }
 
-class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
+class DabaoAppState extends State<DabaoApp>
+    with HavingSubscriptionMixin, WidgetsBindingObserver {
   FirebaseMessaging _firebaseMessaging;
 
   Stream<FirebaseUser> authState = FirebaseAuth.instance.onAuthStateChanged;
@@ -34,8 +35,10 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
+    WidgetsBinding.instance.addObserver(this);
 
     var db = Firestore.instance;
     db.settings(timestampsInSnapshotsEnabled: true);
@@ -44,7 +47,6 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
     disposeAndReset();
     if (Platform.isIOS) iOS_Permission();
     firebaseCloudMessagingListeners();
-
   }
 
   void iOS_Permission() {
@@ -54,6 +56,45 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
         .listen((IosNotificationSettings settings) {
       print("Settings registered: $settings");
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.paused:
+        break;
+      case AppLifecycleState.resumed:
+        print("testing app resumed");
+        print(new DateTime.now().millisecondsSinceEpoch);
+
+        Firestore.instance.runTransaction((t) async {
+          DocumentSnapshot doc = await t
+              .get(Firestore.instance.collection("global").document("settings"))
+              .then((doc) {
+            print("testing doc came");
+            print(new DateTime.now().millisecondsSinceEpoch);
+
+            
+          }).catchError((error) {
+            print("testing error came");
+            print(new DateTime.now().millisecondsSinceEpoch);
+          });
+
+          return doc.exists? doc.data : Map();
+        }).whenComplete(() {
+          print("testing Completed");
+        });
+        break;
+      default:
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    disposeAndReset();
+    super.dispose();
   }
 
   void firebaseCloudMessagingListeners() async {
@@ -112,7 +153,7 @@ class DabaoAppState extends State<DabaoApp> with HavingSubscriptionMixin {
           data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         );
       },
-      home:  _handleCurrentScreen(),
+      home: _handleCurrentScreen(),
     );
   }
 
