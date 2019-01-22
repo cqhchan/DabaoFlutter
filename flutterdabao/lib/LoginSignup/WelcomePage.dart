@@ -8,7 +8,9 @@ class WelcomePage extends StatefulWidget {
 
   final VoidCallback nextPage;
 
-  const WelcomePage({Key key, @required this.numberOfSteps, @required this.nextPage}) : super(key: key);
+  const WelcomePage(
+      {Key key, @required this.numberOfSteps, @required this.nextPage})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -20,7 +22,6 @@ class WelcomePage extends StatefulWidget {
 class WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -30,8 +31,15 @@ class WelcomePageState extends State<WelcomePage> {
               pagination: new SwiperPagination(),
               itemCount: 3,
               itemBuilder: (context, page) {
-                return Image.asset('assets/images/welcome_image_1.png',
-                    fit: BoxFit.cover);
+                if (page == 0)
+                  return Image.asset('assets/images/welcome_image_1.png',
+                      fit: BoxFit.cover);
+                if (page == 1)
+                  return Image.asset('assets/images/splashImage_2.png',
+                      fit: BoxFit.cover);
+                if (page == 2)
+                  return Image.asset('assets/images/splashImage_3.png',
+                      fit: BoxFit.cover);
               },
             ),
           ),
@@ -43,30 +51,30 @@ class WelcomePageState extends State<WelcomePage> {
                 children: <Widget>[
                   Text("Welcome", style: FontHelper.medium(Colors.black, 35.0)),
                   Container(
-                      padding: EdgeInsets.only(left: 30, right: 30, top: 15, bottom: 15),
+                      padding: EdgeInsets.only(
+                          left: 30, right: 30, top: 15, bottom: 15),
                       child: Text(
                         "We're glad to have you join our Dabao Community! \n Let's get you started in ${widget.numberOfSteps} steps",
                         style: FontHelper.medium(Colors.black, 14.0),
                         textAlign: TextAlign.center,
                       )),
-
-                       RaisedButton(
-                    child: Container(
-                      height: 40,
-                      width: 80,
-                      child: Center(
-                        child: Text(
-                          'Next',
-                          style: FontHelper.overlayHeader,
+                  RaisedButton(
+                      child: Container(
+                        height: 40,
+                        width: 80,
+                        child: Center(
+                          child: Text(
+                            'Next',
+                            style: FontHelper.overlayHeader,
+                          ),
                         ),
                       ),
-                    ),
-                    color: Color(0xFFF5A510),
-                    elevation: 2.5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                    ),
-                    onPressed: widget.nextPage)
+                      color: Color(0xFFF5A510),
+                      elevation: 2.5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      ),
+                      onPressed: widget.nextPage)
                 ],
               ),
             ),

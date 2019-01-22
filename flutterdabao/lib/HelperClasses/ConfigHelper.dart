@@ -72,8 +72,6 @@ class ConfigHelper with HavingSubscriptionMixin {
   final GlobalKey<NavigatorState> navigatorKey =
       new GlobalKey<NavigatorState>();
 
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-
   String error;
 
   static ConfigHelper get instance =>
