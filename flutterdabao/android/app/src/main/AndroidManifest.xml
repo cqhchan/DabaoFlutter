@@ -60,5 +60,17 @@
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
+
+        <service
+            android:name="com.example.flutterdabao.LocationUpdatesIntentService"
+            android:exported="false" />
+
+        <receiver android:name="com.example.flutterdabao.LocationUpdatesBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.flutterdabao.backgroundlocationupdates.action.PROCESS_UPDATES" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
