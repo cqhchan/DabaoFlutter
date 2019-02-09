@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdabao/ExtraProperties/HavingSubscriptionMixin.dart';
 import 'package:flutterdabao/Firebase/FirebaseCollectionReactive.dart';
@@ -43,7 +44,7 @@ class ConfigHelper with HavingSubscriptionMixin {
   // A users Orders from the past week
   MutableProperty<List<Order>> currentUserPastWeekCompletedOrdersProperty =
       MutableProperty<List<Order>>(List());
-
+  LatLng lastLocation;
   // A users Orders from the past week
   MutableProperty<List<Order>> currentUserPastWeekCanceledOrdersProperty =
       MutableProperty<List<Order>>(List());
@@ -117,6 +118,45 @@ class ConfigHelper with HavingSubscriptionMixin {
 
     // get current user deliveringOrderProperty;
 
+    subscription.add(Observable.combineLatest2<LatLng, User, LatLng>(
+        currentLocationProperty.producer, currentUserProperty.producer,
+        (location, user) {
+      if (location == null || user == null) {
+        return null;
+      }
+
+      if (lastLocation == null) {
+        return location;
+      }
+      if (LocationHelper.calculateDistancFromSelf(lastLocation.latitude,
+              lastLocation.longitude, location.latitude, location.longitude) >
+          0.1) {
+
+            print("location" + LocationHelper.calculateDistancFromSelf(lastLocation.latitude,
+              lastLocation.longitude, location.latitude, location.longitude).toString());
+        return location;
+      }
+
+      return null;
+    }).listen((location) {
+      if (location != null) {}
+
+      DateTime date = DateTime.now();
+      String dayOfWeek = formatDate(date, [DD]).toUpperCase();
+      String dateFormat =
+          formatDate(date, [yyyy, '-', mm, '-', dd]).toUpperCase();
+      GeoPoint geoPoint = GeoPoint(location.latitude, location.longitude);
+      Firestore.instance
+          .collection("locations")
+          .document(currentUserProperty.value.uid)
+          .collection("DayOfWeek")
+          .document(dayOfWeek)
+          .collection("Date")
+          .document(dateFormat)
+          .collection('inputs')
+          .add({"Location": geoPoint, "Time": date, "InApp": true});
+    }));
+
     subscription.add(currentUserDeliveringOrdersProperty
         .bindTo(currentUserDeliveryingOrdersProducer()));
 
@@ -137,7 +177,6 @@ class ConfigHelper with HavingSubscriptionMixin {
         .bindTo(currentUserRoutesPastDayProducer()));
 
     subscription.add(currentPromotionsProperty.bindTo(globalPromotions()));
-
 
     subscription
         .add(currentDabaoerRewards.bindTo(currentDabaoerRewardsProducer()));
@@ -299,8 +338,9 @@ class ConfigHelper with HavingSubscriptionMixin {
     return currentUserProperty.producer.switchMap((user) => user == null
         ? Observable.just(List())
         : FirebaseCollectionReactive<Promotion>(Firestore.instance
-            .collection("promotions")
-            .where(Promotion.viewableKey, isEqualTo: true)).observable);
+                .collection("promotions")
+                .where(Promotion.viewableKey, isEqualTo: true))
+            .observable);
   }
 
   StreamSubscription<LatLng> location;

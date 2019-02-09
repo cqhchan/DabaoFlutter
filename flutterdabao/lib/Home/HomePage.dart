@@ -163,7 +163,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                   stream:
                       ConfigHelper.instance.currentPromotionsProperty.producer,
                   builder: (context, snapshot) {
-                    if (snapshot.data == null) {
+                    if (snapshot.data == null || snapshot.data.length == 0) {
                       return Offstage();
                     }
                     return Container(
