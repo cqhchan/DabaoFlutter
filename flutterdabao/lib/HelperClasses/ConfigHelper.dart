@@ -128,33 +128,32 @@ class ConfigHelper with HavingSubscriptionMixin {
       if (lastLocation == null) {
         return location;
       }
+
       if (LocationHelper.calculateDistancFromSelf(lastLocation.latitude,
               lastLocation.longitude, location.latitude, location.longitude) >
           0.1) {
-
-            print("location" + LocationHelper.calculateDistancFromSelf(lastLocation.latitude,
-              lastLocation.longitude, location.latitude, location.longitude).toString());
         return location;
       }
 
       return null;
     }).listen((location) {
-      if (location != null) {}
-
-      DateTime date = DateTime.now();
-      String dayOfWeek = formatDate(date, [DD]).toUpperCase();
-      String dateFormat =
-          formatDate(date, [yyyy, '-', mm, '-', dd]).toUpperCase();
-      GeoPoint geoPoint = GeoPoint(location.latitude, location.longitude);
-      Firestore.instance
-          .collection("locations")
-          .document(currentUserProperty.value.uid)
-          .collection("DayOfWeek")
-          .document(dayOfWeek)
-          .collection("Date")
-          .document(dateFormat)
-          .collection('inputs')
-          .add({"Location": geoPoint, "Time": date, "InApp": true});
+      if (location != null) {
+        lastLocation = location;
+        DateTime date = DateTime.now();
+        String dayOfWeek = formatDate(date, [DD]).toUpperCase();
+        String dateFormat =
+            formatDate(date, [yyyy, '-', mm, '-', dd]).toUpperCase();
+        GeoPoint geoPoint = GeoPoint(location.latitude, location.longitude);
+        Firestore.instance
+            .collection("locations")
+            .document(currentUserProperty.value.uid)
+            .collection("DayOfWeek")
+            .document(dayOfWeek)
+            .collection("Date")
+            .document(dateFormat)
+            .collection('inputs')
+            .add({"Location": geoPoint, "Time": date, "InApp": true});
+      }
     }));
 
     subscription.add(currentUserDeliveringOrdersProperty
