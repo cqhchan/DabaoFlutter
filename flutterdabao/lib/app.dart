@@ -15,6 +15,7 @@ import 'package:flutterdabao/LoginSignup/LoginPage.dart';
 import 'package:flutterdabao/LoginSignup/ProcessingPage.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
+import 'package:flutter/services.dart';
 
 class DabaoApp extends StatefulWidget {
   // Add in all set up etc needed
@@ -29,23 +30,41 @@ class DabaoAppState extends State<DabaoApp>
     with HavingSubscriptionMixin, WidgetsBindingObserver {
   FirebaseMessaging _firebaseMessaging;
 
+  static const platform = const MethodChannel('flutter.dabao/locations');
+
   Stream<FirebaseUser> authState = FirebaseAuth.instance.onAuthStateChanged;
+
+  Future<void> _startBackgroundLocationListening() async {
+    try {
+      final int result =
+          await platform.invokeMethod('startLocationBackgroundListening');
+      print("Listening Success");
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    // debugPaintSizeEnabled=true;
     ConfigHelper.instance.appDidLoad();
     WidgetsBinding.instance.addObserver(this);
 
     var db = Firestore.instance;
+
     db.settings(timestampsInSnapshotsEnabled: true);
+
     _firebaseMessaging = FirebaseMessaging();
 
     disposeAndReset();
-    if (Platform.isIOS) iOS_Permission();
+
+    if (Platform.isIOS) {
+      iOS_Permission();
+      _startBackgroundLocationListening();
+    }
+
     firebaseCloudMessagingListeners();
   }
 
@@ -66,25 +85,16 @@ class DabaoAppState extends State<DabaoApp>
         break;
       case AppLifecycleState.resumed:
         print("testing app resumed");
-        print(new DateTime.now().millisecondsSinceEpoch);
+        // print(new DateTime.now().millisecondsSinceEpoch);
 
         Firestore.instance.runTransaction((t) async {
           DocumentSnapshot doc = await t
               .get(Firestore.instance.collection("global").document("settings"))
-              .then((doc) {
-            print("testing doc came");
-            print(new DateTime.now().millisecondsSinceEpoch);
+              .then((doc) {})
+              .catchError((error) {});
 
-            
-          }).catchError((error) {
-            print("testing error came");
-            print(new DateTime.now().millisecondsSinceEpoch);
-          });
-
-          return doc.exists? doc.data : Map();
-        }).whenComplete(() {
-          print("testing Completed");
-        });
+          return doc.exists ? doc.data : Map();
+        }).whenComplete(() {});
         break;
       default:
     }

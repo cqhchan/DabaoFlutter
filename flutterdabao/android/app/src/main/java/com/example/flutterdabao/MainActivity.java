@@ -34,7 +34,7 @@ public class MainActivity extends FlutterFragmentActivity implements GoogleApiCl
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
     // FIXME: 5/16/17
-    private static final long UPDATE_INTERVAL = 10 * 1000 * 60;
+    private static final long UPDATE_INTERVAL = 2 * 1000 * 60;
 
     /**
      * The fastest rate for active location updates. Updates will never be more frequent
@@ -48,7 +48,7 @@ public class MainActivity extends FlutterFragmentActivity implements GoogleApiCl
      * The max time before batched results are delivered by location services. Results may be
      * delivered sooner than this interval.
      */
-    private static final long MAX_WAIT_TIME = UPDATE_INTERVAL * 6;
+    private static final long MAX_WAIT_TIME = UPDATE_INTERVAL;
 
     /**
      * Stores parameters for requests to the FusedLocationProviderApi.
