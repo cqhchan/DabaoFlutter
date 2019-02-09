@@ -56,11 +56,7 @@ CLLocationManager *_locationManager;
             
             @try {
                 NSDate *time = location.timestamp;
-            
-                double timestamp = [[NSDate date] timeIntervalSince1970];
-                int64_t timeInMilisInt64 = (int64_t)(timestamp*1000);
-                NSString *t = [NSString stringWithFormat:@"%lld", timeInMilisInt64];
-
+        
                 NSString *theDate = [dateFormat stringFromDate:time];
                 NSString *dayOFWeek = [dateFormatter stringFromDate:time].uppercaseString;
                 
@@ -74,7 +70,7 @@ CLLocationManager *_locationManager;
                     
                     FIRGeoPoint *point = [[FIRGeoPoint alloc] initWithLatitude: location.coordinate.latitude longitude:location.coordinate.longitude ];
                     
-                    [[[[[defaultFirestore collectionWithPath:@"locations"] documentWithPath:user.uid] collectionWithPath:dayOFWeek] documentWithPath:theDate] setData:@{t: @{@"Location": point, @"Time": time },} merge:true completion:^(NSError * _Nullable error) {
+                    [[[[[[[[defaultFirestore collectionWithPath:@"locations"] documentWithPath:user.uid] collectionWithPath:@"DayOfWeek"] documentWithPath:dayOFWeek] collectionWithPath:@"Date"] documentWithPath:theDate] collectionWithPath:@"inputs"] addDocumentWithData:@{@"Location": point, @"Time": time } completion:^(NSError * _Nullable error) {
                         if (error != nil) {
                             NSLog(@"Error adding document: %@", error);
                         } else {

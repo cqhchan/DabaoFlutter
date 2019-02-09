@@ -26,6 +26,7 @@ import android.util.Log;
 import com.google.android.gms.location.LocationResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.SetOptions;
@@ -138,7 +139,6 @@ public class LocationUpdatesBroadcastReceiver extends BroadcastReceiver {
         Calendar c = Calendar.getInstance(timeZone);
         c.setTime(locationTime);
 
-        String timeInMilliSeconds = Long.toString(locationTime.getTime());
         int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
         // this will for example return 3 for tuesday
         dayOfWeek = dayOfWeek - 1;
@@ -153,13 +153,13 @@ public class LocationUpdatesBroadcastReceiver extends BroadcastReceiver {
         DayOfWeek day = DayOfWeek.forNumber(dayOfWeek);
 
         Map<String,Object> data = new HashMap<String,Object>();
-        Map<String,Object> subData = new HashMap<String,Object>();
 
-        subData.put("Location" , new GeoPoint(location.getLatitude(), location.getLongitude()));
-        subData.put("Time", locationTime);
+        data.put("Location" , new GeoPoint(location.getLatitude(), location.getLongitude()));
+        data.put("Time", locationTime);
 
-        data.put(timeInMilliSeconds , subData);
 
-        batch.set(firestore.collection("locations").document(currentUser.getUid()).collection(day.name()).document(modifiedDate), data,SetOptions.merge());
+        DocumentReference ref = firestore.collection("locations").document(currentUser.getUid()).collection("DayOfWeek").document(day.name()).collection("Date").document(modifiedDate).collection("inputs").document();
+
+        batch.set(ref, data,SetOptions.merge());
     }
 }
