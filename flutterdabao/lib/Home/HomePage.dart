@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +24,14 @@ import 'package:flutterdabao/Holder/OrderHolder.dart';
 import 'package:flutterdabao/Home/BalanceCard.dart';
 import 'package:flutterdabao/Model/Order.dart';
 import 'package:flutterdabao/Model/OrderItem.dart';
+import 'package:flutterdabao/Model/Promotion.dart';
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Profile/Personal.dart';
 import 'package:flutterdabao/Rewards/RewardsTab.dart';
 import 'package:flutterdabao/ViewOrders/ViewOrderListPage.dart';
 import 'package:flutterdabao/ViewOrdersTabPages/TabBarPage.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutterdabao/Holder/RouteHolder.dart';
@@ -40,6 +43,8 @@ class Home extends StatefulWidget {
 
 class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
   ScrollController _controller = ScrollController();
+  PageController controller;
+  int currentpage = 0;
   MutableProperty<double> _opacityProperty = MutableProperty(0.0);
   _Home() {
     _controller.addListener(() {
@@ -51,6 +56,11 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
+    controller = new PageController(
+      initialPage: currentpage,
+      keepPage: false,
+      viewportFraction: 0.8,
+    );
 
     ConfigHelper.instance.startListeningToCurrentLocation(
         LocationHelper.instance.softAskForPermission());
@@ -58,6 +68,8 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
 
   @override
   void dispose() {
+    controller.dispose();
+
     super.dispose();
   }
 
@@ -80,7 +92,7 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
                 margin: EdgeInsets.only(top: 20.0),
                 child: Text(
                   "What would you like today?",
-                  style: FontHelper.semiBold(Colors.black, 18),
+                  style: FontHelper.bold(Colors.black, 18),
                 ),
                 padding: EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
               ),
@@ -146,81 +158,48 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
               ),
               balanceCardStream(context),
               SizedBox(height: 20),
+
+              StreamBuilder<List<Promotion>>(
+                  stream:
+                      ConfigHelper.instance.currentPromotionsProperty.producer,
+                  builder: (context, snapshot) {
+                    if (snapshot.data == null) {
+                      return Offstage();
+                    }
+                    return Container(
+                      height: 210,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                              padding: EdgeInsets.only(left: 15.0),
+                              child: Text(
+                                "What's happening at Dabao?",
+                                style: FontHelper.bold(Colors.black, 18.0),
+                              )),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Expanded(
+                            child: PageView.builder(
+                                itemCount: snapshot.data.length,
+                                onPageChanged: (value) {
+                                  setState(() {
+                                    currentpage = value;
+                                  });
+                                },
+                                controller: controller,
+                                itemBuilder: (context, index) =>
+                                    promoNewsBuilder(
+                                        index, snapshot.data[index])),
+                          ),
+                        ],
+                      ),
+                    );
+                  })
             ],
           ),
         ),
-        // // AppBar Widget
-        // Material(
-        //   type: MaterialType.transparency,
-        //   child: FloatingHeader(
-        //     header: StreamBuilder<String>(stream: ConfigHelper
-        //         .instance.currentUserProperty.producer
-        //         .switchMap((user) {
-        //       if (user == null) return Observable.just("");
-        //       return user.name;
-        //     }), builder: (context, snap) {
-        //       if (!snap.hasData) return Offstage();
-        //       return Align(
-        //           alignment: Alignment.topLeft,
-        //           child: Container(
-        //               padding: EdgeInsets.only(top: 10.0, left: 10.0),
-        //               child: Text(
-        //                 "Welcome back, ${snap.data}",
-        //                 overflow: TextOverflow.ellipsis,
-        //                 style:
-        //                     FontHelper.regular(ColorHelper.dabaoOffGrey70, 14),
-        //               )));
-        //     }),
-        //     backgroundColor: Colors.white,
-        //     opacityProperty: _opacityProperty,
-        //     rightButton: GestureDetector(
-        //       onTap: () {
-        //         Navigator.of(context).push(
-        //           FadeRoute(widget: ChatPage()),
-        //         );
-        //       },
-        //       child: Container(
-        //           height: 40.0,
-        //           width: 40.0,
-        //           decoration: new BoxDecoration(
-        //               shape: BoxShape.circle,
-        //               color: ColorHelper.dabaoOrange,
-        //               image: new DecorationImage(
-        //                   fit: BoxFit.scaleDown,
-        //                   image:
-        //                       new AssetImage('assets/icons/chat_white.png')))),
-        //     ),
-        //     leftButton: Container(
-        //       height: 40.0,
-        //       width: 40.0,
-        //       child: GestureDetector(
-        //         onTap: () {},
-        //         child: StreamBuilder<String>(
-        //           stream: ConfigHelper
-        //               .instance.currentUserProperty.value.thumbnailImage,
-        //           builder: (context, snapshot) {
-        //             if (!snapshot.hasData || snapshot.data == null) {
-        //               return Image.asset(
-        //                 'assets/icons/profile_icon.png',
-        //                 fit: BoxFit.fill,
-        //               );
-        //             }
-        //             return GestureDetector(
-        //               onLongPress: () async {
-        //                 FirebaseAuth.instance.signOut();
-        //               },
-        //               child: CircleAvatar(
-        //                 backgroundImage: NetworkImage(snapshot.data),
-        //                 radius: 20,
-        //               ),
-        //             );
-        //           },
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // ),
-
         StreamBuilder<int>(
           stream: Observable.combineLatest3<List<DabaoRoute.Route>, List<Order>,
                   List<Order>, int>(
@@ -316,6 +295,86 @@ class _Home extends State<Home> with AutomaticKeepAliveClientMixin {
         )
       ]),
     );
+  }
+
+  promoNewsBuilder(int index, Promotion promotion) {
+    return Container(
+        margin: EdgeInsets.only(right: 25.0, bottom: 10.0),
+        height: 180,
+        child: Container(
+          child: RaisedButton(
+            color: Colors.white,
+            padding: EdgeInsets.all(0),
+            elevation: 4.0,
+            disabledElevation: 4.0,
+            highlightElevation: 4.0,
+            onPressed: () {
+              Navigator.of(context).push(FadeRoute(
+                widget: WebviewScaffold(
+                  url: promotion.promoURL.value,
+                  appBar: new AppBar(
+                    backgroundColor: Colors.white,
+                    title: new Text(promotion.title.value),
+                  ),
+                ),
+              ));
+            },
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0))),
+            child: new FractionallySizedBox(
+              widthFactor: 1.0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8.0),
+                              topRight: Radius.circular(8.0)),
+                          image: DecorationImage(
+                            fit: BoxFit.fitHeight,
+                            image: CachedNetworkImageProvider(
+                              promotion.imageURL.value,
+                            ),
+                          )),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    height: 40,
+                    child: Text(
+                      promotion.title.value,
+                      style: FontHelper.semiBold(Colors.black, 14.0),
+                      textAlign: TextAlign.start,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                      padding: EdgeInsets.only(right: 5.0),
+                      height: 20.0,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Text(
+                            "View Details",
+                            style: FontHelper.bold(
+                                ColorHelper.dabaoOffBlack4A, 10.0),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 15.0,
+                            color: ColorHelper.dabaoOffGrey70,
+                          )
+                        ],
+                      ))
+                ],
+              ),
+            ),
+          ),
+        ));
   }
 
   SizedBox buildDrawer(BuildContext context) {

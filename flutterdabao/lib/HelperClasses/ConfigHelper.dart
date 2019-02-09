@@ -13,6 +13,7 @@ import 'package:flutterdabao/Model/DabaoeeReward.dart';
 
 import 'package:flutterdabao/Model/FoodTag.dart';
 import 'package:flutterdabao/Model/Order.dart';
+import 'package:flutterdabao/Model/Promotion.dart';
 import 'package:flutterdabao/Model/Route.dart' as DabaoRoute;
 import 'package:flutterdabao/Model/User.dart';
 import 'package:flutterdabao/Model/Voucher.dart';
@@ -65,6 +66,9 @@ class ConfigHelper with HavingSubscriptionMixin {
 
   MutableProperty<List<Channel>> currentUserChannelProperty =
       MutableProperty<List<Channel>>(List());
+
+  MutableProperty<List<Promotion>> currentPromotionsProperty =
+      MutableProperty<List<Promotion>>(List());
 
   MutableProperty<double> _globalPricePerItem = MutableProperty<double>(0.5);
   MutableProperty<double> _globalFixedPrice = MutableProperty<double>(1.5);
@@ -131,10 +135,10 @@ class ConfigHelper with HavingSubscriptionMixin {
     // get Current Routes TODO fix bug
     subscription.add(currentUserRoutesPastDayProperty
         .bindTo(currentUserRoutesPastDayProducer()));
-//  subscription.add(currentUserRoutesPastDayProperty.producer.listen((onData){
 
-//    print("testing data " + onData.length.toString());
-//  }));
+    subscription.add(currentPromotionsProperty.bindTo(globalPromotions()));
+
+
     subscription
         .add(currentDabaoerRewards.bindTo(currentDabaoerRewardsProducer()));
 
@@ -289,6 +293,14 @@ class ConfigHelper with HavingSubscriptionMixin {
             .document("settings")
             .snapshots()
             .map((doc) => doc.exists ? doc.data : Map())));
+  }
+
+  Observable<List<Promotion>> globalPromotions() {
+    return currentUserProperty.producer.switchMap((user) => user == null
+        ? Observable.just(List())
+        : FirebaseCollectionReactive<Promotion>(Firestore.instance
+            .collection("promotions")
+            .where(Promotion.viewableKey, isEqualTo: true)).observable);
   }
 
   StreamSubscription<LatLng> location;
